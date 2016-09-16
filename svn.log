@@ -1,0 +1,4432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<log>
+<logentry
+   revision="133">
+<author>mda314</author>
+<date>2015-03-23T09:31:19.213531Z</date>
+<paths>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/HostScreen.java</path>
+</paths>
+<msg>Enhanced map list</msg>
+</logentry>
+<logentry
+   revision="132">
+<author>mda314</author>
+<date>2015-03-23T09:25:31.085439Z</date>
+<paths>
+<path
+   kind="file"
+   action="M">/TeamProject/src/core/PowerUpFactory.java</path>
+</paths>
+<msg>Improve javadoc of PowerUpFactory class</msg>
+</logentry>
+<logentry
+   revision="131">
+<author>mda314</author>
+<date>2015-03-23T09:17:47.424151Z</date>
+<paths>
+<path
+   kind="file"
+   action="M">/TeamProject/src/core/PowerUp.java</path>
+</paths>
+<msg>Improve javadoc of PowerUp class</msg>
+</logentry>
+<logentry
+   revision="130">
+<author>bdp414</author>
+<date>2015-03-23T09:17:45.230865Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/AIPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/Arena.java</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/src/geometry/Geometry.java"
+   copyfrom-rev="114">/TeamProject/src/core/Geometry.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/LineOfSight.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/PathFinder.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/core/PathFindingJob.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/Utils.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   action="D"
+   kind="dir">/TeamProject/src/geometry</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/AbstractScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Camera.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/ChatPanel.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GUIFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/MainMenuScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/TeamListModel.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/LobbyServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/ProjectileData.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/ServerPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/AudioManager.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/MusicPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/GeometryTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/ServerTest.java</path>
+</paths>
+<msg>add java doc</msg>
+</logentry>
+<logentry
+   revision="129">
+<author>mda314</author>
+<date>2015-03-23T09:00:30.383749Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/.settings/org.eclipse.jdt.core.prefs</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/CharacterFactoryTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/CharacterTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/ServerTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/TileTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/WeaponTest.java</path>
+</paths>
+<msg>Final clean</msg>
+</logentry>
+<logentry
+   revision="128">
+<author>mda314</author>
+<date>2015-03-23T08:58:21.155637Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/AudioManager.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/MusicPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/Sound.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/SoundPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/CameraTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/CharacterFactoryTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/CharacterTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/GameTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/GeometryTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/PowerUpFactoryTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/PowerUpTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/ProjectileTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/TileTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/Vector2DTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/WeaponTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/WorldTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/AssaultRifle.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/DBarrelPistol.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/Pistol.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/PrimaryWeapon.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/SMG.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/SecondaryWeapon.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/Shotgun.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/SniperRifle.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/Weapon.java</path>
+</paths>
+<msg>Cleaned up rest of packages</msg>
+</logentry>
+<logentry
+   revision="127">
+<author>mda314</author>
+<date>2015-03-23T08:55:12.031502Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/AbstractScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Camera.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/ChatPanel.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/ClientPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GUIFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/HostScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/JoinScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/MainMenuScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Minimap.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/SplashScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/TeamListModel.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Utils.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/FullCharacterData.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameDataPackets.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameEvent.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/LobbyRequest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/LobbyServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/PartialCharacterData.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/PowerUpData.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/ProjectileData.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/ServerPlayer.java</path>
+</paths>
+<msg>Cleaned up network package</msg>
+</logentry>
+<logentry
+   revision="126">
+<author>mda314</author>
+<date>2015-03-23T08:50:11.838771Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/AbstractScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Camera.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/ChatPanel.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/ClientPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GUIFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/HostScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/JoinScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/MainMenuScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Minimap.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/SplashScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/TeamListModel.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Utils.java</path>
+</paths>
+<msg>Cleaned up gui package</msg>
+</logentry>
+<logentry
+   revision="125">
+<author>mda314</author>
+<date>2015-03-23T08:45:36.247935Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/geometry/Geometry.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Animation.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/AnimationSystem.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/AnimationTester.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ConvolveFilter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ExpandingCircleAnimation.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ImageBlender.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ParticleAnimation.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Renderer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Vector2D.java</path>
+</paths>
+<msg>Cleaned up geometry and graphics packages</msg>
+</logentry>
+<logentry
+   revision="124">
+<author>mda314</author>
+<date>2015-03-23T08:40:59.897734Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Main.java</path>
+</paths>
+<msg>Cleaned up game package</msg>
+</logentry>
+<logentry
+   revision="123">
+<author>mda314</author>
+<date>2015-03-23T08:39:19.962790Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/AbstractCharacter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/CharacterFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/ControlledCharacter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Hostage.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Sniper.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/SpecOps.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/AIPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/Arena.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/LineOfSight.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/PathFinder.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/PowerUp.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/PowerUpFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/Projectile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/Tile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/Utils.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/World.java</path>
+</paths>
+<msg>Cleaned up core package</msg>
+</logentry>
+<logentry
+   revision="122">
+<author>mda314</author>
+<date>2015-03-23T08:34:37.173394Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/AbstractCharacter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/CharacterFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Commando.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/ControlledCharacter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Hostage.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Scout.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Sniper.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/SpecOps.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Tank.java</path>
+</paths>
+<msg>Cleaned up character package</msg>
+</logentry>
+<logentry
+   revision="121">
+<author>mda314</author>
+<date>2015-03-23T08:14:04.346967Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/src/test/CameraTest.java</path>
+</paths>
+<msg>Added unit testing for Camera class</msg>
+</logentry>
+<logentry
+   revision="120">
+<author>cpc455</author>
+<date>2015-03-23T07:59:48.023354Z</date>
+<paths>
+<path
+   kind="file"
+   action="M">/TeamProject/src/core/AIPlayer.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/AbstractScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/ClientPlayer.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/GUIFactory.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/GameScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/HostScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/JoinScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/MainMenuScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/Minimap.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/TeamListModel.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/Utils.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/network/GameDataPackets.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/sound/AudioManager.java</path>
+</paths>
+<msg>Documented code</msg>
+</logentry>
+<logentry
+   revision="119">
+<author>mda314</author>
+<date>2015-03-23T07:40:50.409687Z</date>
+<paths>
+<path
+   kind="file"
+   action="A">/TeamProject/src/test/Vector2DTest.java</path>
+</paths>
+<msg>Added unit testing for Vector2D class</msg>
+</logentry>
+<logentry
+   revision="118">
+<author>bdp414</author>
+<date>2015-03-23T07:27:59.133505Z</date>
+<paths>
+<path
+   kind="file"
+   action="M">/TeamProject/src/core/AIPlayer.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/core/LineOfSight.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/core/PathFinder.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/core/PowerUp.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/core/PowerUpFactory.java</path>
+<path
+   kind="file"
+   action="A">/TeamProject/src/core/Utils.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/core/World.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/graphics/AnimationSystem.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/AbstractScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/ChatPanel.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/GameScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/HostScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/JoinScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/LobbyScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/Utils.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/network/GameDataPackets.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/sound/AudioManager.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/test/GeometryTest.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/test/PowerUpFactoryTest.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/test/TileTest.java</path>
+</paths>
+<msg>Clean up source code a bit, remove used imports</msg>
+</logentry>
+<logentry
+   revision="117">
+<author>mda314</author>
+<date>2015-03-23T07:01:08.108893Z</date>
+<paths>
+<path
+   kind="file"
+   action="A">/TeamProject/src/test/GameTest.java</path>
+</paths>
+<msg>Added unit testing for Game class</msg>
+</logentry>
+<logentry
+   revision="116">
+<author>sxs1218</author>
+<date>2015-03-23T06:52:24.210135Z</date>
+<paths>
+<path
+   kind="file"
+   action="A">/TeamProject/src/test/PowerUpTest.java</path>
+</paths>
+<msg>JUnit Testing for PowerUp Class.</msg>
+</logentry>
+<logentry
+   revision="115">
+<author>bdp414</author>
+<date>2015-03-23T06:51:37.260292Z</date>
+<paths>
+<path
+   kind="file"
+   action="M">/TeamProject/src/core/World.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/ChatPanel.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/GameScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/gui/LobbyScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/network/GameDataPackets.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/network/GameServer.java</path>
+</paths>
+<msg>Add chat panel to Game Screen as well</msg>
+</logentry>
+<logentry
+   revision="114">
+<author>sxs1218</author>
+<date>2015-03-23T06:43:11.653314Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/LineOfSight.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ParticleAnimation.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/HostScreen.java</path>
+</paths>
+<msg>Added Java Documentation.</msg>
+</logentry>
+<logentry
+   revision="113">
+<author>sxs1218</author>
+<date>2015-03-23T06:29:05.707586Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/src/test/PowerUpFactoryTest.java</path>
+</paths>
+<msg>JUnit Testing for the PowerUpFactory Class.</msg>
+</logentry>
+<logentry
+   revision="112">
+<author>cpc455</author>
+<date>2015-03-23T06:26:36.554514Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/AbstractCharacter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/ControlledCharacter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Hostage.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/AIPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/CharacterFactoryTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/CharacterTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/WeaponTest.java</path>
+</paths>
+<msg>Some java doccing</msg>
+</logentry>
+<logentry
+   revision="111">
+<author>bdp414</author>
+<date>2015-03-23T05:46:42.434497Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/AbstractScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/ChatPanel.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GUIFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/LobbyRequest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/LobbyServer.java</path>
+</paths>
+<msg>Trying to implement chat panel</msg>
+</logentry>
+<logentry
+   revision="110">
+<author>mda314</author>
+<date>2015-03-23T05:02:46.685432Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/src/test/WorldTest.java</path>
+</paths>
+<msg>Added unit testing for World class</msg>
+</logentry>
+<logentry
+   revision="109">
+<author>sxs1218</author>
+<date>2015-03-23T04:55:57.609975Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Vector2D.java</path>
+</paths>
+<msg>Added Java documentation.</msg>
+</logentry>
+<logentry
+   revision="108">
+<author>sxs1218</author>
+<date>2015-03-23T04:53:41.645985Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Animation.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/AnimationSystem.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ParticleAnimation.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Vector2D.java</path>
+</paths>
+<msg>Added Java documentation.</msg>
+</logentry>
+<logentry
+   revision="107">
+<author>cpc455</author>
+<date>2015-03-23T04:00:23.247716Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/AbstractCharacter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Hostage.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/AIPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/LineOfSight.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/PathFinder.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/Projectile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/Tile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Main.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/geometry/Geometry.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Animation.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/AnimationSystem.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/AnimationTester.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ConvolveFilter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ImageBlender.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ParticleAnimation.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Vector2D.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/AbstractScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Camera.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/ClientPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GUIFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/JoinScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/MainMenuScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Minimap.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/SplashScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/TeamListModel.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Utils.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/FullCharacterData.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameDataPackets.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameEvent.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/LobbyRequest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/LobbyServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/PartialCharacterData.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/ProjectileData.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/ServerPlayer.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/network/ServerTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/AudioManager.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/sound/LoopByteArrayInputStream.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/MusicPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/Sound.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/SoundPlayer.java</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/src/network/ServerTest.java"
+   copyfrom-rev="106">/TeamProject/src/test/ServerTest.java</path>
+</paths>
+<msg>updated author fields</msg>
+</logentry>
+<logentry
+   revision="106">
+<author>cpc455</author>
+<date>2015-03-23T02:18:14.505258Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Minimap.java</path>
+</paths>
+<msg>minimap to black, simple change, nicer look</msg>
+</logentry>
+<logentry
+   revision="105">
+<author>cpc455</author>
+<date>2015-03-23T01:32:57.385116Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Minimap.java</path>
+</paths>
+<msg>Transparent minimap now, changed it to blue so it doesn't clash with team colours</msg>
+</logentry>
+<logentry
+   revision="104">
+<author>cpc455</author>
+<date>2015-03-23T00:43:19.553832Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/SplashScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/AudioManager.java</path>
+</paths>
+<msg>Music ingame working, picking up power up sounds lowered b/c louder than gunshot</msg>
+</logentry>
+<logentry
+   revision="103">
+<author>bdp414</author>
+<date>2015-03-23T00:18:18.286147Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/audio/music/gunshot.wav</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/AIPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/PathFinder.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/AudioManager.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/MusicPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/SoundPlayer.java</path>
+</paths>
+<msg>Fixed pathfinding, add music looping</msg>
+</logentry>
+<logentry
+   revision="102">
+<author>mda314</author>
+<date>2015-03-22T23:18:51.170676Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/audio/sounds/power_up.wav</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/PowerUp.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameEvent.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/AudioManager.java</path>
+</paths>
+<msg>Added power up sound effect</msg>
+</logentry>
+<logentry
+   revision="101">
+<author>mda314</author>
+<date>2015-03-22T21:34:30.173531Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/.settings/org.eclipse.jdt.core.prefs</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/powerup/1.png</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/AbstractCharacter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/PowerUp.java</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/src/core/PowerUps.java"
+   copyfrom-rev="92">/TeamProject/src/core/PowerUpFactory.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/core/PowerUps.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Renderer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameDataPackets.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/network/PowerUpData.java</path>
+</paths>
+<msg>Integrated power up with game fully and refactored some code in World and GameScreen</msg>
+</logentry>
+<logentry
+   revision="100">
+<author>mxr351</author>
+<date>2015-03-22T19:56:15.791490Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Camera.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameServer.java</path>
+</paths>
+<msg>Added more javadocs</msg>
+</logentry>
+<logentry
+   revision="99">
+<author>bdp414</author>
+<date>2015-03-22T19:45:33.702748Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/JoinScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameEvent.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/LobbyServer.java</path>
+</paths>
+<msg>Add time (5 mins) and score (30 points) limit to the game now, also fix various networking bugs</msg>
+</logentry>
+<logentry
+   revision="98">
+<author>cpc455</author>
+<date>2015-03-22T19:39:05.539966Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/map/deathrow.bmp</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/map/deathrow.map</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/map/deathrow_x.bmp</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/resource/test scripts</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/test scripts/GUI Test Script.docx</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/test scripts/Test Script Template.docx</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/CharacterFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/HostScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/CharacterFactoryTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/CharacterTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/ProjectileTest.java</path>
+</paths>
+<msg>New map (not working idk atm), started adding the test scripts, updated some junit tests</msg>
+</logentry>
+<logentry
+   revision="97">
+<author>sxs1218</author>
+<date>2015-03-22T19:27:53.346752Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/JoinScreen.java</path>
+</paths>
+<msg>Error indicator for empty usernames and invalid IP address or port.</msg>
+</logentry>
+<logentry
+   revision="96">
+<author>mxr351</author>
+<date>2015-03-22T15:59:32.081543Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/AIPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/LobbyScreen.java</path>
+</paths>
+<msg>More Javadocs</msg>
+</logentry>
+<logentry
+   revision="95">
+<author>sxs1218</author>
+<date>2015-03-22T15:31:05.414146Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/HostScreen.java</path>
+</paths>
+<msg>Added error indicator for invalid usernames and port numbers.</msg>
+</logentry>
+<logentry
+   revision="94">
+<author>mxr351</author>
+<date>2015-03-22T15:23:16.592124Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/AudioManager.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/MusicPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/Sound.java</path>
+</paths>
+<msg>Added some more Javadocs</msg>
+</logentry>
+<logentry
+   revision="93">
+<author>bdp414</author>
+<date>2015-03-22T14:59:51.937535Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/LobbyServer.java</path>
+</paths>
+<msg>Now the type of the AI player added is the host's current type (so you can select which class to add - mind you, AI can't play scout rly good, since they don't know how to sneak / run yet)</msg>
+</logentry>
+<logentry
+   revision="92">
+<author>mda314</author>
+<date>2015-03-22T03:25:30.459763Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/PowerUp.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/core/PowerUps.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Minimap.java</path>
+</paths>
+<msg>Refactored power ups into 2 classes and improved player experience</msg>
+</logentry>
+<logentry
+   revision="91">
+<author>bdp414</author>
+<date>2015-03-22T02:24:55.684430Z</date>
+<paths>
+<path
+   action="D"
+   kind="file">/TeamProject/resource/audio/music/Deadlock4.wav</path>
+</paths>
+<msg>reduce sample rate of music (3xMB  for each music file is too much)</msg>
+</logentry>
+<logentry
+   revision="90">
+<author>bdp414</author>
+<date>2015-03-22T02:23:25.985257Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/audio/music/menumusic.wav</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/resource/map/dust.map"
+   copyfrom-rev="75">/TeamProject/resource/map/dust.map</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/resource/map/dust_x.bmp"
+   copyfrom-rev="73">/TeamProject/resource/map/dust_x.bmp</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/AbstractCharacter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/ControlledCharacter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Hostage.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/core/AIPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/Arena.java</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/src/gui/LineOfSight.java"
+   copyfrom-rev="75">/TeamProject/src/core/LineOfSight.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/core/PathFinder.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/PowerUp.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/geometry/Geometry.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ImageBlender.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/AbstractScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GUIFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GameScreen.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/gui/LineOfSight.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Minimap.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/SplashScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Utils.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/FullCharacterData.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameDataPackets.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/LobbyRequest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/LobbyServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/PartialCharacterData.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/ProjectileData.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/ServerPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/AudioManager.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/LoopByteArrayInputStream.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/MusicPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/AssaultRifle.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/Pistol.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/SMG.java</path>
+</paths>
+<msg>add AI players (click team button to add), add kick functionality for host player (click player name to kick), also players can now leave lobby safely, press ESC to go back to main menu, add character filtering using line of sight</msg>
+</logentry>
+<logentry
+   revision="89">
+<author>mda314</author>
+<date>2015-03-22T00:58:24.460534Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/PowerUp.java</path>
+</paths>
+<msg>Allow player to pick up a power up</msg>
+</logentry>
+<logentry
+   revision="88">
+<author>cpc455</author>
+<date>2015-03-21T22:09:08.247662Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/CharacterFactoryTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/CharacterTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/WeaponTest.java</path>
+</paths>
+<msg>Redid the Char and Weapon tests so that they have separate methods for each test which is much nicer, working on the character factory - need to check images, creates the right type, etc.</msg>
+</logentry>
+<logentry
+   revision="87">
+<author>mda314</author>
+<date>2015-03-21T21:54:31.013041Z</date>
+<paths>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/resource/powerup/health_kit.png"
+   copyfrom-rev="84">/TeamProject/resource/powerup/0.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/powerup/1.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/powerup/2.png</path>
+<path
+   action="D"
+   kind="file">/TeamProject/resource/powerup/health_kit.png</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/PowerUp.java</path>
+</paths>
+<msg>Added power up types support</msg>
+</logentry>
+<logentry
+   revision="86">
+<author>sxs1218</author>
+<date>2015-03-21T21:38:46.551419Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/HostScreen.java</path>
+</paths>
+<msg>Added a red error indicator to show if there was a problem with the port number entered.</msg>
+</logentry>
+<logentry
+   revision="85">
+<author>mda314</author>
+<date>2015-03-21T21:13:39.710723Z</date>
+<paths>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/resource/map/dust.bmp"
+   copyfrom-rev="83">/TeamProject/resource/map/bazaar.bmp</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/resource/map/dust.map"
+   copyfrom-rev="83">/TeamProject/resource/map/bazaar.map</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/resource/map/dust_x.bmp"
+   copyfrom-rev="83">/TeamProject/resource/map/bazaar_x.bmp</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/resource/map/newMap2.bmp"
+   copyfrom-rev="83">/TeamProject/resource/map/corridor.bmp</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/resource/map/newMap2.map"
+   copyfrom-rev="83">/TeamProject/resource/map/corridor.map</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/resource/map/newMap2_x.bmp"
+   copyfrom-rev="83">/TeamProject/resource/map/corridor_x.bmp</path>
+<path
+   action="D"
+   kind="file">/TeamProject/resource/map/dust.bmp</path>
+<path
+   action="D"
+   kind="file">/TeamProject/resource/map/dust.map</path>
+<path
+   action="D"
+   kind="file">/TeamProject/resource/map/dust_x.bmp</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/resource/map/test40.bmp"
+   copyfrom-rev="83">/TeamProject/resource/map/maze.bmp</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/resource/map/test40.map"
+   copyfrom-rev="83">/TeamProject/resource/map/maze.map</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/resource/map/test40_x.bmp"
+   copyfrom-rev="83">/TeamProject/resource/map/maze_x.bmp</path>
+<path
+   action="D"
+   kind="file">/TeamProject/resource/map/newMap2.bmp</path>
+<path
+   action="D"
+   kind="file">/TeamProject/resource/map/newMap2.map</path>
+<path
+   action="D"
+   kind="file">/TeamProject/resource/map/newMap2_x.bmp</path>
+<path
+   action="D"
+   kind="file">/TeamProject/resource/map/test40.bmp</path>
+<path
+   action="D"
+   kind="file">/TeamProject/resource/map/test40.map</path>
+<path
+   action="D"
+   kind="file">/TeamProject/resource/map/test40_x.bmp</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/HostScreen.java</path>
+</paths>
+<msg>Changed map filenames</msg>
+</logentry>
+<logentry
+   revision="84">
+<author>mda314</author>
+<date>2015-03-21T20:56:29.499256Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Minimap.java</path>
+</paths>
+<msg>Updated minimap size</msg>
+</logentry>
+<logentry
+   revision="83">
+<author>mda314</author>
+<date>2015-03-21T20:36:10.964959Z</date>
+<paths>
+<path
+   action="A"
+   kind="dir">/TeamProject/resource/powerup</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/powerup/health_kit.png</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/PowerUp.java</path>
+</paths>
+<msg>Added power up icon support</msg>
+</logentry>
+<logentry
+   revision="82">
+<author>sxs1218</author>
+<date>2015-03-21T20:33:47.428147Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/HostScreen.java</path>
+</paths>
+<msg></msg>
+</logentry>
+<logentry
+   revision="81">
+<author>sxs1218</author>
+<date>2015-03-21T20:33:20.669036Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/JoinScreen.java</path>
+</paths>
+<msg></msg>
+</logentry>
+<logentry
+   revision="80">
+<author>sxs1218</author>
+<date>2015-03-21T20:09:06.135672Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/JoinScreen.java</path>
+</paths>
+<msg></msg>
+</logentry>
+<logentry
+   revision="79">
+<author>sxs1218</author>
+<date>2015-03-21T20:03:50.554821Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/JoinScreen.java</path>
+</paths>
+<msg></msg>
+</logentry>
+<logentry
+   revision="78">
+<author>sxs1218</author>
+<date>2015-03-21T19:50:59.116621Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/HostScreen.java</path>
+</paths>
+<msg>Back button for the Host Screen.</msg>
+</logentry>
+<logentry
+   revision="77">
+<author>cpc455</author>
+<date>2015-03-21T18:45:35.296163Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/src/test/CharacterFactoryTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/SMG.java</path>
+</paths>
+<msg>SMG better balanced, fires slightly faster and does a bit less damage. Started on CharacterFactoryTest</msg>
+</logentry>
+<logentry
+   revision="76">
+<author>cpc455</author>
+<date>2015-03-21T18:30:38.591117Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/audio/music/Deadlock4.wav</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/map/dust.map</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/map/dust_x.bmp</path>
+</paths>
+<msg>Added lightsources to the Dust map, labels for map on host screen make sense now</msg>
+</logentry>
+<logentry
+   revision="75">
+<author>cpc455</author>
+<date>2015-03-21T18:12:25.245105Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/map/dust.map</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/HostScreen.java</path>
+</paths>
+<msg>Added in Dust map, fixed the old .map file, trying to find the office file</msg>
+</logentry>
+<logentry
+   revision="74">
+<author>cpc455</author>
+<date>2015-03-21T17:58:28.892856Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/SplashScreen.java</path>
+</paths>
+<msg>Soundtrack pushed in</msg>
+</logentry>
+<logentry
+   revision="73">
+<author>cpc455</author>
+<date>2015-03-21T17:50:32.067717Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/character/specops_green.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/character/specops_red.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/map/dust.bmp</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/map/dust.map</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/map/dust_x.bmp</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/anvil_base.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/beacon.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/bedrock.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/bedrock_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/black.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/blockEmerald.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/brick.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/brick1.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/clay.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/clay1.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/coal_block_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/cobblestone copy.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/cobblestone1.png</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/tile/cobblestone2.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/cobblestone2_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/cobblestone3.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/cobblestone4.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/cobblestone5.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/cobblestone6.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/cobblestone_mossy.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/dirt.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/dirt2.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/dirt3.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/dirt_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/dirt_podzol_top.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/dirt_podzol_top1.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/dirt_podzol_top2.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/dirt_podzol_top3.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/dropper_front_vertical.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/furnace_top.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass_black.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass_blue.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass_cyan.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass_gray.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass_green.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass_light_blue.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass_light_blue_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass_lime.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass_magenta.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass_orange.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass_pink.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass_purple.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass_red.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass_silver.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass_white.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glass_yellow.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/grass_top.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/gravel.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/gravel1.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/gravel1_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/hardened_clay_stained_gray.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/hopper_outside.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/hopper_outside_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/ice.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/ice_packed.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/itemframe_background.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/lapis_block.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/nether_brick.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/piston_top_normal.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/piston_top_sticky.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/planks_acacia.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/planks_birch.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/planks_oak.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/planks_spruce.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/planks_spruce_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/quartz_block_lines.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/red_sand.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/redstone_lamp_off.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/redstone_lamp_on.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/sand.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/sand_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/sandstone_normal.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/sandstone_smooth.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/sandstone_smooth_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/sandstone_top.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/stonebrick1.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/stonebrick_carved.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/stonebrick_mossy copy.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/stonebrick_mossy.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/stonebrick_mossy_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/tnt_top.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/underwater.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/underwater_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/wood.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/wood_birch.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/wood_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/wood_jungle.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/wood_spruce.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile.zip</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/CharacterFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/ControlledCharacter.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/character/SpecOps.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/CharacterTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/WeaponTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/SMG.java</path>
+</paths>
+<msg>New Character class, char and weapon tests updated, smg balanced, new images created, blocks and  map updated as well?</msg>
+</logentry>
+<logentry
+   revision="72">
+<author>bdp414</author>
+<date>2015-03-19T01:57:51.348351Z</date>
+<paths>
+<path
+   action="A"
+   kind="dir">/TeamProject/resource/audio/music</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/audio/music/testmusic.wav</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/AbstractCharacter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/ControlledCharacter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Hostage.java</path>
+<path
+   action="A"
+   kind="dir"
+   copyfrom-path="/TeamProject/src/physics"
+   copyfrom-rev="71">/TeamProject/src/core</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/Arena.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/PowerUp.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/Projectile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/Tile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/core/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Main.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/AnimationSystem.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/AnimationTester.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ImageBlender.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Renderer.java</path>
+<path
+   action="A"
+   kind="dir"
+   copyfrom-path="/TeamProject/src/screen"
+   copyfrom-rev="71">/TeamProject/src/gui</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/AbstractScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Camera.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/ChatPanel.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/ClientPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GUIFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/HostScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/JoinScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/LineOfSight.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/MainMenuScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Minimap.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/SplashScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/TeamListModel.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/gui/Utils.java</path>
+<path
+   action="A"
+   kind="dir"
+   copyfrom-path="/TeamProject/src/server"
+   copyfrom-rev="71">/TeamProject/src/network</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/FullCharacterData.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameDataPackets.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameEvent.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/GameServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/LobbyRequest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/LobbyServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/PartialCharacterData.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/ProjectileData.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/ServerPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/network/ServerTest.java</path>
+<path
+   action="D"
+   kind="dir">/TeamProject/src/physics</path>
+<path
+   action="D"
+   kind="dir">/TeamProject/src/screen</path>
+<path
+   action="D"
+   kind="dir">/TeamProject/src/server</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/AudioManager.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/MusicPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/ProjectileTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/TileTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/Weapon.java</path>
+</paths>
+<msg>Add music in the menu - just a test song, will change to proper menu background music later. Rename the packages to better reflect the classes in them.  Add a bit more documentation and clean up the code here and there.</msg>
+</logentry>
+<logentry
+   revision="71">
+<author>bdp414</author>
+<date>2015-03-18T15:52:59.000516Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Animation.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/AnimationSystem.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ConvolveFilter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ExpandingCircleAnimation.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Renderer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Tile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+</paths>
+<msg>Add some javadoc documentation to classes I wrote.</msg>
+</logentry>
+<logentry
+   revision="70">
+<author>bdp414</author>
+<date>2015-03-17T12:35:31.846903Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+</paths>
+<msg>Fix screen lagging, fix client freezing (2)</msg>
+</logentry>
+<logentry
+   revision="69">
+<author>bdp414</author>
+<date>2015-03-17T12:34:14.991277Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ImageBlender.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Tile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+</paths>
+<msg>Fix screen lagging, fix client freezing</msg>
+</logentry>
+<logentry
+   revision="68">
+<author>bdp414</author>
+<date>2015-03-17T04:40:03.113034Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/src/character/AbstractCharacter.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/character/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/CharacterFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Commando.java</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/src/character/Character.java"
+   copyfrom-rev="64">/TeamProject/src/character/ControlledCharacter.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/character/Hostage.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Scout.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Sniper.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Tank.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ImageBlender.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Renderer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Vector2D.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Arena.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Projectile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Tile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/GameDataPackets.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/ServerPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/AudioManager.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/CharacterTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/ProjectileTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/Weapon.java</path>
+</paths>
+<msg>Add lights, add a following hostage (very simple atm, will have to improve)</msg>
+</logentry>
+<logentry
+   revision="67">
+<author>mda314</author>
+<date>2015-03-16T12:52:31.446119Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/src/physics/PowerUp.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+</paths>
+<msg>Added powerUp class that randomly adds power ups</msg>
+</logentry>
+<logentry
+   revision="66">
+<author>bdp414</author>
+<date>2015-03-14T15:18:19.098473Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/map/mansion.map</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/map/mansion_x.bmp</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/map/newMap2.map</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/map/test40.map</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Arena.java</path>
+</paths>
+<msg>update map files (removed dark tiles, now use code to generate dark tiles)</msg>
+</logentry>
+<logentry
+   revision="65">
+<author>bdp414</author>
+<date>2015-03-14T04:13:48.836414Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/light.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/graphics/ConvolveFilter.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/graphics/ImageBlender.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Renderer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Arena.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Tile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LineOfSight.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/Minimap.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/GameServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/TileTest.java</path>
+</paths>
+<msg></msg>
+</logentry>
+<logentry
+   revision="64">
+<author>mda314</author>
+<date>2015-03-13T18:43:01.640861Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/HostScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/LobbyServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/ServerTest.java</path>
+</paths>
+<msg>Added map selection feature in host screen</msg>
+</logentry>
+<logentry
+   revision="63">
+<author>mxr351</author>
+<date>2015-03-10T12:25:19.971926Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Projectile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+</paths>
+<msg>Added some java docs to Projectile and World</msg>
+</logentry>
+<logentry
+   revision="62">
+<author>mda314</author>
+<date>2015-03-10T09:32:51.283420Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/Minimap.java</path>
+</paths>
+<msg>Solved a bug of minimap</msg>
+</logentry>
+<logentry
+   revision="61">
+<author>bdp414</author>
+<date>2015-03-10T04:07:34.339163Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/.classpath</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Renderer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/Camera.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/ClientPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LineOfSight.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/Minimap.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/Utils.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/server/CCharacter.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/server/CProjectile.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/server/FullCharacter.java</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/src/server/FullCharacter.java"
+   copyfrom-rev="60">/TeamProject/src/server/FullCharacterData.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/GameDataPackets.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/GameServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/LobbyServer.java</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/src/server/CCharacter.java"
+   copyfrom-rev="60">/TeamProject/src/server/PartialCharacterData.java</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/src/server/CProjectile.java"
+   copyfrom-rev="60">/TeamProject/src/server/ProjectileData.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/ServerPlayer.java</path>
+</paths>
+<msg>Make the game server multi-threaded like the lobby server i.e it no longer reads input from players sequentially, thus won't freeze other players if it's having one problem with one player. Add minimap into the game, however it's not really working yet and the minimap's position on screen also has to be fixed.</msg>
+</logentry>
+<logentry
+   revision="60">
+<author>bdp414</author>
+<date>2015-03-09T14:20:32.768710Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/GameDataPackets.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/GameServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/AudioManager.java</path>
+</paths>
+<msg>add sneaking i.e lowering speed using Ctrl, add packet filtering on server side (to reduce packet size, only send things of interest to a client)</msg>
+</logentry>
+<logentry
+   revision="59">
+<author>bdp414</author>
+<date>2015-03-09T03:15:01.991588Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/audio/sounds/footstep1.wav</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/audio/sounds/footstep2.wav</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/audio/sounds/footstep3.wav</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/audio/sounds/footstep4.wav</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/audio/sounds/gunshot_assault.wav</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/audio/sounds/gunshot_shotgun.wav</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/audio/sounds/gunshot_smg.wav</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/audio/sounds/gunshot_sniper.wav</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Commando.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Scout.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Tank.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/AnimationSystem.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/Utils.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/GameEvent.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/GameServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/AudioManager.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/AssaultRifle.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/DBarrelPistol.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/Pistol.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/PrimaryWeapon.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/SMG.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/SecondaryWeapon.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/Shotgun.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/SniperRifle.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/Weapon.java</path>
+</paths>
+<msg>Add different gunshot sounds, add footstep sound to the game and rework the footstep noise system to match with the sound - now imitate each "step" realistically, so if walking every half a second there'll be a step noise regardless of character type, but each character type will make different levels of noise at each step. Also, when running steps are more frequent and louder, vice versa when sneaking (TODO will implement later) steps will be quieter and less frequent.</msg>
+</logentry>
+<logentry
+   revision="58">
+<author>cpc455</author>
+<date>2015-03-08T21:08:39.513075Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Character.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/test/CharacterTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/WeaponTest.java</path>
+</paths>
+<msg>Character Accessors added and Character test class to test accessors and mutators done.</msg>
+</logentry>
+<logentry
+   revision="57">
+<author>cpc455</author>
+<date>2015-03-08T18:59:55.408186Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/src/test/WeaponTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/Weapon.java</path>
+</paths>
+<msg>Added Mutator for Accuracy and Weapon Test Class</msg>
+</logentry>
+<logentry
+   revision="56">
+<author>bdp414</author>
+<date>2015-03-08T03:49:18.010448Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/audio/sounds/gunshot_pistol.wav</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/character/commando_green.png</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/character/commando_red.png</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/character/scout_green.png</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/character/scout_red.png</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/character/sniper_green.png</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/character/sniper_red.png</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/character/tank_green.png</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/character/tank_red.png</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Commando.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Scout.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Tank.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/geometry/Geometry.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/Animation.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/AnimationSystem.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ExpandingCircleAnimation.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/graphics/ParticleAnimation.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/graphics/Renderer.java</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/src/physics/Vector2D.java"
+   copyfrom-rev="53">/TeamProject/src/graphics/Vector2D.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/physics/Vector2D.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GUIFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/FullCharacter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/AudioManager.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/sound/SoundPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/AssaultRifle.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/DBarrelPistol.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/Shotgun.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/SniperRifle.java</path>
+</paths>
+<msg>Add character models, add reload indicator, add footstep noise, add gunshot sound for testing purpose, increase weapons' range and projectile velocity to feel more realistic. TODO: add more sounds for guns / footsteps</msg>
+</logentry>
+<logentry
+   revision="55">
+<author>cpc455</author>
+<date>2015-03-07T22:52:41.686633Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/CharacterFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Arena.java</path>
+<path
+   action="D"
+   kind="dir">/TeamProject/src/player</path>
+</paths>
+<msg></msg>
+</logentry>
+<logentry
+   revision="54">
+<author>bdp414</author>
+<date>2015-03-07T04:42:48.698433Z</date>
+<paths>
+<path
+   action="A"
+   kind="dir">/TeamProject/resource/audio</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/resource/audio/sounds</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/audio/sounds/test.wav</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/geometry/Geometry.java</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/src/graphics</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/graphics/Animation.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/graphics/AnimationSystem.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/graphics/AnimationTester.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/graphics/ExpandingCircleAnimation.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/graphics/ParticleAnimation.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/physics/Particle.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/physics/ParticleTester.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LineOfSight.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/Minimap.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/GameEvent.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/GameServer.java</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/src/sound</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/sound/AudioManager.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/sound/LoopByteArrayInputStream.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/sound/MusicPlayer.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/sound/Sound.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/sound/SoundPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/Weapon.java</path>
+</paths>
+<msg>Add bullet effects, add noise effects (still have footstep left), add home-brew sound library (still need to add actual sound effects and play them in proper place in the code)</msg>
+</logentry>
+<logentry
+   revision="53">
+<author>mda314</author>
+<date>2015-03-06T16:05:20.508881Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/Minimap.java</path>
+</paths>
+<msg>Refactored minimap</msg>
+</logentry>
+<logentry
+   revision="52">
+<author>mda314</author>
+<date>2015-03-05T05:53:27.763528Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/src/screen/Minimap.java</path>
+</paths>
+<msg>Added minimap class</msg>
+</logentry>
+<logentry
+   revision="51">
+<author>sxs1218</author>
+<date>2015-03-05T00:03:47.133112Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/ParticleTester.java</path>
+</paths>
+<msg>Directional particle effects for the bullet hitting the wall.</msg>
+</logentry>
+<logentry
+   revision="50">
+<author>sxs1218</author>
+<date>2015-03-02T23:53:35.874986Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/ParticleTester.java</path>
+</paths>
+<msg>Working on the BUllet hitting the wall effects</msg>
+</logentry>
+<logentry
+   revision="49">
+<author>bdp414</author>
+<date>2015-03-02T01:05:00.587217Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/map/mansion.bmp</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/map/mansion.map</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/map/mansion_x.bmp</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/map/newMap2.bmp</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/map/newMap2.map</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/map/newMap2_x.bmp</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glasswindow.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/glasswindow_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/grasswall.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/grasswall_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/graybrick.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/graybrick_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/prismarine.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/prismarine_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/sewerwater.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/sewerwater_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/stonebrick.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/stonebrick_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/wall.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/wall_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/whitewall.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/whitewall_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/yellowbrick.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/yellowbrick_dark.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/yellowgrass.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/yellowgrass_dark.png</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Arena.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/Camera.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/LobbyServer.java</path>
+</paths>
+<msg>Add new arenas (still need a reasonable way to pick map when host a game), optimize arena drawing - now it's only draw what's inside the screen so huge maps shouldn't be a problem now, add score-keeping (still need to test out)</msg>
+</logentry>
+<logentry
+   revision="48">
+<author>bdp414</author>
+<date>2015-02-27T16:16:57.134392Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/screen/ClientPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LineOfSight.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/TeamListModel.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/GameDataPackets.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/server/GameEvent.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/GameServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/LobbyRequest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/LobbyServer.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/server/Player.java</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/src/server/Player.java"
+   copyfrom-rev="46">/TeamProject/src/server/ServerPlayer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/PrimaryWeapon.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/SecondaryWeapon.java</path>
+</paths>
+<msg>trying to keep team / individual score. commit to save work and revert back for feedback session</msg>
+</logentry>
+<logentry
+   revision="47">
+<author>bdp414</author>
+<date>2015-02-27T03:12:28.585093Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Commando.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Scout.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Sniper.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Tank.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Arena.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/AssaultRifle.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/DBarrelPistol.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/Pistol.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/Shotgun.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/SniperRifle.java</path>
+</paths>
+<msg>Fix health not resetting after death, players in different teams now spawn at different locations, tweak weapon / character stats</msg>
+</logentry>
+<logentry
+   revision="46">
+<author>bdp414</author>
+<date>2015-02-24T03:14:20.956705Z</date>
+<paths>
+<path
+   action="D"
+   kind="dir">/TeamProject/resource/Images</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/resource/character</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/character/commando_green.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/character/commando_red.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/character/scout_green.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/character/scout_red.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/character/sniper_green.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/character/sniper_red.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/character/tank_green.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/character/tank_red.png</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Character.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/character/CharacterFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Commando.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Scout.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Sniper.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Tank.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Arena.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/GameServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/LobbyServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/ProjectileTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/Weapon.java</path>
+</paths>
+<msg>Add character icons to the lobby screens, fix bugs</msg>
+</logentry>
+<logentry
+   revision="45">
+<author>sxs1218</author>
+<date>2015-02-24T01:41:14.202307Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/src/physics/ParticleTester.java</path>
+</paths>
+<msg>Creates the Particle Effects for the game.</msg>
+</logentry>
+<logentry
+   revision="44">
+<author>sxs1218</author>
+<date>2015-02-24T01:40:00.602143Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/src/physics/Vector2D.java</path>
+</paths>
+<msg>Creates the Particle Effects for the game.</msg>
+</logentry>
+<logentry
+   revision="43">
+<author>sxs1218</author>
+<date>2015-02-24T01:39:16.678721Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/src/physics/Particle.java</path>
+</paths>
+<msg>Creates the Particle Effects for the game.</msg>
+</logentry>
+<logentry
+   revision="42">
+<author>bdp414</author>
+<date>2015-02-23T13:33:27.456876Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Commando.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Scout.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Sniper.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/character/Tank.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/GameServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/ProjectileTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/weapon/Weapon.java</path>
+</paths>
+<msg>fix character ID and weapon bugs</msg>
+</logentry>
+<logentry
+   revision="41">
+<author>mxr351</author>
+<date>2015-02-23T13:03:32.618813Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LobbyScreen.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/screen/TeamListModel.java</path>
+</paths>
+<msg>Added basic scoreboard to test in labs</msg>
+</logentry>
+<logentry
+   revision="40">
+<author>cpc455</author>
+<date>2015-02-22T19:21:34.250195Z</date>
+<paths>
+<path
+   action="A"
+   kind="dir">/TeamProject/src/character</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/character/Character.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/character/Commando.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/character/Scout.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/character/Sniper.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/character/Tank.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Projectile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/CharacterType.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Weapon.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/FullCharacter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/GameServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/Player.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/ProjectileTest.java</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/src/weapon</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/weapon/AssaultRifle.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/weapon/DBarrelPistol.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/weapon/Pistol.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/weapon/PrimaryWeapon.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/weapon/SMG.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/weapon/SecondaryWeapon.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/weapon/Shotgun.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/weapon/SniperRifle.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/weapon/Weapon.java</path>
+</paths>
+<msg>Working on Weapons subclassing &amp; Character subclassing</msg>
+</logentry>
+<logentry
+   revision="39">
+<author>bdp414</author>
+<date>2015-02-22T03:43:08.195793Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Weapon.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/AbstractScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GUIFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/HostScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/JoinScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LobbyScreen.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/screen/LobbyScreen1.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/MainMenuScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/SplashScreen.java</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/src/server/Packets.java"
+   copyfrom-rev="38">/TeamProject/src/server/GameDataPackets.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/server/GameServer.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/LobbyRequest.java</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/src/server/Server.java"
+   copyfrom-rev="38">/TeamProject/src/server/LobbyServer.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/server/Packets.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/server/Player.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/server/Server.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/ServerTest.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/server/WorldStatePacket.java</path>
+</paths>
+<msg>Add Lobby screen with ready &amp; switch team buttons working, still need to add character &amp; arena selection later. Need to test with multiple players in lobby.</msg>
+</logentry>
+<logentry
+   revision="38">
+<author>mda314</author>
+<date>2015-02-18T06:43:59.572289Z</date>
+<paths>
+<path
+   action="M"
+   kind="dir">/TeamProject/.settings</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Arena.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Tile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/test/GeometryTest.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/test/ProjectileTest.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/test/TileTest.java</path>
+</paths>
+<msg>Added unit testing for projectile and tile classes</msg>
+</logentry>
+<logentry
+   revision="37">
+<author>mda314</author>
+<date>2015-02-18T05:14:54.826802Z</date>
+<paths>
+<path
+   action="A"
+   kind="dir">/TeamProject/src/test</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/test/GeometryTest.java</path>
+</paths>
+<msg>Added unit testing for geometry package</msg>
+</logentry>
+<logentry
+   revision="36">
+<author>mda314</author>
+<date>2015-02-18T02:43:53.632761Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/CCharacter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/CProjectile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/FullCharacter.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/LobbyRequest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/Packets.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/Server.java</path>
+</paths>
+<msg>Cleaned up the server package</msg>
+</logentry>
+<logentry
+   revision="35">
+<author>mda314</author>
+<date>2015-02-18T02:37:11.128469Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/ChatPanel.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GUIFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/HostScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/JoinScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LineOfSight.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LobbyScreen1.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/MainMenuScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/SplashScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/Utils.java</path>
+</paths>
+<msg>Cleaned up the screen package</msg>
+</logentry>
+<logentry
+   revision="34">
+<author>mda314</author>
+<date>2015-02-18T02:24:40.245610Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/CharacterType.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Weapon.java</path>
+</paths>
+<msg>Cleaned up the player package</msg>
+</logentry>
+<logentry
+   revision="33">
+<author>mda314</author>
+<date>2015-02-18T02:10:47.313613Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/geometry/Geometry.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Arena.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Projectile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Tile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+</paths>
+<msg>Cleaned up the game, geometry and physics packages</msg>
+</logentry>
+<logentry
+   revision="32">
+<author>sxs1218</author>
+<date>2015-02-18T01:00:52.747872Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LobbyScreen1.java</path>
+</paths>
+<msg>Added Custom Button and Labels to the Lobby Screen.</msg>
+</logentry>
+<logentry
+   revision="31">
+<author>bdp414</author>
+<date>2015-02-18T00:31:38.756239Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/CharacterType.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Weapon.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/MainMenuScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/Server.java</path>
+</paths>
+<msg>tweak weapons and character types, change server to 30 updates per second (simulation &amp; input receiving rate still 60/s)</msg>
+</logentry>
+<logentry
+   revision="30">
+<author>bdp414</author>
+<date>2015-02-17T22:22:26.897281Z</date>
+<paths>
+<path
+   action="A"
+   kind="dir">/TeamProject/resource/background</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/background/menu.png</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/background/splash.png</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/resource/weapon</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/weapon/rectile.png</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/ChatPanel.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/screen/FlashScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GUIFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/MainMenuScreen.java</path>
+<path
+   action="A"
+   kind="file"
+   copyfrom-path="/TeamProject/src/screen/FlashScreen.java"
+   copyfrom-rev="29">/TeamProject/src/screen/SplashScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/Utils.java</path>
+</paths>
+<msg>Upload rectile, add background for some screens</msg>
+</logentry>
+<logentry
+   revision="29">
+<author>sxs1218</author>
+<date>2015-02-17T21:33:21.291101Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/ChatPanel.java</path>
+</paths>
+<msg></msg>
+</logentry>
+<logentry
+   revision="28">
+<author>sxs1218</author>
+<date>2015-02-17T21:32:47.791482Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/ChatPanel.java</path>
+</paths>
+<msg>Made changes to the Chat Panel</msg>
+</logentry>
+<logentry
+   revision="27">
+<author>sxs1218</author>
+<date>2015-02-17T21:00:33.141869Z</date>
+<paths>
+<path
+   kind="dir"
+   action="A">/TeamProject/resource/Images</path>
+<path
+   kind="file"
+   action="A">/TeamProject/resource/Images/CustomBtn.jpg</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/LobbyScreen1.java</path>
+</paths>
+<msg>Modified the Lobby Screen according to the feedback given. and added a folder called Images to store required Image files.</msg>
+</logentry>
+<logentry
+   revision="26">
+<author>sxs1218</author>
+<date>2015-02-17T20:06:38.293270Z</date>
+<paths>
+<path
+   kind="file"
+   action="A">/TeamProject/src/screen/ChatPanel.java</path>
+</paths>
+<msg>Made a separate class that creates a Chat Panel.</msg>
+</logentry>
+<logentry
+   revision="25">
+<author>bdp414</author>
+<date>2015-02-17T20:01:21.536735Z</date>
+<paths>
+<path
+   kind="file"
+   action="D">/TeamProject/resource/tile/0.bmp</path>
+<path
+   kind="file"
+   action="D">/TeamProject/resource/tile/1.bmp</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/physics/World.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/GameScreen.java</path>
+</paths>
+<msg>Add a rectile cursor, randomize the respawn spot of a player</msg>
+</logentry>
+<logentry
+   revision="24">
+<author>bdp414</author>
+<date>2015-02-17T19:17:38.051810Z</date>
+<paths>
+<path
+   kind="file"
+   action="M">/TeamProject/resource/map/test40.map</path>
+<path
+   kind="file"
+   action="A">/TeamProject/resource/tile/coal_block.png</path>
+<path
+   kind="file"
+   action="A">/TeamProject/resource/tile/coal_block2.png</path>
+<path
+   kind="file"
+   action="A">/TeamProject/resource/tile/cobblestone.png</path>
+<path
+   kind="file"
+   action="A">/TeamProject/resource/tile/cobblestone2.png</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/game/Game.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/physics/Arena.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/physics/Tile.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/physics/World.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/player/Character.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/Camera.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/JoinScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/LineOfSight.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/MainMenuScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/server/Server.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/server/ServerTest.java</path>
+</paths>
+<msg>Add darken effect for the area outside Line of Sight, fix a few bugs with multiplayer.</msg>
+</logentry>
+<logentry
+   revision="23">
+<author>bdp414</author>
+<date>2015-02-17T15:39:14.052040Z</date>
+<paths>
+<path
+   kind="dir"
+   action="A">/TeamProject/lib</path>
+<path
+   kind="file"
+   action="M">/TeamProject/resource/map/test40.map</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/physics/Projectile.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/physics/World.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/player/Character.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/Camera.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/GUIFactory.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   kind="file"
+   action="A">/TeamProject/src/screen/HostScreen.java</path>
+<path
+   kind="file"
+   action="A">/TeamProject/src/screen/JoinScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/LineOfSight.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/LobbyScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/MainMenuScreen.java</path>
+<path
+   kind="file"
+   action="A">/TeamProject/src/server/FullCharacter.java</path>
+<path
+   kind="file"
+   action="A">/TeamProject/src/server/LobbyRequest.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/server/Server.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/server/WorldStatePacket.java</path>
+</paths>
+<msg></msg>
+</logentry>
+<logentry
+   revision="22">
+<author>bdp414</author>
+<date>2015-02-16T04:04:06.209324Z</date>
+<paths>
+<path
+   kind="file"
+   action="M">/TeamProject/src/physics/Projectile.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/physics/World.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/player/Character.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/player/CharacterType.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/player/Weapon.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/LineOfSight.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/LobbyScreen1.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/screen/MainMenuScreen.java</path>
+<path
+   kind="file"
+   action="A">/TeamProject/src/server/CCharacter.java</path>
+<path
+   kind="file"
+   action="A">/TeamProject/src/server/CProjectile.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/server/Server.java</path>
+<path
+   kind="file"
+   action="M">/TeamProject/src/server/WorldStatePacket.java</path>
+</paths>
+<msg>Add HP and bullet vs character collision detection, improve the server-client communication system to allow more flexibility (instead of arrays, use CCharacter and CProjectile as data class)</msg>
+</logentry>
+<logentry
+   revision="21">
+<author>cpc455</author>
+<date>2015-02-15T12:03:17.715397Z</date>
+<paths>
+<path
+   kind="file"
+   action="M">/TeamProject/src/game/Game.java</path>
+</paths>
+<msg>set undecorated true, so no border around window</msg>
+</logentry>
+<logentry
+   revision="20">
+<author>sxs1218</author>
+<date>2015-02-14T16:58:51.316353Z</date>
+<paths>
+<path
+   kind="file"
+   action="A">/TeamProject/src/screen/LobbyScreen1.java</path>
+</paths>
+<msg>I have made the Lobby Screen for the game using Swing.</msg>
+</logentry>
+<logentry
+   revision="19">
+<author>cpc455</author>
+<date>2015-02-14T14:49:13.494401Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/map/test40.map</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/tile/1.bmp</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Weapon.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+</paths>
+<msg>Added some sound files (do those commit in resources?) The screen width/height should be fixed to go full-screen now. Character movement upped a bit to see what happens with FPS.
+
+Tiles changed to jpeg which works hopefully.</msg>
+</logentry>
+<logentry
+   revision="18">
+<author>mda314</author>
+<date>2015-02-14T06:46:08.406088Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Main.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/geometry/Geometry.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Arena.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Projectile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Tile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/CharacterType.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Weapon.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/AbstractScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/Camera.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/FlashScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GUIFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LineOfSight.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/MainMenuScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/Utils.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/Packets.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/Server.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/ServerTest.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/WorldStatePacket.java</path>
+</paths>
+<msg>Refactored all files to improve maintainability</msg>
+</logentry>
+<logentry
+   revision="17">
+<author>bdp414</author>
+<date>2015-02-14T00:39:27.526234Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/screen/LobbyScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/MainMenuScreen.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/server/InputPacket.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/Server.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/server/ServerTest.java</path>
+</paths>
+<msg>Fix bugs - now can have multiple players in one session! still need to have a GUI for the player to enter the IP &amp; port to connect to, at the moment it connects to Anh's IP by default.</msg>
+</logentry>
+<logentry
+   revision="16">
+<author>bdp414</author>
+<date>2015-02-13T08:02:44.200479Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/map/test40.map</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/map/test40_x.bmp</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   copyfrom-path="/TeamProject/src/game/Window.java"
+   copyfrom-rev="15"
+   action="A"
+   kind="file">/TeamProject/src/game/Main.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/game/Window.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Arena.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Projectile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Tile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Character.java</path>
+<path
+   copyfrom-path="/TeamProject/src/screen/Screen.java"
+   copyfrom-rev="15"
+   action="A"
+   kind="file">/TeamProject/src/screen/AbstractScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/Camera.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/FlashScreen.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/screen/GUIFactory.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/MainMenuScreen.java</path>
+<path
+   action="D"
+   kind="file">/TeamProject/src/screen/Screen.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/screen/Utils.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/server/InputPacket.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/server/Packets.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/server/Server.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/server/WorldStatePacket.java</path>
+</paths>
+<msg>Turn the input - simulate - render cycle into client-server model. Extend the map system to allow map creation with custom tiles and spawn points. Change the Game-Screen system into Swing-based to make GUI easier (hopefully).</msg>
+</logentry>
+<logentry
+   revision="15">
+<author>sxs1218</author>
+<date>2015-02-11T16:58:36.220780Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/MainMenuScreen.java</path>
+</paths>
+<msg>
+
+</msg>
+</logentry>
+<logentry
+   revision="14">
+<author>cpc455</author>
+<date>2015-02-11T00:22:21.941243Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/CharacterType.java</path>
+</paths>
+<msg></msg>
+</logentry>
+<logentry
+   revision="13">
+<author>cpc455</author>
+<date>2015-02-10T20:53:11.975348Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Projectile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Weapon.java</path>
+</paths>
+<msg></msg>
+</logentry>
+<logentry
+   revision="12">
+<author>cpc455</author>
+<date>2015-02-09T23:22:00.504485Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Projectile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Character.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/player/CharacterType.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/player/Weapon.java</path>
+</paths>
+<msg>added weapons, still have to mess with character types</msg>
+</logentry>
+<logentry
+   revision="11">
+<author>bdp414</author>
+<date>2015-02-08T23:30:19.480638Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/.classpath</path>
+<path
+   action="M"
+   kind="file">/TeamProject/resource/map/test20.bmp</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/geometry/Geometry.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/Camera.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/LineOfSight.java</path>
+</paths>
+<msg>Add line of sight algorithm.</msg>
+</logentry>
+<logentry
+   revision="10">
+<author>mxr351</author>
+<date>2015-02-08T15:57:43.769727Z</date>
+<paths>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Character.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+</paths>
+<msg>Added collision detection for player and projectiles vs walls</msg>
+</logentry>
+<logentry
+   revision="9">
+<author>bdp414</author>
+<date>2015-02-08T14:25:36.386474Z</date>
+<paths>
+<path
+   action="A"
+   kind="dir">/TeamProject/resource</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/resource/map</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/map/test20.bmp</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/map/test40.bmp</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/resource/tile</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/0.bmp</path>
+<path
+   action="A"
+   kind="file">/TeamProject/resource/tile/1.bmp</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/game/Window.java</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/src/geometry</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/geometry/Geometry.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/physics/Arena.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/Projectile.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/physics/Tile.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/player/Character.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/screen/Camera.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/FlashScreen.java</path>
+<path
+   action="M"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/screen/LineOfSight.java</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/src/server</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/server/Server.java</path>
+</paths>
+<msg>Add arena and tile, still working on collision and LoS. atm the LoS animation is removed.</msg>
+</logentry>
+<logentry
+   revision="8">
+<author>sxs1218</author>
+<date>2015-02-08T12:37:01.922991Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/src/screen/MainMenuScreen.java</path>
+</paths>
+<msg></msg>
+</logentry>
+<logentry
+   revision="6">
+<author>bdp414</author>
+<date>2015-02-02T01:58:03.463223Z</date>
+<paths>
+<path
+   action="A"
+   kind="file">/TeamProject/.classpath</path>
+<path
+   action="A"
+   kind="file">/TeamProject/.project</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/.settings</path>
+<path
+   action="A"
+   kind="file">/TeamProject/.settings/org.eclipse.jdt.core.prefs</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/src</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/src/game</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/game/Game.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/game/Window.java</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/src/physics</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/physics/Projectile.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/physics/World.java</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/src/player</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/player/Character.java</path>
+<path
+   action="A"
+   kind="dir">/TeamProject/src/screen</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/screen/FlashScreen.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/screen/GameScreen.java</path>
+<path
+   action="A"
+   kind="file">/TeamProject/src/screen/Screen.java</path>
+</paths>
+<msg>First commit !!! :)
+Anh.</msg>
+</logentry>
+<logentry
+   revision="5">
+<author>bdp414</author>
+<date>2015-02-02T01:57:05.031566Z</date>
+<paths>
+<path
+   action="A"
+   kind="dir">/TeamProject</path>
+</paths>
+<msg>First commit !!! :)
+Anh.</msg>
+</logentry>
+</log>
