@@ -13,7 +13,7 @@ import java.util.List;
  *
  */
 public class Geometry {
-    private static final double LINE_SAMPLE_THRESHOLD = 4;
+    private static final double LINE_SAMPLE_THRESHOLD = 0.3;
     
 	public static Point2D intersection(Line2D l1, Line2D l2) {
 		Point2D p1 = l1.getP1();

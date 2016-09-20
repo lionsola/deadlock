@@ -11,6 +11,7 @@ import ability.Ability;
 import core.Geometry;
 import core.Utils;
 import core.World;
+import game.Game;
 
 /**
  * The <code>ControlledCharacter</code> class defines the behaviour that all types of Characters
@@ -27,12 +28,13 @@ import core.World;
  */
 public class ControlledCharacter extends AbstractCharacter {
 	
-	private static final double MOVEMENT_DISPERSION_FACTOR = 0.008;
+	private static final double MOVEMENT_DISPERSION_FACTOR = 0.1;
 	private static final double ROTATION_DISPERSION_FACTOR = 0.3;
 	
-	private static final double MAX_DISPERSION_ANGLE = 0.07;
+	private static final double MAX_DISPERSION_ANGLE = 0.1;
 	private static final double DISPERSION_DEC = 0.007;
 
+	private double instaF = 1;
 	
 	
 	public final int id; // the player's ID
@@ -157,12 +159,14 @@ public class ControlledCharacter extends AbstractCharacter {
 	}
 
 	private void updateCrosshair() {
-		// TODO
-		addDispersion(MOVEMENT_DISPERSION_FACTOR*Math.sqrt(getDx()*getDx()+getDy()*getDy()));
+		addDispersion(instaF*MOVEMENT_DISPERSION_FACTOR*getCurrentSpeed()*Game.MS_PER_UPDATE);
 		addDispersion(-DISPERSION_DEC*(0.5+charDispersion));
 	}
 
-
+	public double getCurrentSpeed() {
+		return Math.sqrt(getDx()*getDx()+getDy()*getDy());
+	}
+	
 	/**
 	 * Update the cursor position on screen
 	 * 
@@ -175,9 +179,9 @@ public class ControlledCharacter extends AbstractCharacter {
 		this.cx = cx2;
 		this.cy = cy2;
 		// update direction
-		double newDirection = Math.atan2(getY() - cy2, cx2 - getX()); 
+		double newDirection = Math.atan2(getY() - cy2, cx2 - getX());
 		double dDirection = Math.abs(Geometry.wrapAngle(newDirection - getDirection()));
-		addDispersion(ROTATION_DISPERSION_FACTOR*dDirection);
+		addDispersion(instaF*ROTATION_DISPERSION_FACTOR*dDirection);
 		setDirection(newDirection);
 	}
 
@@ -272,7 +276,7 @@ public class ControlledCharacter extends AbstractCharacter {
 	public FullCharacterData generate() {
 		FullCharacterData fc = new FullCharacterData();
 		fc.healthPoints = (float) getHealthPoints();
-		fc.radius = (byte) getRadius();
+		fc.radius = (float) getRadius();
 		if (primary.isReady())
 			fc.reloadPercent = 1;
 		else {
@@ -315,5 +319,13 @@ public class ControlledCharacter extends AbstractCharacter {
 	
 	public WorldStatePacket getPerception() {
 		return perception;
+	}
+
+	public double getInstaF() {
+		return instaF;
+	}
+
+	public void setInstaF(double instaF) {
+		this.instaF = instaF;
 	}
 }

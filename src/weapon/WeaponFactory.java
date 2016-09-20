@@ -67,7 +67,7 @@ public class WeaponFactory {
 				public void fire(World w, ControlledCharacter c, double direction) {
 					double gunDirection = disperseDirection(direction);
 					for (int i=0;i<type.bulletsNo;i++) {
-						double bulletDirection = i*type.gunDispersion/type.bulletsNo-type.gunDispersion/2; 
+						double bulletDirection = i*type.gunDispersion/type.bulletsNo-type.gunDispersion/2;
 						fireOneBullet(w,c,gunDirection+bulletDirection);
 					}
 				}

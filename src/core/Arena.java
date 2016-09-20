@@ -189,7 +189,7 @@ public class Arena {
 	 * @return the tile located at x, y.
 	 */
 	public Tile getTileAt(double x, double y) {
-		return get((int)(x/Tile.tileSize+0.5),(int)(y/Tile.tileSize+0.5));
+		return get((int)(x/Tile.tileSize),(int)(y/Tile.tileSize));
 	}
 	
 	/**

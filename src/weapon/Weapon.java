@@ -56,8 +56,12 @@ public abstract class Weapon {
 		return gunDirection + type.gunDispersion*Utils.random().nextGaussian()/2;
 	}
 	
+	public static double randomizeStat(double stat, double limit) {
+		return stat*(1+limit*Utils.random().nextGaussian()/2);
+	}
+	
 	protected void fireOneBullet (World w, ControlledCharacter c, double direction) {
-		w.addProjectile(new Bullet(c, type.damage, direction, type.projectileSpeed, type.size));
+		w.addProjectile(new Bullet(c, randomizeStat(type.damage,0.1), direction, randomizeStat(type.projectileSpeed,0.1), type.size));
 	}
 
 	public boolean isReady() {

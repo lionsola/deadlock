@@ -100,7 +100,7 @@ public class LineOfSight {
 		return area;
 	}
 	
-	private List<Point2D> getLOSPoints(final double px, final double py,
+	public List<Point2D> getLOSPoints(final double px, final double py,
 			double viewRange, double viewAngle, double dir, final Arena a) {
 		double ts = Tile.tileSize;
 		int range = (int)(viewRange / ts + 0.5);

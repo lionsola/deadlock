@@ -12,7 +12,8 @@ public class ProjectileData implements Serializable {
 	private static final long serialVersionUID = 4031643912795589086L;
 	public float x;
 	public float y;
+	
 	public float direction;
 	public float speed;
-	
+	public float size;
 }

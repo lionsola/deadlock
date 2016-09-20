@@ -48,7 +48,6 @@ import network.GameDataPackets.WorldStatePacket;
 import network.GameEvent;
 import network.GameEvent.*;
 import network.PartialCharacterData;
-import network.PowerUpData;
 import network.ProjectileData;
 import sound.AudioManager;
 import character.CharacterFactory;
@@ -88,6 +87,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private LineOfSight lineOfSight = new LineOfSight();
 	private boolean playing = true;
 	private double zoomLevel = 0;
+	
+	private double FPS = 0;
 
 	/**
 	 * Creates a new gamescreen where the match will take place
@@ -156,7 +157,6 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		double lag = 0.0;
 		long totalTime = 0;
 		int frameCount = 0;
-		double averageFPS;
 		final int MAX_FRAME_COUNT = 50;
 
 		while (playing) {
@@ -184,10 +184,11 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 
 			frameCount++;
 			if (frameCount == MAX_FRAME_COUNT) {
-				averageFPS = (1000.0 * frameCount) / totalTime;
+				FPS = (1000.0 * frameCount) / totalTime;
 				frameCount = 0;
 				totalTime = 0;
 			}
+			///FPS = averageFPS;
 		}
 	}
 
@@ -298,8 +299,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private void updateCursor() {
 		Point cursorOnScreen = MouseInfo.getPointerInfo().getLocation();
 		Point gameOnScreen = getLocationOnScreen();
-		input.cx = (float)Renderer.toMeter(cursorOnScreen.x - gameOnScreen.x + camera.getTopLeftX(this));
-		input.cy = (float)Renderer.toMeter(cursorOnScreen.y - gameOnScreen.y + camera.getTopLeftY(this));
+		input.cx = (float)Renderer.toMeter(cursorOnScreen.x - gameOnScreen.x + camera.getTopLeftXPixel(this));
+		input.cy = (float)Renderer.toMeter(cursorOnScreen.y - gameOnScreen.y + camera.getTopLeftYPixel(this));
 	}
 
 	/**
@@ -312,7 +313,6 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			input.time = System.currentTimeMillis();
 			out.writeObject(input);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			System.out.println("Exception when trying to send input to network");
 			e.printStackTrace();
 		}
@@ -349,8 +349,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 
 		// render HUD
 		// render world
-		int transX = camera.getTopLeftX(this);
-		int transY = camera.getTopLeftY(this);
+		int transX = camera.getTopLeftXPixel(this);
+		int transY = camera.getTopLeftYPixel(this);
 		g.translate(-transX, -transY);
 
 		Graphics2D g2d = (Graphics2D) g;
@@ -362,13 +362,14 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			Shape los = lineOfSight.generateLoS(mainCharacter, arena);
 			
 			Renderer.renderDark(g2d,arena,camera.getDrawArea(this));
+			Renderer.renderLOS(g2d, los);
 			// Renderer.renderArenaBackground(g2d, camera.getDrawArea(this));
 			globalAnimations.render(g2d);
 
 			// render the light part
 			g2d.clip(los);
 
-			Renderer.render(g2d, arena,getCharacterVisionBox(mainCharacter.x, mainCharacter.y, (int)(mainCharacter.viewRange+0.5)));
+			//Renderer.render(g2d, arena,getCharacterVisionBox(mainCharacter.x, mainCharacter.y, (int)(mainCharacter.viewRange+0.5)));
 
 			ClientPlayer localPlayer = Utils.findPlayer(players, id);
 
@@ -380,14 +381,9 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			}
 
 			for (ProjectileData data : wsp.projectiles) {
-				Renderer.renderProjectile(g2d, data.x, data.y, data.speed, data.direction);
+				Renderer.renderProjectile(g2d,data);
 			}
 
-			/*
-			for (PartialCharacterData data : wsp.hostages) {
-				Renderer.renderCharacter(g2d, data.x, data.y, data.direction, data.radius, 0, true);
-			}
-			*/
 			visualAnimations.render(g2d);
 			// g2d.drawImage(light,mainCharacter.x-mainCharacter.viewRange,mainCharacter.y-mainCharacter.viewRange,mainCharacter.viewRange*2,mainCharacter.viewRange*2,
 			// null);
@@ -397,6 +393,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		}
 		Renderer.renderCrosshair(g2d,input.cx,input.cy,mainCharacter.crosshairSize);
 		g.translate(transX, transY);
+		g2d.drawString("FPS: "+FPS, 10, 10);
 	}
 
 	private Rectangle2D getCharacterVisionBox(double x, double y, double viewRange) {
@@ -586,12 +583,16 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+			} else if (event instanceof GrenadeExplodeEvent) {
+				GrenadeExplodeEvent e = (GrenadeExplodeEvent) event;
+				//System.out.println("A footstep at " + e.x + "," + e.y);
+				globalAnimations.addNoiseAnimation(e.x, e.y, 100);
 			} else if (event instanceof EnemyInfoEvent) {
 				
 			}
 		}
 	};
-	public static final double DEFAULT_PPM = 1;
+	public static final double DEFAULT_PPM = 12;
 	public static double ppm = GameScreen.DEFAULT_PPM;
 
 	@Override

@@ -21,21 +21,20 @@ import network.ProjectileData;
 import sound.AudioManager;
 import character.AbstractCharacter;
 import character.ControlledCharacter;
-import character.Hostage;
 
 /**
  * The physical world inside a match, which handles everything including characters, projectiles and
  * collision.
  * 
  * @author Anh Pham
- * @author Madyan Al-Jazaeri
  */
 public class World {
 	
 	Arena arena;
-	List<ControlledCharacter> characters;
-	List<Hostage> hostages;
-	List<Projectile> projectiles;
+	List<ControlledCharacter> characters = new ArrayList<ControlledCharacter>();;
+	
+	List<Projectile> projectiles = new LinkedList<Projectile>();
+	List<Projectile> newProjectiles = new LinkedList<Projectile>();
 	private GameEventListener listener;
 
 	// List<Effect> effects;
@@ -50,9 +49,7 @@ public class World {
 	public World(Arena arena, GameEventListener listener) {
 		this.arena = arena;
 		this.listener = listener;
-		characters = new ArrayList<ControlledCharacter>();
-		projectiles = new LinkedList<Projectile>();
-		hostages = new LinkedList<Hostage>();
+		
 		// Hostage h = new Hostage(0);
 		// Point spawn = randomizeSpawnPoint(1);
 		// h.setX(spawn.x * Tile.tileSize);
@@ -68,20 +65,12 @@ public class World {
 	 */
 	public void addPlayer(ControlledCharacter p) {
 		Point spawn = randomizeSpawnPoint(p.team);
-		p.setX(spawn.x * Tile.tileSize);
-		p.setY(spawn.y * Tile.tileSize);
+		p.setX((spawn.x+0.5) * Tile.tileSize);
+		p.setY((spawn.y+0.5) * Tile.tileSize);
 		characters.add(p);
 	}
 
-	/**
-	 * Get the game event listener, for classes contained in the world to submit game events
-	 * themselves.
-	 * 
-	 * @return The even listener associated with this world.
-	 */
-	public GameEventListener getEventListener() {
-		return getListener();
-	}
+
 
 	/**
 	 * Randomize the spawn points of a given team
@@ -102,7 +91,7 @@ public class World {
 	 *            the projectile to be added
 	 */
 	public void addProjectile(Projectile p) {
-		projectiles.add(p);
+		newProjectiles.add(p);
 	}
 
 	/**
@@ -113,10 +102,6 @@ public class World {
 		// update characters
 		for (ControlledCharacter p : characters) {
 			p.update(this);
-		}
-
-		for (Hostage h : hostages) {
-			h.update(this);
 		}
 
 		// update projectiles
@@ -130,6 +115,8 @@ public class World {
 			}
 		}
 		projectiles.removeAll(outOfRange);
+		projectiles.addAll(newProjectiles);
+		newProjectiles.clear();
 	}
 
 	public void onPlayerDeath(ControlledCharacter c) {
@@ -184,12 +171,7 @@ public class World {
 		
 		wsp.projectiles = new LinkedList<ProjectileData>();
 		for (Projectile projectile : projectiles) {
-			ProjectileData data = new ProjectileData();
-			data.x = (float) projectile.getX();
-			data.y = (float) projectile.getY();
-			data.speed = (float) projectile.getSpeed();
-			data.direction = (float) projectile.getDirection();
-			wsp.projectiles.add(data);
+			wsp.projectiles.add(projectile.getData());
 		}
 
 		return wsp;
@@ -316,7 +298,13 @@ public class World {
 		return list;
 	}
 
-	public GameEventListener getListener() {
+	/**
+	 * Get the game event listener, for classes contained in the world to submit game events
+	 * themselves.
+	 * 
+	 * @return The even listener associated with this world.
+	 */
+	public GameEventListener getEventListener() {
 		return listener;
 	}
 	

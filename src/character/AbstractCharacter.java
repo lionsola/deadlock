@@ -9,6 +9,7 @@ import core.Arena;
 import core.LineOfSight;
 import core.Tile;
 import core.World;
+import game.Game;
 import status.StatusEffect;
 
 /**
@@ -18,10 +19,10 @@ import status.StatusEffect;
  * @author Anh D Pham
  */
 public class AbstractCharacter {
-	public static final double BASE_SPEED	= 0.9;
+	public static final double BASE_SPEED	= 0.0035;
 	public static final double BASE_HP		= 100;
-	public static final double BASE_RADIUS	= 9;
-	public static final double BASE_FOVRANGE= 360;
+	public static final double BASE_RADIUS	= 0.9;
+	public static final double BASE_FOVRANGE= 20;
 	public static final double BASE_FOVANGLE= Math.toRadians(90);
 	public static final double BASE_NOISE = 30;
 	
@@ -105,8 +106,8 @@ public class AbstractCharacter {
 			return;
 		Arena arena = world.getArena();
 
-		double newX = x + dx;
-		double newY = y + dy;
+		double newX = x + dx*Game.MS_PER_UPDATE;
+		double newY = y + dy*Game.MS_PER_UPDATE;
 		// boundBox.setLocation((int)(newX-radius),(int)(newY-radius));
 		// check each corner of box if walkable
 		

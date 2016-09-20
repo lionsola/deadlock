@@ -124,7 +124,7 @@ public class ParticleAnimation extends Animation {
 	public void render(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setColor(color);
-		g2d.fillRect((int) (loc.x - (size.x / 2)), (int) (loc.y - (size.y / 2)), (int) size.x, (int) size.y);
+		Renderer.fillCircle(g2d,loc.x,loc.y,size.x);
 	}
 
 	/**

@@ -1,7 +1,7 @@
 package gui;
 
 import java.awt.Component;
-import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 
 import network.FullCharacterData;
 import network.GameDataPackets.InputPacket;
@@ -85,7 +85,7 @@ public class Camera {
 	 *            The parent
 	 * @return Returns the top left X coordinate of the camera
 	 */
-	public int getTopLeftX(Component parent) {
+	public int getTopLeftXPixel(Component parent) {
 		return x - parent.getWidth() / 2;
 	}
 
@@ -96,10 +96,32 @@ public class Camera {
 	 *            The parent
 	 * @return Returns the top left X coordinate of the camera
 	 */
-	public int getTopLeftY(Component parent) {
+	public int getTopLeftYPixel(Component parent) {
 		return y - parent.getHeight() / 2;
 	}
 
+	/**
+	 * Get the top left X coordinate of the camera
+	 * 
+	 * @param parent
+	 *            The parent
+	 * @return Returns the top left X coordinate of the camera
+	 */
+	public double getTopLeftXMeter(Component parent) {
+		return Renderer.toMeter(getTopLeftXPixel(parent));
+	}
+
+	/**
+	 * Get the top left X coordinate of the camera
+	 * 
+	 * @param parent
+	 *            The parent
+	 * @return Returns the top left X coordinate of the camera
+	 */
+	public double getTopLeftYMeter(Component parent) {
+		return Renderer.toMeter(getTopLeftYPixel(parent));
+	}
+	
 	/**
 <<<<<<< .mine
 	 * Get the rendering "window" of the game world
@@ -113,8 +135,9 @@ public class Camera {
 	 * @return Returns a rectangle of the draw area of the camera
 >>>>>>> .r128
 	 */
-	public Rectangle getDrawArea(Component parent) {
-		return new Rectangle(getTopLeftX(parent), getTopLeftY(parent), parent.getWidth(), parent.getHeight());
+	public Rectangle2D getDrawArea(Component parent) {
+		return new Rectangle2D.Double(getTopLeftXMeter(parent), getTopLeftYMeter(parent),
+				Renderer.toMeter(parent.getWidth()), Renderer.toMeter(parent.getHeight()));
 	}
 
 }

@@ -24,7 +24,7 @@ public class Mark extends Passive {
 	protected void onUpdate(World w) {
 		if (lastBroadcast<=0) {
 			for (PartialCharacterData c:self().getPerception().characters) {
-				w.getListener().onEventReceived(new EnemyInfoEvent(c.x,c.y,c.id));
+				w.getEventListener().onEventReceived(new EnemyInfoEvent(c.x,c.y,c.id));
 			}
 			lastBroadcast = MARK_COOLDOWN;
 		}

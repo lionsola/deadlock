@@ -5,6 +5,7 @@ import java.util.List;
 
 import character.ControlledCharacter;
 import game.Game;
+import network.ProjectileData;
 
 /**
  * Used to represent a projectile.
@@ -13,7 +14,7 @@ import game.Game;
  * @author Connor Cartwright
  */
 public abstract class Projectile {
-	private static final double RESIST_CONSTANT = 0.0005*Game.MS_PER_UPDATE; 
+	
 	
 	transient final public int id;
 
@@ -49,11 +50,39 @@ public abstract class Projectile {
 		
 		this.direction = direction;
 		this.speed = speed;
+		computeDxDy();
+		this.speed += (source.getDx()*dx + source.getDy()*dy)/speed;
+		computeDxDy();
 		this.size = size;
 	}
 
-	
+	/**
+	 * Create a projectile to be use in the world
+	 * 
+	 * @param source
+	 *            the source, ie the player, of which the projectile being fired from
+	 * @param direction
+	 *            the direction of the projectile
+	 * @param speed
+	 *            the speed of the projectile
+	 * @param size
+	 *            radius of the projectile
+	 */
+	public Projectile(Projectile source, double direction, double speed, double size) {
+		id = source.id;
+		x = source.getX();
+		y = source.getY();
 
+		
+		this.direction = direction;
+		this.speed = speed;
+		computeDxDy();
+		dx += source.getDx();
+		dy += source.getDy();
+		computeSpeedDir();
+		this.size = size;
+	}
+	
 	/**
 	 * Update the projectile by checking if it is out of range every frame
 	 */
@@ -62,9 +91,7 @@ public abstract class Projectile {
 			//consumeProjectile();
 			return;
 		}
-		dx = Math.cos(direction) * speed;
-		dy = -Math.sin(direction) * speed;
-		double newX = getX() + dx, newY = getY() + dy;
+		double newX = getX() + dx*Game.MS_PER_UPDATE, newY = getY() + dy*Game.MS_PER_UPDATE;
 		List<Point2D> samples = Geometry.getLineSamples(getX(), getY(), newX, newY);
 
 		for (Point2D pt : samples) {
@@ -92,10 +119,19 @@ public abstract class Projectile {
 		
 		
 		if (!consumed) {
-			x += dx;
-			y += dy;
+			x += getDx()*Game.MS_PER_UPDATE;
+			y += getDy()*Game.MS_PER_UPDATE;
 		}
-		speed -= RESIST_CONSTANT*size*speed;
+	}
+	
+	public ProjectileData getData() {
+		ProjectileData data = new ProjectileData();
+		data.x = (float) getX();
+		data.y = (float) getY();
+		data.speed = (float) getSpeed();
+		data.direction = (float) getDirection();
+		data.size = (float) getSize();
+		return data;
 	}
 	
 	protected abstract void onHitWall(World w, double x, double y);
@@ -129,17 +165,34 @@ public abstract class Projectile {
 	}
 
 	public double getSpeed() {
-		// TODO Auto-generated method stub
 		return speed;
 	}
 
-
-	protected void setDirection(double d) {
-		this.direction = d;
+	public double getDirection() {
+		return direction;
 	}
 
-	public double getDirection() {
-		// TODO Auto-generated method stub
-		return direction;
+	public double getSize() {
+		return size;
+	}
+	
+	protected void setDirection(double d) {
+		this.direction = d;
+		computeDxDy();
+	}
+	
+	protected void setSpeed(double s) {
+		speed = Math.max(0, s);
+		computeDxDy();
+	}
+	
+	private void computeDxDy() {
+		dx = Math.cos(direction) * speed;
+		dy = -Math.sin(direction) * speed;
+	}
+	
+	private void computeSpeedDir() {
+		speed = Math.sqrt(dx*dx + dy*dy);
+		direction = Math.atan2(-dy, dx);
 	}
 }

@@ -25,7 +25,7 @@ public abstract class GameEvent implements Serializable {
 			this.killedID = killedID;
 		}
 	}
-
+	
 	public static class ScoreChangedEvent extends GameEvent {
 		private static final long serialVersionUID = -6702972540422715379L;
 		public final int team1Score;
@@ -117,4 +117,16 @@ public abstract class GameEvent implements Serializable {
 		private static final long serialVersionUID = 4030097780765059510L;
 	}
 	
+	public static class GrenadeExplodeEvent extends GameEvent {
+		private static final long serialVersionUID = -8306631941667810011L;
+		public final float x;
+		public final float y;
+		public final byte type;
+		
+		public GrenadeExplodeEvent(double x, double y, int type) {
+			this.x = (float)x;
+			this.y = (float)y;
+			this.type = (byte) type;
+		}
+	}
 }

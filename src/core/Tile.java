@@ -14,7 +14,7 @@ import java.awt.image.BufferedImage;
  */
 public class Tile {
 	
-	public static double tileSize = 24; // default
+	public static final double tileSize = 2; // default
 
 	final boolean walkable;
 	final boolean transparent;

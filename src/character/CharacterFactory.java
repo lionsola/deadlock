@@ -6,7 +6,9 @@ import java.io.FileInputStream;
 import javax.imageio.ImageIO;
 
 import ability.HearingAmplifier;
+import ability.ThrowGrenadeAbility;
 import ability.UseBinocular;
+import passive.Assault;
 import passive.Backstab;
 import passive.Mark;
 import passive.Overwatch;
@@ -111,6 +113,12 @@ public class CharacterFactory {
 				agent.setAbilty(new HearingAmplifier(agent));
 				agent.setPassive(new Backstab(agent));
 				return agent;
+			case 4:
+				ControlledCharacter gren =  new ControlledCharacter(id, team, ClassStats.classStats.get(type),
+						WeaponFactory.createGun(0),null);
+				gren.setAbilty(new ThrowGrenadeAbility(gren));
+				gren.setPassive(new Assault(gren));
+				return gren;
 			default:
 				System.out.println("Error: Wrong type id");
 				System.exit(-1);

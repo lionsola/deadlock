@@ -63,7 +63,7 @@ public class ExpandingCircleAnimation extends Animation {
 		this.maxRadius = finalRadius;
 		this.x = x;
 		this.y = y;
-		this.startWidth = Math.max(5,0.2f*maxRadius);
+		this.startWidth = Math.max(0.4f,0.2f*maxRadius);
 		float startGrowth = maxRadius / (life * 3 / 4) * Game.MS_PER_UPDATE;
 		this.life = life;
 		this.growth = startGrowth;
@@ -77,7 +77,7 @@ public class ExpandingCircleAnimation extends Animation {
 		if (delay <= 0) {
 			radius = Math.min(maxRadius, radius + growth);
 			if (radius >= maxRadius * 0.8)
-				growth = Math.max(0.25f, growth * 0.95f);
+				growth = Math.max(0.02f, growth * 0.95f);
 
 			width = (maxRadius-radius)/(maxRadius-startWidth)*startWidth;
 		}
@@ -88,7 +88,7 @@ public class ExpandingCircleAnimation extends Animation {
 	public void render(Graphics g) {
 		g.setColor(color);
 		Graphics2D g2d = (Graphics2D)g;
-		g2d.setStroke(new BasicStroke(Math.max(0.1f,Math.min(radius, width))));
+		g2d.setStroke(new BasicStroke(Math.max(0.1f,Renderer.toPixel(Math.min(radius, width)))));
 		if (radius > 0)
 			Renderer.drawCircle(g2d,x, y, radius);
 	}

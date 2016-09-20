@@ -35,11 +35,8 @@ public class AnimationSystem {
 	 *            The loudness of the noise.
 	 */
 	public void addNoiseAnimation(double x, double y, float noise) {
-		if (noise >= 4) {
-			long duration = 1000 + (int) noise * 5;
-			animations.add(new ExpandingCircleAnimation(x, y, noise / 2, duration, 0));
-			//animations.add(new ExpandingCircleAnimation(x, y, noise / 2, duration - 100, 200));
-		}
+		long duration = 1000 + (int) noise * 5;
+		animations.add(new ExpandingCircleAnimation(x, y, noise / 24, duration, 0));
 	}
 
 	/**
@@ -54,7 +51,7 @@ public class AnimationSystem {
 	public void addShotAnimation(double x, double y, double direction) {
 		for (int i = 0; i < 6; i++) {
 			double randomDirection = direction + 2 * core.Utils.random().nextGaussian() / 5;
-			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 8, 7, 300, Color.WHITE);
+			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.1, 0.5, 300, Color.WHITE);
 			p.setGrowth(-0.4, -0.4);
 			p.setSizeDefault(true);
 			animations.add(p);
@@ -72,7 +69,7 @@ public class AnimationSystem {
 	public void addBloodAnimation(double x, double y) {
 		for (int i = 0; i < 5; i++) {
 			double randomDirection = core.Utils.random().nextDouble() * Math.PI * 2;
-			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 1.1, 12, 500, Color.RED);
+			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.1, 1, 500, Color.RED);
 			p.setGrowth(-0.5, -0.5);
 			p.setSizeDefault(true);
 			animations.add(p);
@@ -91,7 +88,7 @@ public class AnimationSystem {
 		int n = 8;
 		for (int i = 0; i < n; i++) {
 			double randomDirection = i * Math.PI * 2 / n + core.Utils.random().nextGaussian() / 5;
-			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 2, 7, 500, Color.WHITE);
+			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.1,0.5, 500, Color.WHITE);
 			p.setGrowth(-0.35, -0.35);
 			p.setSizeDefault(true);
 			animations.add(p);

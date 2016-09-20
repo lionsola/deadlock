@@ -5,9 +5,9 @@ import core.World;
 import game.Game;
 
 public class UseBinocular extends ToggleAbility {
-	public static final double BINO_RANGE = 1.5;
-	public static final double BINO_ANGLE = 0.5;
-	public static final double BINO_SPEED = 0.5;
+	public static final double BINO_RANGE = 0.5;
+	public static final double BINO_ANGLE = -0.5;
+	public static final double BINO_SPEED = -0.5;
 	public static final double BINO_TRANS = 500;
 	public static final long COOLDOWN = 4000;
 	
@@ -18,9 +18,9 @@ public class UseBinocular extends ToggleAbility {
 	
 	public UseBinocular(ControlledCharacter self) {
 		super(self,COOLDOWN);
-		rangeInc = (BINO_RANGE-1)*Game.MS_PER_UPDATE/BINO_TRANS;
-		angleInc = (BINO_ANGLE-1)*Game.MS_PER_UPDATE/BINO_TRANS;
-		speedInc = self.cs.getSpeedF()*(BINO_SPEED-1)*Game.MS_PER_UPDATE/BINO_TRANS;
+		rangeInc = (BINO_RANGE)*Game.MS_PER_UPDATE/BINO_TRANS;
+		angleInc = (BINO_ANGLE)*Game.MS_PER_UPDATE/BINO_TRANS;
+		speedInc = self.cs.getSpeedF()*(BINO_SPEED)*Game.MS_PER_UPDATE/BINO_TRANS;
 	}
 
 	@Override
