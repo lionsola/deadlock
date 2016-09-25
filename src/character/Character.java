@@ -7,6 +7,7 @@ import java.util.List;
 import network.GameEvent.FootStepEvent;
 import core.Arena;
 import core.LineOfSight;
+import core.Projectile;
 import core.Tile;
 import core.World;
 import game.Game;
@@ -18,10 +19,10 @@ import status.StatusEffect;
  * @author Connor Cartwright
  * @author Anh D Pham
  */
-public class AbstractCharacter {
-	public static final double BASE_SPEED	= 0.0035;
+public class Character {
+	public static final double BASE_SPEED	= 0.0025;
 	public static final double BASE_HP		= 100;
-	public static final double BASE_RADIUS	= 0.9;
+	public static final double BASE_RADIUS	= 0.55;
 	public static final double BASE_FOVRANGE= 20;
 	public static final double BASE_FOVANGLE= Math.toRadians(90);
 	public static final double BASE_NOISE = 30;
@@ -38,7 +39,7 @@ public class AbstractCharacter {
 	private double speedF;
 	private double noiseF; // the level of noise that the character makes, standard = 1
 	private double sizeF;
-	private double hearF;
+	private double hearF; // the 
 	public final ClassStats cs;
 	
 	private double direction; // direction the character is facing in radiants
@@ -47,8 +48,9 @@ public class AbstractCharacter {
 	private final double maxHP;
 	private double healthPoints; // the number of health points the character class has
 	private LineOfSight los = new LineOfSight();
-
+	private Armor armor;
 	private List<StatusEffect> statusEffects = new LinkedList<StatusEffect>();
+	//private List<Shiel>
 	/**
 	 * Creates a new abstract character.
 	 * 
@@ -65,7 +67,7 @@ public class AbstractCharacter {
 	 * @param viewAngle
 	 *            the angle of the characters line of sight
 	 */
-	public AbstractCharacter(ClassStats cs) {
+	public Character(ClassStats cs) {
 		this.maxHP = cs.getMaxHP()*BASE_HP;
 		this.healthPoints = maxHP;
 		this.speedF = cs.getSpeedF();
@@ -77,10 +79,15 @@ public class AbstractCharacter {
 		this.cs = cs;
 	}
 
+	/*
+	 * Main update method called every frame. If overriding this, please
+	 * make sure to call all other update methods (collision, status effects, noise, position) 
+	 */
 	public void update(World world) {
+		updateCollision(world);
 		updateStatusEffects();
-		updateCoordinate(world);
 		updateNoise(world);
+		updatePosition();
 	}
 
 	protected void updateStatusEffects() {
@@ -101,7 +108,7 @@ public class AbstractCharacter {
 	 * @param world
 	 *            the world to update the coordinates in.
 	 */
-	protected void updateCoordinate(World world) {
+	protected void updateCollision(World world) {
 		if (dx == 0 && dy == 0)
 			return;
 		Arena arena = world.getArena();
@@ -124,9 +131,7 @@ public class AbstractCharacter {
 				}
 			}
 		}
-		if (!blocked) {
-			x = newX;
-		} else {
+		if (blocked) {
 			dx = 0;
 		}
 
@@ -145,13 +150,16 @@ public class AbstractCharacter {
 			}
 		}
 
-		if (!blocked) {
-			y = newY;
-		} else {
+		if (blocked) {
 			dy = 0;
 		}
 	}
 
+	protected void updatePosition() {
+		x += dx*Game.MS_PER_UPDATE;
+		y += dy*Game.MS_PER_UPDATE;
+	}
+	
 	/**
 	 * Updates the noise in the world based on the character.
 	 * 
@@ -182,7 +190,7 @@ public class AbstractCharacter {
 	 * @return the line of sight area.
 	 */
 	public Area getLoS(Arena a) {
-		return los.genLOSAreaMeter(getX(), getY(), getFovRange(), getFovAngle(), direction, a);
+		return los.genLOSAreaMeter(getX(), getY(), getFovRange(), getFovAngle(), getDirection(), a);
 	}
 
 	/**
@@ -204,26 +212,26 @@ public class AbstractCharacter {
 		direction = dir;
 	}
 
-	/**
-	 * Sets the view range of the character
-	 * 
-	 * @param viewRange
-	 *            the view range of the character
-	 */
-	public void setViewRangeF(double fovRangeF) {
-		this.fovRangeF = fovRangeF;
-		
+	public void addFovRangeMod(double fovRangeMod) {
+		this.fovRangeF += fovRangeMod; 
 	}
-
-	/**
-	 * Sets the view angle of the character
-	 * 
-	 * @param viewAngle
-	 *            the view angle of the character
-	 */
-	public void setViewAngleF(double fovAngleF) {
-		this.fovAngleF = fovAngleF;
+	
+	public void addFovAngleMod(double fovAngleMod) {
+		this.fovAngleF += fovAngleMod; 
 	}
+	
+	public void addSpeedMod(double speedMod) {
+		this.speedF += speedMod;
+	}
+	
+	public void addNoiseMod(double noiseMod) {
+		this.noiseF += noiseMod;
+	}
+	
+	public void addSizeMod(double sizeMod) {
+		this.sizeF += sizeMod;
+	}
+	
 	
 	/**
 	 * Gets the view range of the character
@@ -270,16 +278,6 @@ public class AbstractCharacter {
 		return BASE_SPEED*speedF;
 	}
 
-	/**
-	 * Sets the speed of the character
-	 * 
-	 * @param speed
-	 *            the speed of the character
-	 */
-	public void setSpeedF(double speedF) {
-		this.speedF = speedF;
-	}
-
 	public double getSpeedF() {
 		return speedF;
 	}
@@ -297,16 +295,8 @@ public class AbstractCharacter {
 		return sizeF;
 	}
 	
-	public void setSizeF(double sizeF) {
-		this.sizeF = sizeF;
-	}
-	
 	public double getNoiseF() {
 		return noiseF;
-	}
-	
-	public void setNoiseF(double noiseF) {
-		this.noiseF = noiseF;
 	}
 	
 
@@ -405,6 +395,19 @@ public class AbstractCharacter {
 		this.healthPoints = healthPoints;
 	}
 
+	protected Armor getArmor() {
+		return armor;
+	}
+	
+	public void setArmor (Armor a) {
+		armor = a;
+	}
+	
+	public void applyArmor(Projectile p, double oldX, double oldY) {
+		if (armor!=null)
+			armor.applyArmor(p,oldX,oldY);
+	}
+	
 	/**
 	 * Reset the HP of the character
 	 */
@@ -422,5 +425,17 @@ public class AbstractCharacter {
 	
 	public double getHearThres() {
 		return hearF*BASE_HEARING_THRES;
+	}
+	
+	public void addStatusEffect(StatusEffect effect) {
+		statusEffects.add(effect);
+	}
+	
+	public boolean isMoving() {
+		return getDx()!=0 || getDy()!=0;
+	}
+	
+	public double getMovingDirection() {
+		return Math.atan2(-dy, dx);
 	}
 }

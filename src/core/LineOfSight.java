@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import character.Character;
 import graphics.Renderer;
 import network.FullCharacterData;
 

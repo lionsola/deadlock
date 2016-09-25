@@ -23,9 +23,9 @@ public abstract class Passive {
 		onUpdate(w);
 	}
 	
-	protected abstract void onDeactivate(World w);
+	protected void onDeactivate(World w) {};
 
-	protected abstract void onActivate(World w);
+	protected void onActivate(World w) {};
 
 	protected ControlledCharacter self() {
 		return self;
@@ -34,7 +34,7 @@ public abstract class Passive {
 	protected abstract boolean trigger();
 	
 	
-	protected abstract void onUpdate(World w);
+	protected void onUpdate(World w) {};
 	
 	public boolean isActive () {
 		return isActive;

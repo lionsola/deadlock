@@ -37,13 +37,13 @@ public class HearingAmplifier extends ToggleAbility {
 	protected void onUpdate(World w, ControlledCharacter c) {
 		if (transElapsed<HEAR_TRANS) {
 			if (isActive()) {
-				self().setViewRangeF(self().getFovRangeF()+rangeInc);
+				self().addFovRangeMod(+rangeInc);
 				self().setHearF(self().getHearF()+thresInc);
-				self().setSpeedF(self().getSpeedF()+speedInc);
+				self().addSpeedMod(+speedInc);
 			} else {
-				self().setViewRangeF(self().getFovRangeF()-rangeInc);
+				self().addFovRangeMod(-rangeInc);
 				self().setHearF(self().getHearF()-thresInc);
-				self().setSpeedF(self().getSpeedF()-speedInc);
+				self().addSpeedMod(-speedInc);
 			}
 			transElapsed += Game.MS_PER_UPDATE;
 		}

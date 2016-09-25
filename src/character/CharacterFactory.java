@@ -6,12 +6,15 @@ import java.io.FileInputStream;
 import javax.imageio.ImageIO;
 
 import ability.HearingAmplifier;
-import ability.ThrowGrenadeAbility;
-import ability.UseBinocular;
+import ability.ChargedAbility;
+import ability.TimedGrenade;
+import ability.Optics;
+import core.World;
 import passive.Assault;
 import passive.Backstab;
 import passive.Mark;
 import passive.Overwatch;
+import passive.Shield;
 import weapon.WeaponFactory;
 
 /**
@@ -93,18 +96,23 @@ public class CharacterFactory {
 			case Spy.typeID:
 				return new Spy(id, team);
 				*/
-			
+			case 0:
+				ControlledCharacter shield =  new ControlledCharacter(id, team, ClassStats.classStats.get(type),
+						WeaponFactory.createGun(3),null);
+				shield.setAbilty(new ChargedAbility.ThrowFlashGrenade(shield));
+				shield.setPassive(new Shield(shield));
+				return shield;
 			
 			case 1:
 				ControlledCharacter scout =  new ControlledCharacter(id, team, ClassStats.classStats.get(type),
 						WeaponFactory.createGun(2),null);
-				scout.setAbilty(new UseBinocular(scout));
+				scout.setAbilty(new Optics(scout));
 				scout.setPassive(new Mark(scout));
 				return scout;
 			case 2:
 				ControlledCharacter sniper =  new ControlledCharacter(id, team, ClassStats.classStats.get(type),
 						WeaponFactory.createGun(1),null);
-				sniper.setAbilty(new UseBinocular(sniper));
+				sniper.setAbilty(new Optics(sniper));
 				sniper.setPassive(new Overwatch(sniper));
 				return sniper;
 			case 3:
@@ -116,7 +124,7 @@ public class CharacterFactory {
 			case 4:
 				ControlledCharacter gren =  new ControlledCharacter(id, team, ClassStats.classStats.get(type),
 						WeaponFactory.createGun(0),null);
-				gren.setAbilty(new ThrowGrenadeAbility(gren));
+				gren.setAbilty(new ChargedAbility.ThrowFragGrenade(gren));
 				gren.setPassive(new Assault(gren));
 				return gren;
 			default:

@@ -5,7 +5,6 @@ package graphics;
  * calculations involving them.
  * 
  * @author Anh Pham
- * @author Shobitha Shivakumar
  */
 
 public class Vector2D {

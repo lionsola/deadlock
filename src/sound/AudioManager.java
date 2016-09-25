@@ -17,11 +17,11 @@ public class AudioManager implements Runnable {
 	
 	// volume gain in decibel
 	public static final float GAIN_MINVOLUME = -30;
-	public static final float GAIN_RANGE = 20;
+	public static final float GAIN_RANGE = 30;
 
 	// artificial volume of noise in game
-	// noises will be from 130db (shotgun shot) to 0db (silence)
-	public static final float GAME_RANGE = 120;
+	// noises will be from 170db (flashbang grenade) to 0db (silence)
+	public static final float GAME_RANGE = 170;
 
 	// noise constants in game
 	public static final float BULLETHITNOISE = 30;

@@ -36,11 +36,12 @@ public class GameServer implements Runnable, GameEventListener {
 	private List<ServerPlayer> players;
 	private List<GameEvent> events;
 	private List<String> chatTexts = new LinkedList<String>();
-	// TODO get it from the host screen
+	
 	private int scoreThreshold = 30;
 	private int timeThreshold = 600000;
 	private int team1Score = 0;
 	private int team2Score = 0;
+	private int gameTimeCounter;
 
 	/**
 	 * Creates a new game server, which the host use to run the game
@@ -56,11 +57,22 @@ public class GameServer implements Runnable, GameEventListener {
 	 */
 	public GameServer(List<ServerPlayer> players, String arenaName) throws FileNotFoundException, IOException {
 		this.players = players;
-		Arena arena = new Arena(arenaName, false);
-		world = new World(arena, this);
+		
+		
 		events = new LinkedList<GameEvent>();
+		
+		setUp(players,arenaName);
+		new Thread(this).start();
+	}
+
+	private void setUp(List<ServerPlayer> players, String arenaName) throws FileNotFoundException, IOException{
 		WeaponFactory.initWeapons();
 		ClassStats.initClassStats();
+		
+		Arena arena = new Arena(arenaName, false);
+		
+		world = new World(arena, this);
+		
 		PathFinder pathFinder = new PathFinder(arena);
 		for (ServerPlayer p : players) {
 			if (p instanceof AIPlayer) {
@@ -70,9 +82,12 @@ public class GameServer implements Runnable, GameEventListener {
 			world.addPlayer(character);
 			new Thread(new InputReceiver(p, character)).start();
 		}
-		new Thread(this).start();
 	}
-
+	
+	private boolean checkEndGame() {
+		return gameTimeCounter > timeThreshold || team1Score >= scoreThreshold || team2Score >= scoreThreshold;
+	}
+	
 	@Override
 	public void run() {
 		int delayCount = 0;
@@ -89,10 +104,10 @@ public class GameServer implements Runnable, GameEventListener {
 				e.printStackTrace();
 			}
 		}
-		long gameTimeCounter = 0;
+		gameTimeCounter = 0;
 		while (playing) {
 			long last = System.currentTimeMillis();
-			if (gameTimeCounter > timeThreshold || team1Score >= scoreThreshold || team2Score >= scoreThreshold) {
+			if (checkEndGame()) {
 				events.add(new GameEndEvent());
 				// world.update();
 				sendState();

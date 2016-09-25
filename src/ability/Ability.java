@@ -2,25 +2,30 @@ package ability;
 
 import character.ControlledCharacter;
 import core.World;
+import game.Game;
 
 public abstract class Ability {
 	public final long cooldown;
-	private long lastActivate = 0;
+	private long cooldownTimer;
 	private ControlledCharacter self;
 	
 	public Ability (ControlledCharacter self, long cooldown) {
 		this.cooldown = cooldown;
 		this.self = self;
+		cooldownTimer = cooldown;
 	}
 	
-	public abstract void update(World w);
+	public void update(World w) {
+		if (cooldownTimer<cooldown)
+			cooldownTimer += Game.MS_PER_UPDATE;
+	}
 	
 	public void startCooldown() {
-		lastActivate = System.currentTimeMillis();
+		cooldownTimer = 0;
 	}
 	
 	public boolean isReady() {
-		return System.currentTimeMillis()-lastActivate>cooldown;
+		return cooldownTimer>=cooldown;
 	}
 	
 	protected ControlledCharacter self() {

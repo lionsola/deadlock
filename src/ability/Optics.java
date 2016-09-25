@@ -4,7 +4,7 @@ import character.ControlledCharacter;
 import core.World;
 import game.Game;
 
-public class UseBinocular extends ToggleAbility {
+public class Optics extends ToggleAbility {
 	public static final double BINO_RANGE = 0.5;
 	public static final double BINO_ANGLE = -0.5;
 	public static final double BINO_SPEED = -0.5;
@@ -16,7 +16,7 @@ public class UseBinocular extends ToggleAbility {
 	private final double angleInc;
 	private final double speedInc;
 	
-	public UseBinocular(ControlledCharacter self) {
+	public Optics(ControlledCharacter self) {
 		super(self,COOLDOWN);
 		rangeInc = (BINO_RANGE)*Game.MS_PER_UPDATE/BINO_TRANS;
 		angleInc = (BINO_ANGLE)*Game.MS_PER_UPDATE/BINO_TRANS;
@@ -37,13 +37,13 @@ public class UseBinocular extends ToggleAbility {
 	protected void onUpdate(World w, ControlledCharacter c) {
 		if (transElapsed<BINO_TRANS) {
 			if (isActive()) {
-				self().setViewRangeF(self().getFovRangeF()+rangeInc);
-				self().setViewAngleF(self().getFovAngleF()+angleInc);
-				self().setSpeedF(self().getSpeedF()+speedInc);
+				self().addFovRangeMod(+rangeInc);
+				self().addFovAngleMod(+angleInc);
+				self().addSpeedMod(+speedInc);
 			} else {
-				self().setViewRangeF(self().getFovRangeF()-rangeInc);
-				self().setViewAngleF(self().getFovAngleF()-angleInc);
-				self().setSpeedF(self().getSpeedF()-speedInc);
+				self().addFovRangeMod(-rangeInc);
+				self().addFovAngleMod(-angleInc);
+				self().addSpeedMod(-speedInc);
 			}
 			transElapsed += Game.MS_PER_UPDATE;
 		}

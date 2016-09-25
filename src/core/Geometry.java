@@ -1,6 +1,7 @@
 package core;
 
 import java.awt.Point;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
@@ -13,36 +14,41 @@ import java.util.List;
  *
  */
 public class Geometry {
-    private static final double LINE_SAMPLE_THRESHOLD = 0.3;
+    public static final double LINE_SAMPLE_THRESHOLD = 0.2;
     
-	public static Point2D intersection(Line2D l1, Line2D l2) {
-		Point2D p1 = l1.getP1();
-		Point2D p2 = l1.getP2();
-		Point2D p3 = l2.getP1();
-		Point2D p4 = l2.getP2();
+    public static Point2D intersection(Line2D l1, Line2D l2) {
+		return intersection(l1.getP1(),l1.getP2(),l2.getP1(),l2.getP2());
+    }
+    
+	public static Point2D intersection(Point2D a1, Point2D a2, Point2D b1, Point2D b2) {
 
 		// From http://paulbourke.net/geometry/lineline2d/
-		double d = (p4.getY() - p3.getY()) * (p2.getX() - p1.getX())
-				 - (p4.getX() - p3.getX()) * (p2.getY() - p1.getY());
+		double d = (b2.getY() - b1.getY()) * (a2.getX() - a1.getX())
+				 - (b2.getX() - b1.getX()) * (a2.getY() - a1.getY());
 		if (d == 0) {
 			return null;
 		}
 
-		double s = ((p4.getX() - p3.getX()) * (p1.getY() - p3.getY())
-				  - (p4.getY() - p3.getY()) * (p1.getX() - p3.getX())) / d;
+		double s = ((b2.getX() - b1.getX()) * (a1.getY() - b1.getY())
+				  - (b2.getY() - b1.getY()) * (a1.getX() - b1.getX())) / d;
 		if (s <= 0 || s > 1) {
 			return null;
 		}
 
-		Point2D p = new Point2D.Double(p1.getX() + s * (p2.getX() - p1.getX()),
-				p1.getY() + s * (p2.getY() - p1.getY()));
+		Point2D p = new Point2D.Double(a1.getX() + s * (a2.getX() - a1.getX()),
+				a1.getY() + s * (a2.getY() - a1.getY()));
 
-		if (l1.intersectsLine(l2)) {
+		if (new Line2D.Double(a1,a2).intersectsLine(new Line2D.Double(b1,b2))) {
 			return p;
 		} else {
 			return null;
 		}
 	}
+	/*
+	public static Point2D intersection(Line2D l, Arc2D a) {
+		
+	}
+	*/
 	
 	public static double wrapAngle(double angle) {
 		double pi2 = Math.PI*2;
@@ -64,12 +70,8 @@ public class Geometry {
 		
 	public static List<Point2D> getLineSamples(double x0, double y0, double x1, double y1, double threshold) {
 	    List<Point2D> result = new LinkedList<Point2D>();
-	    double smallestDistance = Point.distance(x0, y0, x1, y1);
-	    int fragments = 1;
-	    while (smallestDistance>threshold) {
-	        fragments*=2;
-	        smallestDistance/=2;
-	    }
+	    double distance = Point.distance(x0, y0, x1, y1);
+	    int fragments = 1+(int)(distance/threshold); 
 	    double dx = (x1-x0)/fragments;
 	    double dy = (y1-y0)/fragments;
 	    for (int f=0;f<=fragments;f++) {

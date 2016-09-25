@@ -61,7 +61,7 @@ public abstract class Weapon {
 	}
 	
 	protected void fireOneBullet (World w, ControlledCharacter c, double direction) {
-		w.addProjectile(new Bullet(c, randomizeStat(type.damage,0.1), direction, randomizeStat(type.projectileSpeed,0.1), type.size));
+		w.addProjectile(new Bullet(c, direction, randomizeStat(type.projectileSpeed,0.1), type.size));
 	}
 
 	public boolean isReady() {
@@ -79,8 +79,8 @@ public abstract class Weapon {
 	public double getInstability() {
 		return instability;
 	}
-
-	public void setInstability(double instability) {
-		this.instability = instability;
+	
+	public void addRecoilMod(double recoilMod) {
+		this.instability += recoilMod;
 	}
 }

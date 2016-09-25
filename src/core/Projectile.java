@@ -1,11 +1,10 @@
 package core;
 
 import java.awt.geom.Point2D;
-import java.util.List;
-
 import character.ControlledCharacter;
 import game.Game;
 import network.ProjectileData;
+import network.GameEvent.BulletHitWallEvent;
 
 /**
  * Used to represent a projectile.
@@ -24,11 +23,12 @@ public abstract class Projectile {
 	private double dx;
 	private double dy;
 	
+	private int lastHitId;
+	
 	private final double size;
 	private double direction;
 	
 	private double speed;
-	private boolean consumed = false;
 
 	/**
 	 * Create a projectile to be use in the world
@@ -46,7 +46,7 @@ public abstract class Projectile {
 		id = source.id;
 		x = source.getX();
 		y = source.getY();
-
+		lastHitId = source.id;
 		
 		this.direction = direction;
 		this.speed = speed;
@@ -73,7 +73,7 @@ public abstract class Projectile {
 		x = source.getX();
 		y = source.getY();
 
-		
+		lastHitId = Integer.MAX_VALUE;
 		this.direction = direction;
 		this.speed = speed;
 		computeDxDy();
@@ -87,40 +87,48 @@ public abstract class Projectile {
 	 * Update the projectile by checking if it is out of range every frame
 	 */
 	public void update(World w) {
-		if (speed<=0) {
+		if (isConsumed()) {
 			//consumeProjectile();
 			return;
 		}
-		double newX = getX() + dx*Game.MS_PER_UPDATE, newY = getY() + dy*Game.MS_PER_UPDATE;
-		List<Point2D> samples = Geometry.getLineSamples(getX(), getY(), newX, newY);
-
-		for (Point2D pt : samples) {
+		
+		Tile nohitTile = null;
+		
+		int checks = (int)Math.ceil(speed*Game.MS_PER_UPDATE/Geometry.LINE_SAMPLE_THRESHOLD);
+		
+		for (int i=0;i<checks && !isConsumed();i++) {
+			double oldX = x;
+			double oldY = y;
+			x = x + dx*Game.MS_PER_UPDATE/checks;
+			y = y + dy*Game.MS_PER_UPDATE/checks;
+			
 			// check projectile vs character
-			for (ControlledCharacter ch : w.characters) {
+			for (ControlledCharacter ch : w.getCharacters()) {
 				// HIT
-				if (ch.id != id && pt.distance(ch.getX(), ch.getY()) < ch.getRadius()) {
-					onHitCharacter(w,ch,pt.getX(),pt.getY());
+				if (ch.id!=lastHitId && Point2D.distance(x,y, ch.getX(),ch.getY()) < ch.getRadius()) {
+					lastHitId = ch.id;
+					ch.applyArmor(this,oldX,oldY);
+					if (isConsumed())
+						break;
+					ch.applyArmor(this,oldX,oldY);
+					onHitCharacter(w,ch,x,y);
+					break;
 				}
 			}
 
-			// if alr hit character, done
-			if (consumed)
-				break;
-
 			// check projectile vs wall collision
-			int tileX = (int) (pt.getX() / Tile.tileSize);
-			int tileY = (int) (pt.getY() / Tile.tileSize);
-
-			if (!w.arena.get(tileX, tileY).isWalkable()) {
-				onHitWall(w,pt.getX(),pt.getY());
-				break;
+			int tileX = (int) (x / Tile.tileSize);
+			int tileY = (int) (y / Tile.tileSize);
+			Tile t = w.getArena().get(tileX, tileY);
+			if (!t.isWalkable()) {
+				onHitWall(w,getX(),getY());
+				if (t!=nohitTile){
+					w.getEventListener().onEventReceived(new BulletHitWallEvent(x,y));
+					nohitTile = t;
+				}
+			} else {
+				nohitTile = null;
 			}
-		}
-		
-		
-		if (!consumed) {
-			x += getDx()*Game.MS_PER_UPDATE;
-			y += getDy()*Game.MS_PER_UPDATE;
 		}
 	}
 	
@@ -140,13 +148,7 @@ public abstract class Projectile {
 
 	protected abstract void onHitCharacter(World w, ControlledCharacter ch, double x, double y);
 	
-	protected void consumeProjectile() {
-		consumed = true;
-	}
-	
-	public boolean isConsumed() {
-		return consumed;
-	}
+	public abstract boolean isConsumed();
 
 	public double getX() {
 		return x;
@@ -181,7 +183,7 @@ public abstract class Projectile {
 		computeDxDy();
 	}
 	
-	protected void setSpeed(double s) {
+	public void setSpeed(double s) {
 		speed = Math.max(0, s);
 		computeDxDy();
 	}

@@ -2,6 +2,7 @@ package core;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.Random;
 /**
  * Utility methods used in the core package.
@@ -36,4 +37,7 @@ public class Utils {
 		return (float) (originalSound + 30 * Math.log10(Tile.tileSize / distance));
 	}
 
+	public static Rectangle2D getBoundingBox(double cx, double cy, double r) {
+		return new Rectangle2D.Double(cx-r,cy-r,r*2,r*2);
+	}
 }

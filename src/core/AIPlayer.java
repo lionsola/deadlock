@@ -83,6 +83,8 @@ public class AIPlayer extends ServerPlayer {
 			}
 		}
 
+		return new InputPacket();
+		/*
 		// delay output a bit to make them less scary
 		WorldStatePacket wsp = this.wsp;
 		try {
@@ -183,8 +185,9 @@ public class AIPlayer extends ServerPlayer {
 				}
 			}
 		}
-		wsp = null;
+		//this.wsp = null;
 		return input;
+		*/
 	}
 
 	/**

@@ -1,6 +1,7 @@
 package character;
 
 import network.FullCharacterData;
+import network.PartialCharacterData;
 import network.GameDataPackets.InputPacket;
 import network.GameDataPackets.WorldStatePacket;
 import passive.Passive;
@@ -26,7 +27,8 @@ import game.Game;
  * @author Connor Cartwright
  *
  */
-public class ControlledCharacter extends AbstractCharacter {
+public class ControlledCharacter extends Character {
+	public enum MovementMode {WALK,SNEAK,STOP}
 	
 	private static final double MOVEMENT_DISPERSION_FACTOR = 0.1;
 	private static final double ROTATION_DISPERSION_FACTOR = 0.3;
@@ -46,6 +48,7 @@ public class ControlledCharacter extends AbstractCharacter {
 	private float cx = 0; // x position of the crosshairs
 	private float cy = 0; // y position of the crosshairs
 	private double charDispersion = 0;
+	private MovementMode mode = MovementMode.STOP;
 
 	// The initial fields below is the result of providing parameters by subclassing
 	// (compared to using Type Object pattern) - there's no easy way to access,
@@ -142,11 +145,14 @@ public class ControlledCharacter extends AbstractCharacter {
 	 */
 	@Override
 	public void update(World world) {
-		// update position
-		// apply collision detection on movement
+		// translate directional input into movement vector
 		processInput();
-		super.update(world);
-		updateCrosshair();
+		
+		// apply collision detection to correct the movement vector
+		super.updateCollision(world);
+		
+		updateMode();
+		
 		
 		if (passive!=null)
 			passive.update(world);
@@ -156,8 +162,13 @@ public class ControlledCharacter extends AbstractCharacter {
 		
 		if (primary!=null)
 			primary.update(world, this);
+		
+		super.updateStatusEffects();
+		super.updatePosition();
+		super.updateNoise(world);
+		updateCrosshair();
 	}
-
+	
 	private void updateCrosshair() {
 		addDispersion(instaF*MOVEMENT_DISPERSION_FACTOR*getCurrentSpeed()*Game.MS_PER_UPDATE);
 		addDispersion(-DISPERSION_DEC*(0.5+charDispersion));
@@ -176,13 +187,7 @@ public class ControlledCharacter extends AbstractCharacter {
 	 *            cursor y position
 	 */
 	public void updateCursor(float cx2, float cy2) {
-		this.cx = cx2;
-		this.cy = cy2;
-		// update direction
-		double newDirection = Math.atan2(getY() - cy2, cx2 - getX());
-		double dDirection = Math.abs(Geometry.wrapAngle(newDirection - getDirection()));
-		addDispersion(instaF*ROTATION_DISPERSION_FACTOR*dDirection);
-		setDirection(newDirection);
+		
 	}
 
 	public double getCrosshairSize() {
@@ -220,50 +225,60 @@ public class ControlledCharacter extends AbstractCharacter {
 	 *            the input to be processed
 	 */
 	private void processInput() {
+		cx = getInput().cx;
+		cy = getInput().cy;
+		// update direction
+		double newDirection = Math.atan2(getY() - cy, cx - getX());
+		double dDirection = Math.abs(Geometry.wrapAngle(newDirection - getDirection()));
+		addDispersion(instaF*ROTATION_DISPERSION_FACTOR*dDirection);
+		setDirection(newDirection);
 		
-		double dx,dy;
-		double speed = getSpeed();
-		if (getInput().down) {
-			if (!getInput().top) {
-				dy = speed;
-			} else {
-				dy = 0;
-			}
-		} else if (getInput().top) {
-			dy = -speed;
-		} else {
-			dy = 0;
+		if (getInput().down && getInput().top) {
+			getInput().down = false;
+			getInput().top = false;
 		}
-
-		if (getInput().right) {
-			if (!getInput().left) {
-				dx = speed;
-			} else {
-				dx = 0;
-			}
-		} else if (getInput().left) {
-			dx = -speed;
-		} else {
-			dx = 0;
+		if (getInput().left && getInput().right) {
+			getInput().left = false;
+			getInput().right = false;
 		}
-
-		if (dx != 0 && dy != 0) {
-			dx /= 1.4;
-			dy /= 1.4;
+		
+		double dx = 0, dy = 0;
+		
+		if (getInput().down)
+			dy = 1;
+		else if (getInput().top)
+			dy = -1;
+		if (getInput().right)
+			dx = 1;
+		else if (getInput().left)
+			dx = -1;
+		
+		if (dx!=0 && dy!=0) {
+			double SQRT2INV = 1/Math.sqrt(2);
+			dx *= SQRT2INV;
+			dy *= SQRT2INV;
 		}
-
+		
 		if (getInput().sneaking) {
 			dx *= 0.5;
 			dy *= 0.5;
-		} else if (getInput().running) {
-			dx *= 1.5;
-			dy *= 1.5;
 		}
-		setDx(dx);
-		setDy(dy);
-		updateCursor(getInput().cx, getInput().cy);
+		
+		double speed = getSpeed();
+		setDx(dx*speed);
+		setDy(dy*speed);
 	}
-
+	
+	protected void updateMode() {
+		if (getInput().sneaking) {
+			mode = MovementMode.SNEAK;
+		} else if (getDx()!=0 || getDy()!=0) {
+			mode = MovementMode.WALK;
+		} else {
+			mode = MovementMode.STOP;
+		}
+	}
+	
 	public void setInput(network.GameDataPackets.InputPacket input) {
 		this.input = input;
 	}
@@ -290,8 +305,30 @@ public class ControlledCharacter extends AbstractCharacter {
 		fc.x = (float) getX();
 		fc.y = (float) getY();
 		fc.crosshairSize = (float) getCrosshairSize();
+		if (getArmor()!=null) {
+			fc.armorAngle = (float) getArmor().getAngle();
+			fc.armorStart = (float) getArmor().getStart();
+		}
 		return fc;
 	}
+
+	public PartialCharacterData generatePartial() {
+		PartialCharacterData data = new PartialCharacterData();
+		data.id = (short) id;
+		data.team = (byte) team;
+		data.x = (float) getX();
+		data.y = (float) getY();
+		data.healthPoints = (float) getHealthPoints();
+		data.radius = (float) getRadius();
+		data.direction = (float) getDirection();
+		if (getArmor()!=null) {
+			data.armorAngle = (float)getArmor().getAngle();
+			data.armorStart = (float)getArmor().getStart();
+		}
+		return data;
+	}
+	
+	
 
 	public InputPacket getInput() {
 		return input;
@@ -324,8 +361,8 @@ public class ControlledCharacter extends AbstractCharacter {
 	public double getInstaF() {
 		return instaF;
 	}
-
-	public void setInstaF(double instaF) {
-		this.instaF = instaF;
+	
+	public void addInstaMod(double instaMod) {
+		this.instaF += instaMod;
 	}
 }

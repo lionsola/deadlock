@@ -1,14 +1,14 @@
 package status;
 
-import character.AbstractCharacter;
+import character.Character;
 import game.Game;
 
 public abstract class StatusEffect {
     private long duration = 0;
     private long elapsedTime = 0;
-    private AbstractCharacter self;
+    private Character self;
     
-    public StatusEffect (AbstractCharacter self, long duration) {
+    public StatusEffect (Character self, long duration) {
         this.duration = duration;
         this.self = self;
     }
@@ -28,7 +28,7 @@ public abstract class StatusEffect {
         }
     }
     
-    protected AbstractCharacter getSelf() {
+    protected Character getSelf() {
         return self;
     }
 

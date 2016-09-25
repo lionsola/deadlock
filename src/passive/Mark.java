@@ -35,12 +35,12 @@ public class Mark extends Passive {
 
 	@Override
 	protected void onDeactivate(World w) {
-		self().setSpeedF(self().getSpeedF()-self().cs.getSpeedF()*MARK_SPEED);
+		self().addSpeedMod(-self().cs.getSpeedF()*MARK_SPEED);
 	}
 
 	@Override
 	protected void onActivate(World w) {
 		lastBroadcast = 0;
-		self().setSpeedF(self().getSpeedF()+self().cs.getSpeedF()*MARK_SPEED);
+		self().addSpeedMod(+self().cs.getSpeedF()*MARK_SPEED);
 	}
 }

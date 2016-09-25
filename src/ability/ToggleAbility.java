@@ -11,6 +11,7 @@ public abstract class ToggleAbility extends Ability {
 
 	@Override
 	public void update(World w) {
+		super.update(w);
 		if(!isActive && self().getInput().fire2 && isReady()) {
 			onActivate(w,self());
 			isActive = true;

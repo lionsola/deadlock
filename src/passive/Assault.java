@@ -1,33 +1,47 @@
 package passive;
 
 import character.ControlledCharacter;
+import core.Geometry;
 import core.World;
 
 public class Assault extends Passive {
 	public static final double AS_BODYINSTA = -0.2;
+	public static final double AS_SPEED = 0.2;
+	public static final double AS_MAXANGLE = Math.PI/2;
+	public static final double AS_TRANS = 300;
+	private double diffAngle = 0;
+	
+	private double targetSpeed;
+	private double targetInsta;
+	
+	private double increasedSpeed;
+	private double increasedInsta;
+	
 	public Assault(ControlledCharacter self) {
 		super(self);
 	}
 
 	@Override
-	protected void onDeactivate(World w) {
-		self().setInstaF(self().getInstaF() - AS_BODYINSTA);
-	}
-
-	@Override
-	protected void onActivate(World w) {
-		self().setInstaF(self().getInstaF() + AS_BODYINSTA);
-	}
-
-	@Override
 	protected boolean trigger() {
-		return self().getDx()!=0 || self().getDy()!=0;
+		return diffAngle<AS_MAXANGLE;
 	}
 
 	@Override
 	protected void onUpdate(World w) {
-		// TODO Auto-generated method stub
-
+		diffAngle = Math.abs(Geometry.wrapAngle(self().getMovingDirection()-self().getDirection()));
+		if (isActive()) {
+			double ratio = (AS_MAXANGLE - diffAngle)/AS_MAXANGLE;
+			targetSpeed = AS_SPEED*ratio;
+			targetInsta = AS_BODYINSTA*ratio;
+		}
+		else {
+			targetSpeed = 0;
+			targetInsta = 0;
+		}
+		
+		self().addSpeedMod(targetSpeed-increasedSpeed);
+		self().addInstaMod(targetInsta-increasedInsta);
+		increasedSpeed = targetSpeed;
+		increasedInsta = targetInsta;
 	}
-
 }

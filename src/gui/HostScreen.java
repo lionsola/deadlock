@@ -24,6 +24,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
+import network.GameModeData;
 import network.LobbyRequest.LobbyInformationPacket;
 import network.LobbyServer;
 
@@ -38,15 +39,21 @@ public class HostScreen extends AbstractScreen implements ActionListener {
 
 	private static final long serialVersionUID = -8617632006677046360L;
 	// available maps
-	private static final String[] MAP_LIST       = { "maze", "mansion", "bazaar" };
-	private static final String[] MAP_LABEL_LIST = { "Maze", "Mansion", "Bazaar" };
-
+	private static final String[] MAP_LIST       = { "maze", "mansion", "bazaar", "testsmall" };
+	
+	private int currentMode;
+	private JLabel modeLabel;
+	private JButton modeLeft;
+	private JButton modeRight;
+	
+	
 	private int currentMap;
 	private Image[] scaledMap;
 	private JLabel map;
 	private JLabel mapLabel;
 	private JButton left;
 	private JButton right;
+	
 	private JButton hostButton;
 	private JButton backButton;
 	private JTextField port;
@@ -80,11 +87,21 @@ public class HostScreen extends AbstractScreen implements ActionListener {
 		name = GUIFactory.getStyledTextField();
 		name.setText("Host");
 		map = new JLabel(new ImageIcon(scaledMap[currentMap]));
-		mapLabel = GUIFactory.getStyledLabel("Map: " + MAP_LABEL_LIST[currentMap]);
+		mapLabel = GUIFactory.getStyledLabel("Map: " + MAP_LIST[currentMap]);
 		mapLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		left = GUIFactory.getStyledFunctionButton("<");
 		right = GUIFactory.getStyledFunctionButton(">");
-
+		
+		modeLeft = GUIFactory.getStyledFunctionButton("<");
+		modeRight = GUIFactory.getStyledFunctionButton(">");
+		modeLabel = GUIFactory.getStyledLabel("Mode: " + GameModeData.modes[currentMode].name);
+		JPanel modePanel = GUIFactory.getTransparentPanel();
+		modePanel.setLayout(new BorderLayout());
+		modePanel.add(modeLeft, BorderLayout.WEST);
+		modePanel.add(modeLabel, BorderLayout.CENTER);
+		modePanel.add(modeRight, BorderLayout.EAST);
+		
+		
 		// map selection panel
 		JPanel mapPanel = GUIFactory.getTransparentPanel();
 		mapPanel.setLayout(new BorderLayout());
@@ -97,6 +114,7 @@ public class HostScreen extends AbstractScreen implements ActionListener {
 		menuPanel.add(name);
 		menuPanel.add(GUIFactory.getStyledLabel("Port:"));
 		menuPanel.add(port);
+		menuPanel.add(modePanel);
 		menuPanel.add(mapPanel);
 
 		buttonPanel.add(backButton);
@@ -131,6 +149,7 @@ public class HostScreen extends AbstractScreen implements ActionListener {
 				e.printStackTrace();
 			}
 		}
+		GameModeData.initialize();
 	}
 
 	/***
@@ -168,8 +187,6 @@ public class HostScreen extends AbstractScreen implements ActionListener {
 					port.setBorder(new LineBorder(Color.RED, 2));
 					System.out.println("Error reading lobby information from network.");
 					e1.printStackTrace();
-				} catch (Exception e2) {
-					port.setBorder(new LineBorder(Color.RED, 2));
 				}
 			}
 		} else if (e.getSource() == left) {
@@ -178,16 +195,28 @@ public class HostScreen extends AbstractScreen implements ActionListener {
 				currentMap = MAP_LIST.length - 1;
 			}
 			map.setIcon(new ImageIcon(scaledMap[currentMap]));
-			mapLabel.setText("Map: " + MAP_LABEL_LIST[currentMap]);
+			mapLabel.setText("Map: " + MAP_LIST[currentMap]);
 		} else if (e.getSource() == right) {
 			currentMap++;
 			if (currentMap > MAP_LIST.length - 1) {
 				currentMap = 0;
 			}
 			map.setIcon(new ImageIcon(scaledMap[currentMap]));
-			mapLabel.setText("Map: " + MAP_LABEL_LIST[currentMap]);
+			mapLabel.setText("Map: " + MAP_LIST[currentMap]);
 		} else if (e.getSource() == backButton) {
 			game.setScreen(new MainMenuScreen(game));
+		} else if (e.getSource() == modeLeft) {
+			currentMode--;
+			if (currentMode <0) {
+				currentMode = GameModeData.modes.length-1;
+			}
+			modeLabel.setText("Mode: " + GameModeData.modes[currentMode].name);
+		} else if (e.getSource() == modeRight) {
+			currentMode ++;
+			if (currentMode > GameModeData.modes.length) {
+				currentMode = 0;
+			}
+			modeLabel.setText("Mode: " + GameModeData.modes[currentMode].name);
 		}
 	}
 

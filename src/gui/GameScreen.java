@@ -376,7 +376,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			for (ClientPlayer data : players) {
 				if (data.id != id && data.active) {
 					PartialCharacterData ch = data.character;
-					Renderer.renderCharacter(g2d,ch.x, ch.y, ch.direction, ch.radius, data.type, data.team == localPlayer.team);
+					Renderer.renderOtherCharacter(g2d, ch, data.type, data.team == localPlayer.team);
 				}
 			}
 
@@ -442,7 +442,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				break;
 
 			case KeyEvent.VK_C:
-				// move up
+				// use ability
 				input.fire2 = b;
 				break;
 				
@@ -592,7 +592,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			}
 		}
 	};
-	public static final double DEFAULT_PPM = 12;
+	public static final double DEFAULT_PPM = 20;
 	public static double ppm = GameScreen.DEFAULT_PPM;
 
 	@Override

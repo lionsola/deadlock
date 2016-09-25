@@ -11,7 +11,7 @@ import core.World;
  * @author Anh Pham
  *
  */
-public class Hostage extends AbstractCharacter {
+public class Hostage extends Character {
 	
 	// private static final double SEARCHTHRESHOLD = 150;
 	private static final double STOPTHRESHOLD = 30;
@@ -38,8 +38,8 @@ public class Hostage extends AbstractCharacter {
 	@Override
 	public void update(World world) {
 		// if (dest==null || dest.distance(getX(), getY())<SEARCHTHRESHOLD) {
-		List<AbstractCharacter> list = world.generateVisibleCharacters(this);
-		for (AbstractCharacter ch : list) {
+		List<Character> list = world.generateVisibleCharacters(this);
+		for (Character ch : list) {
 			if (ch instanceof ControlledCharacter) {
 				ControlledCharacter cc = (ControlledCharacter) ch;
 				if (cc.team == friendlyTeam) {
@@ -63,7 +63,7 @@ public class Hostage extends AbstractCharacter {
 			this.setDx(Math.cos(direction) * getSpeed());
 			this.setDy(-Math.sin(direction) * getSpeed());
 		}
-		super.updateCoordinate(world);
+		super.updateCollision(world);
 		super.updateNoise(world);
 	}
 	

@@ -11,6 +11,7 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.Toolkit;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -21,10 +22,10 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import network.FullCharacterData;
+import network.PartialCharacterData;
 import network.ProjectileData;
 import core.Arena;
 import core.Geometry;
-import core.LineOfSight;
 import core.Tile;
 import game.Game;
 import gui.GameScreen;
@@ -49,7 +50,7 @@ public class Renderer {
 	public static void renderMainCharacter(Graphics2D g2D, FullCharacterData player, int typeId) {
 		// render the character
 		renderCharacter(g2D, player.x, player.y, player.direction, player.radius, typeId, true);
-
+		renderArmor(g2D,player.x, player.y, player.radius,player.direction+player.armorStart,player.armorAngle,true);
 		// render the health bar
 		g2D.setStroke(new BasicStroke(toPixel(0.25)));
 		g2D.setColor(new Color(255, 50, 50));
@@ -68,7 +69,25 @@ public class Renderer {
 		}
 	}
 
-	public static void renderCharacter(Graphics2D g2D, double x, double y, double direction, double r, int typeId, boolean friendly) {
+	public static void renderOtherCharacter(Graphics2D g2D, PartialCharacterData c, int typeId, boolean friendly) {
+		renderArmor(g2D,c.x,c.y,c.radius,c.direction+c.armorStart,c.armorAngle,friendly);
+		renderCharacter(g2D,c.x,c.y,c.direction,c.radius,typeId,friendly);
+	}
+	
+	private static void renderArmor(Graphics2D g2D, double cx, double cy, double cr, double start, double extent, boolean friendly) {
+		g2D.setStroke(new BasicStroke(4));
+		if (friendly)
+			g2D.setColor(Color.GREEN);
+		else
+			g2D.setColor(Color.RED);
+		drawArc(g2D,cx,cy,cr,start,extent,Arc2D.OPEN);
+	}
+	
+	private static void drawArc(Graphics2D g2D, double cx, double cy, double cr, double start, double extent, int type) {
+		g2D.draw(new Arc2D.Double(toPixel(cx-cr),toPixel(cy-cr),toPixel(cr*2),toPixel(cr*2),Math.toDegrees(start),Math.toDegrees(extent),type));
+	}
+	
+	private static void renderCharacter(Graphics2D g2D, double x, double y, double direction, double r, int typeId, boolean friendly) {
 		g2D.setStroke(new BasicStroke(2));
 		g2D.setColor(Color.BLACK);
 		fillCircle(g2D,x, y,r);
@@ -90,6 +109,7 @@ public class Renderer {
 		
 		double sqrt = (r / 1.4);
 		//drawImage(g2D,CharacterFactory.getImage(typeId, color), x - sqrt, y - sqrt, 2 * sqrt, 2 * sqrt);
+		//for (ArmorData ad:)
 		g2D.setStroke(new BasicStroke(1));
 	}
 

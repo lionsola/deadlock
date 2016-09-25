@@ -15,7 +15,10 @@ public class PartialCharacterData implements Serializable {
 	
 	public float x;
 	public float y;
-	public float camo;
+	
+	public float armorStart;
+	public float armorAngle;
+	
 	public float radius;
 	public float healthPoints;
 	public float direction;

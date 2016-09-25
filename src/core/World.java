@@ -19,7 +19,7 @@ import network.GameEvent.PowerUpPickedUpEvent;
 import network.PartialCharacterData;
 import network.ProjectileData;
 import sound.AudioManager;
-import character.AbstractCharacter;
+import character.Character;
 import character.ControlledCharacter;
 
 /**
@@ -30,14 +30,12 @@ import character.ControlledCharacter;
  */
 public class World {
 	
-	Arena arena;
-	List<ControlledCharacter> characters = new ArrayList<ControlledCharacter>();;
+	private Arena arena;
+	private List<ControlledCharacter> characters = new ArrayList<ControlledCharacter>();;
 	
-	List<Projectile> projectiles = new LinkedList<Projectile>();
-	List<Projectile> newProjectiles = new LinkedList<Projectile>();
+	private List<Projectile> projectiles = new LinkedList<Projectile>();
+	private List<Projectile> newProjectiles = new LinkedList<Projectile>();
 	private GameEventListener listener;
-
-	// List<Effect> effects;
 
 	/**
 	 * Creates the World which is used in GameScreen to play the actual game
@@ -145,15 +143,7 @@ public class World {
 
 		wsp.characters = new LinkedList<PartialCharacterData>();
 		for (ControlledCharacter character : characters) {
-			PartialCharacterData data = new PartialCharacterData();
-			data.id = (short) character.id;
-			data.team = (byte) character.team;
-			data.x = (float) character.getX();
-			data.y = (float) character.getY();
-			data.healthPoints = (float) character.getHealthPoints();
-			data.radius = (byte) character.getRadius();
-			data.direction = (float) character.getDirection();
-			wsp.characters.add(data);
+			wsp.characters.add(character.generatePartial());
 		}
 
 		/*
@@ -283,10 +273,10 @@ public class World {
 	 *            The character that will get the resulting list.
 	 * @return A list of characters in the vision field of the given character.
 	 */
-	public List<AbstractCharacter> generateVisibleCharacters(AbstractCharacter ch) {
+	public List<Character> generateVisibleCharacters(Character ch) {
 		// Shape los = LineOfSight.generateLoS(ch.getIntX(),ch.getIntY(),
 		// ch.getViewRange(),ch.getViewAngle(),ch.getDirection(), arena);
-		List<AbstractCharacter> list = new LinkedList<AbstractCharacter>();
+		List<Character> list = new LinkedList<Character>();
 		for (ControlledCharacter p : characters) {
 			double x0 = p.getX() - p.getRadius();
 			double y0 = p.getY() - p.getRadius();
@@ -308,9 +298,7 @@ public class World {
 		return listener;
 	}
 	
-	/*
-	public ControlledCharacter getCharacterAt(double x, double y) {
-		
+	public List<ControlledCharacter> getCharacters() {
+		return new LinkedList<ControlledCharacter>(characters);
 	}
-	*/
 }
