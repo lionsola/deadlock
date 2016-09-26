@@ -37,16 +37,31 @@ public abstract class GameEvent implements Serializable {
 		}
 	}
 
-	public static class FootStepEvent extends GameEvent {
+	public static class SoundEvent extends GameEvent {
 		private static final long serialVersionUID = 4014556827130454737L;
 		public final float x;
 		public final float y;
-		public final float noise;
+		public final float volume;
+		public final byte id;
 
-		public FootStepEvent(double x, double y, double noise) {
+		public SoundEvent(double x, double y, double noise, int id) {
 			this.x = (float)x;
 			this.y = (float)y;
-			this.noise = (float)noise;
+			this.volume = (float)noise;
+			this.id = (byte)id;
+		}
+	}
+	
+	public static class AnimationEvent extends GameEvent {
+		private static final long serialVersionUID = 991627988551330392L;
+		public final float x;
+		public final float y;
+		public final byte id;
+		
+		public AnimationEvent(double x, double y, int id) {
+			this.x = (float)x;
+			this.y = (float)y;
+			this.id = (byte) id;
 		}
 	}
 	
@@ -60,43 +75,6 @@ public abstract class GameEvent implements Serializable {
 			this.x = (float)x;
 			this.y = (float)y;
 			this.id = (byte) id;
-		}
-	}
-
-	public static class BulletHitPlayerEvent extends GameEvent {
-		private static final long serialVersionUID = 667197569856295166L;
-		public final float x;
-		public final float y;
-
-		public BulletHitPlayerEvent(double x, double y) {
-			this.x = (float)x;
-			this.y = (float)y;
-		}
-	}
-
-	public static class BulletHitWallEvent extends GameEvent {
-		private static final long serialVersionUID = 4594610802812112579L;
-		public final float x;
-		public final float y;
-
-		public BulletHitWallEvent(double x, double y) {
-			this.x = (float)x;
-			this.y = (float)y;
-		}
-	}
-
-	public static class GunShotEvent extends GameEvent {
-		private static final long serialVersionUID = -3238104958505763917L;
-		public final float x;
-		public final float y;
-		public final float direction;
-		public final int weaponId;
-
-		public GunShotEvent(double d, double e, double direction, int weaponId) {
-			this.x = (float)d;
-			this.y = (float)e;
-			this.direction = (float)direction;
-			this.weaponId = weaponId;
 		}
 	}
 
@@ -115,18 +93,5 @@ public abstract class GameEvent implements Serializable {
 
 	public static class GameEndEvent extends GameEvent {
 		private static final long serialVersionUID = 4030097780765059510L;
-	}
-	
-	public static class GrenadeExplodeEvent extends GameEvent {
-		private static final long serialVersionUID = -8306631941667810011L;
-		public final float x;
-		public final float y;
-		public final byte type;
-		
-		public GrenadeExplodeEvent(double x, double y, int type) {
-			this.x = (float)x;
-			this.y = (float)y;
-			this.type = (byte) type;
-		}
 	}
 }

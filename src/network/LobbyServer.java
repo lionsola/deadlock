@@ -1,7 +1,5 @@
 package network;
 
-import gui.ClientPlayer;
-
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -12,6 +10,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
+import client.gui.ClientPlayer;
 import network.LobbyRequest.ChangeCharacterRequest;
 import network.LobbyRequest.ChatRequest;
 import network.LobbyRequest.LobbyInformationPacket;
@@ -19,7 +18,7 @@ import network.LobbyRequest.PlayerLeaveRequest;
 import network.LobbyRequest.StartGameRequest;
 import network.LobbyRequest.SwitchTeamRequest;
 import network.LobbyRequest.ToggleReadyRequest;
-import core.AIPlayer;
+import server.ai.AIPlayer;
 
 /**
  * Server for the lobby screen. It receives new connections and handle
@@ -62,7 +61,7 @@ public class LobbyServer implements Runnable {
 		}
 		running = false;
 		sendRequest(new StartGameRequest());
-		new GameServer(players, arena);
+		new MatchServer(players, arena);
 		serverSocket.close();
 	}
 
@@ -146,7 +145,7 @@ public class LobbyServer implements Runnable {
 
 	@Override
 	public void run() {
-		// Lobby gui, waiting for connections
+		// Lobby client.gui, waiting for connections
 		while (running) {
 			try {
 				Socket socket = serverSocket.accept();

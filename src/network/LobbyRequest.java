@@ -1,8 +1,8 @@
 package network;
 
-import gui.ClientPlayer;
-
 import java.io.Serializable;
+
+import client.gui.ClientPlayer;
 
 /**
  * Models a request from lobby.
@@ -37,7 +37,7 @@ public class LobbyRequest implements Serializable {
 
 	/**
 	 * Every time a client connects, the network sends this packet to it to initialize the lobby
-	 * gui.
+	 * client.gui.
 	 */
 	public static class LobbyInformationPacket extends LobbyRequest {
 		private static final long serialVersionUID = 4996573810361822207L;
