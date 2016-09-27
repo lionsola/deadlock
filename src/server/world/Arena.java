@@ -1,5 +1,6 @@
 package server.world;
 
+import java.awt.Color;
 import java.awt.Point;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
@@ -13,6 +14,8 @@ import java.util.List;
 import java.util.Scanner;
 
 import javax.imageio.ImageIO;
+
+import client.graphics.ImageBlender;
 
 /**
  * Class used to model an Arena - the Arena is what the characters will fight in and what they will
@@ -37,6 +40,10 @@ public class Arena {
 	private List<Point> t2Spawns; // spawn points of team 2
 	private List<Point> lightList;
 	private Area lightMap;
+	
+	public BufferedImage image;
+	public BufferedImage darkImage;
+	
 	/**
 	 * Creating a new Arena
 	 * 
@@ -46,6 +53,7 @@ public class Arena {
 	 * @throws IOException
 	 */
 	public Arena(String name, boolean loadGraphics) throws FileNotFoundException, IOException {
+		try {
 		FileInputStream fileInputStream = new FileInputStream("resource/map/" + name + ".map");
 		Hashtable<Integer, Tile> tileTable = new Hashtable<Integer, Tile>();
 		Scanner sc = new Scanner(fileInputStream);
@@ -56,18 +64,17 @@ public class Arena {
 		// load tile information
 		for (int i = 0; i < n; i++) {
 			int color = sc.nextInt(16); // reads the hex image
+			Color c = new Color(sc.nextInt(16));
 			String filename = sc.next(); // reads the light tile image
 			boolean walkable = sc.nextBoolean(); // reads the walkable bool
 			boolean transparent = sc.nextBoolean(); // reads the transparent bool
 			if (loadGraphics) {
 				BufferedImage tileImage = ImageIO.read(new FileInputStream("resource/tile/" + filename)); // sets
 																											// the
-																											// light
-																											// tile
-																											// image
+																					// image
 				// Image tileImageDark = ImageIO.read(new FileInputStream("resource/tile/" +
 				// filename2)); // sets the dark tile image
-				tileTable.put(color, new Tile(walkable, transparent, tileImage)); // and applies
+				tileTable.put(color, new Tile(walkable, transparent, tileImage,c)); // and applies
 																					// them all to
 																					// create a new
 																					// tile
@@ -81,6 +88,14 @@ public class Arena {
 		
 		loadTileMap(name, tileTable); // load the tile map
 		loadPositionMap(name, loadGraphics); // and load the position map
+		} catch (Exception e) {
+			System.err.println("Error while reading map");
+			e.printStackTrace();
+		}
+		if (loadGraphics) {
+			image = ImageBlender.drawArena(this);
+			darkImage = ImageBlender.darkenImage(ImageBlender.blurImage(image), 3, 1);
+		}
 	}
 
 	/**

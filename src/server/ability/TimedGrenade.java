@@ -77,7 +77,7 @@ public abstract class TimedGrenade extends Projectile {
 			final double BASE_SIZE = 10;
 			final double BASE_SPEED = 0.6;
 			
-			w.addSound(Sound.FRAG_EXPLODE, getX(), getY());
+			w.addSound(Sound.GRENADE_EXPLODE, getX(), getY());
 			
 			for (int i=0;i<FRAGS*0.8;i++) {
 				double direction = Math.PI*2*i/FRAGS;

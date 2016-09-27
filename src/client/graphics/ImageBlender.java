@@ -1,10 +1,17 @@
 package client.graphics;
 
+import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.Kernel;
+
+import client.image.ConvolveFilter;
+import client.image.GaussianFilter;
+import client.image.GlowFilter;
+import server.world.Arena;
 
 /**
  * Provide image processing methods.
@@ -13,12 +20,12 @@ import java.awt.image.Kernel;
  */
 public class ImageBlender {
 	
-	static final GraphicsConfiguration ge = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
+	public static final GraphicsConfiguration ge = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
 	private static final float[] box77 = { 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f,
 			1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f,
 			1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f,
 			1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f };
-	private static final BufferedImageOp blurOp = new ConvolveFilter(new Kernel(7, 7, box77));
+	private static final GaussianFilter blurOp = new GaussianFilter(10);
 
 	/**
 	 * Change the image's brightness and contrast according to given parameters. 1 means not
@@ -70,6 +77,13 @@ public class ImageBlender {
 		return dest;
 	}
 
+	public static BufferedImage glowImage(BufferedImage source, float radius, float amount) {
+		BufferedImage d = ge.createCompatibleImage(source.getWidth(),source.getHeight());
+		GlowFilter gf = new GlowFilter(radius);
+		gf.setAmount(amount);
+		return gf.filter(source, d);
+	}
+	
 	/**
 	 * Blur the image.
 	 * 
@@ -78,7 +92,15 @@ public class ImageBlender {
 	 * @return The resulting blurred image.
 	 */
 	public static BufferedImage blurImage(BufferedImage source) {
-		return blurOp.filter(source, null);
+		BufferedImage d = ge.createCompatibleImage(source.getWidth(),source.getHeight());
+		return blurOp.filter(source, d);
 	}
 
+	public static BufferedImage drawArena(Arena a) {
+		BufferedImage source = ge.createCompatibleImage(Renderer.toPixel(a.getWidthMeter()),Renderer.toPixel(a.getHeightMeter()));
+		Graphics2D g2D = (Graphics2D)source.getGraphics();
+		Renderer.renderDark(g2D, a, new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
+		g2D.dispose();
+		return glowImage(source,60f,0.4f);
+	}
 }

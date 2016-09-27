@@ -56,11 +56,13 @@ public abstract class GameEvent implements Serializable {
 		private static final long serialVersionUID = 991627988551330392L;
 		public final float x;
 		public final float y;
+		public final float rotation;
 		public final byte id;
 		
-		public AnimationEvent(double x, double y, int id) {
+		public AnimationEvent(int id, double x, double y, double rotation) {
 			this.x = (float)x;
 			this.y = (float)y;
+			this.rotation = (float)rotation;
 			this.id = (byte) id;
 		}
 	}

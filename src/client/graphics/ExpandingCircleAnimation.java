@@ -12,7 +12,7 @@ import client.gui.GameWindow;
  * 
  * @author Anh Pham.
  */
-public class ExpandingCircleAnimation extends Animation {
+public class ExpandingCircleAnimation extends BasicAnimation {
 	
 	private double maxRadius;
 	private double x;
@@ -63,7 +63,7 @@ public class ExpandingCircleAnimation extends Animation {
 		this.maxRadius = d;
 		this.x = x;
 		this.y = y;
-		this.startWidth = Math.max(0.3f,0.3f*maxRadius);
+		this.startWidth = Math.max(0.3f,0.25f*maxRadius);
 		double startGrowth = maxRadius / (life * 3 / 4) * GameWindow.MS_PER_UPDATE;
 		this.life = life;
 		this.growth = startGrowth;

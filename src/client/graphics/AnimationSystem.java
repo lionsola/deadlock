@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import network.GameEvent.AnimationEvent;
+
 /**
  * Manage the animation effects and provide high-level methods to create new animations in the game
  * without having to deal with low-level animation classes.
@@ -15,13 +17,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class AnimationSystem {
 	
-	private ConcurrentLinkedQueue<Animation> animations;
+	private ConcurrentLinkedQueue<BasicAnimation> animations;
 
 	/**
 	 * Constructor. Create a new animation system.
 	 */
 	public AnimationSystem() {
-		animations = new ConcurrentLinkedQueue<Animation>();
+		animations = new ConcurrentLinkedQueue<BasicAnimation>();
 	}
 
 	/**
@@ -51,7 +53,7 @@ public class AnimationSystem {
 	public void addShotAnimation(double x, double y, double direction) {
 		for (int i = 0; i < 6; i++) {
 			double randomDirection = direction + 2 * server.world.Utils.random().nextGaussian() / 5;
-			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.1, 0.5, 300, Color.WHITE);
+			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.1, 0.2, 300, Color.WHITE);
 			p.setGrowth(-0.4, -0.4);
 			p.setSizeDefault(true);
 			animations.add(p);
@@ -95,11 +97,18 @@ public class AnimationSystem {
 		}
 	}
 
+	public void addAnimation(AnimationEvent e) {
+		switch(e.id) {
+			case Animation.GUNSHOT:
+				addShotAnimation(e.x,e.y,e.rotation);
+		}
+	}
+	
 	/**
 	 * Avoid using this method; written just for testing. Always use pre-defined add animation
 	 * methods, or write a new one if what you want doesn't exist yet.
 	 */
-	public void addCustomAnimation(Animation animation) {
+	public void addCustomAnimation(BasicAnimation animation) {
 		animations.add(animation);
 	}
 
@@ -107,8 +116,8 @@ public class AnimationSystem {
 	 * Update the animation system.
 	 */
 	public void update() {
-		List<Animation> removed = new LinkedList<Animation>();
-		for (Animation a : animations) {
+		List<BasicAnimation> removed = new LinkedList<BasicAnimation>();
+		for (BasicAnimation a : animations) {
 			if (a.update())
 				removed.add(a);
 		}
@@ -122,7 +131,7 @@ public class AnimationSystem {
 	 *            The client.graphics object to be rendered to.
 	 */
 	public void render(Graphics g) {
-		for (Animation a : animations) {
+		for (BasicAnimation a : animations) {
 			a.render(g);
 		}
 	}

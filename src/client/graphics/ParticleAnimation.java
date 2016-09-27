@@ -10,7 +10,7 @@ import java.awt.Graphics2D;
  * @author Anh Pham
  * @author Shobitha Shivakumar
  */
-public class ParticleAnimation extends Animation {
+public class ParticleAnimation extends BasicAnimation {
 
 	private Vector2D loc; // location of the particle
 	private Vector2D vel; // velocity of the particle

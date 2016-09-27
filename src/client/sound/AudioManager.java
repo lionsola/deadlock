@@ -1,6 +1,5 @@
 package client.sound;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -17,7 +16,7 @@ public class AudioManager implements Runnable {
 	
 	// volume gain in decibel
 	public static final float GAIN_MINVOLUME = -30;
-	public static final float GAIN_RANGE = 30;
+	public static final float GAIN_RANGE = 25;
 
 	// artificial volume of volume in game
 	// noises will be from 170db (flashbang grenade) to 0db (silence)
@@ -33,7 +32,7 @@ public class AudioManager implements Runnable {
 	ConcurrentLinkedQueue<PlayMessage> pending;
 	
 	HashMap<Integer, Sound> soundMap;
-
+	
 	private static final String SOUND_DIR = "resource/audio/sounds/";
 	private static final String MUSIC_DIR = "resource/audio/music/";
 
@@ -42,7 +41,7 @@ public class AudioManager implements Runnable {
 	 * located
 	 */
 	public AudioManager() {
-		threadPool = Executors.newFixedThreadPool(10);
+		threadPool = Executors.newFixedThreadPool(15);
 		pending = new ConcurrentLinkedQueue<PlayMessage>();
 		soundMap = new HashMap<Integer, Sound>();
 		
@@ -54,6 +53,8 @@ public class AudioManager implements Runnable {
 		soundMap.put(2, new SingleSound(SOUND_DIR + "gunshot_pistol.wav"));
 		soundMap.put(3, new SingleSound(SOUND_DIR + "gunshot_silent_pistol.wav"));
 		soundMap.put(4, new SingleSound(SOUND_DIR + "gunshot_smg.wav"));
+		
+		soundMap.put(server.world.Sound.GRENADE_EXPLODE.id,new SingleSound(SOUND_DIR + "grenade_explode.wav"));
 
 		AlternatingSound footsteps = new AlternatingSound();
 		footsteps.addSound(new SingleSound(SOUND_DIR + "footstep1.wav"));

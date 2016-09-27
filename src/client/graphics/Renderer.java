@@ -16,11 +16,8 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
-import java.io.IOException;
 
-import javax.imageio.ImageIO;
-
+import client.gui.ClientPlayer;
 import client.gui.GameScreen;
 import client.gui.GameWindow;
 import network.FullCharacterData;
@@ -37,30 +34,28 @@ import server.world.Tile;
 public class Renderer {
 	public static final int CURSOR_BMP_SIZE = 33;
 	public static final int CURSOR_SIZE = 5;
-	private static BufferedImage light;
+	public static final double CHARACTER_WIDTH = 0.1;
+	public static final double HEALTHBAR_WIDTH = 0.25;
 	private static Color defaultColor = Color.WHITE;
+	private static final Color[] teamColors = {Color.GREEN,Color.RED};
 	public static void init() {
-		try {
-			light = ImageIO.read(new FileInputStream("resource/light.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
 	}
 	
-	public static void renderMainCharacter(Graphics2D g2D, FullCharacterData player, int typeId) {
-		// render the server.character
-		renderCharacter(g2D, player.x, player.y, player.direction, player.radius, typeId, true);
-		renderArmor(g2D,player.x, player.y, player.radius,player.direction+player.armorStart,player.armorAngle,true);
+	public static void renderMainCharacter(Graphics2D g2D, FullCharacterData player, ClientPlayer playerInfo) {
+		// render the character
+		renderCharacter(g2D, player.x, player.y, player.direction, player.radius, playerInfo.type,playerInfo.team);
+		renderArmor(g2D,player.x, player.y, player.radius,player.direction+player.armorStart,player.armorAngle,playerInfo.team);
 		// render the health bar
-		g2D.setStroke(new BasicStroke(toPixel(0.25)));
+		g2D.setStroke(new BasicStroke(toPixel(HEALTHBAR_WIDTH)));
 		g2D.setColor(new Color(255, 50, 50));
 		double length = (0.2*player.healthPoints/GameScreen.ppm);
-		double topy = (player.y - player.radius - 0.5);
+		double topy = (player.y - player.radius - HEALTHBAR_WIDTH*2);
 		
 		drawLine(g2D, player.x - length / 2, topy, player.x + length / 2, topy);
 		// render the reload bar
 		if (player.reloadPercent < 1) {
-			topy += 0.25;
+			topy += HEALTHBAR_WIDTH;
 			length = (player.radius*player.reloadPercent);
 			g2D.setStroke(new BasicStroke(toPixel(0.15)));
 			g2D.setColor(Color.WHITE);
@@ -69,17 +64,14 @@ public class Renderer {
 		}
 	}
 
-	public static void renderOtherCharacter(Graphics2D g2D, PartialCharacterData c, int typeId, boolean friendly) {
-		renderArmor(g2D,c.x,c.y,c.radius,c.direction+c.armorStart,c.armorAngle,friendly);
-		renderCharacter(g2D,c.x,c.y,c.direction,c.radius,typeId,friendly);
+	public static void renderOtherCharacter(Graphics2D g2D, PartialCharacterData c, int typeId) {
+		renderArmor(g2D,c.x,c.y,c.radius,c.direction+c.armorStart,c.armorAngle,c.team);
+		renderCharacter(g2D,c.x,c.y,c.direction,c.radius,typeId,c.team);
 	}
 	
-	private static void renderArmor(Graphics2D g2D, double cx, double cy, double cr, double start, double extent, boolean friendly) {
+	private static void renderArmor(Graphics2D g2D, double cx, double cy, double cr, double start, double extent,int team) {
 		g2D.setStroke(new BasicStroke(4));
-		if (friendly)
-			g2D.setColor(Color.GREEN);
-		else
-			g2D.setColor(Color.RED);
+		g2D.setColor(teamColors[team]);
 		drawArc(g2D,cx,cy,cr,start,extent,Arc2D.OPEN);
 	}
 	
@@ -87,18 +79,11 @@ public class Renderer {
 		g2D.draw(new Arc2D.Double(toPixel(cx-cr),toPixel(cy-cr),toPixel(cr*2),toPixel(cr*2),Math.toDegrees(start),Math.toDegrees(extent),type));
 	}
 	
-	private static void renderCharacter(Graphics2D g2D, double x, double y, double direction, double r, int typeId, boolean friendly) {
-		g2D.setStroke(new BasicStroke(2));
+	private static void renderCharacter(Graphics2D g2D, double x, double y, double direction, double r, int typeId, int team) {
+		g2D.setStroke(new BasicStroke(toPixel(CHARACTER_WIDTH)));
 		g2D.setColor(Color.BLACK);
 		fillCircle(g2D,x, y,r);
-		int color;
-		if (friendly) {
-			g2D.setColor(Color.GREEN);
-			color = 1;
-		} else {
-			g2D.setColor(Color.RED);
-			color = 0;
-		}
+		g2D.setColor(teamColors[team]);
 		//fillCircle(g2D,x, y,r);
 		drawCircle(g2D,x,y,r);
 		
@@ -108,8 +93,7 @@ public class Renderer {
 		drawLine(g2D,x+p1.getX(),y-p1.getY(),x+p2.getX(),y-p2.getY());
 		
 		double sqrt = (r / 1.4);
-		//drawImage(g2D,CharacterFactory.getImage(typeId, color), x - sqrt, y - sqrt, 2 * sqrt, 2 * sqrt);
-		//for (ArmorData ad:)
+		//drawImage(g2D,Sprite.getImage(typeId, team), x - sqrt, y - sqrt, 2 * sqrt, 2 * sqrt);
 		g2D.setStroke(new BasicStroke(1));
 	}
 
@@ -172,36 +156,56 @@ public class Renderer {
 		g2D.draw(los);
 	}
 	
+	public static void renderBackground(Graphics2D g2D, Arena a, Rectangle2D window) {
+		drawImage(g2D, a.darkImage, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
+	}
+	
+	public static void renderForeground(Graphics2D g2D, Arena a, Rectangle2D window) {
+		drawImage(g2D, a.image, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
+	}
+	
 	public static void renderDark(Graphics2D g2D, Arena a, Rectangle2D window) {
+		//drawImage(g2D, a.image, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
+		
+		
 		double ts = Tile.tileSize;
 		int x1 = Math.max(0, (int) (window.getX() / ts));
 		int y1 = Math.max(0, (int) (window.getY() / ts));
 		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (window.getWidth() / ts) + 1);
 		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (window.getHeight() / ts) + 1);
 		
-		double ww = 0.15;
+		double ww = 0.12;
 		g2D.setColor(Color.LIGHT_GRAY);
 		g2D.setStroke(new BasicStroke(toPixel(ww)));
 		
+		
+		
 		for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
-				//Image image = a.get(x, y).getImageDark();
-				//drawImage(g2D,image, x * tileSize,y * tileSize,tileSize,tileSize);
+				Tile t = a.get(x, y);
+				if (!t.isWalkable())
+					continue;
+				
+				Image image = a.get(x, y).getImage();
+				drawImage(g2D,image, x*ts, y*ts, ts, ts);
+			}
+		}
+		
+		for (int x = x1; x <= x2; x++) {
+			for (int y = y1; y <= y2; y++) {
+				Tile t = a.get(x, y);
+				if (t.isWalkable())
+					continue;
+				
+				Image image = a.get(x, y).getImage();
+				drawImage(g2D,image, x*ts, y*ts, ts, ts);
 				
 				double xa = x*ts;
 				double ya = y*ts;
 				double xb = (x+1)*ts;
 				double yb = (y+1)*ts;
-				Tile t = a.get(x, y);
 				
-				/*
-				if (!t.isWalkable()) {
-					g2D.setColor(Color.DARK_GRAY);
-					fillRectangle(g2D,x*ts,y*ts,ts,ts);
-				}
-				*/
-				g2D.setColor(Color.LIGHT_GRAY);
-				
+				g2D.setColor(t.getColor());
 				if (a.get(x-1,y)!=t) {
 					drawLine(g2D,xa,ya,xa,yb);
 				}
@@ -216,6 +220,7 @@ public class Renderer {
 				}
 			}
 		}
+		
 	}
 	
 	public static void render(Graphics2D g2D, Arena a, Rectangle2D window) {
@@ -244,14 +249,6 @@ public class Renderer {
 			}
 		}
 		
-		for (Point l : a.getLightList()) {
-			int x0 = l.x - Arena.LIGHT_RANGE;
-			int y0 = l.y - Arena.LIGHT_RANGE;
-			int d = Arena.LIGHT_RANGE * 2;
-			if (window.intersects(x0, y0, d, d)) {
-				g2D.drawImage(light, x0, y0, d, d, null);
-			}
-		}
 		g2D.setClip(currentClip);
 		
 	}
@@ -274,6 +271,12 @@ public class Renderer {
 	
 	static void drawImage(Graphics2D g2d, Image image, double x, double y, double w, double h) {
 		g2d.drawImage(image, toPixel(x), toPixel(y), toPixel(w), toPixel(h), null);
+	}
+	
+	static void drawImage(Graphics2D g2d, Image image, double sx, double sy, double sw, double sh, double x, double y, double w, double h) {
+		g2d.drawImage(image, toPixel(x), toPixel(y), toPixel(x+w), toPixel(y+h),
+				toPixelDefault(sx), toPixelDefault(sy), toPixelDefault(sx+sw), toPixelDefault(sy+sh),
+				null);
 	}
 	
 	static void fillRectangle(Graphics2D g2d, double x, double y, double w, double h) {
@@ -315,6 +318,10 @@ public class Renderer {
 	
 	public static int toPixel(double value) {
 		return (int)(value*GameScreen.ppm+0.5);
+	}
+	
+	public static int toPixelDefault(double value) {
+		return (int)(value*GameScreen.DEFAULT_PPM+0.5);
 	}
 	
 	public static double toMeter(int pixel) {

@@ -10,6 +10,8 @@ import java.awt.Toolkit;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
+import client.graphics.Sprite;
+
 /**
  * The master frame that holds the game screens.
  * 
@@ -31,7 +33,8 @@ public class GameWindow extends JFrame {
 	public GameWindow() {
 		GraphicsDevice screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
 		setIgnoreRepaint(true);
-		CharacterFactory.initImage();
+		Sprite.initImage();
+		client.data.Class.init();
 		// Should change to load from save file
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		width = (int) screenSize.getWidth();

@@ -1,0 +1,64 @@
+package client.graphics;
+
+import java.awt.Graphics;
+
+/**
+ * Base class of every animation in the game. All subclasses must implement render and usually also
+ * override update.
+ */
+public abstract class BasicAnimation {
+
+	protected final long duration;
+	protected long life;
+	protected long lastTick = 0;
+	protected long delay;
+
+	/**
+	 * Constructor for BasicAnimation.
+	 * @param life Duration of the animation, in millisecond.
+	 */
+	public BasicAnimation(long life) {
+		this(life, 0);
+	}
+
+	/**
+	 * Constructor for BasicAnimation.
+	 * @param life Duration of the animation, in millisecond.
+	 * @param delay The delay before the animation starts, in millisecond.
+	 */
+	public BasicAnimation(long life, long delay) {
+		this.duration = life;
+		this.life = life;
+		this.delay = delay;
+		this.lastTick = System.currentTimeMillis();
+	}
+
+	/**
+	 * Manage the life circle of the animation.
+	 * 
+	 * @return
+	 */
+	public boolean update() {
+		long elapsed = System.currentTimeMillis() - lastTick;
+		if (delay > 0) {
+			delay -= elapsed;
+		} else {
+			life -= elapsed;
+		}
+		if (life < 0)
+			return true;
+		else {
+			lastTick = System.currentTimeMillis();
+			return false;
+		}
+	}
+
+	/**
+	 * Render the animation to the client.graphics object.
+	 * 
+	 * @param g
+	 *            The client.graphics object to be rendered into.
+	 */
+	abstract public void render(Graphics g);
+
+}

@@ -13,7 +13,6 @@ import java.util.List;
 
 import client.graphics.Renderer;
 import network.FullCharacterData;
-import server.character.Character;
 
 /**
  * Used for the logic behind our line of sight.
@@ -21,6 +20,8 @@ import server.character.Character;
  * @author Anh Pham
  */
 public class LineOfSight {
+	private static final double POINT_THRESHOLD = 0.001;
+	
 	
 	private int lastX = Integer.MAX_VALUE;
 	private int lastY = Integer.MAX_VALUE;
@@ -214,7 +215,7 @@ public class LineOfSight {
 		// linking
 		for (Node n1 : nedges) {
 			for (Node n2 : nedges) {
-				if (n1.edge.getP2().equals(n2.edge.getP1())) {
+				if (n1.edge.getP2().distance(n2.edge.getP1())<POINT_THRESHOLD) {
 					n1.next = n2;
 					n2.prev = n1;
 					break;

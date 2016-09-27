@@ -1,5 +1,6 @@
 package server.world;
 
+import java.awt.Color;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
@@ -14,10 +15,11 @@ import client.graphics.ImageBlender;
  */
 public class Tile {
 	
-	public static final double tileSize = 1; // default
+	public static final double tileSize = 1.2; // default
 
 	final boolean walkable;
 	final boolean transparent;
+	final Color color; 
 	final private BufferedImage tileImage;
 	final private BufferedImage tileImageDark;
 	final private BufferedImage tileImageLight;
@@ -33,10 +35,11 @@ public class Tile {
 	 * @param tileImage
 	 *            The base image of this tile, used to generate different images for the lighting.
 	 */
-	public Tile(boolean walkable, boolean transparent, BufferedImage tileImage) {
+	public Tile(boolean walkable, boolean transparent, BufferedImage tileImage, Color color) {
 		this.walkable = walkable;
 		this.transparent = transparent;
-
+		this.color = color;
+		
 		if (transparent) {
 			this.tileImage = ImageBlender.darkenImage(tileImage, 1.2f, 2);
 			this.tileImageDark = ImageBlender.blurImage(ImageBlender.darkenImage(tileImage, 6, 3));
@@ -62,6 +65,7 @@ public class Tile {
 	public Tile(boolean walkable, boolean transparent) {
 		this.walkable = walkable;
 		this.transparent = transparent;
+		this.color = null;
 		this.tileImage = null;
 		this.tileImageDark = null;
 		this.tileImageLight = null;
@@ -85,6 +89,10 @@ public class Tile {
 		return transparent;
 	}
 
+	public Color getColor() {
+		return color;
+	}
+	
 	/**
 	 * Get the standard image for this tile.
 	 * 

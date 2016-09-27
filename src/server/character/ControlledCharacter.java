@@ -258,7 +258,9 @@ public class ControlledCharacter extends Character {
 			dy *= 0.5;
 		}
 		
-		double speed = getSpeed();
+		double diffAngle = Math.abs(Geometry.wrapAngle(getMovingDirection()-getDirection()));
+		double ratio = (Math.PI/2 - diffAngle)/(Math.PI/2);
+		double speed = getSpeed()*(1+ratio*0.25);
 		setDx(dx*speed);
 		setDy(dy*speed);
 	}

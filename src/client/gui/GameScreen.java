@@ -16,6 +16,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
@@ -38,18 +39,20 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import org.w3c.dom.CDATASection;
+
 import network.FullCharacterData;
 import network.GameDataPackets.InputPacket;
 import network.GameDataPackets.WorldStatePacket;
 import network.GameEvent;
 import network.GameEvent.*;
-import server.character.CharacterFactory;
 import server.world.Arena;
 import server.world.LineOfSight;
 import network.PartialCharacterData;
 import network.ProjectileData;
 import client.graphics.AnimationSystem;
 import client.graphics.Renderer;
+import client.graphics.Sprite;
 import client.sound.AudioManager;
 
 /**
@@ -359,13 +362,20 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			// render the dark part
 			Shape los = lineOfSight.generateLoS(mainCharacter, arena);
 			
-			Renderer.renderDark(g2d,arena,camera.getDrawArea(this));
-			Renderer.renderLOS(g2d, los);
+			Renderer.renderBackground(g2d,arena,camera.getDrawArea(this));
+			FullCharacterData c = mainCharacter;
+			Arc2D arc = new Arc2D.Double(Renderer.toPixel(c.x - c.viewRange),Renderer.toPixel(c.y - c.viewRange),
+					Renderer.toPixel(c.viewRange * 2),Renderer.toPixel(c.viewRange * 2),
+					Math.toDegrees(c.direction-c.viewAngle/2), Math.toDegrees(c.viewAngle), Arc2D.PIE);
+			g2d.setClip(arc);
+			//g2d.setClip(Renderer.toPixel(c.x-c.viewRange), Renderer.toPixel(c.y-c.viewRange), Renderer.toPixel(c.viewRange*2),Renderer.toPixel(c.viewRange*2));
+			Renderer.renderForeground(g2d, arena, new Rectangle2D.Double(c.x-c.viewRange,c.y-c.viewRange,c.viewRange*2,c.viewRange*2));
+			
 			// Renderer.renderArenaBackground(g2d, camera.getDrawArea(this));
-			globalAnimations.render(g2d);
+			
 
 			// render the light part
-			g2d.clip(los);
+			g2d.setClip(los);
 
 			//Renderer.render(g2d, arena,getCharacterVisionBox(mainCharacter.x, mainCharacter.y, (int)(mainCharacter.viewRange+0.5)));
 
@@ -374,7 +384,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			for (ClientPlayer data : players) {
 				if (data.id != id && data.active) {
 					PartialCharacterData ch = data.character;
-					Renderer.renderOtherCharacter(g2d, ch, data.type, data.team == localPlayer.team);
+					Renderer.renderOtherCharacter(g2d, ch, data.type);
 				}
 			}
 
@@ -386,8 +396,9 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			// g2d.drawImage(light,mainCharacter.x-mainCharacter.viewRange,mainCharacter.y-mainCharacter.viewRange,mainCharacter.viewRange*2,mainCharacter.viewRange*2,
 			// null);
 			g2d.setClip(null);
-
-			Renderer.renderMainCharacter(g2d, mainCharacter, localPlayer.type);
+			globalAnimations.render(g2d);
+			Renderer.renderLOS(g2d, los);
+			Renderer.renderMainCharacter(g2d, mainCharacter, localPlayer);
 		}
 		Renderer.renderCrosshair(g2d,input.cx,input.cy,mainCharacter.crosshairSize);
 		g.translate(transX, transY);
@@ -508,7 +519,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			// TODO Auto-generated method stub
 			String text = value.name + "     " + value.kills + "     " + value.deaths;
 			ClientPlayer localPlayer = Utils.findPlayer(players, id);
-			JLabel player = new JLabel(text, new ImageIcon(CharacterFactory.getImage(value.type, value.team == localPlayer.team ? 1 : 0)),
+			JLabel player = new JLabel(text, new ImageIcon(Sprite.getImage(value.type, value.team == localPlayer.team ? 1 : 0)),
 					SwingConstants.LEFT);
 			player.setForeground(Color.WHITE);
 			player.setFont(GUIFactory.font_s);

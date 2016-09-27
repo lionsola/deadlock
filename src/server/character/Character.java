@@ -23,7 +23,7 @@ public class Character {
 	public static final double BASE_SPEED	= 0.0025;
 	public static final double BASE_HP		= 100;
 	public static final double BASE_RADIUS	= 0.55;
-	public static final double BASE_FOVRANGE= 18;
+	public static final double BASE_FOVRANGE= 16;
 	public static final double BASE_FOVANGLE= Math.toRadians(100);
 	public static final double BASE_NOISE = 30;
 	

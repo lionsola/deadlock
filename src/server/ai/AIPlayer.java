@@ -10,9 +10,11 @@ import network.GameDataPackets.InputPacket;
 import network.GameDataPackets.WorldStatePacket;
 import server.ai.PathFinder.Path;
 import server.world.Arena;
+import server.world.Geometry;
 import server.world.Tile;
 import server.world.Utils;
 import network.GameEvent;
+import network.GameEvent.SoundEvent;
 import network.PartialCharacterData;
 import network.ServerPlayer;
 
@@ -84,9 +86,7 @@ public class AIPlayer extends ServerPlayer {
 				e.printStackTrace();
 			}
 		}
-
-		return new InputPacket();
-		/*
+		
 		// delay output a bit to make them less scary
 		WorldStatePacket wsp = this.wsp;
 		try {
@@ -125,11 +125,11 @@ public class AIPlayer extends ServerPlayer {
 			// else, explore locations of interests (only gun shots atm)
 			for (GameEvent event : wsp.events) {
 				// listen for gun shots
-				if (event instanceof GunShotEvent) {
-					GunShotEvent e = (GunShotEvent) event;
+				if (event instanceof SoundEvent) {
+					SoundEvent e = (SoundEvent) event;
 					float eventDist = Geometry.diagonalDistance(e.x, e.y, self.getX(), self.getY());
 					// if this one is closer than last one
-					if (eventDist < min) {
+					if (eventDist < min && e.volume>50) {
 						// take this one instead
 						newIntr = new Point2D.Double(e.x, e.y);
 						min = eventDist;
@@ -189,7 +189,7 @@ public class AIPlayer extends ServerPlayer {
 		}
 		//this.wsp = null;
 		return input;
-		*/
+		
 	}
 
 	/**
