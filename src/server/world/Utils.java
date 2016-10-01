@@ -26,15 +26,9 @@ public class Utils {
 		return Utils.randomizer;
 	}
 
-	public static float getVolumeAtDistance(float originalSound, double distance) {
-		// don't increase the volume pass the original volume volume
-		// which is based on one-tile distance
-		distance = Math.max(Tile.tileSize, distance);
-
-		// in real life it's 20*Math.log10 ... , but because we can't simulate
-		// volume loss when a client.sound goes through walls, we have to artificially
-		// increase the volume loss over distance to make up for it
-		return (float) (originalSound + 20 * Math.log10(Tile.tileSize / distance));
+	public static double getVolumeAtDistance(double volume, double distance, double hearF) {
+		double reducedByDistance = Math.max(0,1-hearF) * Sound.DISTANCE_VOLUME_DROP_RATE * distance;
+		return (volume - reducedByDistance);
 	}
 
 	public static Rectangle2D getBoundingBox(double cx, double cy, double r) {

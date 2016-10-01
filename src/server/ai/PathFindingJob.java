@@ -10,7 +10,6 @@ import server.ai.PathFinder.Path;
 import server.world.Arena;
 import server.world.Geometry;
 import server.world.Tile;
-import server.world.Utils;
 
 /**
  * Represents a path finding / searching problem and the solving algorithm using A* search.

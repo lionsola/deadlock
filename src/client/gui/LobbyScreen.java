@@ -47,7 +47,6 @@ import network.LobbyRequest.PlayerLeaveRequest;
 import network.LobbyRequest.StartGameRequest;
 import network.LobbyRequest.SwitchTeamRequest;
 import network.LobbyRequest.ToggleReadyRequest;
-import server.character.CharacterFactory;
 import network.LobbyServer;
 import client.graphics.Sprite;
 import client.sound.AudioManager;
@@ -346,7 +345,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 	 *            The type
 	 */
 	private void setTypeSelection(int type) {
-		typeIcon.setIcon(new ImageIcon(Sprite.getImage(type, clientPlayer.team)));
+		//typeIcon.setIcon(new ImageIcon(Sprite.getImage(type, clientPlayer.team)));
 		typeName.setText(Class.get(type).getName());
 		sendRequest(new ChangeCharacterRequest(clientPlayer.id, currentType));
 	}
@@ -524,8 +523,9 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		@Override
 		public Component getListCellRendererComponent(JList<? extends ClientPlayer> list, final ClientPlayer value, int index, boolean isSelected,
 				boolean cellHasFocus) {
-			ImageIcon icon = new ImageIcon(Sprite.getImage(value.type, value.team));
-			JLabel player = new JLabel(value.name, icon, SwingConstants.LEFT);
+			//ImageIcon icon = new ImageIcon(Sprite.getImage(value.type, value.team));
+			//JLabel player = new JLabel(value.name, icon, SwingConstants.LEFT);
+			JLabel player = new JLabel(value.name, SwingConstants.LEFT);
 			if (value.active)
 				player.setForeground(Color.WHITE);
 			else

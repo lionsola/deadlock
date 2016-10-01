@@ -1,7 +1,5 @@
 package client.gui;
 
-import server.character.CharacterFactory;
-
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;

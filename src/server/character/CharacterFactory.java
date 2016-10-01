@@ -1,17 +1,7 @@
 package server.character;
 
-import java.io.FileInputStream;
-
-import javax.imageio.ImageIO;
-
-import server.ability.ChargedAbility;
-import server.ability.HearingAmplifier;
-import server.ability.Optics;
-import server.passive.Assault;
-import server.passive.Backstab;
-import server.passive.Mark;
-import server.passive.Overwatch;
-import server.passive.Shield;
+import server.ability.*;
+import server.passive.*;
 import server.weapon.WeaponFactory;
 
 /**
@@ -47,36 +37,42 @@ public class CharacterFactory {
 				return new Spy(id, team);
 				*/
 			case 0:
-				ControlledCharacter shield =  new ControlledCharacter(id, team, ClassStats.classStats.get(type),
-						WeaponFactory.createGun(3),null);
+				ControlledCharacter shield =  new ControlledCharacter(id, team, ClassStats.classStats.get(type));
+				shield.setWeapon(WeaponFactory.createGun(3, shield));
 				shield.setAbilty(new ChargedAbility.ThrowFlashGrenade(shield));
 				shield.setPassive(new Shield(shield));
 				return shield;
 			
 			case 1:
-				ControlledCharacter scout =  new ControlledCharacter(id, team, ClassStats.classStats.get(type),
-						WeaponFactory.createGun(2),null);
+				ControlledCharacter scout =  new ControlledCharacter(id, team, ClassStats.classStats.get(type));
+				scout.setWeapon(WeaponFactory.createGun(2,scout));
 				scout.setAbilty(new Optics(scout));
 				scout.setPassive(new Mark(scout));
 				return scout;
 			case 2:
-				ControlledCharacter sniper =  new ControlledCharacter(id, team, ClassStats.classStats.get(type),
-						WeaponFactory.createGun(1),null);
+				ControlledCharacter sniper =  new ControlledCharacter(id, team, ClassStats.classStats.get(type));
+				sniper.setWeapon(WeaponFactory.createGun(1,sniper));
 				sniper.setAbilty(new Optics(sniper));
 				sniper.setPassive(new Overwatch(sniper));
 				return sniper;
 			case 3:
-				ControlledCharacter agent =  new ControlledCharacter(id, team, ClassStats.classStats.get(type),
-						WeaponFactory.createGun(4),null);
+				ControlledCharacter agent =  new ControlledCharacter(id, team, ClassStats.classStats.get(type));
+				agent.setWeapon(WeaponFactory.createGun(4,agent));
 				agent.setAbilty(new HearingAmplifier(agent));
 				agent.setPassive(new Backstab(agent));
 				return agent;
 			case 4:
-				ControlledCharacter gren =  new ControlledCharacter(id, team, ClassStats.classStats.get(type),
-						WeaponFactory.createGun(0),null);
+				ControlledCharacter gren =  new ControlledCharacter(id, team, ClassStats.classStats.get(type));
+				gren.setWeapon(WeaponFactory.createGun(0,gren));
 				gren.setAbilty(new ChargedAbility.ThrowFragGrenade(gren));
 				gren.setPassive(new Assault(gren));
 				return gren;
+			case 5:
+				ControlledCharacter vam =  new ControlledCharacter(id, team, ClassStats.classStats.get(type));
+				vam.setWeapon(WeaponFactory.createGun(ChangeForm.CF_HUMAN_WEAPON,vam));
+				vam.setAbilty(new ChangeForm(vam));
+				vam.setPassive(new BloodSucker(vam));
+				return vam;
 			default:
 				System.out.println("Error: Wrong type id");
 				System.exit(-1);

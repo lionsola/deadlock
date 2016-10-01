@@ -5,12 +5,7 @@ import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.Kernel;
-
-import client.image.ConvolveFilter;
-import client.image.GaussianFilter;
-import client.image.GlowFilter;
+import client.image.*;
 import server.world.Arena;
 
 /**
@@ -21,11 +16,6 @@ import server.world.Arena;
 public class ImageBlender {
 	
 	public static final GraphicsConfiguration ge = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
-	private static final float[] box77 = { 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f,
-			1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f,
-			1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f,
-			1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f, 1 / 49f };
-	private static final GaussianFilter blurOp = new GaussianFilter(10);
 
 	/**
 	 * Change the image's brightness and contrast according to given parameters. 1 means not
@@ -77,23 +67,48 @@ public class ImageBlender {
 		return dest;
 	}
 
+	/**
+	 * Change the image's brightness and contrast according to given parameters. 1 means not
+	 * changing that property.
+	 * 
+	 * @param source
+	 *            The source image to edit.
+	 * @param darkenFactor
+	 *            The factor with which the image will be darken.
+	 * @param contrast
+	 *            The factor with which the image's contrast will be increased.
+	 * @return The resulting image after processing.
+	 */
+	public static BufferedImage lightenImage(BufferedImage source, float lightenFactor) {
+		int width = source.getWidth();
+		int height = source.getHeight();
+		BufferedImage dest = ge.createCompatibleImage(width, height);
+
+		// change contrast and brightness of each pixel
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int sRGB = source.getRGB(x, y);
+				int sR = (sRGB >> 16) & 0xFF;
+				int sG = (sRGB >> 8) & 0xFF;
+				int sB = (sRGB) & 0xFF;
+
+				int dR = (int) (Math.min(255, Math.max(0, (sR+ 255*lightenFactor))));
+				int dG = (int) (Math.min(255, Math.max(0, (sG+ 255*lightenFactor))));
+				int dB = (int) (Math.min(255, Math.max(0, (sB+ 255*lightenFactor))));
+
+				int dRGB = dR << 16 | dG << 8 | dB;
+				dest.setRGB(x, y, dRGB);
+			}
+		}
+		return dest;
+	}
+	
 	public static BufferedImage glowImage(BufferedImage source, float radius, float amount) {
 		BufferedImage d = ge.createCompatibleImage(source.getWidth(),source.getHeight());
 		GlowFilter gf = new GlowFilter(radius);
 		gf.setAmount(amount);
+		gf.setEdgeAction(ConvolveFilter.WRAP_EDGES);
 		return gf.filter(source, d);
-	}
-	
-	/**
-	 * Blur the image.
-	 * 
-	 * @param The
-	 *            source image to be blurred.
-	 * @return The resulting blurred image.
-	 */
-	public static BufferedImage blurImage(BufferedImage source) {
-		BufferedImage d = ge.createCompatibleImage(source.getWidth(),source.getHeight());
-		return blurOp.filter(source, d);
 	}
 
 	public static BufferedImage drawArena(Arena a) {
@@ -101,6 +116,16 @@ public class ImageBlender {
 		Graphics2D g2D = (Graphics2D)source.getGraphics();
 		Renderer.renderDark(g2D, a, new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
 		g2D.dispose();
-		return glowImage(source,60f,0.4f);
+		return source;
+	}
+	
+	public static BufferedImage applyBackgroundEffect(BufferedImage source) {
+		BufferedImage d = ge.createCompatibleImage(source.getWidth(),source.getHeight());
+		GrayscaleFilter gf = new GrayscaleFilter();
+		return darkenImage(gf.filter(source, d),2,1);
+	}
+	
+	public static BufferedImage applyForegroundEffect(BufferedImage source) {
+		return lightenImage(glowImage(source,100f,0.4f),0.05f);
 	}
 }

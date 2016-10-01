@@ -92,7 +92,8 @@ public class AudioManager implements Runnable {
 	}
 
 	public void playSound(int id, float volume) {
-		playSound(soundMap.get(id),volume);
+		if (id!=server.world.Sound.NONE.id)
+			playSound(soundMap.get(id),volume);
 	}
 
 	/**

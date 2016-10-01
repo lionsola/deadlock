@@ -17,7 +17,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Arc2D;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -39,8 +37,6 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-import org.w3c.dom.CDATASection;
-
 import network.FullCharacterData;
 import network.GameDataPackets.InputPacket;
 import network.GameDataPackets.WorldStatePacket;
@@ -50,9 +46,9 @@ import server.world.Arena;
 import server.world.LineOfSight;
 import network.PartialCharacterData;
 import network.ProjectileData;
+import client.graphics.Animation;
 import client.graphics.AnimationSystem;
 import client.graphics.Renderer;
-import client.graphics.Sprite;
 import client.sound.AudioManager;
 
 /**
@@ -86,6 +82,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private ChatPanel chatPanel;
 	private JComponent minimap;
 	private LineOfSight lineOfSight = new LineOfSight();
+	private Renderer renderer = new Renderer();
 	private boolean playing = true;
 	private double zoomLevel = 0;
 	
@@ -145,7 +142,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		addMouseListener(this);
 		addMouseWheelListener(this);
 		initUI();
-		Renderer.init();
+		renderer.initArenaImages(arena);
 		new Thread(this).start();
 	}
 
@@ -354,29 +351,32 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		int transY = camera.getTopLeftYPixel(this);
 		g.translate(-transX, -transY);
 
-		Graphics2D g2d = (Graphics2D) g;
+		Graphics2D g2D = (Graphics2D) g;
 		RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2d.setRenderingHints(rh);
+		g2D.setRenderingHints(rh);
 
 		if (wsp != null) {
 			// render the dark part
 			Shape los = lineOfSight.generateLoS(mainCharacter, arena);
 			
-			Renderer.renderBackground(g2d,arena,camera.getDrawArea(this));
+			renderer.renderBackground(g2D,camera.getDrawArea(this));
 			FullCharacterData c = mainCharacter;
 			Arc2D arc = new Arc2D.Double(Renderer.toPixel(c.x - c.viewRange),Renderer.toPixel(c.y - c.viewRange),
 					Renderer.toPixel(c.viewRange * 2),Renderer.toPixel(c.viewRange * 2),
 					Math.toDegrees(c.direction-c.viewAngle/2), Math.toDegrees(c.viewAngle), Arc2D.PIE);
-			g2d.setClip(arc);
+			g2D.setClip(arc);
 			//g2d.setClip(Renderer.toPixel(c.x-c.viewRange), Renderer.toPixel(c.y-c.viewRange), Renderer.toPixel(c.viewRange*2),Renderer.toPixel(c.viewRange*2));
-			Renderer.renderForeground(g2d, arena, new Rectangle2D.Double(c.x-c.viewRange,c.y-c.viewRange,c.viewRange*2,c.viewRange*2));
+			Rectangle2D viewBox = getCharacterVisionBox(c.x,c.y,c.viewRange);
+			renderer.render(g2D, viewBox);
 			
 			// Renderer.renderArenaBackground(g2d, camera.getDrawArea(this));
 			
 
 			// render the light part
-			g2d.setClip(los);
+			g2D.setClip(los);
 
+			renderer.renderForeground(g2D, viewBox);
+			
 			//Renderer.render(g2d, arena,getCharacterVisionBox(mainCharacter.x, mainCharacter.y, (int)(mainCharacter.viewRange+0.5)));
 
 			ClientPlayer localPlayer = Utils.findPlayer(players, id);
@@ -384,25 +384,25 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			for (ClientPlayer data : players) {
 				if (data.id != id && data.active) {
 					PartialCharacterData ch = data.character;
-					Renderer.renderOtherCharacter(g2d, ch, data.type);
+					Renderer.renderOtherCharacter(g2D, ch, data.type);
 				}
 			}
 
 			for (ProjectileData data : wsp.projectiles) {
-				Renderer.renderProjectile(g2d,data);
+				Renderer.renderProjectile(g2D,data);
 			}
 
-			visualAnimations.render(g2d);
+			visualAnimations.render(g2D);
 			// g2d.drawImage(light,mainCharacter.x-mainCharacter.viewRange,mainCharacter.y-mainCharacter.viewRange,mainCharacter.viewRange*2,mainCharacter.viewRange*2,
 			// null);
-			g2d.setClip(null);
-			globalAnimations.render(g2d);
-			Renderer.renderLOS(g2d, los);
-			Renderer.renderMainCharacter(g2d, mainCharacter, localPlayer);
+			g2D.setClip(null);
+			globalAnimations.render(g2D);
+			//Renderer.renderLOS(g2D, los);
+			Renderer.renderMainCharacter(g2D, mainCharacter, localPlayer);
 		}
-		Renderer.renderCrosshair(g2d,input.cx,input.cy,mainCharacter.crosshairSize);
+		Renderer.renderCrosshair(g2D,input.cx,input.cy,mainCharacter.crosshairSize);
 		g.translate(transX, transY);
-		g2d.drawString("FPS: "+FPS, 10, 10);
+		g2D.drawString("FPS: "+FPS, 10, 10);
 	}
 
 	private Rectangle2D getCharacterVisionBox(double x, double y, double viewRange) {
@@ -519,7 +519,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			// TODO Auto-generated method stub
 			String text = value.name + "     " + value.kills + "     " + value.deaths;
 			ClientPlayer localPlayer = Utils.findPlayer(players, id);
-			JLabel player = new JLabel(text, new ImageIcon(Sprite.getImage(value.type, value.team == localPlayer.team ? 1 : 0)),
+			JLabel player = new JLabel(text/*, new ImageIcon(Sprite.getImage(value.type, value.team == localPlayer.team ? 1 : 0))*/,
 					SwingConstants.LEFT);
 			player.setForeground(Color.WHITE);
 			player.setFont(GUIFactory.font_s);
@@ -554,10 +554,15 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				});
 			} else if (event instanceof SoundEvent) {
 				SoundEvent e = (SoundEvent) event;
-				float volume = server.world.Utils.getVolumeAtDistance(e.volume, Point2D.distance(e.x, e.y, mainCharacter.x, mainCharacter.y));
-				globalAnimations.addNoiseAnimation(e.x, e.y, volume);
-				audioManager.playSound(e.id,volume);
+				globalAnimations.addNoiseAnimation(e.x, e.y, e.volume);
+				audioManager.playSound(e.id,e.volume);
 				
+			} else if (event instanceof AnimationEvent) {
+				AnimationEvent e = (AnimationEvent) event;
+				visualAnimations.addAnimation(e);
+				if (e.id==Animation.BLOOD) {
+					renderer.addBloodToArena(e.x, e.y, e.direction);
+				}
 			} else if (event instanceof GameEndEvent) {
 				playing = false;
 				game.setScreen(new MainMenuScreen(game));

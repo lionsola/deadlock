@@ -11,9 +11,6 @@ import network.GameEvent.AnimationEvent;
 /**
  * Manage the animation effects and provide high-level methods to create new animations in the game
  * without having to deal with low-level animation classes.
- * 
- * @author Anh Pham
- * @author Shobitha Shivakumar
  */
 public class AnimationSystem {
 	
@@ -51,10 +48,10 @@ public class AnimationSystem {
 	 * @param direction
 	 */
 	public void addShotAnimation(double x, double y, double direction) {
-		for (int i = 0; i < 6; i++) {
-			double randomDirection = direction + 2 * server.world.Utils.random().nextGaussian() / 5;
-			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.1, 0.2, 300, Color.WHITE);
-			p.setGrowth(-0.4, -0.4);
+		for (int i = 0; i < 5; i++) {
+			double randomDirection = direction + (Math.PI/6) * server.world.Utils.random().nextGaussian() / 2;
+			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.05, 0.15, 50, Color.WHITE);
+			p.setGrowth(-0.002, -0.002);
 			p.setSizeDefault(true);
 			animations.add(p);
 		}
@@ -68,11 +65,11 @@ public class AnimationSystem {
 	 * @param y
 	 *            The y coordinate of the animation.
 	 */
-	public void addBloodAnimation(double x, double y) {
+	public void addBloodAnimation(double x, double y, double direction) {
 		for (int i = 0; i < 5; i++) {
-			double randomDirection = server.world.Utils.random().nextDouble() * Math.PI * 2;
-			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.1, 0.2, 500, Color.RED);
-			p.setGrowth(-0.5, -0.5);
+			double randomDirection = server.world.Utils.random().nextGaussian() * Math.PI * 2;
+			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.01, 0.2, 200, Color.RED);
+			p.setGrowth(-0.001, -0.001);
 			p.setSizeDefault(true);
 			animations.add(p);
 		}
@@ -100,7 +97,16 @@ public class AnimationSystem {
 	public void addAnimation(AnimationEvent e) {
 		switch(e.id) {
 			case Animation.GUNSHOT:
-				addShotAnimation(e.x,e.y,e.rotation);
+				addShotAnimation(e.x,e.y,e.direction);
+				break;
+			case Animation.BLOOD:
+				addBloodAnimation(e.x,e.y,e.direction);
+				break;
+			case Animation.ENEMYMARK:
+				addCustomAnimation(new ExpandingCircleAnimation(e.x,e.y,2,500, 0,Color.RED));
+			default:
+				System.err.println("");
+				break;
 		}
 	}
 	

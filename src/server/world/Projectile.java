@@ -92,8 +92,6 @@ public abstract class Projectile {
 			return;
 		}
 		
-		Tile nohitTile = null;
-		
 		int checks = (int)Math.ceil(speed*GameWindow.MS_PER_UPDATE/Geometry.LINE_SAMPLE_THRESHOLD);
 		
 		for (int i=0;i<checks && !isConsumed();i++) {
@@ -121,13 +119,7 @@ public abstract class Projectile {
 			int tileY = (int) (y / Tile.tileSize);
 			Tile t = w.getArena().get(tileX, tileY);
 			if (!t.isWalkable()) {
-				onHitWall(w,getX(),getY());
-				if (t!=nohitTile){
-					w.addSound(Sound.BULLETWALL,x,y);
-					nohitTile = t;
-				}
-			} else {
-				nohitTile = null;
+				onHitWall(w,x,y,t);	
 			}
 		}
 	}
@@ -142,9 +134,7 @@ public abstract class Projectile {
 		return data;
 	}
 	
-	protected abstract void onHitWall(World w, double x, double y);
-	
-	protected abstract void onHitDestination(World w);
+	protected abstract void onHitWall(World w, double x, double y, Tile t);
 
 	protected abstract void onHitCharacter(World w, ControlledCharacter ch, double x, double y);
 	

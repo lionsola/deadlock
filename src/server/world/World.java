@@ -2,19 +2,16 @@ package server.world;
 
 
 import java.awt.Point;
-import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import network.GameDataPackets.WorldStatePacket;
-import network.GameEvent;
-import network.GameEvent.SoundEvent;
+import network.GameEvent.AnimationEvent;
 import server.character.Character;
 import server.character.ControlledCharacter;
 import network.GameEvent.GameEventListener;
-import network.GameEvent.PowerUpPickedUpEvent;
 import network.PartialCharacterData;
 import network.ProjectileData;
 
@@ -27,7 +24,8 @@ import network.ProjectileData;
 public class World {
 	
 	private Arena arena;
-	private List<ControlledCharacter> characters = new ArrayList<ControlledCharacter>();;
+	private List<ControlledCharacter> characters = new ArrayList<ControlledCharacter>();
+	private List<Character> npcs = new LinkedList<Character>();
 	
 	private List<Projectile> projectiles = new LinkedList<Projectile>();
 	private List<Projectile> newProjectiles = new LinkedList<Projectile>();
@@ -43,12 +41,6 @@ public class World {
 	public World(Arena arena, GameEventListener listener) {
 		this.arena = arena;
 		this.listener = listener;
-		
-		// Hostage h = new Hostage(0);
-		// Point spawn = randomizeSpawnPoint(1);
-		// h.setX(spawn.x * Tile.tileSize);
-		// h.setY(spawn.y * Tile.tileSize);
-		// hostages.add(h);
 	}
 
 	/**
@@ -64,7 +56,9 @@ public class World {
 		characters.add(p);
 	}
 
-
+	public void addNPC(Character npc) {
+		npcs.add(npc);
+	}
 
 	/**
 	 * Randomize the spawn points of a given team
@@ -89,15 +83,25 @@ public class World {
 	}
 	
 	public void addSound(Sound s, double x, double y) {
-		listener.onEventReceived(new SoundEvent(x, y, s.volume, s.id));
+		addSound(s.id,s.volume,x,y);
 	}
 
 	public void addSound(int id, double volume, double x, double y) {
-		listener.onEventReceived(new SoundEvent(x, y, volume, id));
+		for (Character ch:characters) {
+			ch.filterSound(id, volume, x, y);
+		}
 	}
 	
-	public void addAnimation(double id, double x, double y, double rot) {
-		
+	public void addAnimation(int id, double x, double y, double direction) {
+		for (Character ch:characters) {
+			ch.filterVisualAnimation(id, x, y, direction);
+		}
+	}
+	
+	public void addGlobalAnimation(int id, double x, double y, double rot) {
+		for (Character ch:characters) {
+			ch.getPerception().events.add(new AnimationEvent(id,x,y,rot));
+		}
 	}
 	
 	/**
@@ -110,6 +114,14 @@ public class World {
 			p.update(this);
 		}
 
+		// update npcs
+		List<Character> expired = new LinkedList<Character>();
+		for (Character npc : npcs) {
+			//if (npc.)
+			npc.update(this);
+		}
+		npcs.removeAll(expired);
+		
 		// update projectiles
 		List<Projectile> outOfRange = new LinkedList<Projectile>();
 		for (Projectile p : projectiles) {
@@ -153,19 +165,6 @@ public class World {
 		for (ControlledCharacter character : characters) {
 			wsp.characters.add(character.generatePartial());
 		}
-
-		/*
-		wsp.hostages = new LinkedList<PartialCharacterData>();
-		for (Hostage hostage : hostages) {
-			PartialCharacterData data = new PartialCharacterData();
-			data.id = -1;
-			data.x = (float) hostage.getX();
-			data.y = (float) hostage.getY();
-			data.healthPoints = (float) hostage.getHealthPoints();
-			data.radius = (byte) hostage.getRadius();
-			wsp.hostages.add(data);
-		}
-*/
 		
 		wsp.projectiles = new LinkedList<ProjectileData>();
 		for (Projectile projectile : projectiles) {
@@ -173,84 +172,6 @@ public class World {
 		}
 
 		return wsp;
-	}
-
-	/**
-	 * Filter out the data about entities / events that are outside one server.character's vision
-	 * 
-	 * @param globalState
-	 *            The global state of the world to be filtered.
-	 * @param ch
-	 *            The server.character that will get the resulting state.
-	 * @return The filtered world state.
-	 */
-	public WorldStatePacket filter(WorldStatePacket globalState, int id) {
-		ControlledCharacter ch = null;
-		for (ControlledCharacter cc : characters) {
-			if (cc.id == id) {
-				ch = cc;
-			}
-		}
-		if (ch == null) {
-			System.out.println("Invalid server.character Id passed into filter");
-			System.exit(-1);
-		}
-		// create a new copy
-		WorldStatePacket localState = new WorldStatePacket();
-
-		Area los = ch.getLoS(arena);
-
-		// copy the characters over if they are in line of sight
-		localState.characters = new LinkedList<PartialCharacterData>();
-		for (PartialCharacterData data : globalState.characters) {
-			// if (Point.distance(ch.getX(),ch.getY(),c.x,c.y)<ch.getViewRange()+10)
-			if (data.id!=id && los.intersects(data.x - data.radius, data.y - data.radius, data.radius * 2, data.radius * 2)) {
-				localState.characters.add(data);
-			}
-		}
-
-		/*
-		// copy the hostages over if they are in line of sight
-		localState.hostages = new LinkedList<PartialCharacterData>();
-		for (PartialCharacterData data : globalState.hostages) {
-			double distance = Point2D.distance(ch.getX(), ch.getY(), data.x, data.y);
-			if (distance < ch.getFovRange() + 10) {
-				localState.hostages.add(data);
-			}
-		}
-*/
-		// copy the projectiles over if they are in line of sight
-		localState.projectiles = new LinkedList<ProjectileData>();
-		for (ProjectileData data : globalState.projectiles) {
-			if (los.contains(data.x, data.y)) {
-				localState.projectiles.add(data);
-			}
-		}
-
-
-		// copy the events over if they should be known by the player
-		// i.e in view / listen range.
-		localState.events = new LinkedList<GameEvent>();
-		for (GameEvent event : globalState.events) {
-			if (event instanceof SoundEvent) {
-				SoundEvent e = (SoundEvent) event;
-				double distance = Point2D.distance(e.x, e.y, ch.getX(), ch.getY());
-				float volume = server.world.Utils.getVolumeAtDistance(e.volume, distance);
-				if (volume >= ch.getHearThres())
-					localState.events.add(e);
-			} else if (event instanceof PowerUpPickedUpEvent) {
-				PowerUpPickedUpEvent e = (PowerUpPickedUpEvent) event;
-				if (e.id == id) {
-					localState.events.add(e);
-				}
-			} else {
-				localState.events.add(event);
-			}
-		}
-		localState.time = globalState.time;
-		localState.player = ch.generate();
-		localState.chatTexts = globalState.chatTexts;
-		return localState;
 	}
 
 	/**
@@ -291,4 +212,9 @@ public class World {
 	public List<ControlledCharacter> getCharacters() {
 		return new LinkedList<ControlledCharacter>(characters);
 	}
+
+	public List<Projectile> getProjectiles() {
+		return projectiles;
+	}
 }
+

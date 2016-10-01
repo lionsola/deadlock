@@ -5,8 +5,8 @@ import server.character.ControlledCharacter;
 import server.world.World;
 
 public class Optics extends ToggleAbility {
-	public static final double BINO_RANGE = 0.5;
-	public static final double BINO_ANGLE = -0.5;
+	public static final double BINO_RANGE = 0.7;
+	public static final double BINO_ANGLE = -0.7;
 	public static final double BINO_SPEED = -0.5;
 	public static final double BINO_TRANS = 500;
 	public static final long COOLDOWN = 4000;

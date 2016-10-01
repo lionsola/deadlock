@@ -15,8 +15,6 @@ import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 
-import client.graphics.ImageBlender;
-
 /**
  * Class used to model an Arena - the Arena is what the characters will fight in and what they will
  * move around in.
@@ -40,9 +38,6 @@ public class Arena {
 	private List<Point> t2Spawns; // spawn points of team 2
 	private List<Point> lightList;
 	private Area lightMap;
-	
-	public BufferedImage image;
-	public BufferedImage darkImage;
 	
 	/**
 	 * Creating a new Arena
@@ -91,10 +86,6 @@ public class Arena {
 		} catch (Exception e) {
 			System.err.println("Error while reading map");
 			e.printStackTrace();
-		}
-		if (loadGraphics) {
-			image = ImageBlender.drawArena(this);
-			darkImage = ImageBlender.darkenImage(ImageBlender.blurImage(image), 3, 1);
 		}
 	}
 

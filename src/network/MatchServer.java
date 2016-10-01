@@ -79,6 +79,7 @@ public class MatchServer implements Runnable, GameEventListener {
 			}
 			ControlledCharacter character = CharacterFactory.newCharacter(p.id, p.team, p.type);
 			world.addPlayer(character);
+			p.setCharacter(character);
 			new Thread(new InputReceiver(p, character)).start();
 		}
 	}
@@ -163,8 +164,13 @@ public class MatchServer implements Runnable, GameEventListener {
 		wsp.chatTexts = chatTexts;
 		// Send world data to players
 		for (ServerPlayer p : players) {
-			WorldStatePacket filteredState = world.filter(wsp, p.id);
-			p.sendWorldState(filteredState);
+			WorldStatePacket per = p.character.getPerception();
+			per.chatTexts  = chatTexts;
+			per.events.addAll(wsp.events);
+			per.time = wsp.time;
+			per.player = p.character.generate();
+			p.sendData(per);
+			per.events.clear();
 		}
 		events = new LinkedList<GameEvent>();
 		chatTexts = new LinkedList<String>();

@@ -44,10 +44,10 @@ public abstract class GameEvent implements Serializable {
 		public final float volume;
 		public final byte id;
 
-		public SoundEvent(double x, double y, double noise, int id) {
+		public SoundEvent(int id, double volume, double x, double y) {
 			this.x = (float)x;
 			this.y = (float)y;
-			this.volume = (float)noise;
+			this.volume = (float)volume;
 			this.id = (byte)id;
 		}
 	}
@@ -56,13 +56,13 @@ public abstract class GameEvent implements Serializable {
 		private static final long serialVersionUID = 991627988551330392L;
 		public final float x;
 		public final float y;
-		public final float rotation;
+		public final float direction;
 		public final byte id;
 		
 		public AnimationEvent(int id, double x, double y, double rotation) {
 			this.x = (float)x;
 			this.y = (float)y;
-			this.rotation = (float)rotation;
+			this.direction = (float)rotation;
 			this.id = (byte) id;
 		}
 	}

@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
+import client.gui.GameWindow;
+
 /**
  * Creates 2D particles and enables their movement.
  * 
@@ -53,6 +55,9 @@ public class ParticleAnimation extends BasicAnimation {
 		this.growth = new Vector2D(0, 0);
 		this.maxSize = new Vector2D(Double.MAX_VALUE, Double.MAX_VALUE);
 		this.color = c;
+		acc.mult(GameWindow.MS_PER_UPDATE);
+		vel.mult(GameWindow.MS_PER_UPDATE);
+		growth.mult(GameWindow.MS_PER_UPDATE);
 	}
 
 	/**
@@ -201,8 +206,8 @@ public class ParticleAnimation extends BasicAnimation {
 	 *            change in the y coordinate of the growth of the particle.
 	 */
 	public void setGrowth(double x, double y) {
-		growth.x = x;
-		growth.y = y;
+		growth.x = x*GameWindow.MS_PER_UPDATE;
+		growth.y = y*GameWindow.MS_PER_UPDATE;
 	}
 
 	/**

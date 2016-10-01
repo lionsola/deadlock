@@ -68,7 +68,7 @@ public class AIPlayer extends ServerPlayer {
 	}
 
 	@Override
-	public void sendWorldState(WorldStatePacket wsp) {
+	public void sendData(WorldStatePacket wsp) {
 		this.wsp = wsp;
 	}
 
@@ -237,7 +237,7 @@ public class AIPlayer extends ServerPlayer {
 			System.out.println("Can't find an empty tile from " + new Point(tileX0, tileY0) + " to " + new Point(tileX1, tileY1));
 			return null;
 		} else {
-			return server.world.Utils.tileToMeter(emptyTiles.get(server.world.Utils.random().nextInt(emptyTiles.size())));
+			return Utils.tileToMeter(emptyTiles.get(Utils.random().nextInt(emptyTiles.size())));
 		}
 	}
 

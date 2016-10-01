@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 
 import javax.imageio.ImageIO;
 
+import server.world.Utils;
+
 public class Sprite {
 	public static final int MAXTYPE = 4;
 	private static Image COMMANDO_RED;
@@ -18,9 +20,14 @@ public class Sprite {
 	private static Image TANK_GREEN;
 	private static Image SPECOPS_GREEN;
 	private static Image[][] images = new Image[5][2];
+	private static Image[] BLOOD = new Image[4];
 
 	public static void initImage() {
 		try {
+			for (int i=0;i<BLOOD.length;i++) {
+				BLOOD[i] = ImageIO.read(new FileInputStream("resource/animation/blood"+i+".png"));
+			}
+			
 			COMMANDO_RED = ImageIO.read(new FileInputStream("resource/character/commando_red.png"));
 			SCOUT_RED = ImageIO.read(new FileInputStream("resource/character/scout_red.png"));
 			SNIPER_RED = ImageIO.read(new FileInputStream("resource/character/sniper_red.png"));
@@ -63,7 +70,11 @@ public class Sprite {
 	 *            used to select the appropriate image based on the characters team.
 	 * @return
 	 */
-	public static Image getImage(int type, int color) {
-		return images[type][color];
+	//public static Image getImage(int type, int color) {
+	//	return images[type][color];
+	//}
+	
+	public static Image getBloodImage() {
+		return BLOOD[Utils.random().nextInt(BLOOD.length)];
 	}
 }

@@ -17,13 +17,13 @@ public class Backstab extends Passive {
 	@Override
 	protected void onDeactivate(World w) {
 		self().addNoiseMod(-BS_NOISE);
-		self().getPrimary().addRecoilMod(- self().getPrimary().type.instability*BS_RECOIL);
+		self().getWeapon().addRecoilMod(- self().getWeapon().type.instability*BS_RECOIL);
 	}
 
 	@Override
 	protected void onActivate(World w) {
 		self().addNoiseMod(+BS_NOISE);
-		self().getPrimary().addRecoilMod(+ self().getPrimary().type.instability*BS_RECOIL);
+		self().getWeapon().addRecoilMod(+ self().getWeapon().type.instability*BS_RECOIL);
 	}
 
 	@Override

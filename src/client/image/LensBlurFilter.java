@@ -4,10 +4,7 @@
 
 package client.image;
 
-import java.awt.*;
-import java.awt.geom.*;
 import java.awt.image.*;
-import java.awt.color.*;
 
 public class LensBlurFilter extends AbstractBufferedImageOp {
     
@@ -67,8 +64,8 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
         int tileWidth = 128;
         int tileHeight = tileWidth;
 
-        int adjustedWidth = (int)(width + iradius*2);
-        int adjustedHeight = (int)(height + iradius*2);
+        //int adjustedWidth = (int)(width + iradius*2);
+        //int adjustedHeight = (int)(height + iradius*2);
 
 		tileWidth = iradius < 32 ? Math.min(128, width+2*iradius) : Math.min(256, width+2*iradius);
 		tileHeight = iradius < 32 ? Math.min(128, height+2*iradius) : Math.min(256, height+2*iradius);

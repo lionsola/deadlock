@@ -8,7 +8,7 @@ import client.graphics.ImageBlender;
 
 /**
  * Represent the properties and data of one type of tile. Note that there is only one tile object
- * for each type, the tile map in Arena just keep reference to them. The network does not need the
+ * for each type, the tile map in Arena just keep reference to them. The server-side does not need the
  * images, so a network-side tile only use the property fields.
  * 
  * @author Anh Pham
@@ -21,8 +21,6 @@ public class Tile {
 	final boolean transparent;
 	final Color color; 
 	final private BufferedImage tileImage;
-	final private BufferedImage tileImageDark;
-	final private BufferedImage tileImageLight;
 
 	/**
 	 * Constructor. Note that this constructor should only be used for the client, since the network
@@ -42,14 +40,10 @@ public class Tile {
 		
 		if (transparent) {
 			this.tileImage = ImageBlender.darkenImage(tileImage, 1.2f, 2);
-			this.tileImageDark = ImageBlender.blurImage(ImageBlender.darkenImage(tileImage, 6, 3));
-			this.tileImageLight = ImageBlender.darkenImage(tileImage, 1f, 2);
 		} else {
 			// the solid tiles will not have lighting effects on them,
 			// so no need to have different tile images.
 			this.tileImage = tileImage;//ImageBlender.darkenImage(tileImage, 6, 3);
-			this.tileImageDark = null;
-			this.tileImageLight = null;
 		}
 	}
 
@@ -67,8 +61,6 @@ public class Tile {
 		this.transparent = transparent;
 		this.color = null;
 		this.tileImage = null;
-		this.tileImageDark = null;
-		this.tileImageLight = null;
 	}
 
 	/**
@@ -100,24 +92,6 @@ public class Tile {
 	 */
 	public Image getImage() {
 		return tileImage;
-	}
-
-	/**
-	 * Get a darken image for this tile.
-	 * 
-	 * @return
-	 */
-	public Image getImageDark() {
-		return tileImageDark != null ? tileImageDark : tileImage;
-	}
-
-	/**
-	 * Get a lighten image for this tile.
-	 * 
-	 * @return
-	 */
-	public Image getImageLight() {
-		return tileImageLight != null ? tileImageLight : tileImage;
 	}
 	
 }

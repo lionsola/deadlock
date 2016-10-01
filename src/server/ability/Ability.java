@@ -31,4 +31,8 @@ public abstract class Ability {
 	protected ControlledCharacter self() {
 		return self;
 	}
+	
+	public double getCooldownPercent() {
+		return Math.min(1,1.0*cooldownTimer/cooldown);
+	}
 }

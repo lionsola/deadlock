@@ -2,7 +2,7 @@ package server.weapon;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import server.character.ControlledCharacter;
@@ -11,12 +11,12 @@ import server.world.World;
 public class WeaponFactory {
 	public static void initWeapons() {
 		if (weaponTypes==null){
-			weaponTypes = new ArrayList<WeaponType>();
+			weaponTypes = new HashMap<Integer,WeaponType>();
 			Scanner sc = null;
 			try {
 				sc = new Scanner(new File("resource/weapon/gunStats"));
 				while(sc.hasNext()) {
-					weaponTypes.add(new WeaponType(
+					WeaponType type = new WeaponType(
 							sc.nextInt(),
 							sc.nextInt(),
 							sc.nextDouble(),
@@ -29,7 +29,8 @@ public class WeaponFactory {
 							sc.nextInt(),
 							sc.nextInt(),
 							sc.nextInt(),
-							sc.nextInt()));
+							sc.nextInt());
+					weaponTypes.put(type.weaponId,type);
 				}
 				sc.close();
 			} catch (IOException e) {
@@ -45,16 +46,16 @@ public class WeaponFactory {
 		}
 	}
 	
-	private static ArrayList<WeaponType> weaponTypes;
+	private static HashMap<Integer, WeaponType> weaponTypes;
 	
 	public static WeaponType getWeaponData(int weaponID) {
 		return weaponTypes.get(weaponID);
 	}
 	
-	public static Weapon createGun(int weaponID) {
+	public static Weapon createGun(int weaponID, ControlledCharacter self) {
 		WeaponType type = weaponTypes.get(weaponID);
 		if (type.weaponType==1) {
-			return new Weapon(type) {
+			return new Weapon(self,type) {
 				@Override
 				public void fire(World w, ControlledCharacter c, double direction) {
 					for (int i=0;i<type.bulletsNo;i++) {
@@ -63,19 +64,19 @@ public class WeaponFactory {
 				}
 			};
 		} else if (type.weaponType==2) {
-			return new Weapon(type) {
+			return new Weapon(self,type) {
 				@Override
 				public void fire(World w, ControlledCharacter c, double direction) {
-					double gunDirection = disperseDirection(direction);
+					double gunDirection = direction;
 					for (int i=0;i<type.bulletsNo;i++) {
-						double bulletDirection = i*type.gunDispersion/type.bulletsNo-type.gunDispersion/2;
+						double bulletDirection = 2*type.gunDispersion*(i/(type.bulletsNo-1.0)-0.5);
 						fireOneBullet(w,c,gunDirection+bulletDirection);
 					}
 				}
 			};
 		}
 		else {
-			return new Weapon(type) {
+			return new Weapon(self,type) {
 				@Override
 				protected void fire(World w, ControlledCharacter c, double direction) {
 					super.fireOneBullet(w, c, disperseDirection(direction));

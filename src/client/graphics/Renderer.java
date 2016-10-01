@@ -12,7 +12,6 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.geom.Arc2D;
-import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -38,8 +37,31 @@ public class Renderer {
 	public static final double HEALTHBAR_WIDTH = 0.25;
 	private static Color defaultColor = Color.WHITE;
 	private static final Color[] teamColors = {Color.GREEN,Color.RED};
-	public static void init() {
-
+	
+	private BufferedImage darkArenaImage;
+	private BufferedImage arenaImage;
+	private BufferedImage lightArenaImage;
+	
+	public void initArenaImages(Arena arena) {
+		arenaImage = ImageBlender.drawArena(arena);
+		//darkImage = ImageBlender.darkenImage(ImageBlender.blurImage(image), 3, 1);
+		darkArenaImage = ImageBlender.applyBackgroundEffect(arenaImage);
+		lightArenaImage = ImageBlender.applyForegroundEffect(arenaImage);
+	}
+	
+	public void addBloodToArena(double x, double y, double direction) {
+		Graphics2D g2d = (Graphics2D) lightArenaImage.getGraphics();
+		g2d.rotate(-direction,toPixel(x),toPixel(y));
+		double bw = 2;
+		drawImage(g2d,Sprite.getBloodImage(),x+bw/4,y-bw/2,bw,bw);
+		g2d.rotate(direction,toPixel(x),toPixel(y));
+		g2d.dispose();
+	}
+	
+	public void dispose() {
+		darkArenaImage = null;
+		arenaImage = null;
+		lightArenaImage = null;
 	}
 	
 	public static void renderMainCharacter(Graphics2D g2D, FullCharacterData player, ClientPlayer playerInfo) {
@@ -92,8 +114,6 @@ public class Renderer {
 		Point2D p2 = Geometry.PolarToCartesian(r*1.5, direction);
 		drawLine(g2D,x+p1.getX(),y-p1.getY(),x+p2.getX(),y-p2.getY());
 		
-		double sqrt = (r / 1.4);
-		//drawImage(g2D,Sprite.getImage(typeId, team), x - sqrt, y - sqrt, 2 * sqrt, 2 * sqrt);
 		g2D.setStroke(new BasicStroke(1));
 	}
 
@@ -156,12 +176,16 @@ public class Renderer {
 		g2D.draw(los);
 	}
 	
-	public static void renderBackground(Graphics2D g2D, Arena a, Rectangle2D window) {
-		drawImage(g2D, a.darkImage, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
+	public void renderBackground(Graphics2D g2D, Rectangle2D window) {
+		drawImage(g2D, darkArenaImage, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
 	}
 	
-	public static void renderForeground(Graphics2D g2D, Arena a, Rectangle2D window) {
-		drawImage(g2D, a.image, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
+	public void render(Graphics2D g2D, Rectangle2D window) {
+		drawImage(g2D, arenaImage, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
+	}
+	
+	public void renderForeground(Graphics2D g2D, Rectangle2D window) {
+		drawImage(g2D, lightArenaImage, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
 	}
 	
 	public static void renderDark(Graphics2D g2D, Arena a, Rectangle2D window) {
@@ -220,36 +244,6 @@ public class Renderer {
 				}
 			}
 		}
-		
-	}
-	
-	public static void render(Graphics2D g2D, Arena a, Rectangle2D window) {
-		
-		double tileSize = Tile.tileSize;
-		int x1 = Math.max(0, (int) (window.getX() / tileSize));
-		int y1 = Math.max(0, (int) (window.getY() / tileSize));
-		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (window.getWidth() / tileSize) + 1);
-		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (window.getHeight() / tileSize) + 1);
-		for (int x = x1; x <= x2; x++) {
-			for (int y = y1; y <= y2; y++) {
-				Image image = a.get(x, y).getImage();
-				drawImage(g2D,image,x * tileSize,y * tileSize,tileSize,tileSize);
-			}
-		}
-		
-		Shape currentClip = g2D.getClip();
-		Area tempClip = new Area(currentClip);
-		//tempClip.intersect(arena.getLightMap());
-		g2D.setClip(tempClip);
-
-		for (int x = x1; x <= x2; x++) {
-			for (int y = y1; y <= y2; y++) {
-				Image image = a.get(x, y).getImageLight();
-				drawImage(g2D,image, x * tileSize, y * tileSize, tileSize, tileSize);
-			}
-		}
-		
-		g2D.setClip(currentClip);
 		
 	}
 	

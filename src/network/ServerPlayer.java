@@ -7,6 +7,7 @@ import java.net.Socket;
 
 import network.GameDataPackets.InputPacket;
 import network.GameDataPackets.WorldStatePacket;
+import server.character.ControlledCharacter;
 
 /**
  * ServerPlayer acts as an intermediate layer for the Server to communicate
@@ -24,6 +25,7 @@ public class ServerPlayer {
     public int kills = 0;
     public int deaths = 0;
     public Socket socket;
+    public ControlledCharacter character;
     
     /**
      * Constructor.
@@ -64,7 +66,7 @@ public class ServerPlayer {
      * Send world state to a player.
      * @param wsp The state to be sent, already filtered for this player.
      */
-    public void sendWorldState(WorldStatePacket wsp) {
+    public void sendData(WorldStatePacket wsp) {
         try {
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             out.writeObject(wsp);
@@ -72,5 +74,9 @@ public class ServerPlayer {
             System.out.println("Exception when trying to send data to player " + socket.getRemoteSocketAddress());
             e.printStackTrace();
         }
+    }
+    
+    public void setCharacter(ControlledCharacter c) {
+    	this.character = c;
     }
 }

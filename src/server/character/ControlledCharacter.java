@@ -1,9 +1,7 @@
 package server.character;
 
 import network.FullCharacterData;
-import network.PartialCharacterData;
 import network.GameDataPackets.InputPacket;
-import network.GameDataPackets.WorldStatePacket;
 import server.ability.Ability;
 import server.passive.Passive;
 import server.weapon.Weapon;
@@ -22,11 +20,6 @@ import client.gui.GameWindow;
  * Characters have to behave.
  * 
  * A <code>ControlledCharacter</code> also uses a specific set of <code>Weapons</code>.
- * 
- * @see Weapon
- * @author Team D1
- * @author Connor Cartwright
- *
  */
 public class ControlledCharacter extends Character {
 	public enum MovementMode {WALK,SNEAK,STOP}
@@ -39,10 +32,6 @@ public class ControlledCharacter extends Character {
 
 	private double instaF = 1;
 	
-	
-	public final int id; // the player's ID
-
-	public final int team; // the team the player is on
 
 	private int typeID; // the type of the server.character, e.g. Sniper
 
@@ -88,7 +77,7 @@ public class ControlledCharacter extends Character {
 	private Passive passive;
 	
 	private InputPacket input = new InputPacket();
-	private WorldStatePacket perception = new WorldStatePacket();
+	
 
 	/**
 	 * Creating a new controlled server.character
@@ -118,23 +107,16 @@ public class ControlledCharacter extends Character {
 	 * @param secondary
 	 *            the server.character secondary server.weapon
 	 */
-	protected ControlledCharacter(int id, int team, ClassStats cs, Weapon weapon, Ability ability) {
-		super(cs);
-		this.id = id;
-		this.team = team;
-
-		// this.initialStamina = stamina;
-		// this.initialRadius = radius;
-		// this.initialSpeed = speed;
-		// this.initialViewAngle = viewAngle;
-		// this.initialViewRange = viewRange;
+	protected ControlledCharacter(int id, int team, ClassStats cs, Weapon weapon, Ability ability, Passive passive) {
+		super(cs,id,team);
 
 		this.primary = weapon;
 		this.ability = ability;
+		this.passive = passive;
 	}
 
 	protected ControlledCharacter(int id, int team, ClassStats cs) {
-		this(id,team,cs,null,null);
+		super(cs,id,team);
 	}
 	
 	/**
@@ -151,6 +133,7 @@ public class ControlledCharacter extends Character {
 		// apply collision detection to correct the movement vector
 		super.updateCollision(world);
 		
+		super.updatePerception(world);
 		
 		if (passive!=null)
 			passive.update(world);
@@ -171,21 +154,9 @@ public class ControlledCharacter extends Character {
 		addDispersion(instaF*MOVEMENT_DISPERSION_FACTOR*getCurrentSpeed()*GameWindow.MS_PER_UPDATE);
 		addDispersion(-DISPERSION_DEC*(0.5+charDispersion));
 	}
-	
-	/**
-	 * Update the cursor position on screen
-	 * 
-	 * @param cx2
-	 *            cursor x position
-	 * @param cy2
-	 *            cursor y position
-	 */
-	public void updateCursor(float cx2, float cy2) {
-		
-	}
 
 	public double getCrosshairSize() {
-		double angle = charDispersion*MAX_DISPERSION_ANGLE+getPrimary().type.gunDispersion;
+		double angle = charDispersion*MAX_DISPERSION_ANGLE+getWeapon().type.gunDispersion;
 		return Math.tan(angle)*Point2D.distance(getX(),getY(),cx,cy);
 	}
 	
@@ -198,7 +169,7 @@ public class ControlledCharacter extends Character {
 	 * 
 	 * @return the primary server.weapon of the server.character
 	 */
-	public Weapon getPrimary() {
+	public Weapon getWeapon() {
 		return primary;
 	}
 
@@ -260,7 +231,7 @@ public class ControlledCharacter extends Character {
 		
 		double diffAngle = Math.abs(Geometry.wrapAngle(getMovingDirection()-getDirection()));
 		double ratio = (Math.PI/2 - diffAngle)/(Math.PI/2);
-		double speed = getSpeed()*(1+ratio*0.25);
+		double speed = getSpeed()*(1+ratio*0.2);
 		setDx(dx*speed);
 		setDy(dy*speed);
 	}
@@ -281,9 +252,7 @@ public class ControlledCharacter extends Character {
 		if (primary.isReady())
 			fc.reloadPercent = 1;
 		else {
-			float cooldownPercent = (float)primary.timeSinceFire() / primary.type.cooldown;
-			float reloadPercent = (float)primary.timeSinceReload() / primary.type.reloadTime;
-			fc.reloadPercent = Math.min(cooldownPercent, reloadPercent);
+			fc.reloadPercent = (float)primary.getCooldownPercent();
 		}
 		fc.direction = (float) getDirection();
 		fc.viewAngle = (float) getFovAngle();
@@ -298,22 +267,6 @@ public class ControlledCharacter extends Character {
 		return fc;
 	}
 
-	public PartialCharacterData generatePartial() {
-		PartialCharacterData data = new PartialCharacterData();
-		data.id = (short) id;
-		data.team = (byte) team;
-		data.x = (float) getX();
-		data.y = (float) getY();
-		data.healthPoints = (float) getHealthPoints();
-		data.radius = (float) getRadius();
-		data.direction = (float) getDirection();
-		if (getArmor()!=null) {
-			data.armorAngle = (float)getArmor().getAngle();
-			data.armorStart = (float)getArmor().getStart();
-		}
-		return data;
-	}
-	
 	
 
 	public InputPacket getInput() {
@@ -324,25 +277,18 @@ public class ControlledCharacter extends Character {
 		charDispersion = Math.max(0,Math.min(1,charDispersion+dispersion));
 	}
 	
-	protected void setWeapon(Weapon w) {
+	public void setWeapon(Weapon w) {
 		primary = w;
 	}
 	
-	protected void setAbilty(Ability a) {
+	public void setAbilty(Ability a) {
 		ability = a;
 	}
 	
-	protected void setPassive(Passive p) {
+	public void setPassive(Passive p) {
 		passive = p;
 	}
-	
-	public void setPerception(WorldStatePacket wsp) {
-		this.perception = wsp;
-	}
-	
-	public WorldStatePacket getPerception() {
-		return perception;
-	}
+
 
 	public double getInstaF() {
 		return instaF;
@@ -350,5 +296,10 @@ public class ControlledCharacter extends Character {
 	
 	public void addInstaMod(double instaMod) {
 		this.instaF += instaMod;
+	}
+	
+	@Override
+	public double getNoiseF() {
+		return super.getNoiseF()*(getInput().sneaking?0.5:1);
 	}
 }

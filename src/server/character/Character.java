@@ -1,16 +1,23 @@
 package server.character;
 
 import java.awt.geom.Area;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
 import java.util.List;
 
 import client.gui.GameWindow;
+import network.PartialCharacterData;
+import network.GameDataPackets.WorldStatePacket;
+import network.GameEvent.SoundEvent;
+import network.GameEvent.AnimationEvent;
 import server.status.StatusEffect;
 import server.world.Arena;
 import server.world.LineOfSight;
 import server.world.Projectile;
 import server.world.Sound;
 import server.world.Tile;
+import server.world.Utils;
 import server.world.World;
 
 /**
@@ -22,10 +29,9 @@ import server.world.World;
 public class Character {
 	public static final double BASE_SPEED	= 0.0025;
 	public static final double BASE_HP		= 100;
-	public static final double BASE_RADIUS	= 0.55;
+	public static final double BASE_RADIUS	= 0.5;
 	public static final double BASE_FOVRANGE= 16;
 	public static final double BASE_FOVANGLE= Math.toRadians(100);
-	public static final double BASE_NOISE = 30;
 	
 	public static final double BASE_HEARING_THRES = 0;
 	
@@ -34,6 +40,8 @@ public class Character {
 	private double dx = 0; // delta x, left = -speed, right = speed
 	private double dy = 0; // delta y, upwards = - speed, down = speed
 	
+	public final int id; // the player's ID
+	
 	private double fovRangeF;
 	private double fovAngleF;
 	private double speedF;
@@ -41,6 +49,7 @@ public class Character {
 	private double sizeF;
 	private double hearF; // the 
 	public final ClassStats cs;
+	public final int team;
 	
 	private double direction; // direction the server.character is facing in radiants
 	private double noise = 0; // server.character current volume
@@ -50,7 +59,8 @@ public class Character {
 	private LineOfSight los = new LineOfSight();
 	private Armor armor;
 	private List<StatusEffect> statusEffects = new LinkedList<StatusEffect>();
-	//private List<Shiel>
+	private WorldStatePacket perception = new WorldStatePacket();
+
 	/**
 	 * Creates a new abstract server.character.
 	 * 
@@ -67,16 +77,18 @@ public class Character {
 	 * @param viewAngle
 	 *            the angle of the characters line of sight
 	 */
-	public Character(ClassStats cs) {
+	public Character(ClassStats cs, int id, int team) {
 		this.maxHP = cs.getMaxHP()*BASE_HP;
 		this.healthPoints = maxHP;
 		this.speedF = cs.getSpeedF();
 		this.sizeF = cs.getSize();
 		this.noiseF = cs.getNoise();
-		this.hearF = 1;
+		this.hearF = 0;
 		this.fovRangeF = 1;
 		this.fovAngleF = 1;
 		this.cs = cs;
+		this.id = id;
+		this.team = team;
 	}
 
 	/*
@@ -88,6 +100,7 @@ public class Character {
 		updateStatusEffects();
 		updateNoise(world);
 		updatePosition();
+		updatePerception(world);
 	}
 
 	protected void updateStatusEffects() {
@@ -167,18 +180,42 @@ public class Character {
 	 *            the world in which to update the volume.
 	 */
 	protected void updateNoise(World world) {
-		double inc = 0.1;
+		double inc = -0.1;
 		if (dx != 0 || dy != 0)
-			inc = getCurrentSpeed() / getSpeed();
+			inc = getNoiseF()*1;
 
 		noise = Math.max(0, noise + inc);
-		double noiseThres = getNoiseF()*Character.BASE_NOISE;
+		double noiseThres = 30;
 		if (noise > noiseThres) {
-			world.addSound(Sound.FOOTSTEP.id,noiseThres*inc,getX(),getY());
+			world.addSound(Sound.FOOTSTEP.id,Sound.FOOTSTEP.volume*inc,getX(),getY());
 			noise -= noiseThres;
 		}
 	}
 
+	protected void updatePerception(World w) {
+		perception.characters.clear();
+		Area los = this.los.genLOSAreaMeter(x, y,getFovRange(), getFovAngle(),getDirection(),w.getArena());
+		for (Character c : w.getCharacters()) {
+			// if (Point.distance(ch.getX(),ch.getY(),c.x,c.y)<ch.getViewRange()+10)
+			if (c.id!=id && los.intersects(c.getBoundingBox())) {
+				perception.characters.add(c.generatePartial());
+			}
+		}
+
+		// copy the projectiles over if they are in line of sight
+		perception.projectiles.clear();
+		for (Projectile pr : w.getProjectiles()) {
+			if (los.contains(pr.getX(),pr.getY())) {
+				perception.projectiles.add(pr.getData());
+			}
+		}
+	}
+	
+	
+	public WorldStatePacket getPerception() {
+		return perception;
+	}
+	
 	/**
 	 * Returns the line of sight of the server.character.
 	 * 
@@ -386,16 +423,20 @@ public class Character {
 		return healthPoints;
 	}
 
+	public void onHit(double damage) {
+		healthPoints -= damage;
+	}
+	
 	/**
 	 * Sets the health points of the server.character
 	 * 
 	 * @param healthPoints
 	 *            the health points of the server.character
 	 */
-	public void setHealthPoints(double healthPoints) {
+	protected void setHealthPoints(double healthPoints) {
 		this.healthPoints = healthPoints;
 	}
-
+	
 	protected Armor getArmor() {
 		return armor;
 	}
@@ -420,12 +461,12 @@ public class Character {
 		return hearF;
 	}
 
-	public void setHearF(double hearF) {
+	protected void setHearF(double hearF) {
 		this.hearF = hearF;
 	}
 	
-	public double getHearThres() {
-		return hearF*BASE_HEARING_THRES;
+	public void addHearMod(double hearMod) {
+		hearF += hearMod;
 	}
 	
 	public void addStatusEffect(StatusEffect effect) {
@@ -438,5 +479,47 @@ public class Character {
 	
 	public double getMovingDirection() {
 		return Math.atan2(-dy, dx);
+	}
+	
+	public void clearEvents() {
+		perception.events.clear();
+	}
+	
+	public Rectangle2D getBoundingBox() {
+		return new Rectangle2D.Double(getX()-getRadius(), getY()-getRadius(), getRadius()*2, getRadius()*2);
+	}
+	
+	public PartialCharacterData generatePartial() {
+		PartialCharacterData data = new PartialCharacterData();
+		data.id = (short) id;
+		data.team = (byte) team;
+		data.x = (float) getX();
+		data.y = (float) getY();
+		data.healthPoints = (float) getHealthPoints();
+		data.radius = (float) getRadius();
+		data.direction = (float) getDirection();
+		if (getArmor()!=null) {
+			data.armorAngle = (float)getArmor().getAngle();
+			data.armorStart = (float)getArmor().getStart();
+		}
+		return data;
+	}
+	
+	public void filterSound(int id, double volume, double x, double y) {
+		double distance = Point2D.distance(x, y, getX(), getY());
+		double perceivedVolume = Utils.getVolumeAtDistance(volume, distance, getHearF());
+		if (perceivedVolume >= Character.BASE_HEARING_THRES) {
+			SoundEvent e = new SoundEvent(id,perceivedVolume,x,y);
+			getPerception().events.add(e);
+		}
+	}
+	
+	public void filterVisualAnimation(int id, double x, double y, double direction) {
+		if (Point2D.distance(x, y, getX(), getY())<getFovRange()+5)
+			addAnimation(id,x,y,direction);
+	}
+	
+	public void addAnimation(int id, double x, double y, double direction) {
+		getPerception().events.add(new AnimationEvent(id,x,y,direction));
 	}
 }

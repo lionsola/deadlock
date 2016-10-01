@@ -1,5 +1,8 @@
 package server.weapon;
 
+import client.graphics.Animation;
+import client.gui.GameWindow;
+import server.ability.Ability;
 import server.character.ControlledCharacter;
 import server.world.Utils;
 import server.world.World;
@@ -18,34 +21,41 @@ import server.world.World;
  * @author Connor Cartwright
  *
  */
-public abstract class Weapon {
-	
+public abstract class Weapon extends Ability {
 	public final WeaponType type;
 	private double instability;
-	private long lastFire;
 	private int ammoLeft;
-	private long lastReload;
+	private long reloadTimer = 0;
 
-	public Weapon(WeaponType type) {
+	public Weapon(ControlledCharacter self, WeaponType type) {
+		super(self,type.cooldown);
 		this.type = type;
 		instability = type.instability;
 		ammoLeft = type.magSize;
 	}
 
 	public void update(World w, ControlledCharacter c) {
+		super.update(w);
 		if (c.getInput().fire1 && isReady()) {
 			double direction = c.disperseDirection();
+			fire(w,c,direction);
+			
+			w.addAnimation(Animation.GUNSHOT, c.getX(), c.getY(), direction);
 			w.addSound(type.soundId, type.noise, c.getX(), c.getY());
 			
-			lastFire = System.currentTimeMillis();
-			fire(w,c,direction);
 			c.addDispersion(getInstability());
 			ammoLeft -= 1;
+			startCooldown();
 			if (ammoLeft<=0) {
-				lastReload = System.currentTimeMillis();
+				reloadTimer = 0;
 			}
-		} else if (ammoLeft==0 && timeSinceReload()>type.reloadTime) {
-			ammoLeft = type.magSize;
+		} else if (ammoLeft==0) {
+			if (reloadTimer>type.reloadTime) {
+				ammoLeft = type.magSize;
+			}
+			else {
+				reloadTimer += GameWindow.MS_PER_UPDATE;
+			}
 		}
 	}
 
@@ -55,7 +65,7 @@ public abstract class Weapon {
 		return gunDirection + type.gunDispersion*Utils.random().nextGaussian()/2;
 	}
 	
-	public static double randomizeStat(double stat, double limit) {
+	private static double randomizeStat(double stat, double limit) {
 		return stat*(1+limit*Utils.random().nextGaussian()/2);
 	}
 	
@@ -63,16 +73,14 @@ public abstract class Weapon {
 		w.addProjectile(new Bullet(c, direction, randomizeStat(type.projectileSpeed,0.1), type.size));
 	}
 
+	@Override
 	public boolean isReady() {
-		return timeSinceFire()>type.cooldown && ammoLeft>0; 
+		return super.isReady() && ammoLeft>0; 
 	}
 	
-	public long timeSinceFire() {
-		return System.currentTimeMillis()-lastFire;
-	}
-	
-	public long timeSinceReload() {
-		return System.currentTimeMillis()-lastReload;
+	@Override
+	public double getCooldownPercent() {
+		return Math.min(super.getCooldownPercent(), Math.min(1,1.0*reloadTimer/type.reloadTime));
 	}
 	
 	public double getInstability() {

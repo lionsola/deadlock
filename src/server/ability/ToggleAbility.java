@@ -17,7 +17,7 @@ public abstract class ToggleAbility extends Ability {
 			isActive = true;
 			startCooldown();
 		} else if (isActive) {
-			if (!self().getInput().fire2 && isReady()) {
+			if (self().getInput().fire2 && isReady()) {
 				onDeactivate(w,self());
 				isActive = false;
 				startCooldown();
