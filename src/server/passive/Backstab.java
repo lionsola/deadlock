@@ -1,16 +1,16 @@
 package server.passive;
 
-import network.PartialCharacterData;
-import server.character.ControlledCharacter;
+import server.character.PlayerCharacter;
 import server.world.Geometry;
 import server.world.World;
+import shared.network.PartialCharacterData;
 
 public class Backstab extends Passive {
 	public static final double BS_MIN_ANGLE = 135;
 	public static final double BS_RECOIL = -0.5;
 	public static final double BS_NOISE = -0.3;
 
-	public Backstab(ControlledCharacter self) {
+	public Backstab(PlayerCharacter self) {
 		super(self);
 	}
 

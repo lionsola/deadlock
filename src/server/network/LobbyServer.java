@@ -1,4 +1,4 @@
-package network;
+package server.network;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -11,14 +11,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import client.gui.ClientPlayer;
-import network.LobbyRequest.ChangeCharacterRequest;
-import network.LobbyRequest.ChatRequest;
-import network.LobbyRequest.LobbyInformationPacket;
-import network.LobbyRequest.PlayerLeaveRequest;
-import network.LobbyRequest.StartGameRequest;
-import network.LobbyRequest.SwitchTeamRequest;
-import network.LobbyRequest.ToggleReadyRequest;
 import server.ai.AIPlayer;
+import shared.network.LobbyRequest;
+import shared.network.LobbyRequest.ChangeCharacterRequest;
+import shared.network.LobbyRequest.ChatRequest;
+import shared.network.LobbyRequest.GameConfig;
+import shared.network.LobbyRequest.LobbyInformationPacket;
+import shared.network.LobbyRequest.NewPlayerRequest;
+import shared.network.LobbyRequest.PlayerLeaveRequest;
+import shared.network.LobbyRequest.StartGameRequest;
+import shared.network.LobbyRequest.SwitchTeamRequest;
+import shared.network.LobbyRequest.ToggleReadyRequest;
 
 /**
  * Server for the lobby screen. It receives new connections and handle
@@ -248,6 +251,7 @@ public class LobbyServer implements Runnable {
                 } catch (IOException | ClassNotFoundException e) {
                     System.out.println("Error while receiving request from client");
                     e.printStackTrace();
+                    return;
                 }
             }
         }

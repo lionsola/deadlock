@@ -2,7 +2,7 @@ package client.gui;
 
 import java.io.Serializable;
 
-import network.PartialCharacterData;
+import shared.network.PartialCharacterData;
 
 /**
  * Models a client player.

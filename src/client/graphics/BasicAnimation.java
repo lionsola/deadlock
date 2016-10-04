@@ -1,6 +1,6 @@
 package client.graphics;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 /**
  * Base class of every animation in the game. All subclasses must implement render and usually also
@@ -59,6 +59,6 @@ public abstract class BasicAnimation {
 	 * @param g
 	 *            The client.graphics object to be rendered into.
 	 */
-	abstract public void render(Graphics g);
+	abstract public void render(Graphics2D g2D);
 
 }

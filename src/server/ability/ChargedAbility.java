@@ -1,14 +1,14 @@
 package server.ability;
 
 import client.gui.GameWindow;
-import server.character.ControlledCharacter;
+import server.character.PlayerCharacter;
 import server.world.World;
 
 public abstract class ChargedAbility extends Ability {
 	private long timeElapsed;
 	private boolean throwing;
 	
-	public ChargedAbility(ControlledCharacter c, long cooldown) {
+	public ChargedAbility(PlayerCharacter c, long cooldown) {
 		super(c,cooldown);
 	}
 
@@ -36,7 +36,7 @@ public abstract class ChargedAbility extends Ability {
 		static final long THROWFRAG_COOLDOWN = 20000;
 		static final long THROWFRAG_FUSE = 5000;
 		
-		public ThrowFragGrenade(ControlledCharacter c) {
+		public ThrowFragGrenade(PlayerCharacter c) {
 			super(c,THROWFRAG_COOLDOWN);
 		}
 		
@@ -48,10 +48,10 @@ public abstract class ChargedAbility extends Ability {
 	
 	public static class ThrowFlashGrenade extends ChargedAbility {
 		static final double THROWFLASH_SPEED = 0.01;
-		static final long THROWFLASH_COOLDOWN = 20000;
+		static final long THROWFLASH_COOLDOWN = 1000;
 		static final long THROWFLASH_FUSE = 5000;
 		
-		public ThrowFlashGrenade(ControlledCharacter c) {
+		public ThrowFlashGrenade(PlayerCharacter c) {
 			super(c,THROWFLASH_COOLDOWN);
 		}
 		

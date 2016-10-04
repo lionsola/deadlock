@@ -1,13 +1,14 @@
-package network;
+package server.network;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import network.GameDataPackets.InputPacket;
-import network.GameDataPackets.WorldStatePacket;
-import server.character.ControlledCharacter;
+import server.character.PlayerCharacter;
+import shared.network.GameDataPackets;
+import shared.network.GameDataPackets.InputPacket;
+import shared.network.GameDataPackets.WorldStatePacket;
 
 /**
  * ServerPlayer acts as an intermediate layer for the Server to communicate
@@ -25,7 +26,7 @@ public class ServerPlayer {
     public int kills = 0;
     public int deaths = 0;
     public Socket socket;
-    public ControlledCharacter character;
+    public PlayerCharacter character;
     
     /**
      * Constructor.
@@ -76,7 +77,7 @@ public class ServerPlayer {
         }
     }
     
-    public void setCharacter(ControlledCharacter c) {
+    public void setCharacter(PlayerCharacter c) {
     	this.character = c;
     }
 }

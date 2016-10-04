@@ -4,9 +4,9 @@ import java.awt.Component;
 import java.awt.geom.Rectangle2D;
 
 import client.graphics.Renderer;
-import network.FullCharacterData;
-import network.GameDataPackets.InputPacket;
 import server.world.Arena;
+import shared.network.FullCharacterData;
+import shared.network.GameDataPackets.InputPacket;
 
 /**
  * Follows the player as he moves to display the appropriate area of the screen.

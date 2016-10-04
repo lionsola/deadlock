@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import client.graphics.Renderer;
-import network.FullCharacterData;
+import shared.network.FullCharacterData;
 
 /**
  * Used for the logic behind our line of sight.

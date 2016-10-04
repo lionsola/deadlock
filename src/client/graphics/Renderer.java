@@ -17,14 +17,13 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import client.gui.ClientPlayer;
-import client.gui.GameScreen;
 import client.gui.GameWindow;
-import network.FullCharacterData;
-import network.PartialCharacterData;
-import network.ProjectileData;
 import server.world.Arena;
 import server.world.Geometry;
 import server.world.Tile;
+import shared.network.FullCharacterData;
+import shared.network.PartialCharacterData;
+import shared.network.ProjectileData;
 
 /**
  * Supposed to be the client.graphics "engine" of the game, this class provides all the rendering methods
@@ -41,6 +40,8 @@ public class Renderer {
 	private BufferedImage darkArenaImage;
 	private BufferedImage arenaImage;
 	private BufferedImage lightArenaImage;
+	public static final double DEFAULT_PPM = 20;
+	public static double ppm = Renderer.DEFAULT_PPM;
 	
 	public void initArenaImages(Arena arena) {
 		arenaImage = ImageBlender.drawArena(arena);
@@ -71,7 +72,7 @@ public class Renderer {
 		// render the health bar
 		g2D.setStroke(new BasicStroke(toPixel(HEALTHBAR_WIDTH)));
 		g2D.setColor(new Color(255, 50, 50));
-		double length = (0.2*player.healthPoints/GameScreen.ppm);
+		double length = (0.2*player.healthPoints/Renderer.ppm);
 		double topy = (player.y - player.radius - HEALTHBAR_WIDTH*2);
 		
 		drawLine(g2D, player.x - length / 2, topy, player.x + length / 2, topy);
@@ -92,7 +93,7 @@ public class Renderer {
 	}
 	
 	private static void renderArmor(Graphics2D g2D, double cx, double cy, double cr, double start, double extent,int team) {
-		g2D.setStroke(new BasicStroke(4));
+		g2D.setStroke(new BasicStroke(toPixel(CHARACTER_WIDTH*2)));
 		g2D.setColor(teamColors[team]);
 		drawArc(g2D,cx,cy,cr,start,extent,Arc2D.OPEN);
 	}
@@ -106,7 +107,7 @@ public class Renderer {
 		g2D.setColor(Color.BLACK);
 		fillCircle(g2D,x, y,r);
 		g2D.setColor(teamColors[team]);
-		//fillCircle(g2D,x, y,r);
+		//fillCircle(g2D,x,y,r);
 		drawCircle(g2D,x,y,r);
 		
 		// draw gun
@@ -129,21 +130,7 @@ public class Renderer {
 			drawCircle(g2D,pd.x,pd.y,pd.size/2000);
 		}
 	}
-
-	public static void renderPowerUp(Graphics2D g2D, int x, int y, int type) {
-		//g2D.drawImage(PowerUpFactory.getIcon(type), x, y, null);
-	}
-
-	/*
-	public static void renderPowerUpRing(Graphics2D g2D, int x, int y, int radius, int type) {
-		g2D.setColor(PowerUpFactory.COLORS[type]);
-		int ringX = x - radius - 2;
-		int ringY = y - radius - 2;
-		int size = 2 * radius + 4;
-		g2D.drawOval(ringX, ringY, size, size);
-	}
-	*/
-
+	
 	public static Cursor createCursor() {
 		BufferedImage cursor = new BufferedImage(CURSOR_BMP_SIZE,CURSOR_BMP_SIZE, BufferedImage.TYPE_INT_ARGB);
 		RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -188,7 +175,7 @@ public class Renderer {
 		drawImage(g2D, lightArenaImage, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
 	}
 	
-	public static void renderDark(Graphics2D g2D, Arena a, Rectangle2D window) {
+	public static void renderArena(Graphics2D g2D, Arena a, Rectangle2D window) {
 		//drawImage(g2D, a.image, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
 		
 		
@@ -247,10 +234,6 @@ public class Renderer {
 		
 	}
 	
-	static void drawLine(Graphics2D g2d, double x1, double y1, double x2, double y2, float strokeWidth) {
-		drawLine(g2d,x1,y1,x2,y2);
-	}
-	
 	static void drawLine(Graphics2D g2d, double x1, double y1, double x2, double y2) {
 		g2d.drawLine(toPixel(x1), toPixel(y1), toPixel(x2), toPixel(y2));
 	}
@@ -307,18 +290,31 @@ public class Renderer {
 	}
 	
 	public static double getPPM() {
-		return GameScreen.ppm;
+		return Renderer.ppm;
 	}
 	
 	public static int toPixel(double value) {
-		return (int)(value*GameScreen.ppm+0.5);
+		return (int)(value*Renderer.ppm+0.5);
 	}
 	
 	public static int toPixelDefault(double value) {
-		return (int)(value*GameScreen.DEFAULT_PPM+0.5);
+		return (int)(value*Renderer.DEFAULT_PPM+0.5);
 	}
 	
 	public static double toMeter(int pixel) {
-		return pixel/GameScreen.ppm;
+		return pixel/Renderer.ppm;
+	}
+
+	public static void renderProtection(Graphics2D g2D, int tileX, int tileY, double protection) {
+		double y = (tileY+0.1)*Tile.tileSize;
+		double x = (tileX+0.1)*Tile.tileSize;
+		g2D.setStroke(new BasicStroke(toPixel(0.1)));
+		g2D.setColor(Color.WHITE);
+		drawLine(g2D,x,y,x+0.8*Tile.tileSize*protection,y);
+		double w = 0.8;
+		x = (tileX+(1-w)/2)*Tile.tileSize;
+		y = (tileY+(1-w)/2)*Tile.tileSize;
+		w = w*Tile.tileSize;
+		drawImage(g2D,Sprite.SHIELD,x,y,w,w);
 	}
 }

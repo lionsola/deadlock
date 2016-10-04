@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import network.GameDataPackets.WorldStatePacket;
-import network.GameEvent.AnimationEvent;
 import server.character.Character;
-import server.character.ControlledCharacter;
-import network.GameEvent.GameEventListener;
-import network.PartialCharacterData;
-import network.ProjectileData;
+import server.character.PlayerCharacter;
+import shared.network.PartialCharacterData;
+import shared.network.ProjectileData;
+import shared.network.GameDataPackets.WorldStatePacket;
+import shared.network.GameEvent.AnimationEvent;
+import shared.network.GameEvent.GameEventListener;
 
 /**
  * The physical world inside a match, which handles everything including characters, projectiles and
@@ -24,7 +24,7 @@ import network.ProjectileData;
 public class World {
 	
 	private Arena arena;
-	private List<ControlledCharacter> characters = new ArrayList<ControlledCharacter>();
+	private List<PlayerCharacter> characters = new ArrayList<PlayerCharacter>();
 	private List<Character> npcs = new LinkedList<Character>();
 	
 	private List<Projectile> projectiles = new LinkedList<Projectile>();
@@ -49,7 +49,7 @@ public class World {
 	 * @param p
 	 *            the player to be added
 	 */
-	public void addPlayer(ControlledCharacter p) {
+	public void addPlayer(PlayerCharacter p) {
 		Point spawn = randomizeSpawnPoint(p.team);
 		p.setX((spawn.x+0.5) * Tile.tileSize);
 		p.setY((spawn.y+0.5) * Tile.tileSize);
@@ -110,7 +110,7 @@ public class World {
 	 */
 	public void update() {
 		// update characters
-		for (ControlledCharacter p : characters) {
+		for (PlayerCharacter p : characters) {
 			p.update(this);
 		}
 
@@ -137,7 +137,7 @@ public class World {
 		newProjectiles.clear();
 	}
 
-	public void onPlayerDeath(ControlledCharacter c) {
+	public void onPlayerDeath(PlayerCharacter c) {
 		Point spawn = randomizeSpawnPoint(c.team);
 		c.setX(spawn.x * Tile.tileSize);
 		c.setY(spawn.y * Tile.tileSize);
@@ -162,7 +162,7 @@ public class World {
 		WorldStatePacket wsp = new WorldStatePacket();
 
 		wsp.characters = new LinkedList<PartialCharacterData>();
-		for (ControlledCharacter character : characters) {
+		for (PlayerCharacter character : characters) {
 			wsp.characters.add(character.generatePartial());
 		}
 		
@@ -188,7 +188,7 @@ public class World {
 		// Shape los = LineOfSight.generateLoS(ch.getIntX(),ch.getIntY(),
 		// ch.getViewRange(),ch.getViewAngle(),ch.getDirection(), arena);
 		List<Character> list = new LinkedList<Character>();
-		for (ControlledCharacter p : characters) {
+		for (PlayerCharacter p : characters) {
 			double x0 = p.getX() - p.getRadius();
 			double y0 = p.getY() - p.getRadius();
 			// double radius = p.getRadius();
@@ -209,8 +209,8 @@ public class World {
 		return listener;
 	}
 	
-	public List<ControlledCharacter> getCharacters() {
-		return new LinkedList<ControlledCharacter>(characters);
+	public List<PlayerCharacter> getCharacters() {
+		return new LinkedList<PlayerCharacter>(characters);
 	}
 
 	public List<Projectile> getProjectiles() {

@@ -6,17 +6,17 @@ import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import java.util.List;
 
-import network.GameDataPackets.InputPacket;
-import network.GameDataPackets.WorldStatePacket;
 import server.ai.PathFinder.Path;
+import server.network.ServerPlayer;
 import server.world.Arena;
 import server.world.Geometry;
 import server.world.Tile;
 import server.world.Utils;
-import network.GameEvent;
-import network.GameEvent.SoundEvent;
-import network.PartialCharacterData;
-import network.ServerPlayer;
+import shared.network.GameEvent;
+import shared.network.PartialCharacterData;
+import shared.network.GameDataPackets.InputPacket;
+import shared.network.GameDataPackets.WorldStatePacket;
+import shared.network.GameEvent.SoundEvent;
 
 /**
  * Used to model the behaviour of an AI player.
@@ -29,9 +29,9 @@ public class AIPlayer extends ServerPlayer {
 		EXPLORING_POINT, EXPLORING_RANDOMLY, ATTACKING, RETREATING
 	}
 
-	private static final double PATH_THRESHOLD = Tile.tileSize / 3;
+	private static final double PATH_THRESHOLD = Tile.tileSize/5;
 	private static final double OUTOFRANGE_THRESHOLD = Tile.tileSize * 2;
-	private static final double COORD_THRESHOLD = Tile.tileSize / 10;
+	private static final double COORD_THRESHOLD = Tile.tileSize / 20;
 	private static final double EXPLORE_DISTANCE = Tile.tileSize * 15;
 	private static final double RETREAT_DISTANCE = Tile.tileSize * 5;
 	private PathFinder pathFinder;

@@ -1,15 +1,15 @@
 package server.ability;
 
 import client.gui.GameWindow;
-import server.character.ControlledCharacter;
+import server.character.PlayerCharacter;
 import server.world.World;
 
 public abstract class Ability {
 	public final long cooldown;
 	private long cooldownTimer;
-	private ControlledCharacter self;
+	private PlayerCharacter self;
 	
-	public Ability (ControlledCharacter self, long cooldown) {
+	public Ability (PlayerCharacter self, long cooldown) {
 		this.cooldown = cooldown;
 		this.self = self;
 		cooldownTimer = cooldown;
@@ -28,7 +28,7 @@ public abstract class Ability {
 		return cooldownTimer>=cooldown;
 	}
 	
-	protected ControlledCharacter self() {
+	protected PlayerCharacter self() {
 		return self;
 	}
 	

@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import server.character.ControlledCharacter;
+import server.ability.ChangeForm;
+import server.character.BatAI;
+import server.character.ClassStats;
+import server.character.PlayerCharacter;
 import server.world.World;
 
 public class WeaponFactory {
@@ -52,12 +55,27 @@ public class WeaponFactory {
 		return weaponTypes.get(weaponID);
 	}
 	
-	public static Weapon createGun(int weaponID, ControlledCharacter self) {
+	public static Weapon createGun(int weaponID, PlayerCharacter self) {
 		WeaponType type = weaponTypes.get(weaponID);
-		if (type.weaponType==1) {
+		if (weaponID==ChangeForm.CF_HUMAN_WEAPON) {
 			return new Weapon(self,type) {
 				@Override
-				public void fire(World w, ControlledCharacter c, double direction) {
+				protected void fire(World w, PlayerCharacter c, double direction) {
+					for (int i=0;i<type.bulletsNo;i++) {
+						BatAI bat = new BatAI(ClassStats.classStats.get(21),c.id,c.team);
+						bat.setX(c.getX());
+						bat.setY(c.getY());
+						bat.setDirection(direction);
+						//bat.set
+						//w.addNPC();
+					}
+				}
+			};
+		}
+		else if (type.weaponType==1) {
+			return new Weapon(self,type) {
+				@Override
+				public void fire(World w, PlayerCharacter c, double direction) {
 					for (int i=0;i<type.bulletsNo;i++) {
 						fireOneBullet(w,c,disperseDirection(direction));
 					}
@@ -66,7 +84,7 @@ public class WeaponFactory {
 		} else if (type.weaponType==2) {
 			return new Weapon(self,type) {
 				@Override
-				public void fire(World w, ControlledCharacter c, double direction) {
+				public void fire(World w, PlayerCharacter c, double direction) {
 					double gunDirection = direction;
 					for (int i=0;i<type.bulletsNo;i++) {
 						double bulletDirection = 2*type.gunDispersion*(i/(type.bulletsNo-1.0)-0.5);
@@ -78,7 +96,7 @@ public class WeaponFactory {
 		else {
 			return new Weapon(self,type) {
 				@Override
-				protected void fire(World w, ControlledCharacter c, double direction) {
+				protected void fire(World w, PlayerCharacter c, double direction) {
 					super.fireOneBullet(w, c, disperseDirection(direction));
 				}
 			};

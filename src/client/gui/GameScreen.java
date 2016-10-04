@@ -37,15 +37,16 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-import network.FullCharacterData;
-import network.GameDataPackets.InputPacket;
-import network.GameDataPackets.WorldStatePacket;
-import network.GameEvent;
-import network.GameEvent.*;
 import server.world.Arena;
 import server.world.LineOfSight;
-import network.PartialCharacterData;
-import network.ProjectileData;
+import server.world.Tile;
+import shared.network.FullCharacterData;
+import shared.network.GameEvent;
+import shared.network.PartialCharacterData;
+import shared.network.ProjectileData;
+import shared.network.GameDataPackets.InputPacket;
+import shared.network.GameDataPackets.WorldStatePacket;
+import shared.network.GameEvent.*;
 import client.graphics.Animation;
 import client.graphics.AnimationSystem;
 import client.graphics.Renderer;
@@ -97,7 +98,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	 *            The id of the local player
 	 * @param socket
 	 *            The socket to communicate with the server
-	 * @param arenaName
+	 * @param arenaFile
 	 *            The name of the arena for this game
 	 * @param team1
 	 *            The list of players on team 1
@@ -106,7 +107,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	 * @throws IOException
 	 *             Exception thrown on gamescreen
 	 */
-	public GameScreen(GameWindow game, int id, Socket socket, String arenaName, List<ClientPlayer> team1, List<ClientPlayer> team2) throws IOException {
+	public GameScreen(GameWindow game, int id, Socket socket, String arenaFile, List<ClientPlayer> team1, List<ClientPlayer> team2) throws IOException {
 		super();
 		this.game = game;
 		this.setSize(game.getWidth(), game.getHeight());
@@ -114,7 +115,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		this.requestFocusInWindow();
 		this.setIgnoreRepaint(true);
 		setFocusTraversalKeysEnabled(false);
-		this.arena = new Arena(arenaName, true);
+		this.arena = new Arena(arenaFile, true);
 		this.team1 = team1;
 		this.team2 = team2;
 		this.players = new LinkedList<ClientPlayer>();
@@ -361,20 +362,24 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			
 			renderer.renderBackground(g2D,camera.getDrawArea(this));
 			FullCharacterData c = mainCharacter;
-			Arc2D arc = new Arc2D.Double(Renderer.toPixel(c.x - c.viewRange),Renderer.toPixel(c.y - c.viewRange),
-					Renderer.toPixel(c.viewRange * 2),Renderer.toPixel(c.viewRange * 2),
+			//Arc2D arc = new Arc2D.Double(Renderer.toPixel(c.x - c.viewRange),Renderer.toPixel(c.y - c.viewRange),
+			//		Renderer.toPixel(c.viewRange * 2),Renderer.toPixel(c.viewRange * 2),
+			//		Math.toDegrees(c.direction-c.viewAngle/2), Math.toDegrees(c.viewAngle), Arc2D.PIE);
+			Arc2D arc = new Arc2D.Double(Renderer.toPixel(c.x - c.hearRange),Renderer.toPixel(c.y - c.hearRange),
+					Renderer.toPixel(c.hearRange*2),Renderer.toPixel(c.hearRange*2),
 					Math.toDegrees(c.direction-c.viewAngle/2), Math.toDegrees(c.viewAngle), Arc2D.PIE);
 			g2D.setClip(arc);
 			//g2d.setClip(Renderer.toPixel(c.x-c.viewRange), Renderer.toPixel(c.y-c.viewRange), Renderer.toPixel(c.viewRange*2),Renderer.toPixel(c.viewRange*2));
-			Rectangle2D viewBox = getCharacterVisionBox(c.x,c.y,c.viewRange);
-			renderer.render(g2D, viewBox);
+			Rectangle2D hearBox = getCharacterVisionBox(c.x,c.y,c.hearRange);
+			renderer.render(g2D, hearBox);
 			
+			g2D.setClip(null);
 			// Renderer.renderArenaBackground(g2d, camera.getDrawArea(this));
-			
+			globalAnimations.render(g2D);
 
 			// render the light part
 			g2D.setClip(los);
-
+			Rectangle2D viewBox = getCharacterVisionBox(c.x,c.y,c.viewRange);
 			renderer.renderForeground(g2D, viewBox);
 			
 			//Renderer.render(g2d, arena,getCharacterVisionBox(mainCharacter.x, mainCharacter.y, (int)(mainCharacter.viewRange+0.5)));
@@ -388,17 +393,21 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				}
 			}
 
+			visualAnimations.render(g2D);
 			for (ProjectileData data : wsp.projectiles) {
 				Renderer.renderProjectile(g2D,data);
+				visualAnimations.addProjectileTrail(data.x, data.y, data.direction, data.speed,data.size);
 			}
-
-			visualAnimations.render(g2D);
+			
 			// g2d.drawImage(light,mainCharacter.x-mainCharacter.viewRange,mainCharacter.y-mainCharacter.viewRange,mainCharacter.viewRange*2,mainCharacter.viewRange*2,
 			// null);
 			g2D.setClip(null);
-			globalAnimations.render(g2D);
 			//Renderer.renderLOS(g2D, los);
 			Renderer.renderMainCharacter(g2D, mainCharacter, localPlayer);
+			int tileX = (int)(input.cx/Tile.tileSize);
+			int tileY = (int)(input.cy/Tile.tileSize);
+			if (arena.get(tileX,tileY).getProtection()>0)
+				Renderer.renderProtection(g2D,tileX,tileY,arena.get(tileX,tileY).getProtection());
 		}
 		Renderer.renderCrosshair(g2D,input.cx,input.cy,mainCharacter.crosshairSize);
 		g.translate(transX, transY);
@@ -501,7 +510,6 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		}*/
 	}
 
-
 	@Override
 	public void mouseReleased(MouseEvent event) {
 		if (SwingUtilities.isLeftMouseButton(event)) {
@@ -518,7 +526,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				boolean cellHasFocus) {
 			// TODO Auto-generated method stub
 			String text = value.name + "     " + value.kills + "     " + value.deaths;
-			ClientPlayer localPlayer = Utils.findPlayer(players, id);
+			//ClientPlayer localPlayer = Utils.findPlayer(players, id);
 			JLabel player = new JLabel(text/*, new ImageIcon(Sprite.getImage(value.type, value.team == localPlayer.team ? 1 : 0))*/,
 					SwingConstants.LEFT);
 			player.setForeground(Color.WHITE);
@@ -576,12 +584,9 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			}
 		}
 	};
-	public static final double DEFAULT_PPM = 20;
-	public static double ppm = GameScreen.DEFAULT_PPM;
-
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		zoomLevel = Math.max(-0.5,Math.min(0.5,zoomLevel + 0.05*e.getPreciseWheelRotation()));
-		ppm = DEFAULT_PPM*(1+zoomLevel);
+		Renderer.ppm = Renderer.DEFAULT_PPM*(1+zoomLevel);
 	}
 }

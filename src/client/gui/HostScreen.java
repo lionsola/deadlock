@@ -22,9 +22,9 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
-import network.GameModeData;
-import network.LobbyRequest.LobbyInformationPacket;
-import network.LobbyServer;
+import server.network.LobbyServer;
+import shared.network.GameModeData;
+import shared.network.LobbyRequest.LobbyInformationPacket;
 
 /**
  * Screen which allows a player to host a game.

@@ -1,10 +1,10 @@
 package client.graphics;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 import client.gui.GameWindow;
+import shared.core.Vector2D;
 
 /**
  * Creates 2D particles and enables their movement.
@@ -126,10 +126,9 @@ public class ParticleAnimation extends BasicAnimation {
 	 * Renders the particle onto the screen.
 	 */
 	@Override
-	public void render(Graphics g) {
-		Graphics2D g2d = (Graphics2D) g;
-		g2d.setColor(color);
-		Renderer.fillCircle(g2d,loc.x,loc.y,size.x);
+	public void render(Graphics2D g2D) {
+		g2D.setColor(color);
+		Renderer.fillCircle(g2D,loc.x,loc.y,size.x);
 	}
 
 	/**

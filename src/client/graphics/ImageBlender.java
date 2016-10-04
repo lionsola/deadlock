@@ -114,7 +114,7 @@ public class ImageBlender {
 	public static BufferedImage drawArena(Arena a) {
 		BufferedImage source = ge.createCompatibleImage(Renderer.toPixel(a.getWidthMeter()),Renderer.toPixel(a.getHeightMeter()));
 		Graphics2D g2D = (Graphics2D)source.getGraphics();
-		Renderer.renderDark(g2D, a, new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
+		Renderer.renderArena(g2D, a, new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
 		g2D.dispose();
 		return source;
 	}

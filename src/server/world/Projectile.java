@@ -3,8 +3,8 @@ package server.world;
 import java.awt.geom.Point2D;
 
 import client.gui.GameWindow;
-import network.ProjectileData;
-import server.character.ControlledCharacter;
+import server.character.PlayerCharacter;
+import shared.network.ProjectileData;
 
 /**
  * Used to represent a projectile.
@@ -13,8 +13,6 @@ import server.character.ControlledCharacter;
  * @author Connor Cartwright
  */
 public abstract class Projectile {
-	
-	
 	transient final public int id;
 
 	private double x;
@@ -42,7 +40,7 @@ public abstract class Projectile {
 	 * @param size
 	 *            radius of the projectile
 	 */
-	public Projectile(ControlledCharacter source, double direction, double speed, double size) {
+	public Projectile(PlayerCharacter source, double direction, double speed, double size) {
 		id = source.id;
 		x = source.getX();
 		y = source.getY();
@@ -100,8 +98,8 @@ public abstract class Projectile {
 			x = x + dx*GameWindow.MS_PER_UPDATE/checks;
 			y = y + dy*GameWindow.MS_PER_UPDATE/checks;
 			
-			// check projectile vs server.character
-			for (ControlledCharacter ch : w.getCharacters()) {
+			// check projectile vs character
+			for (PlayerCharacter ch : w.getCharacters()) {
 				// HIT
 				if (ch.id!=lastHitId && Point2D.distance(x,y, ch.getX(),ch.getY()) < ch.getRadius()) {
 					lastHitId = ch.id;
@@ -136,10 +134,18 @@ public abstract class Projectile {
 	
 	protected abstract void onHitWall(World w, double x, double y, Tile t);
 
-	protected abstract void onHitCharacter(World w, ControlledCharacter ch, double x, double y);
+	protected abstract void onHitCharacter(World w, PlayerCharacter ch, double x, double y);
 	
 	public abstract boolean isConsumed();
 
+	protected void setX(double x) {
+		this.x = x;
+	}
+	
+	protected void setY(double y) {
+		this.y = y;
+	}
+	
 	public double getX() {
 		return x;
 	}

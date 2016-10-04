@@ -2,7 +2,6 @@ package client.graphics;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 import client.gui.GameWindow;
@@ -85,12 +84,11 @@ public class ExpandingCircleAnimation extends BasicAnimation {
 	}
 
 	@Override
-	public void render(Graphics g) {
-		g.setColor(color);
-		Graphics2D g2d = (Graphics2D)g;
-		g2d.setStroke(new BasicStroke(Math.max(0.1f,Renderer.toPixel(Math.min(radius, width)))));
+	public void render(Graphics2D g2D) {
+		g2D.setColor(color);
+		g2D.setStroke(new BasicStroke(Math.max(0.1f,Renderer.toPixel(Math.min(radius, width)))));
 		if (radius > 0)
-			Renderer.drawCircle(g2d,x, y, radius);
+			Renderer.drawCircle(g2D,x, y, radius);
 	}
 	
 }

@@ -1,4 +1,4 @@
-package network;
+package shared.network;
 
 import java.io.Serializable;
 import java.util.LinkedList;

@@ -7,10 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import client.gui.GameWindow;
-import network.PartialCharacterData;
-import network.GameDataPackets.WorldStatePacket;
-import network.GameEvent.SoundEvent;
-import network.GameEvent.AnimationEvent;
 import server.status.StatusEffect;
 import server.world.Arena;
 import server.world.LineOfSight;
@@ -19,26 +15,30 @@ import server.world.Sound;
 import server.world.Tile;
 import server.world.Utils;
 import server.world.World;
+import shared.core.Vector2D;
+import shared.network.PartialCharacterData;
+import shared.network.GameDataPackets.WorldStatePacket;
+import shared.network.GameEvent.AnimationEvent;
+import shared.network.GameEvent.SoundEvent;
 
 /**
  * This class will define the base behaviour of every type of Character.
- * 
- * @author Connor Cartwright
- * @author Anh D Pham
  */
 public class Character {
 	public static final double BASE_SPEED	= 0.0025;
 	public static final double BASE_HP		= 100;
 	public static final double BASE_RADIUS	= 0.5;
 	public static final double BASE_FOVRANGE= 16;
-	public static final double BASE_FOVANGLE= Math.toRadians(100);
+	public static final double BASE_FOVANGLE= Math.toRadians(120);
 	
 	public static final double BASE_HEARING_THRES = 0;
 	
 	private double x = 0; // x position of the server.character
 	private double y = 0; // y position of the server.character
+	private Vector2D pos;
 	private double dx = 0; // delta x, left = -speed, right = speed
 	private double dy = 0; // delta y, upwards = - speed, down = speed
+	private Vector2D vel;
 	
 	public final int id; // the player's ID
 	
@@ -52,7 +52,7 @@ public class Character {
 	public final int team;
 	
 	private double direction; // direction the server.character is facing in radiants
-	private double noise = 0; // server.character current volume
+	private double noise = 0; // character current volume
 	
 	private final double maxHP;
 	private double healthPoints; // the number of health points the server.character class has
@@ -125,46 +125,68 @@ public class Character {
 		if (dx == 0 && dy == 0)
 			return;
 		Arena arena = world.getArena();
-
+		
 		double newX = x + dx*GameWindow.MS_PER_UPDATE;
 		double newY = y + dy*GameWindow.MS_PER_UPDATE;
 		// boundBox.setLocation((int)(newX-radius),(int)(newY-radius));
 		// check each corner of box if walkable
 		
-		int tileX1 = (int) ((newX - getRadius()) / Tile.tileSize);
-		int tileY1 = (int) ((getY() - getRadius()) / Tile.tileSize);
-		int tileX2 = (int) ((newX + getRadius()) / Tile.tileSize);
-		int tileY2 = (int) ((getY() + getRadius()) / Tile.tileSize);
-		boolean blocked = false;;
-		for (int x=tileX1;x<=tileX2;x++) {
-			for (int y=tileY1;y<=tileY2;y++) {
-				if (!arena.get(x, y).isWalkable()) {
-					blocked = true;
-					break;
+		if (dx!=0) {
+			int tileX1 = (int) ((newX - getRadius()) / Tile.tileSize);
+			int tileY1 = (int) ((getY() - getRadius()) / Tile.tileSize);
+			int tileX2 = (int) ((newX + getRadius()) / Tile.tileSize);
+			int tileY2 = (int) ((getY() + getRadius()) / Tile.tileSize);
+			int wallX=0,wallY=0;
+			boolean blocked = false;;
+			for (int x=tileX1;x<=tileX2;x++) {
+				for (int y=tileY1;y<=tileY2;y++) {
+					if (!arena.get(x, y).isWalkable()) {
+						wallX = x;
+						wallY = y;
+						blocked = true;
+						break;
+					}
 				}
 			}
-		}
-		if (blocked) {
-			dx = 0;
-		}
-
-		int tileX3 = (int) ((getX() - getRadius()) / Tile.tileSize);
-		int tileY3 = (int) ((newY - getRadius()) / Tile.tileSize);
-		int tileX4 = (int) ((getX() + getRadius()) / Tile.tileSize);
-		int tileY4 = (int) ((newY + getRadius()) / Tile.tileSize);
-		
-		blocked = false;
-		for (int x=tileX3;x<=tileX4;x++) {
-			for (int y=tileY3;y<=tileY4;y++) {
-				if (!arena.get(x, y).isWalkable()) {
-					blocked = true;
-					break;
+			if (blocked) {
+				int curTileY = (int)(y/Tile.tileSize);
+				double t = y-(0.5+wallY)*Tile.tileSize;
+				if (Math.abs(t)>Tile.tileSize/2 &&
+						arena.get(wallX,curTileY).isWalkable() &&
+						dy==0) {
+					setDy(Math.copySign(Math.abs(dx*0.7),t));
 				}
+				dx = 0;
 			}
 		}
-
-		if (blocked) {
-			dy = 0;
+		if (dy!=0) {
+			int tileX3 = (int) ((getX() - getRadius()) / Tile.tileSize);
+			int tileY3 = (int) ((newY - getRadius()) / Tile.tileSize);
+			int tileX4 = (int) ((getX() + getRadius()) / Tile.tileSize);
+			int tileY4 = (int) ((newY + getRadius()) / Tile.tileSize);
+			int wallX=0,wallY=0;
+			boolean blocked = false;
+			for (int x=tileX3;x<=tileX4;x++) {
+				for (int y=tileY3;y<=tileY4;y++) {
+					if (!arena.get(x, y).isWalkable()) {
+						wallX = x;
+						wallY = y;
+						blocked = true;
+						break;
+					}
+				}
+			}
+	
+			if (blocked) {
+				int curTileX = (int)(x/Tile.tileSize);
+				double t = x-(0.5+wallX)*Tile.tileSize;
+				if (Math.abs(t)>Tile.tileSize/2 &&
+						arena.get(curTileX,wallY).isWalkable() &&
+						dx==0) {
+					setDx(Math.copySign(Math.abs(dy*0.7),t));
+				}
+				dy = 0;
+			}
 		}
 	}
 
@@ -205,7 +227,8 @@ public class Character {
 		// copy the projectiles over if they are in line of sight
 		perception.projectiles.clear();
 		for (Projectile pr : w.getProjectiles()) {
-			if (los.contains(pr.getX(),pr.getY())) {
+			if (los.contains(pr.getX(),pr.getY()) ||
+					los.contains(pr.getX()-GameWindow.MS_PER_UPDATE*pr.getDx(), pr.getY()-GameWindow.MS_PER_UPDATE*pr.getDy())) {
 				perception.projectiles.add(pr.getData());
 			}
 		}

@@ -1,12 +1,12 @@
 package server.passive;
 
-import server.character.ControlledCharacter;
+import server.character.PlayerCharacter;
 import server.world.World;
 
 public abstract class Passive {
-	private ControlledCharacter self;
+	private PlayerCharacter self;
 	private boolean isActive;
-	public Passive(ControlledCharacter self) {
+	public Passive(PlayerCharacter self) {
 		this.self = self;
 	}
 	
@@ -27,7 +27,7 @@ public abstract class Passive {
 
 	protected void onActivate(World w) {};
 
-	protected ControlledCharacter self() {
+	protected PlayerCharacter self() {
 		return self;
 	}
 	

@@ -3,7 +3,7 @@ package server.weapon;
 import client.graphics.Animation;
 import client.gui.GameWindow;
 import server.ability.Ability;
-import server.character.ControlledCharacter;
+import server.character.PlayerCharacter;
 import server.world.Utils;
 import server.world.World;
 
@@ -14,7 +14,7 @@ import server.world.World;
  * 
  * A specific set of <code>Weapons</code> are used by each <code>ControlledCharacter<code>.
  * 
- * @see ControlledCharacter
+ * @see PlayerCharacter
  * @see PrimaryWeapon
  * @see SecondaryWeapon
  * @author Team D1
@@ -27,14 +27,14 @@ public abstract class Weapon extends Ability {
 	private int ammoLeft;
 	private long reloadTimer = 0;
 
-	public Weapon(ControlledCharacter self, WeaponType type) {
+	public Weapon(PlayerCharacter self, WeaponType type) {
 		super(self,type.cooldown);
 		this.type = type;
 		instability = type.instability;
 		ammoLeft = type.magSize;
 	}
 
-	public void update(World w, ControlledCharacter c) {
+	public void update(World w, PlayerCharacter c) {
 		super.update(w);
 		if (c.getInput().fire1 && isReady()) {
 			double direction = c.disperseDirection();
@@ -59,7 +59,7 @@ public abstract class Weapon extends Ability {
 		}
 	}
 
-	protected abstract void fire(World w, ControlledCharacter c, double direction);
+	protected abstract void fire(World w, PlayerCharacter c, double direction);
 	
 	protected double disperseDirection(double gunDirection) {
 		return gunDirection + type.gunDispersion*Utils.random().nextGaussian()/2;
@@ -69,7 +69,7 @@ public abstract class Weapon extends Ability {
 		return stat*(1+limit*Utils.random().nextGaussian()/2);
 	}
 	
-	protected void fireOneBullet (World w, ControlledCharacter c, double direction) {
+	protected void fireOneBullet (World w, PlayerCharacter c, double direction) {
 		w.addProjectile(new Bullet(c, direction, randomizeStat(type.projectileSpeed,0.1), type.size));
 	}
 

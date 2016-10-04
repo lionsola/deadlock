@@ -1,4 +1,4 @@
-package network;
+package shared.network;
 
 public class GameModeData {
 	public static final GameModeData FIVE_ON_FIVE = new GameModeData();

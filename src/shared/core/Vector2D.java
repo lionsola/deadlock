@@ -1,4 +1,4 @@
-package client.graphics;
+package shared.core;
 
 /**
  * Allows for the 2-dimensional representation of various aspects of particles and the other

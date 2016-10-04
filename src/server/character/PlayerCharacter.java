@@ -1,13 +1,14 @@
 package server.character;
 
-import network.FullCharacterData;
-import network.GameDataPackets.InputPacket;
 import server.ability.Ability;
 import server.passive.Passive;
 import server.weapon.Weapon;
 import server.world.Geometry;
+import server.world.Sound;
 import server.world.Utils;
 import server.world.World;
+import shared.network.FullCharacterData;
+import shared.network.GameDataPackets.InputPacket;
 
 import java.awt.geom.Point2D;
 
@@ -21,56 +22,22 @@ import client.gui.GameWindow;
  * 
  * A <code>ControlledCharacter</code> also uses a specific set of <code>Weapons</code>.
  */
-public class ControlledCharacter extends Character {
+public class PlayerCharacter extends Character {
 	public enum MovementMode {WALK,SNEAK,STOP}
 	
 	private static final double MOVEMENT_DISPERSION_FACTOR = 0.1;
 	private static final double ROTATION_DISPERSION_FACTOR = 0.3;
 	
 	private static final double MAX_DISPERSION_ANGLE = 0.1;
-	private static final double DISPERSION_DEC = 0.007;
+	private static final double DISPERSION_DEC = 0.006;
 
 	private double instaF = 1;
 	
-
 	private int typeID; // the type of the server.character, e.g. Sniper
 
 	private float cx = 0; // x position of the crosshairs
 	private float cy = 0; // y position of the crosshairs
 	private double charDispersion = 0;
-
-	// The initial fields below is the result of providing parameters by subclassing
-	// (compared to using Type Object pattern) - there's no easy way to access,
-	// say, Scout's max HP (although it is already defined there)
-	// even from inside the ControlledCharacter class. With type object, we can type.getHP().
-	// With subclassing, we can't getLowestLevelClass().MAXHP. So now we have two options:
-	//
-	// + (used below) to save every single initial stat in ControlledCharacter objects instead
-	// (an already big class) although all scouts will have the same initial stats anyway,
-	// i.e duplicated fields in all objects. The initial fields also grow along with
-	// each field added later.
-	//
-	// + to have abstract accessors to initial fields in ControlledCharacter that
-	// EVERY subclass has to implement, and then call server.character.getMaxHealth()
-	// to achieve polymorphism (duplicated code in all the subclasses).
-	//
-	// Both solutions make the codebase look poorly written and maintaining & extending
-	// devilishly hard, over the gain of a nice-looking server.character type hierarchy.
-	//
-	// This could be solved easily by either ditching the server.character inheritance hierarchy completely
-	// and providing a data table (rows = types, columns = fields) to look up when creating
-	// a new server.character with a numerical "typeID", hence to access default fields we just need
-	// table[typeID][FIELD]; or storing a Type Object as a field inside ControlledCharacter,
-	// hence to access default fields we just need type.getInitHP().
-	//
-	// Data table & Type Object, both solutions are widely used to provide persistent data
-	// (things that don't change) in games.
-
-	// private final double initialStamina;
-	// private final int initialRadius;
-	// private final double initialSpeed;
-	// private final int initialViewRange;
-	// private final int initialViewAngle;
 
 	private Weapon primary; // the primary server.weapon of the server.character class
 	private Ability ability;
@@ -107,7 +74,7 @@ public class ControlledCharacter extends Character {
 	 * @param secondary
 	 *            the server.character secondary server.weapon
 	 */
-	protected ControlledCharacter(int id, int team, ClassStats cs, Weapon weapon, Ability ability, Passive passive) {
+	protected PlayerCharacter(int id, int team, ClassStats cs, Weapon weapon, Ability ability, Passive passive) {
 		super(cs,id,team);
 
 		this.primary = weapon;
@@ -115,7 +82,7 @@ public class ControlledCharacter extends Character {
 		this.passive = passive;
 	}
 
-	protected ControlledCharacter(int id, int team, ClassStats cs) {
+	protected PlayerCharacter(int id, int team, ClassStats cs) {
 		super(cs,id,team);
 	}
 	
@@ -132,7 +99,6 @@ public class ControlledCharacter extends Character {
 		
 		// apply collision detection to correct the movement vector
 		super.updateCollision(world);
-		
 		super.updatePerception(world);
 		
 		if (passive!=null)
@@ -236,7 +202,7 @@ public class ControlledCharacter extends Character {
 		setDy(dy*speed);
 	}
 	
-	public void setInput(network.GameDataPackets.InputPacket input) {
+	public void setInput(shared.network.GameDataPackets.InputPacket input) {
 		this.input = input;
 	}
 	
@@ -260,6 +226,7 @@ public class ControlledCharacter extends Character {
 		fc.x = (float) getX();
 		fc.y = (float) getY();
 		fc.crosshairSize = (float) getCrosshairSize();
+		fc.hearRange = (float) (80.0/(Sound.DISTANCE_VOLUME_DROP_RATE*(1-getHearF())));
 		if (getArmor()!=null) {
 			fc.armorAngle = (float) getArmor().getAngle();
 			fc.armorStart = (float) getArmor().getStart();

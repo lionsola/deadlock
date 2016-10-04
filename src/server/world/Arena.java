@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -27,8 +28,8 @@ import javax.imageio.ImageIO;
  * @author Anh D Pham
  */
 public class Arena {
-	public static final int T1_COLOR = 0xff0000; // red spawn colour
-	public static final int T2_COLOR = 0x0000ff; // blue spawn colour
+	public static final int T1_COLOR = 0x00ff00; // red spawn colour
+	public static final int T2_COLOR = 0xff0000; // green spawn colour
 	public static final int LIGHT_COLOR = 0xffff00; // light colour
 	public static final int LIGHT_RANGE = 250;
 
@@ -39,6 +40,49 @@ public class Arena {
 	private List<Point> lightList;
 	private Area lightMap;
 	
+	public Arena(File file, boolean loadGraphics) {
+		try {
+			FileInputStream fileInputStream = new FileInputStream(file);
+			Hashtable<Integer, Tile> tileTable = new Hashtable<Integer, Tile>();
+			Scanner fileSc = new Scanner(fileInputStream);
+			this.name = fileSc.nextLine();
+
+			// load number of tiles
+			int n = fileSc.nextInt();
+			fileSc.nextLine();
+			// load tile information
+			for (int i = 0; i < n; i++) {
+				String line = fileSc.nextLine();
+				Scanner sc = new Scanner(line);
+				int color = sc.nextInt(16); // reads the hex image
+				Color c = new Color(sc.nextInt(16));
+				String filename = sc.next(); // reads the light tile image
+				boolean walkable = sc.nextBoolean(); // reads the walkable bool
+				boolean transparent = sc.nextBoolean(); // reads the transparent bool
+				double protection = sc.nextDouble();
+				sc.close();
+				BufferedImage tileImage = null;
+				Tile t;
+				if (loadGraphics) {
+					tileImage = ImageIO.read(new FileInputStream("resource/tile/" + filename));
+					t = new Tile(walkable, transparent, tileImage,c);
+				} else {
+					t = new Tile(walkable, transparent);
+				}
+				t.setProtection(protection);
+				tileTable.put(color,t);
+			}
+
+			fileSc.close(); // after all tiles are read, close the scanner
+			
+			loadTileMap(name, tileTable); // load the tile map
+			loadPositionMap(name, loadGraphics); // and load the position map
+			} catch (Exception e) {
+				System.err.println("Error while reading map");
+				e.printStackTrace();
+			}
+	}
+	
 	/**
 	 * Creating a new Arena
 	 * 
@@ -48,45 +92,7 @@ public class Arena {
 	 * @throws IOException
 	 */
 	public Arena(String name, boolean loadGraphics) throws FileNotFoundException, IOException {
-		try {
-		FileInputStream fileInputStream = new FileInputStream("resource/map/" + name + ".map");
-		Hashtable<Integer, Tile> tileTable = new Hashtable<Integer, Tile>();
-		Scanner sc = new Scanner(fileInputStream);
-		this.name = sc.nextLine();
-
-		// load number of tiles
-		int n = sc.nextInt();
-		// load tile information
-		for (int i = 0; i < n; i++) {
-			int color = sc.nextInt(16); // reads the hex image
-			Color c = new Color(sc.nextInt(16));
-			String filename = sc.next(); // reads the light tile image
-			boolean walkable = sc.nextBoolean(); // reads the walkable bool
-			boolean transparent = sc.nextBoolean(); // reads the transparent bool
-			if (loadGraphics) {
-				BufferedImage tileImage = ImageIO.read(new FileInputStream("resource/tile/" + filename)); // sets
-																											// the
-																					// image
-				// Image tileImageDark = ImageIO.read(new FileInputStream("resource/tile/" +
-				// filename2)); // sets the dark tile image
-				tileTable.put(color, new Tile(walkable, transparent, tileImage,c)); // and applies
-																					// them all to
-																					// create a new
-																					// tile
-			} else {
-				tileTable.put(color, new Tile(walkable, transparent)); // and applies them all to
-																		// create a new tile
-			}
-		}
-
-		sc.close(); // after all tiles are read, close the scanner
-		
-		loadTileMap(name, tileTable); // load the tile map
-		loadPositionMap(name, loadGraphics); // and load the position map
-		} catch (Exception e) {
-			System.err.println("Error while reading map");
-			e.printStackTrace();
-		}
+		this(new File("resource/map/" + name + ".map"), loadGraphics);
 	}
 
 	/**

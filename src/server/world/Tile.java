@@ -17,10 +17,12 @@ public class Tile {
 	
 	public static final double tileSize = 1.2; // default
 
-	final boolean walkable;
-	final boolean transparent;
-	final Color color; 
-	final private BufferedImage tileImage;
+	protected boolean walkable;
+	protected boolean transparent;
+	protected double protection;
+	protected String name;
+	protected Color color; 
+	protected BufferedImage tileImage;
 
 	/**
 	 * Constructor. Note that this constructor should only be used for the client, since the network
@@ -94,4 +96,15 @@ public class Tile {
 		return tileImage;
 	}
 	
+	public void setProtection(double protection) {
+		this.protection = protection;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public double getProtection() {
+		return protection;
+	}
 }

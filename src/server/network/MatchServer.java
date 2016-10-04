@@ -1,4 +1,4 @@
-package network;
+package server.network;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -6,20 +6,22 @@ import java.util.LinkedList;
 import java.util.List;
 
 import client.gui.GameWindow;
-import network.GameDataPackets.InputPacket;
-import network.GameDataPackets.WorldStatePacket;
-import network.GameEvent.GameEndEvent;
-import network.GameEvent.GameEventListener;
-import network.GameEvent.PlayerDieEvent;
-import network.GameEvent.ScoreChangedEvent;
 import server.ai.AIPlayer;
 import server.ai.PathFinder;
 import server.character.CharacterFactory;
 import server.character.ClassStats;
-import server.character.ControlledCharacter;
+import server.character.PlayerCharacter;
 import server.weapon.WeaponFactory;
 import server.world.Arena;
 import server.world.World;
+import shared.network.GameDataPackets;
+import shared.network.GameEvent;
+import shared.network.GameDataPackets.InputPacket;
+import shared.network.GameDataPackets.WorldStatePacket;
+import shared.network.GameEvent.GameEndEvent;
+import shared.network.GameEvent.GameEventListener;
+import shared.network.GameEvent.PlayerDieEvent;
+import shared.network.GameEvent.ScoreChangedEvent;
 
 /**
  * Is the game server.
@@ -77,7 +79,7 @@ public class MatchServer implements Runnable, GameEventListener {
 			if (p instanceof AIPlayer) {
 				((AIPlayer) p).init(arena, pathFinder);
 			}
-			ControlledCharacter character = CharacterFactory.newCharacter(p.id, p.team, p.type);
+			PlayerCharacter character = CharacterFactory.newCharacter(p.id, p.team, p.type);
 			world.addPlayer(character);
 			p.setCharacter(character);
 			new Thread(new InputReceiver(p, character)).start();
@@ -122,10 +124,11 @@ public class MatchServer implements Runnable, GameEventListener {
 			world.update();
 
 			// send world state out every 2 frames
-			if (tick) {
-				sendState();
-			}
-			tick = !tick;
+			//if (tick) {
+			//	sendState();
+			//}
+			//tick = !tick;
+			sendState();
 
 			long wait = GameWindow.MS_PER_UPDATE - (System.currentTimeMillis() - last);
 
@@ -210,9 +213,9 @@ public class MatchServer implements Runnable, GameEventListener {
 	 */
 	private class InputReceiver implements Runnable {
 		private ServerPlayer player;
-		private ControlledCharacter character;
+		private PlayerCharacter character;
 
-		public InputReceiver(ServerPlayer player, ControlledCharacter character) {
+		public InputReceiver(ServerPlayer player, PlayerCharacter character) {
 			this.player = player;
 			this.character = character;
 		}

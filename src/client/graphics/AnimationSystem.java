@@ -2,11 +2,13 @@ package client.graphics;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import network.GameEvent.AnimationEvent;
+import server.world.Utils;
+import shared.network.GameEvent.AnimationEvent;
 
 /**
  * Manage the animation effects and provide high-level methods to create new animations in the game
@@ -48,8 +50,8 @@ public class AnimationSystem {
 	 * @param direction
 	 */
 	public void addShotAnimation(double x, double y, double direction) {
-		for (int i = 0; i < 5; i++) {
-			double randomDirection = direction + (Math.PI/6) * server.world.Utils.random().nextGaussian() / 2;
+		for (int i = 0; i < 6; i++) {
+			double randomDirection = direction + (Math.PI/8) * Utils.random().nextGaussian() / 2;
 			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.05, 0.15, 50, Color.WHITE);
 			p.setGrowth(-0.002, -0.002);
 			p.setSizeDefault(true);
@@ -67,8 +69,8 @@ public class AnimationSystem {
 	 */
 	public void addBloodAnimation(double x, double y, double direction) {
 		for (int i = 0; i < 5; i++) {
-			double randomDirection = server.world.Utils.random().nextGaussian() * Math.PI * 2;
-			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.01, 0.2, 200, Color.RED);
+			double randomDirection = direction + (Math.PI/2) * Utils.random().nextGaussian()/2;
+			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.01, 0.3, 200, Color.RED);
 			p.setGrowth(-0.001, -0.001);
 			p.setSizeDefault(true);
 			animations.add(p);
@@ -94,6 +96,10 @@ public class AnimationSystem {
 		}
 	}
 
+	public void addProjectileTrail(double x, double y, double direction, double speed, double size) {
+		addCustomAnimation(new LineAnimation(100,x,y,direction,speed,size));
+	}
+	
 	public void addAnimation(AnimationEvent e) {
 		switch(e.id) {
 			case Animation.GUNSHOT:
@@ -138,7 +144,7 @@ public class AnimationSystem {
 	 */
 	public void render(Graphics g) {
 		for (BasicAnimation a : animations) {
-			a.render(g);
+			a.render((Graphics2D)g);
 		}
 	}
 	

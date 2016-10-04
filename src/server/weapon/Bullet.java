@@ -4,31 +4,29 @@ import java.awt.geom.Line2D;
 
 import client.graphics.Animation;
 import client.gui.GameWindow;
-import network.GameEvent.PlayerDieEvent;
-import server.character.ControlledCharacter;
+import server.character.PlayerCharacter;
 import server.world.Geometry;
 import server.world.Projectile;
 import server.world.Sound;
 import server.world.Tile;
 import server.world.World;
+import shared.network.GameEvent.PlayerDieEvent;
 
 public class Bullet extends Projectile {
 	private static final double BULLET_AIR_RESIST_CONSTANT = 0.0005;
 	private static final double BULLET_PENETRATION_CONSTANT = 0.3;
 	Tile lastHit;
 	
-	public Bullet(ControlledCharacter source, double direction, double speed, double size) {
+	public Bullet(PlayerCharacter source, double direction, double speed, double size) {
 		super(source, direction, speed, size);
-		// TODO Auto-generated constructor stub
 	}
 	
 	public Bullet(Projectile source, double direction, double speed, double size) {
 		super(source, direction, speed, size);
-		// TODO Auto-generated constructor stub
 	}
 	
 	@Override
-	public void onHitCharacter(World w, ControlledCharacter ch, double x, double y) {
+	public void onHitCharacter(World w, PlayerCharacter ch, double x, double y) {
 		//w.getEventListener().onEventReceived(new BulletHitPlayerEvent( x, y));
 		double damageRatio;
 		double HEADSHOT_DISTANCE = ch.getRadius()/10;
@@ -60,7 +58,7 @@ public class Bullet extends Projectile {
 	}
 	
 	public double getDamage() {
-		return getSpeed()*getSize()*10;
+		return getSpeed()*getSize()*8;
 	}
 	
 	@Override

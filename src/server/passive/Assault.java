@@ -1,6 +1,6 @@
 package server.passive;
 
-import server.character.ControlledCharacter;
+import server.character.PlayerCharacter;
 import server.world.Geometry;
 import server.world.World;
 
@@ -17,7 +17,7 @@ public class Assault extends Passive {
 	private double increasedSpeed;
 	private double increasedInsta;
 	
-	public Assault(ControlledCharacter self) {
+	public Assault(PlayerCharacter self) {
 		super(self);
 	}
 

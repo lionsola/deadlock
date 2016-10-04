@@ -19,6 +19,7 @@ public class Sprite {
 	private static Image SNIPER_GREEN;
 	private static Image TANK_GREEN;
 	private static Image SPECOPS_GREEN;
+	public static Image SHIELD;
 	private static Image[][] images = new Image[5][2];
 	private static Image[] BLOOD = new Image[4];
 
@@ -52,6 +53,8 @@ public class Sprite {
 			images[4][GREEN] = COMMANDO_GREEN;
 			images[3][RED] = SPECOPS_RED;
 			images[3][GREEN] = SPECOPS_GREEN;
+			
+			SHIELD = ImageIO.read(new FileInputStream("resource/shield.png"));
 
 		} catch (Exception e) {
 			System.out.println("Error while loading server.character images");

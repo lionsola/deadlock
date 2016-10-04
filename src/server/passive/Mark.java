@@ -1,16 +1,16 @@
 package server.passive;
 
 import client.gui.GameWindow;
-import network.PartialCharacterData;
-import network.GameEvent.EnemyInfoEvent;
-import server.character.ControlledCharacter;
+import server.character.PlayerCharacter;
 import server.world.World;
+import shared.network.PartialCharacterData;
+import shared.network.GameEvent.EnemyInfoEvent;
 
 public class Mark extends Passive {
 	public static final double MARK_SPEED = 0.1;
 	public static final long MARK_COOLDOWN = 1000;
 	private long lastBroadcast;
-	public Mark(ControlledCharacter self) {
+	public Mark(PlayerCharacter self) {
 		super(self);
 	}
 

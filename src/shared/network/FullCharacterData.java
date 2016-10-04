@@ -1,4 +1,4 @@
-package network;
+package shared.network;
 
 import java.io.Serializable;
 
@@ -21,6 +21,7 @@ public class FullCharacterData implements Serializable {
 	public float healthPoints;
 	public float reloadPercent;
 	public float viewRange;
+	public float hearRange;
 	public float viewAngle;
 	public float direction;
 	

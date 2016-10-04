@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
-import network.LobbyRequest.LobbyInformationPacket;
+import shared.network.LobbyRequest.LobbyInformationPacket;
 
 /**
  * Shows the screen where a player can join a screen.
