@@ -55,7 +55,7 @@ public class LineOfSight {
 	 *            view range of the Line of Sight
 	 * @param viewAngle
 	 *            view angle of the Line of Sight
-	 * @param direction
+	 * @param pDirection
 	 *            direction of the Line of Sight
 	 * @param a
 	 *            represents the Arena where the fight is taking place.

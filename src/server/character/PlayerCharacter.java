@@ -59,7 +59,7 @@ public class PlayerCharacter extends Character {
 	 *            the characters health points
 	 * @param stamina
 	 *            the characters stamina value
-	 * @param speed
+	 * @param pSpeed
 	 *            the characters movement speed value
 	 * @param volume
 	 *            the characters volume value

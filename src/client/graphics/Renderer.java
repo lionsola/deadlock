@@ -103,6 +103,14 @@ public class Renderer {
 	}
 	
 	private static void renderCharacter(Graphics2D g2D, double x, double y, double direction, double r, int typeId, int team) {
+		double GUN_WIDTH = 0.15;
+		// draw gun
+		g2D.setStroke(new BasicStroke(toPixel(GUN_WIDTH)));
+		g2D.setColor(teamColors[team]);
+		Point2D p1 = Geometry.PolarToCartesian(r*0.7, direction);
+		Point2D p2 = Geometry.PolarToCartesian(r*1.7, direction);
+		drawLine(g2D,x+p1.getX(),y-p1.getY(),x+p2.getX(),y-p2.getY());
+		
 		g2D.setStroke(new BasicStroke(toPixel(CHARACTER_WIDTH)));
 		g2D.setColor(Color.BLACK);
 		fillCircle(g2D,x, y,r);
@@ -110,10 +118,12 @@ public class Renderer {
 		//fillCircle(g2D,x,y,r);
 		drawCircle(g2D,x,y,r);
 		
-		// draw gun
-		Point2D p1 = Geometry.PolarToCartesian(r*0.7, direction);
-		Point2D p2 = Geometry.PolarToCartesian(r*1.5, direction);
-		drawLine(g2D,x+p1.getX(),y-p1.getY(),x+p2.getX(),y-p2.getY());
+
+		
+		// draw head
+		Point2D h = Geometry.PolarToCartesian(r*0.4, direction);
+		double hr = r*0.4;
+		fillCircle(g2D,x+h.getX(),y-h.getY(),hr);
 		
 		g2D.setStroke(new BasicStroke(1));
 	}
@@ -121,11 +131,7 @@ public class Renderer {
 	public static void renderProjectile(Graphics2D g2D, ProjectileData pd) {
 		g2D.setColor(Color.WHITE);
 		g2D.setStroke(new BasicStroke(2));
-		if (pd.speed > 0.05) {
-			double dx = Math.cos(pd.direction) * pd.speed * GameWindow.MS_PER_UPDATE;
-			double dy = -Math.sin(pd.direction) * pd.speed * GameWindow.MS_PER_UPDATE;
-			drawLine(g2D, pd.x, pd.y,pd.x - dx,pd.y - dy);
-		}
+		drawLine(g2D, pd.x, pd.y,pd.prevX,pd.prevY);
 		if (pd.size > 50) {
 			drawCircle(g2D,pd.x,pd.y,pd.size/2000);
 		}
@@ -310,7 +316,7 @@ public class Renderer {
 		double x = (tileX+0.1)*Tile.tileSize;
 		g2D.setStroke(new BasicStroke(toPixel(0.1)));
 		g2D.setColor(Color.WHITE);
-		drawLine(g2D,x,y,x+0.8*Tile.tileSize*protection,y);
+		drawLine(g2D,x,y,x+0.8*Tile.tileSize*protection/3.0,y);
 		double w = 0.8;
 		x = (tileX+(1-w)/2)*Tile.tileSize;
 		y = (tileY+(1-w)/2)*Tile.tileSize;

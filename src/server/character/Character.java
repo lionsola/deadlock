@@ -28,7 +28,7 @@ public class Character {
 	public static final double BASE_SPEED	= 0.0025;
 	public static final double BASE_HP		= 100;
 	public static final double BASE_RADIUS	= 0.5;
-	public static final double BASE_FOVRANGE= 16;
+	public static final double BASE_FOVRANGE= 18;
 	public static final double BASE_FOVANGLE= Math.toRadians(120);
 	
 	public static final double BASE_HEARING_THRES = 0;
@@ -228,7 +228,7 @@ public class Character {
 		perception.projectiles.clear();
 		for (Projectile pr : w.getProjectiles()) {
 			if (los.contains(pr.getX(),pr.getY()) ||
-					los.contains(pr.getX()-GameWindow.MS_PER_UPDATE*pr.getDx(), pr.getY()-GameWindow.MS_PER_UPDATE*pr.getDy())) {
+					los.contains(pr.getPrevX(), pr.getPrevY())) {
 				perception.projectiles.add(pr.getData());
 			}
 		}

@@ -4,7 +4,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
-import client.gui.GameWindow;
 import shared.core.Vector2D;
 
 public class LineAnimation extends BasicAnimation {
@@ -12,10 +11,10 @@ public class LineAnimation extends BasicAnimation {
 	private Vector2D source;
 	private double size;
 	
-	public LineAnimation(long life, double dx, double dy, double direction, double speed, double size) {
+	public LineAnimation(long life, double dx, double dy, double prevX, double prevY, double size) {
 		super(life);
 		this.dest = new Vector2D(dx,dy);
-		this.source = new Vector2D(dx-Math.cos(direction)*speed*GameWindow.MS_PER_UPDATE,dy+Math.sin(direction)*speed*GameWindow.MS_PER_UPDATE);
+		this.source = new Vector2D(prevX,prevY);
 		this.size = size;
 	}
 

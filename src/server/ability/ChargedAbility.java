@@ -33,7 +33,7 @@ public abstract class ChargedAbility extends Ability {
 	
 	public static class ThrowFragGrenade extends ChargedAbility {
 		static final double THROWFRAG_SPEED = 0.01;
-		static final long THROWFRAG_COOLDOWN = 20000;
+		static final long THROWFRAG_COOLDOWN = 1000;
 		static final long THROWFRAG_FUSE = 5000;
 		
 		public ThrowFragGrenade(PlayerCharacter c) {
@@ -42,7 +42,7 @@ public abstract class ChargedAbility extends Ability {
 		
 		@Override
 		protected void activate(World w, long chargeTime) {
-			w.addProjectile(new TimedGrenade.FragGrenade(self(), self().getDirection(), THROWFRAG_SPEED, THROWFRAG_FUSE-chargeTime));
+			w.addDelayedProjectile(new TimedGrenade.FragGrenade(self(), self().getDirection(), THROWFRAG_SPEED, THROWFRAG_FUSE-chargeTime));
 		}
 	}
 	
@@ -57,7 +57,7 @@ public abstract class ChargedAbility extends Ability {
 		
 		@Override
 		protected void activate(World w, long chargeTime) {
-			w.addProjectile(new TimedGrenade.FlashGrenade(self(), self().getDirection(), THROWFLASH_SPEED, THROWFLASH_FUSE-chargeTime));
+			w.addDelayedProjectile(new TimedGrenade.FlashGrenade(self(), self().getDirection(), THROWFLASH_SPEED, THROWFLASH_FUSE-chargeTime));
 		}
 	}
 }

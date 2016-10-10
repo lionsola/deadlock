@@ -15,7 +15,7 @@ import shared.network.GameEvent.AnimationEvent;
  * without having to deal with low-level animation classes.
  */
 public class AnimationSystem {
-	
+	private ConcurrentLinkedQueue<ParticleEmitter> particleEmitters;
 	private ConcurrentLinkedQueue<BasicAnimation> animations;
 
 	/**
@@ -68,10 +68,10 @@ public class AnimationSystem {
 	 *            The y coordinate of the animation.
 	 */
 	public void addBloodAnimation(double x, double y, double direction) {
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 10; i++) {
 			double randomDirection = direction + (Math.PI/2) * Utils.random().nextGaussian()/2;
-			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.01, 0.3, 200, Color.RED);
-			p.setGrowth(-0.001, -0.001);
+			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.005, 0.2, 1000, Color.RED);
+			p.setGrowth(-0.0005, -0.0005);
 			p.setSizeDefault(true);
 			animations.add(p);
 		}

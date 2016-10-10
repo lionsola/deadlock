@@ -48,9 +48,9 @@ import shared.network.LobbyRequest.PlayerLeaveRequest;
 import shared.network.LobbyRequest.StartGameRequest;
 import shared.network.LobbyRequest.SwitchTeamRequest;
 import shared.network.LobbyRequest.ToggleReadyRequest;
+import client.game.Class;
 import client.sound.AudioManager;
 import client.sound.MusicPlayer;
-import client.data.Class;
 
 /**
  * GUI view to show the lobby screen where the player waits before launching the game.

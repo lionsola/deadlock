@@ -1,10 +1,14 @@
-package client.data;
+package client.game;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+/**
+ * This class (and this package) will hold client-side textual
+ * and game-play data.
+ */
 public class Class {
 	private static ArrayList<Class> classes;
 	

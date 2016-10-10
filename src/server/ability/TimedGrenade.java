@@ -76,21 +76,21 @@ public abstract class TimedGrenade extends Projectile {
 
 		@Override
 		protected void explode(World w) {
-			final int FRAGS = 20;
+			final int FRAGS = 25;
 			final double BASE_SIZE = 10;
 			final double BASE_SPEED = 0.5;
 			
 			w.addSound(Sound.GRENADE_EXPLODE, getX(), getY());
 			
 			for (int i=0;i<FRAGS*0.8;i++) {
-				double direction = Math.PI*2*i/FRAGS;
+				double direction = Math.PI*2*i/(FRAGS*0.8);
 				double sizeF = Math.max(1,1 + 0.8*Utils.random().nextGaussian()/2);
-				w.addProjectile(new Bullet(this, direction, BASE_SPEED/Math.sqrt(sizeF), BASE_SIZE*sizeF));
+				w.addDelayedProjectile(new Bullet(this, direction, BASE_SPEED/Math.sqrt(sizeF), BASE_SIZE*sizeF));
 			}
 			for (int i=0;i<FRAGS*0.2;i++) {
 				double direction = Utils.random().nextDouble()*Math.PI*2;
 				double sizeF = Math.max(1,1 + 0.8*Utils.random().nextGaussian()/2);
-				w.addProjectile(new Bullet(this, direction, BASE_SPEED/Math.sqrt(sizeF), BASE_SIZE*sizeF));
+				w.addDelayedProjectile(new Bullet(this, direction, BASE_SPEED/Math.sqrt(sizeF), BASE_SIZE*sizeF));
 			}
 		}
 	}

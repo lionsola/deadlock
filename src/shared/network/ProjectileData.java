@@ -13,7 +13,7 @@ public class ProjectileData implements Serializable {
 	public float x;
 	public float y;
 	
-	public float direction;
-	public float speed;
+	public float prevX;
+	public float prevY;
 	public float size;
 }

@@ -18,6 +18,9 @@ public abstract class Projectile {
 	private double x;
 	private double y;
 	
+	private double prevX;
+	private double prevY;
+	
 	private double dx;
 	private double dy;
 	
@@ -89,7 +92,8 @@ public abstract class Projectile {
 			//consumeProjectile();
 			return;
 		}
-		
+		prevX = x;
+		prevY = y;
 		int checks = (int)Math.ceil(speed*GameWindow.MS_PER_UPDATE/Geometry.LINE_SAMPLE_THRESHOLD);
 		
 		for (int i=0;i<checks && !isConsumed();i++) {
@@ -126,8 +130,8 @@ public abstract class Projectile {
 		ProjectileData data = new ProjectileData();
 		data.x = (float) getX();
 		data.y = (float) getY();
-		data.speed = (float) getSpeed();
-		data.direction = (float) getDirection();
+		data.prevX = (float) getPrevX();
+		data.prevY = (float) getPrevY();
 		data.size = (float) getSize();
 		return data;
 	}
@@ -154,6 +158,14 @@ public abstract class Projectile {
 		return y;
 	}
 
+	public double getPrevX() {
+		return prevX;
+	}
+	
+	public double getPrevY() {
+		return prevY;
+	}
+	
 	public double getDx() {
 		return dx;
 	}

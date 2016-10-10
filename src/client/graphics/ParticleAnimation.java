@@ -20,6 +20,8 @@ public class ParticleAnimation extends BasicAnimation {
 	private Vector2D size; // size of the particle
 	private Vector2D maxSize; // maximum size allowed for the particle
 	private Vector2D growth; // growth in size of particle
+	private double rotation;
+	private double rotationSpeed;
 	private Color color; // colour of particle
 
 	private boolean ultSize = false;
@@ -58,6 +60,7 @@ public class ParticleAnimation extends BasicAnimation {
 		acc.mult(GameWindow.MS_PER_UPDATE);
 		vel.mult(GameWindow.MS_PER_UPDATE);
 		growth.mult(GameWindow.MS_PER_UPDATE);
+		rotation *= GameWindow.MS_PER_UPDATE;
 	}
 
 	/**
@@ -72,7 +75,8 @@ public class ParticleAnimation extends BasicAnimation {
 		vel.add(acc);
 		loc.add(vel);
 		size.add(growth);
-
+		rotation += rotationSpeed;
+		
 		if (defaultSize) {
 			if (size.x >= maxSize.x) {
 				if (size.y >= maxSize.y)
@@ -128,7 +132,13 @@ public class ParticleAnimation extends BasicAnimation {
 	@Override
 	public void render(Graphics2D g2D) {
 		g2D.setColor(color);
-		Renderer.fillCircle(g2D,loc.x,loc.y,size.x);
+		if (rotation!=0) {
+			g2D.rotate(-rotation, loc.x, loc.y);
+			Renderer.fillCircle(g2D,loc.x,loc.y,size.x);
+			g2D.rotate(rotation, loc.x, loc.y);
+		} else {
+			Renderer.fillCircle(g2D,loc.x,loc.y,size.x);
+		}
 	}
 
 	/**
@@ -230,6 +240,10 @@ public class ParticleAnimation extends BasicAnimation {
 		ultSize = c;
 	}
 
+	public void setRotationSpeed(double rotSpeed) {
+		rotationSpeed = rotSpeed;
+	}
+	
 	/**
 	 * Sets the colour for a particle.
 	 * 

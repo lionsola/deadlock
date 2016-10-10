@@ -78,8 +78,12 @@ public class World {
 	 * @param p
 	 *            the projectile to be added
 	 */
-	public void addProjectile(Projectile p) {
+	public void addDelayedProjectile(Projectile p) {
 		newProjectiles.add(p);
+	}
+	
+	public void addProjectile(Projectile p) {
+		projectiles.add(p);
 	}
 	
 	public void addSound(Sound s, double x, double y) {
@@ -109,6 +113,8 @@ public class World {
 	 * frame.
 	 */
 	public void update() {
+		
+		
 		// update characters
 		for (PlayerCharacter p : characters) {
 			p.update(this);

@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
-import client.graphics.ImageBlender;
-
 /**
  * Represent the properties and data of one type of tile. Note that there is only one tile object
  * for each type, the tile map in Arena just keep reference to them. The server-side does not need the
@@ -14,15 +12,23 @@ import client.graphics.ImageBlender;
  * @author Anh Pham
  */
 public class Tile {
+	public static final int COVER_NONE = 0;
+	public static final int COVER_LIGHT = 1;
+	public static final int COVER_MEDIUM = 2;
+	public static final int COVER_HEAVY = 3;
 	
 	public static final double tileSize = 1.2; // default
 
+	protected int id;
 	protected boolean walkable;
 	protected boolean transparent;
-	protected double protection;
+	protected int coverType;
 	protected String name;
 	protected Color color; 
 	protected BufferedImage tileImage;
+	
+
+	protected String imageName;
 
 	/**
 	 * Constructor. Note that this constructor should only be used for the client, since the network
@@ -35,18 +41,12 @@ public class Tile {
 	 * @param tileImage
 	 *            The base image of this tile, used to generate different images for the lighting.
 	 */
-	public Tile(boolean walkable, boolean transparent, BufferedImage tileImage, Color color) {
+	public Tile(int id, boolean walkable, boolean transparent, BufferedImage tileImage, Color color) {
+		this.id = id;
 		this.walkable = walkable;
 		this.transparent = transparent;
 		this.color = color;
-		
-		if (transparent) {
-			this.tileImage = ImageBlender.darkenImage(tileImage, 1.2f, 2);
-		} else {
-			// the solid tiles will not have lighting effects on them,
-			// so no need to have different tile images.
-			this.tileImage = tileImage;//ImageBlender.darkenImage(tileImage, 6, 3);
-		}
+		this.tileImage = tileImage;//ImageBlender.darkenImage(tileImage, 6, 3);
 	}
 
 	/**
@@ -58,7 +58,8 @@ public class Tile {
 	 * @param transparent
 	 *            If true, the characters can see through the tile.
 	 */
-	public Tile(boolean walkable, boolean transparent) {
+	public Tile(int id, boolean walkable, boolean transparent) {
+		this.id = id;
 		this.walkable = walkable;
 		this.transparent = transparent;
 		this.color = null;
@@ -96,15 +97,35 @@ public class Tile {
 		return tileImage;
 	}
 	
-	public void setProtection(double protection) {
-		this.protection = protection;
+	public void setImage(BufferedImage image) {
+		this.tileImage = image;
+	}
+	
+	public String getImageName() {
+		return imageName;
+	}
+	
+	public int getCoverType() {
+		return coverType;
+	}
+	
+	public void setCoverType(int coverType) {
+		this.coverType = coverType;
 	}
 	
 	public String getName() {
 		return name;
 	}
 
-	public double getProtection() {
-		return protection;
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setImageName(String imageName) {
+		this.imageName = imageName;
+	}
+	
+	public int getId() {
+		return id;
 	}
 }

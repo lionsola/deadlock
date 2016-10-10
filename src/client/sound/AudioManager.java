@@ -52,7 +52,7 @@ public class AudioManager implements Runnable {
 		soundMap.put(1, new SingleSound(SOUND_DIR + "gunshot_shotgun.wav"));
 		soundMap.put(2, new SingleSound(SOUND_DIR + "gunshot_pistol.wav"));
 		soundMap.put(3, new SingleSound(SOUND_DIR + "gunshot_silent_pistol.wav"));
-		soundMap.put(4, new SingleSound(SOUND_DIR + "gunshot_smg.wav"));
+		soundMap.put(4, new SingleSound(SOUND_DIR + "gunshot_sniper.wav"));
 		
 		soundMap.put(server.world.Sound.GRENADE_EXPLODE.id,new SingleSound(SOUND_DIR + "grenade_explode.wav"));
 

@@ -94,7 +94,7 @@ public class ImageBlender {
 
 				int dR = (int) (Math.min(255, Math.max(0, (sR+ 255*lightenFactor))));
 				int dG = (int) (Math.min(255, Math.max(0, (sG+ 255*lightenFactor))));
-				int dB = (int) (Math.min(255, Math.max(0, (sB+ 255*lightenFactor))));
+				int dB = (int) (Math.min(255, Math.max(0, (sB+ 255*lightenFactor/2))));
 
 				int dRGB = dR << 16 | dG << 8 | dB;
 				dest.setRGB(x, y, dRGB);
@@ -126,6 +126,6 @@ public class ImageBlender {
 	}
 	
 	public static BufferedImage applyForegroundEffect(BufferedImage source) {
-		return lightenImage(glowImage(source,100f,0.4f),0.05f);
+		return lightenImage(glowImage(source,50f,0.2f),0.025f);
 	}
 }

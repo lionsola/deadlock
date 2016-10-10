@@ -6,7 +6,6 @@ import java.awt.geom.Rectangle2D;
 import client.graphics.Renderer;
 import server.world.Arena;
 import shared.network.FullCharacterData;
-import shared.network.GameDataPackets.InputPacket;
 
 /**
  * Follows the player as he moves to display the appropriate area of the screen.
@@ -14,7 +13,7 @@ import shared.network.GameDataPackets.InputPacket;
  * @author Anh Pham
  */
 public class Camera {
-
+	private Component parent;
 	private int x;
 	private int y;
 	private final double arenaWidthMeter;
@@ -26,7 +25,8 @@ public class Camera {
 	 * @param arena
 	 *            The arena in the game
 	 */
-	public Camera(Arena arena) {
+	public Camera(Arena arena, Component parent) {
+		this.parent = parent;
 		this.arenaWidthMeter = arena.getWidthMeter();
 		this.arenaHeightMeter = arena.getHeightMeter();
 		//x = arenaWidthMeter / 2;
@@ -41,25 +41,35 @@ public class Camera {
 	 * @param player
 	 *            The player which the camera is following
 	 */
-	public void update(Component parent, FullCharacterData player, InputPacket input) {
+	public void update(FullCharacterData player) {
+		update(player.x,player.y);
+	}
+
+	/**
+	 * Updates the camera
+	 * 
+	 * @param parent
+	 *            The parent
+	 */
+	public void update(double px, double py) {
 		int arenaWidthPixel = (int) (arenaWidthMeter*Renderer.getPPM()+0.5);
 		int arenaHeightPixel = (int) (arenaHeightMeter*Renderer.getPPM()+0.5);
 		
 		if (arenaWidthPixel > parent.getWidth()) {
-			x = Math.min(Renderer.toPixel(player.x), arenaWidthPixel - parent.getWidth() / 2);
+			x = Math.min(Renderer.toPixel(px), arenaWidthPixel - parent.getWidth() / 2);
 			x = Math.max(x, parent.getWidth() / 2);
 		} else {
 			x = arenaWidthPixel / 2;
 		}
 
 		if (arenaHeightPixel > parent.getHeight()) {
-			y = Math.min(Renderer.toPixel(player.y), arenaHeightPixel - parent.getHeight() / 2);
+			y = Math.min(Renderer.toPixel(py), arenaHeightPixel - parent.getHeight() / 2);
 			y = Math.max(y, parent.getHeight() / 2);
 		} else {
 			y = arenaHeightPixel / 2;
 		}
 	}
-
+	
 	/**
 	 * Gets the X coordinate of the camera
 	 * 
@@ -85,7 +95,7 @@ public class Camera {
 	 *            The parent
 	 * @return Returns the top left X coordinate of the camera
 	 */
-	public int getTopLeftXPixel(Component parent) {
+	public int getTopLeftXPixel() {
 		return x - parent.getWidth() / 2;
 	}
 
@@ -96,7 +106,7 @@ public class Camera {
 	 *            The parent
 	 * @return Returns the top left X coordinate of the camera
 	 */
-	public int getTopLeftYPixel(Component parent) {
+	public int getTopLeftYPixel() {
 		return y - parent.getHeight() / 2;
 	}
 
@@ -108,7 +118,7 @@ public class Camera {
 	 * @return Returns the top left X coordinate of the camera
 	 */
 	public double getTopLeftXMeter(Component parent) {
-		return Renderer.toMeter(getTopLeftXPixel(parent));
+		return Renderer.toMeter(getTopLeftXPixel());
 	}
 
 	/**
@@ -119,7 +129,7 @@ public class Camera {
 	 * @return Returns the top left X coordinate of the camera
 	 */
 	public double getTopLeftYMeter(Component parent) {
-		return Renderer.toMeter(getTopLeftYPixel(parent));
+		return Renderer.toMeter(getTopLeftYPixel());
 	}
 	
 	/**

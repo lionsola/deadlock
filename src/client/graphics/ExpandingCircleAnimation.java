@@ -8,8 +8,6 @@ import client.gui.GameWindow;
 
 /**
  * Represent an animation of an circle expanding until it reaches the max size and stops.
- * 
- * @author Anh Pham.
  */
 public class ExpandingCircleAnimation extends BasicAnimation {
 	

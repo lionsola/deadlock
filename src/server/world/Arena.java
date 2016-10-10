@@ -37,8 +37,6 @@ public class Arena {
 	private Tile[][] tileMap; // represents each tile and their position, X and Y
 	private List<Point> t1Spawns; // spawn points of team 1
 	private List<Point> t2Spawns; // spawn points of team 2
-	private List<Point> lightList;
-	private Area lightMap;
 	
 	public Arena(File file, boolean loadGraphics) {
 		try {
@@ -56,20 +54,22 @@ public class Arena {
 				Scanner sc = new Scanner(line);
 				int color = sc.nextInt(16); // reads the hex image
 				Color c = new Color(sc.nextInt(16));
+				String tileName = sc.next(); // reads the light tile image
 				String filename = sc.next(); // reads the light tile image
 				boolean walkable = sc.nextBoolean(); // reads the walkable bool
 				boolean transparent = sc.nextBoolean(); // reads the transparent bool
-				double protection = sc.nextDouble();
+				int protection = sc.nextInt();
 				sc.close();
 				BufferedImage tileImage = null;
 				Tile t;
 				if (loadGraphics) {
 					tileImage = ImageIO.read(new FileInputStream("resource/tile/" + filename));
-					t = new Tile(walkable, transparent, tileImage,c);
+					t = new Tile(color,walkable, transparent, tileImage,c);
 				} else {
-					t = new Tile(walkable, transparent);
+					t = new Tile(color,walkable, transparent);
 				}
-				t.setProtection(protection);
+				t.setCoverType(protection);
+				t.setName(tileName);
 				tileTable.put(color,t);
 			}
 
@@ -77,10 +77,10 @@ public class Arena {
 			
 			loadTileMap(name, tileTable); // load the tile map
 			loadPositionMap(name, loadGraphics); // and load the position map
-			} catch (Exception e) {
-				System.err.println("Error while reading map");
-				e.printStackTrace();
-			}
+		} catch (Exception e) {
+			System.err.println("Error while reading map");
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -141,10 +141,6 @@ public class Arena {
 
 		t1Spawns = new ArrayList<Point>();
 		t2Spawns = new ArrayList<Point>();
-		if (loadGraphics) {
-			lightMap = new Area();
-			lightList = new LinkedList<Point>();
-		}
 
 		for (int xPixel = 0; xPixel < image.getWidth(); xPixel++) {
 			for (int yPixel = 0; yPixel < image.getHeight(); yPixel++) {
@@ -158,8 +154,6 @@ public class Arena {
 					int y = (int) ((yPixel + 0.5) * Tile.tileSize);
 					LineOfSight los = new LineOfSight();
 					Area light = new Area(los.genLOSAreaMeter(x, y, LIGHT_RANGE, Math.PI*2, 0, this));
-					lightMap.add(light);
-					lightList.add(new Point(x, y));
 				}
 			}
 		}
@@ -253,7 +247,10 @@ public class Arena {
 		return getHeight() * Tile.tileSize;
 	}
 
-
+	public void setTile(int x, int y, Tile t) {
+		if (x>0 && x<getWidth() && y>0 && y<getHeight())
+			tileMap[x][y] = t;
+	}
 
 	/**
 	 * Returns the name of the arena.
@@ -262,14 +259,6 @@ public class Arena {
 	 */
 	public String getName() {
 		return name;
-	}
-	
-	public Area getLightMap() {
-		return lightMap;
-	}
-	
-	public List<Point> getLightList() {
-		return lightList;
 	}
 	
 	/**
