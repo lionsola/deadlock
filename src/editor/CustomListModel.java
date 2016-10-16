@@ -4,13 +4,10 @@ import java.util.List;
 
 import javax.swing.AbstractListModel;
 
-import client.gui.ClientPlayer;
-import server.world.Tile;
-
-public class TileListModel extends AbstractListModel<Tile> {
+public class CustomListModel<T> extends AbstractListModel<T> {
 
 	private static final long serialVersionUID = 1480642633891355142L;
-	private List<Tile> team;
+	private List<T> tiles;
 
 	/**
 	 * Creates a new TeamListModel using a list of players
@@ -18,18 +15,18 @@ public class TileListModel extends AbstractListModel<Tile> {
 	 * @param team
 	 *            a list of each team
 	 */
-	public TileListModel(List<Tile> team) {
-		this.team = team;
+	public CustomListModel(List<T> team) {
+		this.tiles = team;
 	}
 
 	@Override
-	public Tile getElementAt(int index) {
-		return team.get(index);
+	public T getElementAt(int index) {
+		return tiles.get(index);
 	}
 
 	@Override
 	public int getSize() {
-		return team.size();
+		return tiles.size();
 	}
 
 	/**

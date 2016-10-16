@@ -9,7 +9,7 @@ import java.util.List;
 import server.ai.PathFinder.Path;
 import server.world.Arena;
 import server.world.Geometry;
-import server.world.Tile;
+import server.world.TileBG;
 
 /**
  * Represents a path finding / searching problem and the solving algorithm using A* search.
@@ -34,9 +34,9 @@ public class PathFindingJob implements Runnable {
      */
     public PathFindingJob(Point2D source, Point2D dest, Arena arena, Path result) {
         this.arena = arena;
-        this.source = new Point((int)(source.getX()/Tile.tileSize),(int)(source.getY()/Tile.tileSize));
+        this.source = new Point((int)(source.getX()/TileBG.tileSize),(int)(source.getY()/TileBG.tileSize));
         this.pixelDest = dest;
-        this.dest = new Point((int)(pixelDest.getX()/Tile.tileSize),(int)(pixelDest.getY()/Tile.tileSize));
+        this.dest = new Point((int)(pixelDest.getX()/TileBG.tileSize),(int)(pixelDest.getY()/TileBG.tileSize));
         this.result = result;
     }
     

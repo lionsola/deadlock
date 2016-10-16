@@ -7,7 +7,7 @@ import java.util.List;
 import javax.swing.JComponent;
 
 import server.world.Arena;
-import server.world.Tile;
+import server.world.TileBG;
 
 /**
  * This class will handle the drawing of a minimap.
@@ -98,8 +98,8 @@ public class Minimap extends JComponent {
 				g.setColor(PLAYER_COLOR);
 			}
 
-			int characterX = (int)(REAL_OFFSET + (p.character.x * TILE_SIZE / Tile.tileSize) - RADIUS);
-			int characterY = (int) (REAL_OFFSET + (p.character.y * TILE_SIZE / Tile.tileSize) - RADIUS);
+			int characterX = (int)(REAL_OFFSET + (p.character.x * TILE_SIZE / TileBG.tileSize) - RADIUS);
+			int characterY = (int) (REAL_OFFSET + (p.character.y * TILE_SIZE / TileBG.tileSize) - RADIUS);
 			int characterSize = 2 * RADIUS;
 			g.fillOval(characterX, characterY, characterSize, characterSize);
 		}

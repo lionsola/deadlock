@@ -117,8 +117,8 @@ public abstract class Projectile {
 			}
 
 			// check projectile vs wall collision
-			int tileX = (int) (x / Tile.tileSize);
-			int tileY = (int) (y / Tile.tileSize);
+			int tileX = (int) (x / TileBG.tileSize);
+			int tileY = (int) (y / TileBG.tileSize);
 			Tile t = w.getArena().get(tileX, tileY);
 			if (!t.isWalkable()) {
 				onHitWall(w,x,y,t);	

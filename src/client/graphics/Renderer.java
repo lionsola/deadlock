@@ -15,11 +15,15 @@ import java.awt.geom.Arc2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 import client.gui.ClientPlayer;
-import client.gui.GameWindow;
 import server.world.Arena;
 import server.world.Geometry;
+import server.world.TileBG;
 import server.world.Tile;
 import shared.network.FullCharacterData;
 import shared.network.PartialCharacterData;
@@ -35,19 +39,74 @@ public class Renderer {
 	public static final double CHARACTER_WIDTH = 0.1;
 	public static final double HEALTHBAR_WIDTH = 0.25;
 	private static Color defaultColor = Color.WHITE;
-	private static final Color[] teamColors = {Color.GREEN,Color.RED};
-	
-	private BufferedImage darkArenaImage;
+	private static final Color[] teamColors = {Color.GREEN.darker(),Color.RED.darker()};
+	/**
+	 * @return the arenaImage
+	 */
+	public BufferedImage getArenaImage() {
+		return arenaImage;
+	}
+
+	/**
+	 * @return the darkArenaImage
+	 */
+	public BufferedImage getDarkArenaImage() {
+		return darkArenaImage;
+	}
+
+	/**
+	 * @return the lightArenaImage
+	 */
+	public BufferedImage getLightArenaImage() {
+		return lightArenaImage;
+	}
+
+	/**
+	 * @return the lightMap
+	 */
+	public BufferedImage getLightMap() {
+		return lightMap;
+	}
+
 	private BufferedImage arenaImage;
+	private BufferedImage darkArenaImage;
 	private BufferedImage lightArenaImage;
+	private BufferedImage lightMap;
 	public static final double DEFAULT_PPM = 20;
-	public static double ppm = Renderer.DEFAULT_PPM;
+	private static double ppm = Renderer.DEFAULT_PPM;
 	
 	public void initArenaImages(Arena arena) {
-		arenaImage = ImageBlender.drawArena(arena);
-		//darkImage = ImageBlender.darkenImage(ImageBlender.blurImage(image), 3, 1);
-		darkArenaImage = ImageBlender.applyBackgroundEffect(arenaImage);
-		lightArenaImage = ImageBlender.applyForegroundEffect(arenaImage);
+		try {
+			arenaImage = ImageIO.read(new FileInputStream("resource/map/"+arena.getName()+"_mid.png"));
+		} catch (IOException e) {
+			System.err.println("Error while reading pre-rendered map image");
+			e.printStackTrace();
+			arenaImage = ImageBlender.drawArena(arena);
+		}
+		
+		try {
+			darkArenaImage = ImageIO.read(new FileInputStream("resource/map/"+arena.getName()+"_dark.png"));
+		} catch (IOException e) {
+			System.err.println("Error while reading pre-rendered dark image");
+			e.printStackTrace();
+			darkArenaImage = ImageBlender.applyBackgroundEffect(arenaImage);
+		}
+		
+		try {
+			lightArenaImage = ImageIO.read(new FileInputStream("resource/map/"+arena.getName()+"_light.png"));
+		} catch (IOException e) {
+			System.err.println("Error while reading pre-rendered map image");
+			e.printStackTrace();
+			lightArenaImage = ImageBlender.applyForegroundEffect(arenaImage);
+		}
+		
+		try {
+			lightMap = ImageIO.read(new FileInputStream("resource/map/"+arena.getName()+"_lightmap.png"));
+		} catch (IOException e) {
+			System.err.println("Error while reading pre-rendered light map");
+			e.printStackTrace();
+			lightArenaImage = ImageBlender.drawLightImage(arena);
+		}
 	}
 	
 	public void addBloodToArena(double x, double y, double direction) {
@@ -96,10 +155,6 @@ public class Renderer {
 		g2D.setStroke(new BasicStroke(toPixel(CHARACTER_WIDTH*2)));
 		g2D.setColor(teamColors[team]);
 		drawArc(g2D,cx,cy,cr,start,extent,Arc2D.OPEN);
-	}
-	
-	private static void drawArc(Graphics2D g2D, double cx, double cy, double cr, double start, double extent, int type) {
-		g2D.draw(new Arc2D.Double(toPixel(cx-cr),toPixel(cy-cr),toPixel(cr*2),toPixel(cr*2),Math.toDegrees(start),Math.toDegrees(extent),type));
 	}
 	
 	private static void renderCharacter(Graphics2D g2D, double x, double y, double direction, double r, int typeId, int team) {
@@ -169,79 +224,110 @@ public class Renderer {
 		g2D.draw(los);
 	}
 	
-	public void renderBackground(Graphics2D g2D, Rectangle2D window) {
-		drawImage(g2D, darkArenaImage, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
-	}
-	
-	public void render(Graphics2D g2D, Rectangle2D window) {
-		drawImage(g2D, arenaImage, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
-	}
-	
-	public void renderForeground(Graphics2D g2D, Rectangle2D window) {
-		drawImage(g2D, lightArenaImage, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
-	}
-	
 	public static void renderArena(Graphics2D g2D, Arena a, Rectangle2D window) {
 		//drawImage(g2D, a.image, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
+		g2D.setColor(new Color(0x080808));
+		fillRect(g2D,0,0, a.getWidthMeter(), a.getHeightMeter());
 		
-		
-		double ts = Tile.tileSize;
+		double ts = TileBG.tileSize;
 		int x1 = Math.max(0, (int) (window.getX() / ts));
 		int y1 = Math.max(0, (int) (window.getY() / ts));
 		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (window.getWidth() / ts) + 1);
 		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (window.getHeight() / ts) + 1);
 		
-		double ww = 0.12;
-		g2D.setColor(Color.LIGHT_GRAY);
-		g2D.setStroke(new BasicStroke(toPixel(ww)));
-		
-		
 		
 		for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
-				Tile t = a.get(x, y);
-				if (!t.isWalkable())
-					continue;
-				
-				Image image = a.get(x, y).getImage();
-				drawImage(g2D,image, x*ts, y*ts, ts, ts);
+				TileBG t = a.getTile(x, y);
+				BufferedImage image = t.getImage();
+				int w = image.getWidth()/32;
+				int h = image.getHeight()/32;
+				double xM = (x%w)*ts;
+				double yM = (y%h)*ts;
+				drawImage(g2D,image, xM, yM, ts, ts, x*ts, y*ts, ts, ts);
 			}
 		}
 		
 		for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
 				Tile t = a.get(x, y);
-				if (t.isWalkable())
+				if (t.getId()==0)
 					continue;
 				
-				Image image = a.get(x, y).getImage();
-				drawImage(g2D,image, x*ts, y*ts, ts, ts);
+				BufferedImage image = t.getImage();
+				double sw = ts*t.getSpriteSize();
+				
+				int w = image.getWidth()/32;
+				int h = image.getHeight()/32;
+				double xM = (x%w)*ts;
+				double yM = (y%h)*ts;
+				//drawImage(g2D,image, x*ts-(sw-ts)*0.5, y*ts-(sw-ts)*0.5, sw, sw);
+				drawImage(g2D,image, xM, yM, ts, ts, x*ts-(sw-ts)*0.5, y*ts-(sw-ts)*0.5, sw, sw);
 				
 				double xa = x*ts;
 				double ya = y*ts;
 				double xb = (x+1)*ts;
 				double yb = (y+1)*ts;
 				
-				g2D.setColor(t.getColor());
-				if (a.get(x-1,y)!=t) {
-					drawLine(g2D,xa,ya,xa,yb);
-				}
-				if (a.get(x,y-1)!=t) {
-					drawLine(g2D,xa,ya,xb,ya);
-				}
-				if (a.get(x+1,y)!=t) {
-					drawLine(g2D,xb,ya,xb,yb);
-				}
-				if (a.get(x,y+1)!=t) {
-					drawLine(g2D,xa,yb,xb,yb);
+				if (t.getCoverType()==3) {
+					double ww = 0.15;
+					g2D.setStroke(new BasicStroke(toPixel(ww)));
+					g2D.setColor(t.getColor());
+					if (a.get(x-1,y)!=t) {
+						drawLine(g2D,xa,ya,xa,yb);
+					}
+					if (a.get(x,y-1)!=t) {
+						drawLine(g2D,xa,ya,xb,ya);
+					}
+					if (a.get(x+1,y)!=t) {
+						drawLine(g2D,xb,ya,xb,yb);
+					}
+					if (a.get(x,y+1)!=t) {
+						drawLine(g2D,xa,yb,xb,yb);
+					}
 				}
 			}
 		}
+	}
+	
+	public static void renderEditorLight(Graphics2D g2D, int[][] lightMap, Rectangle2D window) {
+		double ts = TileBG.tileSize;
+		int x1 = Math.max(0, (int) (window.getX() / ts));
+		int y1 = Math.max(0, (int) (window.getY() / ts));
+		int x2 = Math.min(lightMap.length - 1, x1 + (int) (window.getWidth() / ts) + 1);
+		int y2 = Math.min(lightMap[0].length - 1, y1 + (int) (window.getHeight() / ts) + 1);
 		
+		for (int x = x1; x <= x2; x++) {
+			for (int y = y1; y <= y2; y++) {
+				if ((lightMap[x][y] & 0x00ffffff) != 0) {
+					g2D.setColor(new Color(lightMap[x][y] | 0xff000000,true));
+					fillRect(g2D,x*ts,y*ts, ts/2, ts/2);
+				}
+			}
+		}			
+	}
+	
+	public static void renderHardLight(Graphics2D g2D, int[][] lightMap, Rectangle2D window) {
+		double ts = TileBG.tileSize;
+		int x1 = Math.max(0, (int) (window.getX() / ts));
+		int y1 = Math.max(0, (int) (window.getY() / ts));
+		int x2 = Math.min(lightMap.length - 1, x1 + (int) (window.getWidth() / ts) + 1);
+		int y2 = Math.min(lightMap[0].length - 1, y1 + (int) (window.getHeight() / ts) + 1);
+		
+		for (int x = x1; x <= x2; x++) {
+			for (int y = y1; y <= y2; y++) {
+				g2D.setColor(new Color(lightMap[x][y] | 0xff000000,true));
+				fillRect(g2D,x*ts,y*ts, ts, ts);
+			}
+		}			
 	}
 	
 	static void drawLine(Graphics2D g2d, double x1, double y1, double x2, double y2) {
 		g2d.drawLine(toPixel(x1), toPixel(y1), toPixel(x2), toPixel(y2));
+	}
+	
+	private static void drawArc(Graphics2D g2D, double cx, double cy, double cr, double start, double extent, int type) {
+		g2D.draw(new Arc2D.Double(toPixel(cx-cr),toPixel(cy-cr),toPixel(cr*2),toPixel(cr*2),Math.toDegrees(start),Math.toDegrees(extent),type));
 	}
 	
 	static void drawCircle(Graphics2D g2d, double x, double y, double radius) {
@@ -252,17 +338,30 @@ public class Renderer {
 		g2d.fillOval(toPixel(x-radius), toPixel(y-radius), toPixel(radius*2), toPixel(radius*2));
 	}
 	
+	public static void drawArenaImage(Graphics2D g2D, Image image, Rectangle2D window) {
+		drawImage(g2D, image, window.getX(),window.getY(),window.getWidth(),window.getHeight(),
+				window.getX(),window.getY(),window.getWidth(),window.getHeight());
+	}
+	
 	static void drawImage(Graphics2D g2d, Image image, double x, double y, double w, double h) {
-		g2d.drawImage(image, toPixel(x), toPixel(y), toPixel(w), toPixel(h), null);
+		int screenX = toPixel(x);
+		int screenY = toPixel(y);
+		int screenW = toPixel(w+x-Renderer.toMeter(screenX));
+		int screenH = toPixel(h+y-Renderer.toMeter(screenY));
+		g2d.drawImage(image, screenX, screenY, screenW, screenH, null);
 	}
 	
 	static void drawImage(Graphics2D g2d, Image image, double sx, double sy, double sw, double sh, double x, double y, double w, double h) {
-		g2d.drawImage(image, toPixel(x), toPixel(y), toPixel(x+w), toPixel(y+h),
+		int screenX = toPixel(x);
+		int screenY = toPixel(y);
+		int screenW = toPixel(w+x-Renderer.toMeter(screenX));
+		int screenH = toPixel(h+y-Renderer.toMeter(screenY));
+		g2d.drawImage(image, screenX, screenY, screenW+screenX, screenH+screenY,
 				toPixelDefault(sx), toPixelDefault(sy), toPixelDefault(sx+sw), toPixelDefault(sy+sh),
 				null);
 	}
 	
-	static void fillRectangle(Graphics2D g2d, double x, double y, double w, double h) {
+	static void fillRect(Graphics2D g2d, double x, double y, double w, double h) {
 		g2d.fillRect(toPixel(x), toPixel(y), toPixel(w), toPixel(h));
 	}
 	
@@ -295,6 +394,10 @@ public class Renderer {
 		g2d.fillPolygon(polygon);
 	}
 	
+	public static void setPPM(double ppm) {
+		
+	}
+	
 	public static double getPPM() {
 		return Renderer.ppm;
 	}
@@ -312,15 +415,15 @@ public class Renderer {
 	}
 
 	public static void renderProtection(Graphics2D g2D, int tileX, int tileY, double protection) {
-		double y = (tileY+0.1)*Tile.tileSize;
-		double x = (tileX+0.1)*Tile.tileSize;
+		double y = (tileY+0.1)*TileBG.tileSize;
+		double x = (tileX+0.1)*TileBG.tileSize;
 		g2D.setStroke(new BasicStroke(toPixel(0.1)));
 		g2D.setColor(Color.WHITE);
-		drawLine(g2D,x,y,x+0.8*Tile.tileSize*protection/3.0,y);
+		drawLine(g2D,x,y,x+0.8*TileBG.tileSize*protection/3.0,y);
 		double w = 0.8;
-		x = (tileX+(1-w)/2)*Tile.tileSize;
-		y = (tileY+(1-w)/2)*Tile.tileSize;
-		w = w*Tile.tileSize;
+		x = (tileX+(1-w)/2)*TileBG.tileSize;
+		y = (tileY+(1-w)/2)*TileBG.tileSize;
+		w = w*TileBG.tileSize;
 		drawImage(g2D,Sprite.SHIELD,x,y,w,w);
 	}
 }

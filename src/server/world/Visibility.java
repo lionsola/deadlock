@@ -12,64 +12,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import client.graphics.Renderer;
-import server.world.LineOfSight.Node;
 import shared.network.FullCharacterData;
 
-//Calculate visible area from a position
-//Copyright 2012 Red Blob Games
-//License: Apache v2
-
-/* 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-/*
-This code uses the Haxe compiler, including some of the basic Haxe
-libraries, which are under the two-clause BSD license: http://haxe.org/doc/license
-
-Copyright (c) 2005, the haXe Project Contributors
-All rights reserved.
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-* Redistributions of source code must retain the above copyright
-  notice, this list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright
-  notice, this list of conditions and the following disclaimer in the
-  documentation and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE HAXE PROJECT CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE HAXE PROJECT
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-/*
-This code also uses a linked list datastructure class from
-Polygonal, which is Copyright (c) 2009-2010 Michael Baczynski,
-http://www.polygonal.de. It is available under the new BSD license,
-except for two algorithms, which I do not use. See
-https://github.com/polygonal/polygonal/blob/master/LICENSE
-*/
-
+/** Calculate visible area from a position
+ * Re-written in Java based on Haxe code from Red Blob Games
+ */
 class EndPoint extends Point2D.Float {
 	private static final long serialVersionUID = -4666092594884161798L;
 	public EndPoint(float x, float y) {
@@ -124,7 +71,7 @@ public class Visibility {
  // For the demo, keep track of wall intersections
  // public var demo_intersectionsDetected:Array<Array<Point>>;
 	
-	public Visibility(Arena arena) {
+	public Visibility() {
 		//loadWholeMap(arena);
 	}
 
@@ -170,8 +117,14 @@ public class Visibility {
 	public void loadMap(Arena a, float px, float py, float viewRange) {
 	    segments.clear();
 	    endpoints.clear();
-	    float ts = (float) Tile.tileSize;
-		int range = (int)(viewRange / ts + 0.5);
+	    
+	    addSegment(px-viewRange,py-viewRange,px-viewRange,py+viewRange);
+	    addSegment(px-viewRange,py+viewRange,px+viewRange,py+viewRange);
+	    addSegment(px+viewRange,py+viewRange,px+viewRange,py-viewRange);
+	    addSegment(px+viewRange,py-viewRange,px-viewRange,py-viewRange);
+	    
+	    float ts = (float) TileBG.tileSize;
+		int range = (int)Math.ceil(viewRange / ts);
 		int pX = (int)(px / ts);
 		int pY = (int)(py / ts);
 

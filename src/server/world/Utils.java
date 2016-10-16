@@ -19,7 +19,7 @@ public class Utils {
 	*/
 
 	public static Point2D tileToMeter(Point tileCoord) {
-		return new Point2D.Double(tileCoord.x * Tile.tileSize + Tile.tileSize / 2, tileCoord.y * Tile.tileSize + Tile.tileSize / 2);
+		return new Point2D.Double(tileCoord.x * TileBG.tileSize + TileBG.tileSize / 2, tileCoord.y * TileBG.tileSize + TileBG.tileSize / 2);
 	}
 	
 	public static Random random() {

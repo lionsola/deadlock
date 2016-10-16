@@ -2,6 +2,7 @@ package client.gui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Composite;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -16,13 +17,16 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.awt.geom.Arc2D;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.AbstractAction;
@@ -38,8 +42,8 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import server.world.Arena;
-import server.world.LineOfSight;
 import server.world.Tile;
+import server.world.TileBG;
 import server.world.Visibility;
 import shared.network.FullCharacterData;
 import shared.network.GameEvent;
@@ -51,13 +55,13 @@ import shared.network.GameEvent.*;
 import client.graphics.Animation;
 import client.graphics.AnimationSystem;
 import client.graphics.Renderer;
+import client.image.SoftLightComposite;
 import client.sound.AudioManager;
+import editor.DataManager;
 
 /**
  * The GUI where the match takes place, i.e. the arena with players.
  * 
- * @author Anh Pham
- * @author Connor Cartwright
  */
 public class GameScreen extends JLayeredPane implements KeyListener, MouseListener, Runnable, MouseWheelListener {
 
@@ -83,7 +87,6 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private JLabel teamScore;
 	private ChatPanel chatPanel;
 	private JComponent minimap;
-	private LineOfSight lineOfSight = new LineOfSight();
 	private Visibility visibility;
 	private Renderer renderer = new Renderer();
 	private boolean playing = true;
@@ -100,7 +103,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	 *            The id of the local player
 	 * @param socket
 	 *            The socket to communicate with the server
-	 * @param arenaFile
+	 * @param arenaName
 	 *            The name of the arena for this game
 	 * @param team1
 	 *            The list of players on team 1
@@ -109,7 +112,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	 * @throws IOException
 	 *             Exception thrown on gamescreen
 	 */
-	public GameScreen(GameWindow game, int id, Socket socket, String arenaFile, List<ClientPlayer> team1, List<ClientPlayer> team2) throws IOException {
+	public GameScreen(GameWindow game, int id, Socket socket, String arenaName, List<ClientPlayer> team1, List<ClientPlayer> team2) throws IOException {
 		super();
 		this.game = game;
 		this.setSize(game.getWidth(), game.getHeight());
@@ -117,8 +120,24 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		this.requestFocusInWindow();
 		this.setIgnoreRepaint(true);
 		setFocusTraversalKeysEnabled(false);
-		this.arena = new Arena(arenaFile, true);
-		this.visibility = new Visibility(arena);
+		Collection<TileBG> tileList = DataManager.loadTileListOld();
+		HashMap<Integer,TileBG> tileTable = DataManager.getTileMap(tileList);
+		Collection<Tile> objectList = DataManager.loadObjectListOld();
+		HashMap<Integer,Tile> objectTable = DataManager.getObjectMap(objectList);
+		try {
+			DataManager.loadTileGraphics(tileList);
+		} catch (IOException e) {
+			System.err.println("Error while loading tile images.");
+			e.printStackTrace();
+		}
+		try {
+			DataManager.loadObjectGraphics(objectList);
+		} catch (IOException e) {
+			System.err.println("Error while loading tile images.");
+			e.printStackTrace();
+		}
+		this.arena = new Arena(arenaName, tileTable, objectTable);
+		this.visibility = new Visibility();
 		this.team1 = team1;
 		this.team2 = team2;
 		this.players = new LinkedList<ClientPlayer>();
@@ -361,33 +380,30 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 
 		if (wsp != null) {
 			// render the dark part
-			long before = System.nanoTime();
-			//Shape los = lineOfSight.generateLoS(mainCharacter, arena);
-			Shape los = visibility.generateLoS(mainCharacter, arena);
-			System.out.println(System.nanoTime()-before);
-			renderer.renderBackground(g2D,camera.getDrawArea(this));
+			//long before = System.nanoTime();
+			
 			FullCharacterData c = mainCharacter;
-			//Arc2D arc = new Arc2D.Double(Renderer.toPixel(c.x - c.viewRange),Renderer.toPixel(c.y - c.viewRange),
-			//		Renderer.toPixel(c.viewRange * 2),Renderer.toPixel(c.viewRange * 2),
-			//		Math.toDegrees(c.direction-c.viewAngle/2), Math.toDegrees(c.viewAngle), Arc2D.PIE);
-			Arc2D arc = new Arc2D.Double(Renderer.toPixel(c.x - c.hearRange),Renderer.toPixel(c.y - c.hearRange),
-					Renderer.toPixel(c.hearRange*2),Renderer.toPixel(c.hearRange*2),
-					Math.toDegrees(c.direction-c.viewAngle/2), Math.toDegrees(c.viewAngle), Arc2D.PIE);
-			g2D.setClip(arc);
-			//g2d.setClip(Renderer.toPixel(c.x-c.viewRange), Renderer.toPixel(c.y-c.viewRange), Renderer.toPixel(c.viewRange*2),Renderer.toPixel(c.viewRange*2));
+			
+			//System.out.println(System.nanoTime()-before);
+			Renderer.drawArenaImage(g2D, renderer.getDarkArenaImage(),camera.getDrawArea());
+			
+			Shape clip = new Ellipse2D.Double(Renderer.toPixel(c.x - c.hearRange),Renderer.toPixel(c.y - c.hearRange),
+					Renderer.toPixel(c.hearRange*2),Renderer.toPixel(c.hearRange*2));
+			g2D.setClip(clip);
 			Rectangle2D hearBox = getCharacterVisionBox(c.x,c.y,c.hearRange);
-			renderer.render(g2D, hearBox);
+			Renderer.drawArenaImage(g2D, renderer.getArenaImage(),hearBox);
 			
 			g2D.setClip(null);
-			// Renderer.renderArenaBackground(g2d, camera.getDrawArea(this));
 			globalAnimations.render(g2D);
-
-			// render the light part
-			g2D.setClip(los);
-			Rectangle2D viewBox = getCharacterVisionBox(c.x,c.y,c.viewRange);
-			renderer.renderForeground(g2D, viewBox);
 			
-			//Renderer.render(g2d, arena,getCharacterVisionBox(mainCharacter.x, mainCharacter.y, (int)(mainCharacter.viewRange+0.5)));
+			Area los = visibility.generateLoS(c, arena);
+			double r = 2;
+			los.add(new Area(new Ellipse2D.Double(Renderer.toPixel(c.x - r),Renderer.toPixel(c.y - r),
+					Renderer.toPixel(r*2),Renderer.toPixel(r*2))));
+			
+			Rectangle2D viewBox = getCharacterVisionBox(c.x,c.y,c.viewRange);
+			g2D.setClip(los);
+			Renderer.drawArenaImage(g2D,renderer.getLightArenaImage(),viewBox);
 
 			ClientPlayer localPlayer = Utils.findPlayer(players, id);
 
@@ -404,15 +420,20 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				visualAnimations.addProjectileTrail(data.x, data.y, data.prevX, data.prevY ,data.size);
 			}
 			
-			// g2d.drawImage(light,mainCharacter.x-mainCharacter.viewRange,mainCharacter.y-mainCharacter.viewRange,mainCharacter.viewRange*2,mainCharacter.viewRange*2,
-			// null);
-			g2D.setClip(null);
-			//Renderer.renderLOS(g2D, los);
 			Renderer.renderMainCharacter(g2D, mainCharacter, localPlayer);
-			int tileX = (int)(input.cx/Tile.tileSize);
-			int tileY = (int)(input.cy/Tile.tileSize);
+			
+			g2D.setClip(los);
+			Composite save = g2D.getComposite();
+			g2D.setComposite(new SoftLightComposite(1f));
+			Renderer.drawArenaImage(g2D,renderer.getLightMap(),viewBox);
+			g2D.setComposite(save);
+			
+			int tileX = (int)(input.cx/TileBG.tileSize);
+			int tileY = (int)(input.cy/TileBG.tileSize);
 			if (arena.get(tileX,tileY).getCoverType()>0)
 				Renderer.renderProtection(g2D,tileX,tileY,arena.get(tileX,tileY).getCoverType());
+			g2D.setClip(null);
+			
 		}
 		Renderer.renderCrosshair(g2D,input.cx,input.cy,mainCharacter.crosshairSize);
 		g.translate(transX, transY);
@@ -592,6 +613,6 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		zoomLevel = Math.max(-0.5,Math.min(0.5,zoomLevel + 0.05*e.getPreciseWheelRotation()));
-		Renderer.ppm = Renderer.DEFAULT_PPM*(1+zoomLevel);
+		Renderer.setPPM(Renderer.DEFAULT_PPM*(1+zoomLevel));
 	}
 }

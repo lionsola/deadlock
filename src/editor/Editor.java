@@ -9,8 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
-
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.event.MouseInputListener;
@@ -18,6 +16,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import server.world.Arena;
 import server.world.Tile;
+import server.world.TileBG;
+import editor.DataManager.ArenaData;
 
 /**
  * The master frame that holds the game screens.
@@ -34,11 +34,14 @@ public class Editor extends JFrame {
     private int height;
     // private int scale;
     ArenaPanel arenaPanel;
+    
     MouseInputListener currentTool;
 
-	Collection<Tile> tiles;
+	Collection<TileBG> tiles;
+	Collection<Tile> objects;
 
-	HashMap<Integer,Tile> tileTable;
+	HashMap<Integer,TileBG> tileTable;
+	HashMap<Integer,Tile> objectTable;
     public Editor() {
         GraphicsDevice screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
         setIgnoreRepaint(true);
@@ -58,12 +61,9 @@ public class Editor extends JFrame {
         
         getContentPane().setLayout(new BorderLayout());
         
+        
+		tiles = DataManager.loadTileListOld();
         try {
-			tiles = DataManager.loadTileListOld();
-		} catch (ClassNotFoundException | IOException e) {
-			tiles = new LinkedList<Tile>();
-		}
-		try {
 			DataManager.loadTileGraphics(tiles);
 		} catch (IOException e) {
 			System.err.println("Error while loading tile images.");
@@ -71,11 +71,19 @@ public class Editor extends JFrame {
 		}
 		tileTable = DataManager.getTileMap(tiles);
         
+        objects = DataManager.loadObjectListOld();
+        try {
+			DataManager.loadObjectGraphics(objects);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        objectTable = DataManager.getObjectMap(objects);
+        
         this.add(new ToolMenu(this),BorderLayout.WEST);
         pack();
         setVisible(true);
         setLocationRelativeTo(null);
-        openArena();
+        openArenaNew();
     }
 
     @Override
@@ -99,17 +107,45 @@ public class Editor extends JFrame {
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
                 "Map file", "map");
         fc.setFileFilter(filter);
-        int returnVal = fc.showDialog(this, "Attach");
+        int returnVal = fc.showDialog(this, "Open");
         Arena a = null;
         if (returnVal==JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            a = new Arena(file,true);
+            a = new Arena(file,tileTable,objectTable);
         }
         if (a!=null) {
+        	if (arenaPanel!=null) {
+        		getContentPane().remove(arenaPanel);
+        	}
         	arenaPanel = new ArenaPanel(a);
         	getContentPane().add(arenaPanel, BorderLayout.CENTER);
         	pack();
-        	setTool(new MoveTool(arenaPanel));
+        	setTool(new Tool.MoveTool(arenaPanel));
+        }
+	}
+	
+    
+    public void openArenaNew() {
+		JFileChooser fc = new JFileChooser("resource/map/");
+        fc.setMultiSelectionEnabled(false);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                "Arena file", "arena");
+        fc.setFileFilter(filter);
+        int returnVal = fc.showDialog(this, "Open");
+        Arena a = null;
+        if (returnVal==JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            a = new Arena((ArenaData)DataManager.loadObject(file),tileTable,objectTable);
+        }
+        if (a!=null) {
+        	if (arenaPanel!=null) {
+        		arenaPanel.stop();
+        		getContentPane().remove(arenaPanel);
+        	}
+        	arenaPanel = new ArenaPanel(a);
+        	getContentPane().add(arenaPanel, BorderLayout.CENTER);
+        	pack();
+        	setTool(new Tool.MoveTool(arenaPanel));
         }
 	}
 	
@@ -121,12 +157,28 @@ public class Editor extends JFrame {
     	currentTool = tool;
     }
     
-	public void saveArena() {
-		
-	}
+    public void addTileBG(TileBG t) {
+    	tiles.add(t);
+    	tileTable.put(t.getId(), t);
+    }
+    
+    public void addObject(Tile t) {
+    	objects.add(t);
+    	objectTable.put(t.getId(), t);
+    }
 	
-	public void newArena() {
-
+	public void saveArena() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				try {
+					DataManager.exportImages(arenaPanel.getArena());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
 	}
     
     public static void main(String[] args) {

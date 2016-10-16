@@ -1,131 +1,123 @@
 package server.world;
 
 import java.awt.Color;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 
-/**
- * Represent the properties and data of one type of tile. Note that there is only one tile object
- * for each type, the tile map in Arena just keep reference to them. The server-side does not need the
- * images, so a network-side tile only use the property fields.
- * 
- * @author Anh Pham
- */
-public class Tile {
-	public static final int COVER_NONE = 0;
-	public static final int COVER_LIGHT = 1;
-	public static final int COVER_MEDIUM = 2;
-	public static final int COVER_HEAVY = 3;
-	
-	public static final double tileSize = 1.2; // default
+import editor.CellRenderable;
+import editor.Identifiable;
 
+public class Tile implements CellRenderable, Identifiable {
+	
+	public Tile(int id) {
+		this.id = id;
+	}
+	
 	protected int id;
 	protected boolean walkable;
 	protected boolean transparent;
+	protected Color color;
 	protected int coverType;
 	protected String name;
-	protected Color color; 
-	protected BufferedImage tileImage;
-	
-
 	protected String imageName;
-
+	protected double spriteSize; // in meters
+	protected BufferedImage objectImage;
+	
 	/**
-	 * Constructor. Note that this constructor should only be used for the client, since the network
-	 * does not need the image resources and would waste memory keeping them in the tile.
-	 * 
-	 * @param walkable
-	 *            If true, the characters can move through the tile.
-	 * @param transparent
-	 *            If true, the characters can see through the tile.
-	 * @param tileImage
-	 *            The base image of this tile, used to generate different images for the lighting.
+	 * @return the imageName
 	 */
-	public Tile(int id, boolean walkable, boolean transparent, BufferedImage tileImage, Color color) {
-		this.id = id;
-		this.walkable = walkable;
-		this.transparent = transparent;
-		this.color = color;
-		this.tileImage = tileImage;//ImageBlender.darkenImage(tileImage, 6, 3);
+	public String getImageName() {
+		return imageName;
 	}
 
 	/**
-	 * Constructor. Note that this constructor should only be used for the network, because it does
-	 * not initialize the graphical resource.
-	 * 
-	 * @param walkable
-	 *            If true, the characters can move through the tile.
-	 * @param transparent
-	 *            If true, the characters can see through the tile.
+	 * @param imageName the imageName to set
 	 */
-	public Tile(int id, boolean walkable, boolean transparent) {
-		this.id = id;
-		this.walkable = walkable;
-		this.transparent = transparent;
-		this.color = null;
-		this.tileImage = null;
+	public void setImageName(String imageName) {
+		this.imageName = imageName;
 	}
 
 	/**
-	 * Check if this tile is walkable.
-	 * 
-	 * @return True if the characters can walk through it, false otherwise.
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
+	}
+
+	/**
+	 * @return the walkable
 	 */
 	public boolean isWalkable() {
 		return walkable;
 	}
-
 	/**
-	 * Check if this tile is walkable.
-	 * 
-	 * @return True if the characters can walk through it, false otherwise.
+	 * @param walkable the walkable to set
+	 */
+	public void setWalkable(boolean walkable) {
+		this.walkable = walkable;
+	}
+	/**
+	 * @return the transparent
 	 */
 	public boolean isTransparent() {
 		return transparent;
 	}
-
-	public Color getColor() {
-		return color;
-	}
-	
 	/**
-	 * Get the standard image for this tile.
-	 * 
-	 * @return
+	 * @param transparent the transparent to set
 	 */
-	public Image getImage() {
-		return tileImage;
+	public void setTransparent(boolean transparent) {
+		this.transparent = transparent;
 	}
-	
-	public void setImage(BufferedImage image) {
-		this.tileImage = image;
-	}
-	
-	public String getImageName() {
-		return imageName;
-	}
-	
+	/**
+	 * @return the coverType
+	 */
 	public int getCoverType() {
 		return coverType;
 	}
-	
+	/**
+	 * @param coverType the coverType to set
+	 */
 	public void setCoverType(int coverType) {
 		this.coverType = coverType;
 	}
-	
+	/**
+	 * @return the name
+	 */
 	public String getName() {
 		return name;
 	}
-
+	/**
+	 * @param name the name to set
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	public void setImageName(String imageName) {
-		this.imageName = imageName;
+	/**
+	 * @return the spriteSize
+	 */
+	public double getSpriteSize() {
+		return spriteSize;
+	}
+	/**
+	 * @param spriteSize the spriteSize to set
+	 */
+	public void setSpriteSize(double spriteSize) {
+		this.spriteSize = spriteSize;
+	}
+	/**
+	 * @return the objectImage
+	 */
+	public BufferedImage getImage() {
+		return objectImage;
+	}
+	/**
+	 * @param objectImage the objectImage to set
+	 */
+	public void setImage(BufferedImage objectImage) {
+		this.objectImage = objectImage;
+		color = new Color(objectImage.getRGB(0, 0));
 	}
 	
-	public int getId() {
-		return id;
+	public Color getColor() {
+		return color;
 	}
 }

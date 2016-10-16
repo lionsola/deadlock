@@ -1,6 +1,7 @@
 package editor;
 
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.MouseInfo;
@@ -10,6 +11,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -18,25 +20,36 @@ import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import javax.swing.JPanel;
+
+import client.graphics.ImageBlender;
 import client.graphics.Renderer;
 import client.gui.Camera;
 import client.gui.ClientPlayer;
 import client.gui.GameWindow;
+import client.image.HardLightComposite;
+import client.image.MultiplyComposite;
+import client.image.SoftHardLightComposite;
+import client.image.SoftLightComposite;
 import server.world.Arena;
-import server.world.Tile;
+import server.world.TileBG;
 import shared.network.FullCharacterData;
 import shared.network.GameDataPackets.InputPacket;
 
 public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWheelListener{
+	enum Layer {ARENA,LIGHT}
 	private static final long serialVersionUID = 2649458143637701147L;
 	private Renderer renderer = new Renderer();
 	private Arena arena;
-
+	public BufferedImage lightImage;
+	public Layer layer = Layer.ARENA;
 	private Camera camera;
 	private double zoomLevel;
 	private ClientPlayer playerInfo = new ClientPlayer();
 	FullCharacterData player = new FullCharacterData();
 	private InputPacket input = new InputPacket();
+	private double FPS;
+	private volatile boolean running = true;
+	private Thread thread;
 	public ArenaPanel (Arena arena) {
 		super();
 		this.arena = arena;
@@ -46,13 +59,28 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		this.setIgnoreRepaint(true);
 		setFocusTraversalKeysEnabled(false);
 		
+		
 		addKeyListener(this);
 		addMouseWheelListener(this);
 		
 		//addMouseListener(this);
-		new Thread(this).start();
+		start();
 	}
 
+	public void start() {
+		thread = new Thread(this);
+		thread.start();
+	}
+	
+	public void stop() {
+		running = false;
+		try {
+			thread.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * The game loop.
 	 */
@@ -63,7 +91,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		long totalTime = 0;
 		int frameCount = 0;
 		final int MAX_FRAME_COUNT = 50;
-		while (true) {
+		while (running) {
 			long current = System.currentTimeMillis();
 			long elapsed = current - previous;
 			previous = current;
@@ -87,6 +115,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	
 			frameCount++;
 			if (frameCount == MAX_FRAME_COUNT) {
+				FPS = (1000.0 * frameCount) / totalTime;
 				frameCount = 0;
 				totalTime = 0;
 			}
@@ -144,27 +173,41 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		Graphics2D g2D = (Graphics2D) g;
 		RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2D.setRenderingHints(rh);
-		int layer = 0;
 		switch (layer) {
-			case 0:
-				Renderer.renderArena(g2D, arena, camera.getDrawArea(this));
+			case ARENA:
+				Renderer.renderArena(g2D, arena, camera.getDrawArea());
+				if (lightImage!=null) {
+					Composite save = g2D.getComposite();
+					//g2D.setComposite(new MultiplyComposite(0.5f));
+					g2D.setComposite(new SoftHardLightComposite(1f));
+					//long before = System.currentTimeMillis();
+					Renderer.drawArenaImage(g2D, lightImage, camera.getDrawArea());
+					//System.out.println(System.currentTimeMillis()-before);
+					g2D.setComposite(save);
+				}
 				break;
-			case 1:
-				renderer.render(g2D, camera.getDrawArea(this));
-				break;
-			case 2:
-				renderer.renderForeground(g2D, camera.getDrawArea(this));
+			case LIGHT:
+				Renderer.renderArena(g2D, arena, camera.getDrawArea());
+				Renderer.renderEditorLight(g2D, arena.getLightmap(), camera.getDrawArea());
 				break;
 		}
 		Renderer.renderMainCharacter(g2D, player, playerInfo);
 		g.translate(transX, transY);
+		g2D.drawString("FPS: "+FPS, 10, 10);
 	}
 	
-	
+	public void generateLightImage( ) {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				BufferedImage i = ImageBlender.drawLightImage(arena);
+				lightImage = i;
+			}}).start();
+	}
 	
 	// TILE
-	public void saveTiles(HashMap<Integer,Tile> tileTable) throws FileNotFoundException, IOException {
-		Collection<Tile> tileList = tileTable.values();
+	public void saveTiles(HashMap<Integer,TileBG> tileTable) throws FileNotFoundException, IOException {
+		Collection<TileBG> tileList = tileTable.values();
 		ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream("resource/tile/tiles")));
 		out.writeObject(tileList);
 		out.close();
@@ -230,7 +273,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
     
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
-		zoomLevel = Math.max(-0.5,Math.min(0.5,zoomLevel + 0.05*e.getPreciseWheelRotation()));
-		Renderer.ppm = Renderer.DEFAULT_PPM*(1+zoomLevel);
+		//zoomLevel = Math.max(-0.5,Math.min(0.5,zoomLevel + 0.05*e.getPreciseWheelRotation()));
+		//Renderer.setPPM(Renderer.DEFAULT_PPM*(1+zoomLevel));
 	}
 }

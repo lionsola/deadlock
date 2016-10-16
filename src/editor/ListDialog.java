@@ -1,12 +1,6 @@
 package editor;
  
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
-import client.gui.GUIFactory;
-import server.world.Tile;
-
 import java.awt.*;
 import java.awt.event.*;
  
@@ -33,10 +27,8 @@ import java.awt.event.*;
 public class ListDialog<T> extends JDialog implements ActionListener {
 
 	private static final long serialVersionUID = -2705330003771825132L;
-	private T value;
     private JList<T> list;
     private Editor editor;
-    private JPanel buttonPanel;
  
     /**
      * Set up and show the dialog.  The first Component argument

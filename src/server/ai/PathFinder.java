@@ -1,9 +1,7 @@
 package server.ai;
 
 
-import java.awt.Point;
 import java.awt.geom.Point2D;
-import java.io.IOException;
 import java.util.List;
 
 import server.world.Arena;
@@ -44,19 +42,5 @@ public class PathFinder {
      */
     public static class Path {
         public List<Point2D> path = null;
-    }
-    
-    public static void main(String[] args) {
-        Path r = new Path();
-        try {
-            PathFindingJob job = new PathFindingJob(new Point(50,50),new Point(1280,1280),new Arena("mansion",false),r);
-            job.run();
-            for (Point2D p:r.path) {
-                System.out.println(p);
-            }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
     }
 }

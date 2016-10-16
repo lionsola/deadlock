@@ -11,31 +11,32 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import server.world.Tile;
+import server.world.TileBG;
+import server.world.Utils;
 
-public class TileEditDialog extends JDialog implements ActionListener {
+public class TileBGDialog extends JDialog implements ActionListener {
 	private static final long serialVersionUID = 5917436825785813483L;
-	private Tile tile;
+	private Editor editor;
+	private TileBG tile;
 	
+	private JFormattedTextField id;
+	private JTextField name;
 	private JButton loadImage;
 	private JButton save;
 	private JLabel tileImage;
 	private BufferedImage curTileImage;
-	private JCheckBox walkable;
-	private JCheckBox sightBlocking;
-	private JComboBox<String> cover;
 	
-	public TileEditDialog (Editor editor, Tile tile) {
+	public TileBGDialog (Editor editor, TileBG tile) {
 		super(editor, "Edit tile", true);
+		this.editor = editor;
 		this.tile = tile;
 		//Create and populate the top panel.
         JPanel topPanel = new JPanel(new GridBagLayout());
@@ -45,16 +46,19 @@ public class TileEditDialog extends JDialog implements ActionListener {
         
         c.gridx = 0;
         c.gridy = 0;
-        JTextField name = new JTextField(tile.getName());
+        id = new JFormattedTextField();
+        id.setHorizontalAlignment(JTextField.CENTER);
+        topPanel.add(id,c);
+        
+        c.gridy += 1;
+        name = new JTextField();
         name.setHorizontalAlignment(JTextField.CENTER);
         topPanel.add(name,c);
         
         c.gridy += 1;
         c.fill = GridBagConstraints.BOTH;
-        tileImage = new JLabel(new ImageIcon(tile.getImage()));
-        if (tile.getImage()!=null) {
-        	topPanel.add(tileImage,c);
-        }
+        tileImage = new JLabel();
+    	topPanel.add(tileImage,c);
         
         c.gridy += 1;
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -62,6 +66,7 @@ public class TileEditDialog extends JDialog implements ActionListener {
         loadImage.addActionListener(this);
         topPanel.add(loadImage,c);
         
+        /*
         c.gridy += 1;
         walkable = new JCheckBox("Walkable");
         walkable.setSelected(tile.isWalkable());
@@ -77,11 +82,26 @@ public class TileEditDialog extends JDialog implements ActionListener {
         cover = new JComboBox<String>(coverTypes);
         cover.setSelectedIndex(tile.getCoverType());
         topPanel.add(cover,c);
+        */
         
         c.gridy += 1;
         save = new JButton("Save");
         save.addActionListener(this);
         topPanel.add(save,c);
+        
+        if (tile!=null) {
+        	id.setValue(tile.getId());
+        	id.setEditable(false);
+        	this.tile = tile;
+        	name.setText(tile.getName());
+        	if (tile.getImage()!=null) {
+        		tileImage.setIcon(new ImageIcon(tile.getImage()));
+        	}
+        } else {
+        	int ID = Utils.random().nextInt();
+        	//this.tile = new TileBG(ID);
+        	id.setValue(ID);
+        }
         
         this.setContentPane(topPanel);
         this.pack();
@@ -91,14 +111,17 @@ public class TileEditDialog extends JDialog implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		if (arg0.getSource()==save) {
-			// TODO save the tile
-			tile.setImage(curTileImage);
+			if (this.tile!=null) {
+				tile.setName(name.getText());
+				tile.setImage(curTileImage);
+				//tile
+			}
 			
 			// Close the dialog
 			this.setVisible(false);
 			this.dispose();
 		} else if (arg0.getSource()==loadImage) {
-			JFileChooser fc = new JFileChooser("resource/map/");
+			JFileChooser fc = new JFileChooser("resource/tile/");
 	        fc.setMultiSelectionEnabled(false);
 	        fc.setFileFilter(new FileNameExtensionFilter("Tile image", "png"));
 	        int returnVal = fc.showDialog(this, "Attach");

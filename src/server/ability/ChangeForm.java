@@ -1,7 +1,6 @@
 package server.ability;
 
 import server.character.PlayerCharacter;
-import server.weapon.WeaponFactory;
 import server.world.World;
 
 public class ChangeForm extends ToggleAbility {

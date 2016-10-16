@@ -2,10 +2,12 @@ package server.network;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
 import client.gui.GameWindow;
+import editor.DataManager;
 import server.ai.AIPlayer;
 import server.ai.PathFinder;
 import server.character.CharacterFactory;
@@ -13,8 +15,9 @@ import server.character.ClassStats;
 import server.character.PlayerCharacter;
 import server.weapon.WeaponFactory;
 import server.world.Arena;
+import server.world.Tile;
+import server.world.TileBG;
 import server.world.World;
-import shared.network.GameDataPackets;
 import shared.network.GameEvent;
 import shared.network.GameDataPackets.InputPacket;
 import shared.network.GameDataPackets.WorldStatePacket;
@@ -31,7 +34,6 @@ import shared.network.GameEvent.ScoreChangedEvent;
 public class MatchServer implements Runnable, GameEventListener {
 	
 	private World world;
-	private boolean tick = true;
 	private boolean playing = false;
 	private boolean scoreChanged = false;
 	private List<ServerPlayer> players;
@@ -70,7 +72,9 @@ public class MatchServer implements Runnable, GameEventListener {
 		WeaponFactory.initWeapons();
 		ClassStats.initClassStats();
 		
-		Arena arena = new Arena(arenaName, false);
+		HashMap<Integer,TileBG> tileTable = DataManager.getTileMap(DataManager.loadTileListOld());
+		HashMap<Integer,Tile> objectTable = DataManager.getObjectMap(DataManager.loadObjectListOld());
+		Arena arena = new Arena(arenaName, tileTable, objectTable);
 		
 		world = new World(arena, this);
 		

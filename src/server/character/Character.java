@@ -12,7 +12,7 @@ import server.world.Arena;
 import server.world.LineOfSight;
 import server.world.Projectile;
 import server.world.Sound;
-import server.world.Tile;
+import server.world.TileBG;
 import server.world.Utils;
 import server.world.World;
 import shared.core.Vector2D;
@@ -25,19 +25,19 @@ import shared.network.GameEvent.SoundEvent;
  * This class will define the base behaviour of every type of Character.
  */
 public class Character {
-	public static final double BASE_SPEED	= 0.0025;
+	public static final double BASE_SPEED	= 0.0035;
 	public static final double BASE_HP		= 100;
 	public static final double BASE_RADIUS	= 0.5;
-	public static final double BASE_FOVRANGE= 18;
+	public static final double BASE_FOVRANGE= 20;
 	public static final double BASE_FOVANGLE= Math.toRadians(120);
 	
 	public static final double BASE_HEARING_THRES = 0;
 	
-	private double x = 0; // x position of the server.character
-	private double y = 0; // y position of the server.character
+	private double x = 0;
+	private double y = 0;
 	private Vector2D pos;
-	private double dx = 0; // delta x, left = -speed, right = speed
-	private double dy = 0; // delta y, upwards = - speed, down = speed
+	private double dx = 0;
+	private double dy = 0;
 	private Vector2D vel;
 	
 	public final int id; // the player's ID
@@ -132,10 +132,10 @@ public class Character {
 		// check each corner of box if walkable
 		
 		if (dx!=0) {
-			int tileX1 = (int) ((newX - getRadius()) / Tile.tileSize);
-			int tileY1 = (int) ((getY() - getRadius()) / Tile.tileSize);
-			int tileX2 = (int) ((newX + getRadius()) / Tile.tileSize);
-			int tileY2 = (int) ((getY() + getRadius()) / Tile.tileSize);
+			int tileX1 = (int) ((newX - getRadius()) / TileBG.tileSize);
+			int tileY1 = (int) ((getY() - getRadius()) / TileBG.tileSize);
+			int tileX2 = (int) ((newX + getRadius()) / TileBG.tileSize);
+			int tileY2 = (int) ((getY() + getRadius()) / TileBG.tileSize);
 			int wallX=0,wallY=0;
 			boolean blocked = false;;
 			for (int x=tileX1;x<=tileX2;x++) {
@@ -149,9 +149,9 @@ public class Character {
 				}
 			}
 			if (blocked) {
-				int curTileY = (int)(y/Tile.tileSize);
-				double t = y-(0.5+wallY)*Tile.tileSize;
-				if (Math.abs(t)>Tile.tileSize/2 &&
+				int curTileY = (int)(y/TileBG.tileSize);
+				double t = y-(0.5+wallY)*TileBG.tileSize;
+				if (Math.abs(t)>TileBG.tileSize/2 &&
 						arena.get(wallX,curTileY).isWalkable() &&
 						dy==0) {
 					setDy(Math.copySign(Math.abs(dx*0.7),t));
@@ -160,10 +160,10 @@ public class Character {
 			}
 		}
 		if (dy!=0) {
-			int tileX3 = (int) ((getX() - getRadius()) / Tile.tileSize);
-			int tileY3 = (int) ((newY - getRadius()) / Tile.tileSize);
-			int tileX4 = (int) ((getX() + getRadius()) / Tile.tileSize);
-			int tileY4 = (int) ((newY + getRadius()) / Tile.tileSize);
+			int tileX3 = (int) ((getX() - getRadius()) / TileBG.tileSize);
+			int tileY3 = (int) ((newY - getRadius()) / TileBG.tileSize);
+			int tileX4 = (int) ((getX() + getRadius()) / TileBG.tileSize);
+			int tileY4 = (int) ((newY + getRadius()) / TileBG.tileSize);
 			int wallX=0,wallY=0;
 			boolean blocked = false;
 			for (int x=tileX3;x<=tileX4;x++) {
@@ -178,9 +178,9 @@ public class Character {
 			}
 	
 			if (blocked) {
-				int curTileX = (int)(x/Tile.tileSize);
-				double t = x-(0.5+wallX)*Tile.tileSize;
-				if (Math.abs(t)>Tile.tileSize/2 &&
+				int curTileX = (int)(x/TileBG.tileSize);
+				double t = x-(0.5+wallX)*TileBG.tileSize;
+				if (Math.abs(t)>TileBG.tileSize/2 &&
 						arena.get(curTileX,wallY).isWalkable() &&
 						dx==0) {
 					setDx(Math.copySign(Math.abs(dy*0.7),t));

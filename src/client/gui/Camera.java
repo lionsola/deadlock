@@ -1,6 +1,7 @@
 package client.gui;
 
 import java.awt.Component;
+import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
 import client.graphics.Renderer;
@@ -56,14 +57,14 @@ public class Camera {
 		int arenaHeightPixel = (int) (arenaHeightMeter*Renderer.getPPM()+0.5);
 		
 		if (arenaWidthPixel > parent.getWidth()) {
-			x = Math.min(Renderer.toPixel(px), arenaWidthPixel - parent.getWidth() / 2);
-			x = Math.max(x, parent.getWidth() / 2);
+			x = Math.min(Renderer.toPixel(px), (int)(arenaWidthPixel - parent.getWidth() / 2.0));
+			x = Math.max(x, (parent.getWidth() / 2));
 		} else {
 			x = arenaWidthPixel / 2;
 		}
 
 		if (arenaHeightPixel > parent.getHeight()) {
-			y = Math.min(Renderer.toPixel(py), arenaHeightPixel - parent.getHeight() / 2);
+			y = Math.min(Renderer.toPixel(py), (int)(arenaHeightPixel - parent.getHeight() / 2.0));
 			y = Math.max(y, parent.getHeight() / 2);
 		} else {
 			y = arenaHeightPixel / 2;
@@ -117,7 +118,7 @@ public class Camera {
 	 *            The parent
 	 * @return Returns the top left X coordinate of the camera
 	 */
-	public double getTopLeftXMeter(Component parent) {
+	public double getTopLeftXMeter() {
 		return Renderer.toMeter(getTopLeftXPixel());
 	}
 
@@ -128,26 +129,17 @@ public class Camera {
 	 *            The parent
 	 * @return Returns the top left X coordinate of the camera
 	 */
-	public double getTopLeftYMeter(Component parent) {
+	public double getTopLeftYMeter() {
 		return Renderer.toMeter(getTopLeftYPixel());
 	}
-	
-	/**
-<<<<<<< .mine
-	 * Get the rendering "window" of the game world
-	 * @param parent The parent component that is rendered into
-	 * @return A rectangle representing the draw area of the game world
-=======
-	 * Get the draw area of the camera
-	 * 
-	 * @param parent
-	 *            The parent
-	 * @return Returns a rectangle of the draw area of the camera
->>>>>>> .r128
-	 */
-	public Rectangle2D getDrawArea(Component parent) {
-		return new Rectangle2D.Double(getTopLeftXMeter(parent), getTopLeftYMeter(parent),
+
+	public Rectangle2D getDrawArea() {
+		return new Rectangle2D.Double(getTopLeftXMeter(), getTopLeftYMeter(),
 				Renderer.toMeter(parent.getWidth()), Renderer.toMeter(parent.getHeight()));
 	}
 
+	public Rectangle getDrawAreaPixel() {
+		return new Rectangle(getTopLeftXPixel(), getTopLeftYPixel(),
+				parent.getWidth(), parent.getHeight());
+	}
 }

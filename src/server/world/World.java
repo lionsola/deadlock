@@ -1,7 +1,6 @@
 package server.world;
 
 
-import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -43,6 +42,7 @@ public class World {
 		this.listener = listener;
 	}
 
+	static int[] curSpawn = new int[2];
 	/**
 	 * Adds a player to the World
 	 * 
@@ -50,9 +50,10 @@ public class World {
 	 *            the player to be added
 	 */
 	public void addPlayer(PlayerCharacter p) {
-		Point spawn = randomizeSpawnPoint(p.team);
-		p.setX((spawn.x+0.5) * Tile.tileSize);
-		p.setY((spawn.y+0.5) * Tile.tileSize);
+		Point2D spawn = arena.getSpawn(p.team).get(curSpawn[p.team]);
+		curSpawn[p.team] = (curSpawn[p.team]+1)%arena.getSpawn(p.team).size();
+		p.setX(spawn.getX());
+		p.setY(spawn.getY());
 		characters.add(p);
 	}
 
@@ -67,7 +68,7 @@ public class World {
 	 *            the team id of the team that wishes its spawn points randomized
 	 * @return
 	 */
-	private Point randomizeSpawnPoint(int team) {
+	private Point2D randomizeSpawnPoint(int team) {
 		int spawnIndex = server.world.Utils.random().nextInt(arena.getSpawn(team).size());
 		return arena.getSpawn(team).get(spawnIndex);
 	}
@@ -144,10 +145,10 @@ public class World {
 	}
 
 	public void onPlayerDeath(PlayerCharacter c) {
-		Point spawn = randomizeSpawnPoint(c.team);
-		c.setX(spawn.x * Tile.tileSize);
-		c.setY(spawn.y * Tile.tileSize);
-		c.resetStats();
+		//Point spawn = randomizeSpawnPoint(c.team);
+		//c.setX(spawn.x * TileBG.tileSize);
+		//c.setY(spawn.y * TileBG.tileSize);
+		//c.resetStats();
 	}
 	
 	/**

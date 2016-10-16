@@ -10,7 +10,7 @@ import server.ai.PathFinder.Path;
 import server.network.ServerPlayer;
 import server.world.Arena;
 import server.world.Geometry;
-import server.world.Tile;
+import server.world.TileBG;
 import server.world.Utils;
 import shared.network.GameEvent;
 import shared.network.PartialCharacterData;
@@ -29,11 +29,11 @@ public class AIPlayer extends ServerPlayer {
 		EXPLORING_POINT, EXPLORING_RANDOMLY, ATTACKING, RETREATING
 	}
 
-	private static final double PATH_THRESHOLD = Tile.tileSize/5;
-	private static final double OUTOFRANGE_THRESHOLD = Tile.tileSize * 2;
-	private static final double COORD_THRESHOLD = Tile.tileSize / 20;
-	private static final double EXPLORE_DISTANCE = Tile.tileSize * 15;
-	private static final double RETREAT_DISTANCE = Tile.tileSize * 5;
+	private static final double PATH_THRESHOLD = TileBG.tileSize/5;
+	private static final double OUTOFRANGE_THRESHOLD = TileBG.tileSize * 2;
+	private static final double COORD_THRESHOLD = TileBG.tileSize / 20;
+	private static final double EXPLORE_DISTANCE = TileBG.tileSize * 15;
+	private static final double RETREAT_DISTANCE = TileBG.tileSize * 5;
 	private PathFinder pathFinder;
 
 	private InputPacket input = new InputPacket();
@@ -209,8 +209,8 @@ public class AIPlayer extends ServerPlayer {
 	private Point2D randomIntr(double d, double e, double direction, double distance) {
 		double newX = d + distance * Math.cos(direction);
 		double newY = e - distance * Math.sin(direction);
-		int tileX = (int) (newX / Tile.tileSize);
-		int tileY = (int) (newY / Tile.tileSize);
+		int tileX = (int) (newX / TileBG.tileSize);
+		int tileY = (int) (newY / TileBG.tileSize);
 		if (tileX < 0)
 			tileX = Math.abs(tileX);
 		else if (tileX > arena.getWidth())

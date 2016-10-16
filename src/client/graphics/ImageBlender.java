@@ -1,12 +1,20 @@
 package client.graphics;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
+import java.awt.Shape;
+import java.awt.Transparency;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
+
 import client.image.*;
 import server.world.Arena;
+import server.world.Visibility;
+import shared.network.FullCharacterData;
 
 /**
  * Provide image processing methods.
@@ -94,7 +102,7 @@ public class ImageBlender {
 
 				int dR = (int) (Math.min(255, Math.max(0, (sR+ 255*lightenFactor))));
 				int dG = (int) (Math.min(255, Math.max(0, (sG+ 255*lightenFactor))));
-				int dB = (int) (Math.min(255, Math.max(0, (sB+ 255*lightenFactor/2))));
+				int dB = (int) (Math.min(255, Math.max(0, (sB+ 255*lightenFactor))));
 
 				int dRGB = dR << 16 | dG << 8 | dB;
 				dest.setRGB(x, y, dRGB);
@@ -103,16 +111,26 @@ public class ImageBlender {
 		return dest;
 	}
 	
-	public static BufferedImage glowImage(BufferedImage source, float radius, float amount) {
-		BufferedImage d = ge.createCompatibleImage(source.getWidth(),source.getHeight());
+	public static BufferedImage glowImage(BufferedImage source, BufferedImage dest, float radius, float amount) {
+		if (dest==null)
+			dest = ge.createCompatibleImage(source.getWidth(),source.getHeight());
 		GlowFilter gf = new GlowFilter(radius);
 		gf.setAmount(amount);
 		gf.setEdgeAction(ConvolveFilter.WRAP_EDGES);
-		return gf.filter(source, d);
+		return gf.filter(source, dest);
 	}
 
+	public static BufferedImage blurImage(BufferedImage source, BufferedImage dest, float radius) {
+		if (dest==null)
+			dest = ge.createCompatibleImage(source.getWidth(),source.getHeight());
+		GaussianFilter gf = new GaussianFilter(radius);
+		gf.setEdgeAction(ConvolveFilter.WRAP_EDGES);
+		return gf.filter(source, dest);
+	}
+	
 	public static BufferedImage drawArena(Arena a) {
-		BufferedImage source = ge.createCompatibleImage(Renderer.toPixel(a.getWidthMeter()),Renderer.toPixel(a.getHeightMeter()));
+		BufferedImage source = ge.createCompatibleImage(Renderer.toPixelDefault(a.getWidthMeter()),
+				Renderer.toPixelDefault(a.getHeightMeter()));
 		Graphics2D g2D = (Graphics2D)source.getGraphics();
 		Renderer.renderArena(g2D, a, new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
 		g2D.dispose();
@@ -125,7 +143,56 @@ public class ImageBlender {
 		return darkenImage(gf.filter(source, d),2,1);
 	}
 	
+	public static BufferedImage applyMiddlegroundEffect(BufferedImage source) {
+		BufferedImage d = deepCopy(source);
+		BufferedImage black = ge.createCompatibleImage(d.getWidth(),d.getHeight(),Transparency.OPAQUE);
+		Graphics2D g2D = (Graphics2D)d.getGraphics();
+		g2D.setComposite(new SoftLightComposite(1f));
+		g2D.drawImage(black,0,0,d.getWidth(),d.getHeight(),null);
+		g2D.dispose();
+		return d;
+	}
+	
 	public static BufferedImage applyForegroundEffect(BufferedImage source) {
-		return lightenImage(glowImage(source,50f,0.2f),0.025f);
+		return glowImage(source,null,25f,0.2f);
+	}
+	
+	static BufferedImage deepCopy(BufferedImage bi) {
+		 ColorModel cm = bi.getColorModel();
+		 boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+		 WritableRaster raster = bi.copyData(null);
+		 return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+	}
+	
+	public static BufferedImage blendLightImage(BufferedImage foreground, BufferedImage lightmap) {
+		BufferedImage source = deepCopy(foreground);
+		Graphics2D g2D = (Graphics2D)source.getGraphics();
+		g2D.setComposite(new SoftLightComposite(1f));
+		g2D.drawImage(lightmap,0,0,null);
+		g2D.dispose();
+		return source;
+	}
+	
+	public static BufferedImage drawLightImage(Arena a) {
+		BufferedImage source = ge.createCompatibleImage(Renderer.toPixelDefault(a.getWidthMeter()),Renderer.toPixelDefault(a.getHeightMeter()));
+		Graphics2D g2D = (Graphics2D)source.getGraphics();
+		Renderer.renderHardLight(g2D, a.getLightmap(), new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
+		g2D.dispose();
+		return blurImage(source,null,32f);
+	}
+	
+	public static BufferedImage drawLightImage(Arena a, FullCharacterData player) {
+		BufferedImage source = ge.createCompatibleImage(Renderer.toPixel(a.getWidthMeter()),Renderer.toPixel(a.getHeightMeter()));
+		Graphics2D g2D = (Graphics2D)source.getGraphics();
+		Visibility v = new Visibility();
+		Shape s = v.generateLoS(player, a);
+		g2D.setColor(Color.BLACK);
+		g2D.fillRect(0,0,source.getWidth(),source.getHeight());
+		g2D.setColor(Color.WHITE);
+		g2D.fill(s);
+		g2D.dispose();
+		//BufferedImage dest = ge.createCompatibleImage(Renderer.toPixel(a.getWidthMeter()),Renderer.toPixel(a.getHeightMeter()));
+		//return blurImage(source,dest,50f);
+		return source;
 	}
 }
