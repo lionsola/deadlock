@@ -30,6 +30,8 @@ public class DataManager {
 	public static void exportImages(Arena a) throws IOException {
 		BufferedImage arenaImage = ImageBlender.drawArena(a);
 		
+		ImageIO.write(arenaImage, "png", new File("resource/map/"+a.getName()+"_plain.png"));
+		
 		BufferedImage midImage = ImageBlender.applyMiddlegroundEffect(arenaImage);
 		ImageIO.write(midImage, "png", new File("resource/map/"+a.getName()+"_mid.png"));
 		
@@ -44,23 +46,6 @@ public class DataManager {
 		
 		BufferedImage wholeMap = ImageBlender.blendLightImage(lightImage, lightMap);
 		ImageIO.write(wholeMap, "png", new File("resource/map/"+a.getName()+".png"));
-		
-		int[][] tileIDMap = new int[a.getWidth()][a.getHeight()];
-		int[][] objectIDMap = new int[a.getWidth()][a.getHeight()];
-		for (int x=0;x<a.getWidth();x++) {
-			for (int y=0;y<a.getHeight();y++) {
-				tileIDMap[x][y] = a.getTile(x, y).getId();
-				objectIDMap[x][y] = a.get(x, y).getId();
-			}
-		}
-		ArenaData ad = new ArenaData();
-		ad.name = a.getName();
-		ad.tileMap = tileIDMap;
-		ad.objectMap = objectIDMap;
-		ad.spawn1 = a.getSpawn(0);
-		ad.spawn2 = a.getSpawn(1);
-		ad.lightMap = a.getLightmap();
-		saveObject(ad,"resource/map/"+a.getName()+".arena");
 	}
 	
 	/*
@@ -257,5 +242,24 @@ public class DataManager {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static void exportArenaData(Arena a) {
+		int[][] tileIDMap = new int[a.getWidth()][a.getHeight()];
+		int[][] objectIDMap = new int[a.getWidth()][a.getHeight()];
+		for (int x=0;x<a.getWidth();x++) {
+			for (int y=0;y<a.getHeight();y++) {
+				tileIDMap[x][y] = a.getTile(x, y).getId();
+				objectIDMap[x][y] = a.get(x, y).getId();
+			}
+		}
+		ArenaData ad = new ArenaData();
+		ad.name = a.getName();
+		ad.tileMap = tileIDMap;
+		ad.objectMap = objectIDMap;
+		ad.spawn1 = a.getSpawn(0);
+		ad.spawn2 = a.getSpawn(1);
+		ad.lightMap = a.getLightmap();
+		saveObject(ad,"resource/map/"+a.getName()+".arena");
 	}
 }

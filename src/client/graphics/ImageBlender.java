@@ -146,15 +146,19 @@ public class ImageBlender {
 	public static BufferedImage applyMiddlegroundEffect(BufferedImage source) {
 		BufferedImage d = deepCopy(source);
 		BufferedImage black = ge.createCompatibleImage(d.getWidth(),d.getHeight(),Transparency.OPAQUE);
+		Graphics2D blackG2D = (Graphics2D) black.getGraphics();
+		blackG2D.setColor(new Color(0x1f1f1f));
+		blackG2D.fillRect(0, 0, d.getWidth(),d.getHeight());
+		
 		Graphics2D g2D = (Graphics2D)d.getGraphics();
-		g2D.setComposite(new SoftLightComposite(1f));
+		g2D.setComposite(new SoftHardLightComposite(1f));
 		g2D.drawImage(black,0,0,d.getWidth(),d.getHeight(),null);
 		g2D.dispose();
 		return d;
 	}
 	
 	public static BufferedImage applyForegroundEffect(BufferedImage source) {
-		return glowImage(source,null,25f,0.2f);
+		return source;//glowImage(source,null,25f,0.2f);
 	}
 	
 	static BufferedImage deepCopy(BufferedImage bi) {
@@ -167,7 +171,7 @@ public class ImageBlender {
 	public static BufferedImage blendLightImage(BufferedImage foreground, BufferedImage lightmap) {
 		BufferedImage source = deepCopy(foreground);
 		Graphics2D g2D = (Graphics2D)source.getGraphics();
-		g2D.setComposite(new SoftLightComposite(1f));
+		g2D.setComposite(new SoftHardLightComposite(1f));
 		g2D.drawImage(lightmap,0,0,null);
 		g2D.dispose();
 		return source;
@@ -176,9 +180,9 @@ public class ImageBlender {
 	public static BufferedImage drawLightImage(Arena a) {
 		BufferedImage source = ge.createCompatibleImage(Renderer.toPixelDefault(a.getWidthMeter()),Renderer.toPixelDefault(a.getHeightMeter()));
 		Graphics2D g2D = (Graphics2D)source.getGraphics();
-		Renderer.renderHardLight(g2D, a.getLightmap(), new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
+		Renderer.renderHardLight(g2D, a, new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
 		g2D.dispose();
-		return blurImage(source,null,32f);
+		return source;//blurImage(source,null,32f);
 	}
 	
 	public static BufferedImage drawLightImage(Arena a, FullCharacterData player) {

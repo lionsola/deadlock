@@ -3,6 +3,7 @@ package editor;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.LinkedList;
 
 import javax.swing.BorderFactory;
@@ -111,14 +112,31 @@ public class ToolMenu extends JPanel {
 		this.add(openNew);
 		
 		final JButton save = new JButton("Export");
-		open.addActionListener(new ActionListener() {
-
+		save.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				editor.saveArena();
+				DataManager.exportArenaData(editor.arenaPanel.getArena());
 			}
 		});
 		this.add(save);
+		
+		final JButton saveImages = new JButton("Export Images");
+		saveImages.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						try {
+							DataManager.exportImages(editor.arenaPanel.getArena());
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}}).start();
+			}
+		});
+		this.add(saveImages);
 		
 		final JToggleButton light = new JToggleButton("Light");
 		light.addActionListener(new ActionListener() {

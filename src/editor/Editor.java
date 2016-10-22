@@ -166,20 +166,6 @@ public class Editor extends JFrame {
     	objects.add(t);
     	objectTable.put(t.getId(), t);
     }
-	
-	public void saveArena() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				try {
-					DataManager.exportImages(arenaPanel.getArena());
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-	}
     
     public static void main(String[] args) {
     	new Editor();

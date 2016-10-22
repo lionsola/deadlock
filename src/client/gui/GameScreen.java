@@ -55,6 +55,7 @@ import shared.network.GameEvent.*;
 import client.graphics.Animation;
 import client.graphics.AnimationSystem;
 import client.graphics.Renderer;
+import client.image.SoftHardLightComposite;
 import client.image.SoftLightComposite;
 import client.sound.AudioManager;
 import editor.DataManager;
@@ -391,13 +392,13 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 					Renderer.toPixel(c.hearRange*2),Renderer.toPixel(c.hearRange*2));
 			g2D.setClip(clip);
 			Rectangle2D hearBox = getCharacterVisionBox(c.x,c.y,c.hearRange);
-			Renderer.drawArenaImage(g2D, renderer.getArenaImage(),hearBox);
+			//Renderer.drawArenaImage(g2D, renderer.getArenaImage(),hearBox);
 			
 			g2D.setClip(null);
 			globalAnimations.render(g2D);
 			
 			Area los = visibility.generateLoS(c, arena);
-			double r = 2;
+			double r = c.radius*1.5;
 			los.add(new Area(new Ellipse2D.Double(Renderer.toPixel(c.x - r),Renderer.toPixel(c.y - r),
 					Renderer.toPixel(r*2),Renderer.toPixel(r*2))));
 			
@@ -424,7 +425,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			
 			g2D.setClip(los);
 			Composite save = g2D.getComposite();
-			g2D.setComposite(new SoftLightComposite(1f));
+			g2D.setComposite(new SoftHardLightComposite(1f));
 			Renderer.drawArenaImage(g2D,renderer.getLightMap(),viewBox);
 			g2D.setComposite(save);
 			

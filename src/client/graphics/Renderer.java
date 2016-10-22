@@ -110,12 +110,12 @@ public class Renderer {
 	}
 	
 	public void addBloodToArena(double x, double y, double direction) {
-		Graphics2D g2d = (Graphics2D) lightArenaImage.getGraphics();
-		g2d.rotate(-direction,toPixel(x),toPixel(y));
+		Graphics2D g2D = (Graphics2D) lightArenaImage.getGraphics();
+		g2D.rotate(-direction,toPixel(x),toPixel(y));
 		double bw = 2;
-		drawImage(g2d,Sprite.getBloodImage(),x+bw/4,y-bw/2,bw,bw);
-		g2d.rotate(direction,toPixel(x),toPixel(y));
-		g2d.dispose();
+		drawImage(g2D,Sprite.getBloodImage(),x+bw/4,y-bw/2,bw,bw);
+		g2D.rotate(direction,toPixel(x),toPixel(y));
+		g2D.dispose();
 	}
 	
 	public void dispose() {
@@ -224,6 +224,82 @@ public class Renderer {
 		g2D.draw(los);
 	}
 	
+	public static void renderArenaBG(Graphics2D g2D, Arena a, Rectangle2D window) {
+		g2D.setColor(new Color(0x080808));
+		fillRect(g2D,0,0, a.getWidthMeter(), a.getHeightMeter());
+		
+		double ts = TileBG.tileSize;
+		int x1 = Math.max(0, (int) (window.getX() / ts));
+		int y1 = Math.max(0, (int) (window.getY() / ts));
+		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (window.getWidth() / ts) + 1);
+		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (window.getHeight() / ts) + 1);
+		
+		
+		for (int x = x1; x <= x2; x++) {
+			for (int y = y1; y <= y2; y++) {
+				TileBG t = a.getTile(x, y);
+				if (t.getId()==0)
+					continue;
+				
+				BufferedImage image = t.getImage();
+				int w = image.getWidth()/32;
+				int h = image.getHeight()/32;
+				double xM = (x%w)*ts;
+				double yM = (y%h)*ts;
+				drawImage(g2D,image, xM, yM, ts, ts, x*ts, y*ts, ts, ts);
+			}
+		}
+	}
+	
+	public static void renderAreneObjects(Graphics2D g2D, Arena a, Rectangle2D window) {
+		double ts = TileBG.tileSize;
+		int x1 = Math.max(0, (int) (window.getX() / ts));
+		int y1 = Math.max(0, (int) (window.getY() / ts));
+		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (window.getWidth() / ts) + 1);
+		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (window.getHeight() / ts) + 1);
+		
+		for (int x = x1; x <= x2; x++) {
+			for (int y = y1; y <= y2; y++) {
+				Tile t = a.get(x, y);
+				if (t.getId()==0)
+					continue;
+				
+				BufferedImage image = t.getImage();
+				double sw = ts*t.getSpriteSize();
+				
+				int w = image.getWidth()/32;
+				int h = image.getHeight()/32;
+				double xM = (x%w)*ts;
+				double yM = (y%h)*ts;
+				//drawImage(g2D,image, x*ts-(sw-ts)*0.5, y*ts-(sw-ts)*0.5, sw, sw);
+				drawImage(g2D,image, xM, yM, ts, ts, x*ts-(sw-ts)*0.5, y*ts-(sw-ts)*0.5, sw, sw);
+				
+				double xa = x*ts;
+				double ya = y*ts;
+				double xb = (x+1)*ts;
+				double yb = (y+1)*ts;
+				
+				if (t.getCoverType()==3) {
+					double ww = 0.15;
+					g2D.setStroke(new BasicStroke(toPixel(ww)));
+					g2D.setColor(t.getColor());
+					if (a.get(x-1,y)!=t) {
+						drawLine(g2D,xa,ya,xa,yb);
+					}
+					if (a.get(x,y-1)!=t) {
+						drawLine(g2D,xa,ya,xb,ya);
+					}
+					if (a.get(x+1,y)!=t) {
+						drawLine(g2D,xb,ya,xb,yb);
+					}
+					if (a.get(x,y+1)!=t) {
+						drawLine(g2D,xa,yb,xb,yb);
+					}
+				}
+			}
+		}
+	}
+		
 	public static void renderArena(Graphics2D g2D, Arena a, Rectangle2D window) {
 		//drawImage(g2D, a.image, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
 		g2D.setColor(new Color(0x080808));
@@ -290,6 +366,26 @@ public class Renderer {
 		}
 	}
 	
+	public static void renderGrid(Graphics2D g2D, Arena a, Rectangle2D window) {
+		//drawImage(g2D, a.image, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
+		g2D.setColor(Color.GRAY);
+		
+		double ts = TileBG.tileSize;
+		int x1 = Math.max(0, (int) (window.getX() / ts));
+		int y1 = Math.max(0, (int) (window.getY() / ts));
+		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (window.getWidth() / ts) + 1);
+		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (window.getHeight() / ts) + 1);
+		
+		
+		for (int x = x1; x <= x2; x++) {
+			Renderer.drawLine(g2D, x*TileBG.tileSize, y1, x*TileBG.tileSize, y2);
+		}
+		
+		for (int y = y1; y <= y2; y++) {
+			Renderer.drawLine(g2D, x1, y*TileBG.tileSize, x2, y*TileBG.tileSize);
+		}
+	}
+	
 	public static void renderEditorLight(Graphics2D g2D, int[][] lightMap, Rectangle2D window) {
 		double ts = TileBG.tileSize;
 		int x1 = Math.max(0, (int) (window.getX() / ts));
@@ -299,43 +395,52 @@ public class Renderer {
 		
 		for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
-				if ((lightMap[x][y] & 0x00ffffff) != 0) {
-					g2D.setColor(new Color(lightMap[x][y] | 0xff000000,true));
+				if (lightMap[x][y] != 0) {
+					g2D.setColor(new Color(lightMap[x][y]));
 					fillRect(g2D,x*ts,y*ts, ts/2, ts/2);
+					g2D.setColor(Color.WHITE);
+					drawRect(g2D,x*ts,y*ts, ts/2, ts/2);
 				}
 			}
 		}			
 	}
 	
-	public static void renderHardLight(Graphics2D g2D, int[][] lightMap, Rectangle2D window) {
+	public static void renderHardLight(Graphics2D g2D, Arena a, Rectangle2D window) {
 		double ts = TileBG.tileSize;
 		int x1 = Math.max(0, (int) (window.getX() / ts));
 		int y1 = Math.max(0, (int) (window.getY() / ts));
-		int x2 = Math.min(lightMap.length - 1, x1 + (int) (window.getWidth() / ts) + 1);
-		int y2 = Math.min(lightMap[0].length - 1, y1 + (int) (window.getHeight() / ts) + 1);
+		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (window.getWidth() / ts) + 1);
+		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (window.getHeight() / ts) + 1);
 		
 		for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
-				g2D.setColor(new Color(lightMap[x][y] | 0xff000000,true));
+				if (!a.get(x, y).isTransparent()) {
+					//g2D.setColor(Color.BLACK);
+					g2D.setColor(new Color(0x1f1f1f));
+				} else if (a.getLightmap()[x][y]==0) {
+					g2D.setColor(new Color(0x2f2f2f));
+				} else {
+					g2D.setColor(new Color(a.getLightmap()[x][y] | 0xff000000,true));
+				}
 				fillRect(g2D,x*ts,y*ts, ts, ts);
 			}
 		}			
 	}
 	
-	static void drawLine(Graphics2D g2d, double x1, double y1, double x2, double y2) {
-		g2d.drawLine(toPixel(x1), toPixel(y1), toPixel(x2), toPixel(y2));
+	static void drawLine(Graphics2D g2D, double x1, double y1, double x2, double y2) {
+		g2D.drawLine(toPixel(x1), toPixel(y1), toPixel(x2), toPixel(y2));
 	}
 	
 	private static void drawArc(Graphics2D g2D, double cx, double cy, double cr, double start, double extent, int type) {
 		g2D.draw(new Arc2D.Double(toPixel(cx-cr),toPixel(cy-cr),toPixel(cr*2),toPixel(cr*2),Math.toDegrees(start),Math.toDegrees(extent),type));
 	}
 	
-	static void drawCircle(Graphics2D g2d, double x, double y, double radius) {
-		g2d.drawOval(toPixel(x-radius), toPixel(y-radius), toPixel(radius*2), toPixel(radius*2));
+	static void drawCircle(Graphics2D g2D, double x, double y, double radius) {
+		g2D.drawOval(toPixel(x-radius), toPixel(y-radius), toPixel(radius*2), toPixel(radius*2));
 	}
 	
-	static void fillCircle(Graphics2D g2d, double x, double y, double radius) {
-		g2d.fillOval(toPixel(x-radius), toPixel(y-radius), toPixel(radius*2), toPixel(radius*2));
+	static void fillCircle(Graphics2D g2D, double x, double y, double radius) {
+		g2D.fillOval(toPixel(x-radius), toPixel(y-radius), toPixel(radius*2), toPixel(radius*2));
 	}
 	
 	public static void drawArenaImage(Graphics2D g2D, Image image, Rectangle2D window) {
@@ -343,59 +448,59 @@ public class Renderer {
 				window.getX(),window.getY(),window.getWidth(),window.getHeight());
 	}
 	
-	static void drawImage(Graphics2D g2d, Image image, double x, double y, double w, double h) {
+	static void drawImage(Graphics2D g2D, Image image, double x, double y, double w, double h) {
 		int screenX = toPixel(x);
 		int screenY = toPixel(y);
 		int screenW = toPixel(w+x-Renderer.toMeter(screenX));
 		int screenH = toPixel(h+y-Renderer.toMeter(screenY));
-		g2d.drawImage(image, screenX, screenY, screenW, screenH, null);
+		g2D.drawImage(image, screenX, screenY, screenW, screenH, null);
 	}
 	
-	static void drawImage(Graphics2D g2d, Image image, double sx, double sy, double sw, double sh, double x, double y, double w, double h) {
+	static void drawImage(Graphics2D g2D, Image image, double sx, double sy, double sw, double sh, double x, double y, double w, double h) {
 		int screenX = toPixel(x);
 		int screenY = toPixel(y);
 		int screenW = toPixel(w+x-Renderer.toMeter(screenX));
 		int screenH = toPixel(h+y-Renderer.toMeter(screenY));
-		g2d.drawImage(image, screenX, screenY, screenW+screenX, screenH+screenY,
+		g2D.drawImage(image, screenX, screenY, screenW+screenX, screenH+screenY,
 				toPixelDefault(sx), toPixelDefault(sy), toPixelDefault(sx+sw), toPixelDefault(sy+sh),
 				null);
 	}
 	
-	static void fillRect(Graphics2D g2d, double x, double y, double w, double h) {
-		g2d.fillRect(toPixel(x), toPixel(y), toPixel(w), toPixel(h));
+	static void fillRect(Graphics2D g2D, double x, double y, double w, double h) {
+		g2D.fillRect(toPixel(x), toPixel(y), toPixel(w), toPixel(h));
 	}
 	
-	static void fillPolygon(Graphics2D g2d, Point2D[] points) {
+	static void fillPolygon(Graphics2D g2D, Point2D[] points) {
 		Polygon polygon = new Polygon();
 		for (Point2D point:points) {
 			polygon.addPoint(toPixel(point.getX()),toPixel(point.getY()));
 		}
-		g2d.fillPolygon(polygon);
+		g2D.fillPolygon(polygon);
 	}
 	
-	static void drawRectangle(Graphics2D g2d, double x, double y, double w, double h, float strokeWidth) {
-		drawRectangle(g2d,x,y,w,h,new BasicStroke(strokeWidth),defaultColor);
+	static void drawRect(Graphics2D g2D, double x, double y, double w, double h) {
+		g2D.drawRect(toPixel(x), toPixel(y), toPixel(w), toPixel(h));
 	}
 	
-	static void drawRectangle(Graphics2D g2d, double x, double y, double w, double h, Stroke stroke, Color color) {
+	static void drawRectangle(Graphics2D g2D, double x, double y, double w, double h, Stroke stroke, Color color) {
 		Point2D[] points = {new Point2D.Double(x,y),new Point2D.Double(x+w,y),
 				new Point2D.Double(x,y+h),new Point2D.Double(x+w,y+h)};
-		drawPolygon(g2d,points,stroke,color);
+		drawPolygon(g2D,points,stroke,color);
 	}
 	
-	static void drawPolygon(Graphics2D g2d, Point2D[] points, Stroke stroke, Color color) {
-		g2d.setColor(color);
-		g2d.setStroke(stroke);
+	static void drawPolygon(Graphics2D g2D, Point2D[] points, Stroke stroke, Color color) {
+		g2D.setColor(color);
+		g2D.setStroke(stroke);
 		
 		Polygon polygon = new Polygon();
 		for (Point2D point:points) {
 			polygon.addPoint(toPixel(point.getX()),toPixel(point.getY()));
 		}
-		g2d.fillPolygon(polygon);
+		g2D.fillPolygon(polygon);
 	}
 	
 	public static void setPPM(double ppm) {
-		
+		Renderer.ppm = ppm;
 	}
 	
 	public static double getPPM() {

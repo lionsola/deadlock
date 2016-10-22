@@ -36,12 +36,10 @@ public class Arena {
 	public static final int LIGHT_RANGE = 250;
 
 	private String name; // the name of the map
-	private int width;
-	private int height;
 	private TileBG[][] tileMap; // represents each tile and their position, X and Y
 	private Tile[][] objectMap;
-	private List<Point2D> t1Spawns; // spawn points of team 1
-	private List<Point2D> t2Spawns; // spawn points of team 2	
+	private transient List<Point2D> t1Spawns; // spawn points of team 1
+	private transient List<Point2D> t2Spawns; // spawn points of team 2	
 	private int[][] lightMap;
 	
 	public Arena(File file, HashMap<Integer,TileBG> tileTable, HashMap<Integer,Tile> objectTable) {
@@ -50,8 +48,8 @@ public class Arena {
 			
 			Scanner fileSc = new Scanner(fileInputStream);
 			this.name = fileSc.nextLine();
-			this.width = fileSc.nextInt();
-			this.height = fileSc.nextInt();
+			int width = fileSc.nextInt();
+			int height = fileSc.nextInt();
 			
 			fileSc.close();
 			ArenaData ad = (ArenaData) DataManager.loadObject("resource/map/"+name+".arena");
@@ -86,14 +84,13 @@ public class Arena {
 
 	private void initialize(ArenaData ad, HashMap<Integer,TileBG> tileTable, HashMap<Integer,Tile> objectTable) {
 		this.name = ad.name;
-		width = ad.tileMap.length;
-		height = ad.tileMap[0].length;
+		int width = ad.tileMap.length;
+		int height = ad.tileMap[0].length;
 		tileMap = new TileBG[width][height];
 		objectMap = new Tile[width][height];
 		DataManager.loadFromTable(ad.tileMap,tileTable,tileMap);
 		DataManager.loadFromTable(ad.objectMap,objectTable,objectMap);
-		t1Spawns = ad.spawn1;
-		t2Spawns = ad.spawn2;
+		generateSpawnPoints();
 		lightMap = ad.lightMap;
 		if (t1Spawns==null) {
 			t1Spawns = new LinkedList<Point2D>();
@@ -224,6 +221,64 @@ public class Arena {
 		return getHeight() * TileBG.tileSize;
 	}
 
+	synchronized private void generateSpawnPoints() {
+		t1Spawns = new LinkedList<Point2D>();
+		t2Spawns = new LinkedList<Point2D>();
+		for (int x=0;x<getWidth();x++) {
+			for (int y=0;y<getWidth();y++) {
+				if (get(x,y).getId()==T1_COLOR) {
+					t1Spawns.add(new Point2D.Double((x+0.5)*TileBG.tileSize, (y+0.5)*TileBG.tileSize));
+				} else if (get(x,y).getId()==T2_COLOR) {
+					t2Spawns.add(new Point2D.Double((x+0.5)*TileBG.tileSize, (y+0.5)*TileBG.tileSize));
+				}
+			}
+		}
+	}
+	
+	synchronized public void increaseSize(int newWidth, int newHeight, int side) {
+		int x0=0,y0=0;
+		int z0=0,t0=0;
+		int w0=Math.min(newWidth, getWidth());
+		int h0=Math.min(newHeight, getHeight());
+		
+		switch(side) {
+			case 0:
+			case 1:
+				x0 = 0;
+				y0 = 0;
+				z0 = 0;
+				t0 = 0;
+				w0 = Math.min(newWidth,getWidth());
+				h0 = Math.min(newHeight,getHeight());
+				break;
+			case 2:
+			case 3:
+				x0 = 0;
+				y0 = 0;
+				z0 = newWidth-getWidth();
+				t0 = newHeight-getHeight();
+				w0 = Math.min(newWidth,getWidth());
+				h0 = Math.min(newHeight,getHeight());
+				break;
+		}
+		
+		TileBG[][] newTileMap = new TileBG[w0][h0];
+		Tile[][] newObjectMap = new Tile[w0][h0];
+		int[][] newLightMap   = new int[w0][h0];
+		
+		for (int x=x0,z=z0,w=0;w<w0;w++) {
+			for (int y=y0,t=t0,h=0;h<h0;h++) {
+				newTileMap[x][y]	= tileMap[z][t];
+				newObjectMap[x][y]	= objectMap[z][t];
+				newLightMap[x][y]	= lightMap[z][t];
+			}
+		}
+		
+		tileMap = newTileMap;
+		objectMap = newObjectMap;
+		lightMap = newLightMap;
+	}
+	
 	public void setTile(int x, int y, TileBG t) {
 		if (x>0 && x<getWidth() && y>0 && y<getHeight())
 			tileMap[x][y] = t;

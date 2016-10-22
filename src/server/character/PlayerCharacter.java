@@ -197,7 +197,7 @@ public class PlayerCharacter extends Character {
 		
 		double diffAngle = Math.abs(Geometry.wrapAngle(getMovingDirection()-getDirection()));
 		double ratio = (Math.PI/2 - diffAngle)/(Math.PI/2);
-		double speed = getSpeed()*(1+ratio*0.2);
+		double speed = getSpeed()*(1+ratio*0.1);
 		setDx(dx*speed);
 		setDy(dy*speed);
 	}
