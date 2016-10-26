@@ -1,4 +1,4 @@
-package client.game;
+package client.data;
 
 import java.io.File;
 import java.io.IOException;

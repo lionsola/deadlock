@@ -123,7 +123,7 @@ public class Visibility {
 	    addSegment(px+viewRange,py+viewRange,px+viewRange,py-viewRange);
 	    addSegment(px+viewRange,py-viewRange,px-viewRange,py-viewRange);
 	    
-	    float ts = (float) TileBG.tileSize;
+	    float ts = (float) Terrain.tileSize;
 		int range = (int)Math.ceil(viewRange / ts);
 		int pX = (int)(px / ts);
 		int pY = (int)(py / ts);
@@ -137,8 +137,8 @@ public class Visibility {
 	    Rectangle2D bb = new Rectangle2D.Double((x1 - 1) * ts, (y1 - 1) * ts, (x2 - x1 + 3) * ts, (y2 - y1 + 3) * ts);
 	    for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
-				if (!a.get(x, y).isTransparent()) {
-					if (y < pY && a.get(x, y + 1).isTransparent()) {
+				if (!a.get(x, y).isClear()) {
+					if (y < pY && a.get(x, y + 1).isClear()) {
 						xa = x * ts;
 						ya = (y + 1) * ts;
 						xb = xa + ts;
@@ -149,7 +149,7 @@ public class Visibility {
 					}
 
 					// below player & above that is an empty tile
-					else if (y > pY && a.get(x, y - 1).isTransparent()) {
+					else if (y > pY && a.get(x, y - 1).isClear()) {
 						xa = (x + 1) * ts;
 						ya = y * ts;
 						xb = xa - ts;
@@ -161,7 +161,7 @@ public class Visibility {
 					// vertical edges
 					// to the left of player && to the right of that is an
 					// empty tile
-					if (x < pX && a.get(x + 1, y).isTransparent()) {
+					if (x < pX && a.get(x + 1, y).isClear()) {
 						xa = (x + 1) * ts;
 						ya = (y + 1) * ts;
 						xb = xa;
@@ -172,7 +172,7 @@ public class Visibility {
 
 					// to the right of player && to the left of that is an
 					// empty tile
-					if (x > pX && a.get(x - 1, y).isTransparent()) {
+					if (x > pX && a.get(x - 1, y).isClear()) {
 						xa = x * ts;
 						ya = y * ts;
 						xb = xa;

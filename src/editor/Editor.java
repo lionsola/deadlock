@@ -11,12 +11,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.event.MouseInputListener;
+import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import server.world.Arena;
-import server.world.Tile;
-import server.world.TileBG;
+import server.world.Thing;
+import server.world.Terrain;
 import editor.DataManager.ArenaData;
 
 /**
@@ -33,19 +32,25 @@ public class Editor extends JFrame {
     private int width;
     private int height;
     // private int scale;
-    ArenaPanel arenaPanel;
+    private ArenaPanel arenaPanel;
     
-    MouseInputListener currentTool;
+    /**
+	 * @return the arenaPanel
+	 */
+	public ArenaPanel getArenaPanel() {
+		return arenaPanel;
+	}
 
-	Collection<TileBG> tiles;
-	Collection<Tile> objects;
+	Tool currentTool;
 
-	HashMap<Integer,TileBG> tileTable;
-	HashMap<Integer,Tile> objectTable;
+	Collection<Terrain> tiles;
+	Collection<Thing> objects;
+
+	HashMap<Integer,Terrain> tileTable;
+	HashMap<Integer,Thing> objectTable;
     public Editor() {
         GraphicsDevice screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
-        setIgnoreRepaint(true);
-        // Should change to load from save file
+
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         width = (int) screenSize.getWidth();
         height = (int) screenSize.getHeight();
@@ -58,9 +63,6 @@ public class Editor extends JFrame {
         if (screen.isFullScreenSupported()) {
             //setUndecorated(true);
         }
-        
-        getContentPane().setLayout(new BorderLayout());
-        
         
 		tiles = DataManager.loadTileListOld();
         try {
@@ -79,11 +81,14 @@ public class Editor extends JFrame {
 		}
         objectTable = DataManager.getObjectMap(objects);
         
-        this.add(new ToolMenu(this),BorderLayout.WEST);
+        getContentPane().setLayout(new BorderLayout());
+        
+        this.setJMenuBar(new MenuBar(this));
+        this.getContentPane().add(new ToolMenu(this),BorderLayout.WEST);
         pack();
         setVisible(true);
         setLocationRelativeTo(null);
-        openArenaNew();
+        openArena();
     }
 
     @Override
@@ -101,73 +106,67 @@ public class Editor extends JFrame {
         return height;
     }
     
-    public void openArena() {
-		JFileChooser fc = new JFileChooser("resource/map/");
-        fc.setMultiSelectionEnabled(false);
-        FileNameExtensionFilter filter = new FileNameExtensionFilter(
-                "Map file", "map");
-        fc.setFileFilter(filter);
-        int returnVal = fc.showDialog(this, "Open");
-        Arena a = null;
-        if (returnVal==JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            a = new Arena(file,tileTable,objectTable);
-        }
-        if (a!=null) {
-        	if (arenaPanel!=null) {
-        		getContentPane().remove(arenaPanel);
-        	}
-        	arenaPanel = new ArenaPanel(a);
-        	getContentPane().add(arenaPanel, BorderLayout.CENTER);
-        	pack();
-        	setTool(new Tool.MoveTool(arenaPanel));
-        }
-	}
-	
+    public void setArena(EditorArena a) {
+    	if (arenaPanel!=null) {
+    		arenaPanel.stop();
+    		getContentPane().remove(arenaPanel);
+    	}
+    	arenaPanel = new ArenaPanel(a);
+    	getContentPane().add(arenaPanel, BorderLayout.CENTER);
+    	pack();
+    	setTool(new Tool.MoveTool(arenaPanel));
+    	arenaPanel.start();
+    }
     
-    public void openArenaNew() {
+    public void openArena() {
 		JFileChooser fc = new JFileChooser("resource/map/");
         fc.setMultiSelectionEnabled(false);
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
                 "Arena file", "arena");
         fc.setFileFilter(filter);
         int returnVal = fc.showDialog(this, "Open");
-        Arena a = null;
+        EditorArena a = null;
         if (returnVal==JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            a = new Arena((ArenaData)DataManager.loadObject(file),tileTable,objectTable);
+            a = new EditorArena((ArenaData)DataManager.loadObject(file),tileTable,objectTable);
         }
         if (a!=null) {
-        	if (arenaPanel!=null) {
-        		arenaPanel.stop();
-        		getContentPane().remove(arenaPanel);
-        	}
-        	arenaPanel = new ArenaPanel(a);
-        	getContentPane().add(arenaPanel, BorderLayout.CENTER);
-        	pack();
-        	setTool(new Tool.MoveTool(arenaPanel));
+        	setArena(a);
         }
 	}
 	
-    public void setTool(MouseInputListener tool) {
+    public void setTool(Tool tool) {
     	arenaPanel.removeMouseListener(currentTool);
     	arenaPanel.removeMouseMotionListener(currentTool);
+    	arenaPanel.removeMouseWheelListener(currentTool);
     	arenaPanel.addMouseListener(tool);
     	arenaPanel.addMouseMotionListener(tool);
+    	arenaPanel.addMouseWheelListener(tool);
     	currentTool = tool;
     }
     
-    public void addTileBG(TileBG t) {
+    public void addTileBG(Terrain t) {
     	tiles.add(t);
     	tileTable.put(t.getId(), t);
     }
     
-    public void addObject(Tile t) {
+    public void addObject(Thing t) {
     	objects.add(t);
     	objectTable.put(t.getId(), t);
     }
     
     public static void main(String[] args) {
+		try {
+		    // Set System L&F
+		    UIManager.setLookAndFeel(
+		        UIManager.getSystemLookAndFeelClassName());
+		} 
+		catch (Exception e) {
+		}
     	new Editor();
     }
+
+	public void newArena(String n, int w, int h) {
+		setArena(new EditorArena(n,w,h,tileTable,objectTable));
+	}
 }

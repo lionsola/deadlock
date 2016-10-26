@@ -1,4 +1,4 @@
-package editor;
+package editor.dialogs;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -19,22 +19,24 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import server.world.TileBG;
+import editor.Editor;
+import server.world.Terrain;
 import server.world.Utils;
 
 public class TileBGDialog extends JDialog implements ActionListener {
 	private static final long serialVersionUID = 5917436825785813483L;
 	private Editor editor;
-	private TileBG tile;
+	private Terrain tile;
 	
 	private JFormattedTextField id;
 	private JTextField name;
+	private JLabel imageName;
 	private JButton loadImage;
 	private JButton save;
 	private JLabel tileImage;
 	private BufferedImage curTileImage;
 	
-	public TileBGDialog (Editor editor, TileBG tile) {
+	public TileBGDialog (Editor editor, Terrain tile) {
 		super(editor, "Edit tile", true);
 		this.editor = editor;
 		this.tile = tile;
@@ -60,29 +62,15 @@ public class TileBGDialog extends JDialog implements ActionListener {
         tileImage = new JLabel();
     	topPanel.add(tileImage,c);
         
+    	c.gridy += 1;
+        imageName = new JLabel();
+    	topPanel.add(imageName,c);
+    	
         c.gridy += 1;
         c.fill = GridBagConstraints.HORIZONTAL;
         loadImage = new JButton("Load image");
         loadImage.addActionListener(this);
         topPanel.add(loadImage,c);
-        
-        /*
-        c.gridy += 1;
-        walkable = new JCheckBox("Walkable");
-        walkable.setSelected(tile.isWalkable());
-        topPanel.add(walkable,c);
-        
-        c.gridy += 1;
-        sightBlocking = new JCheckBox("Sight-blocking");
-        sightBlocking.setSelected(!tile.isTransparent());
-        topPanel.add(sightBlocking,c);
-        
-        c.gridy += 1;
-        String[] coverTypes = {"None","Light","Medium","Heavy"};
-        cover = new JComboBox<String>(coverTypes);
-        cover.setSelectedIndex(tile.getCoverType());
-        topPanel.add(cover,c);
-        */
         
         c.gridy += 1;
         save = new JButton("Save");
@@ -97,6 +85,7 @@ public class TileBGDialog extends JDialog implements ActionListener {
         	if (tile.getImage()!=null) {
         		tileImage.setIcon(new ImageIcon(tile.getImage()));
         	}
+        	imageName.setText(tile.getImageName());
         } else {
         	int ID = Utils.random().nextInt();
         	//this.tile = new TileBG(ID);
@@ -114,7 +103,7 @@ public class TileBGDialog extends JDialog implements ActionListener {
 			if (this.tile!=null) {
 				tile.setName(name.getText());
 				tile.setImage(curTileImage);
-				//tile
+				tile.setImageName(imageName.getText());
 			}
 			
 			// Close the dialog
@@ -130,6 +119,8 @@ public class TileBGDialog extends JDialog implements ActionListener {
 	            try {
 	            	curTileImage = ImageIO.read(file);
 					tileImage.setIcon(new ImageIcon(curTileImage));
+					imageName.setText(file.getName());
+					this.pack();
 				} catch (IOException e) {
 					System.err.println("Error while reading tile image");
 					e.printStackTrace();

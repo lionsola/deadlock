@@ -132,7 +132,8 @@ public class ImageBlender {
 		BufferedImage source = ge.createCompatibleImage(Renderer.toPixelDefault(a.getWidthMeter()),
 				Renderer.toPixelDefault(a.getHeightMeter()));
 		Graphics2D g2D = (Graphics2D)source.getGraphics();
-		Renderer.renderArena(g2D, a, new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
+		Renderer.renderArenaBG(g2D, a, new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
+		Renderer.renderArenaObjects(g2D, a, new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
 		g2D.dispose();
 		return source;
 	}

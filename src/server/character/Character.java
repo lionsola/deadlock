@@ -12,7 +12,7 @@ import server.world.Arena;
 import server.world.LineOfSight;
 import server.world.Projectile;
 import server.world.Sound;
-import server.world.TileBG;
+import server.world.Terrain;
 import server.world.Utils;
 import server.world.World;
 import shared.core.Vector2D;
@@ -132,15 +132,15 @@ public class Character {
 		// check each corner of box if walkable
 		
 		if (dx!=0) {
-			int tileX1 = (int) ((newX - getRadius()) / TileBG.tileSize);
-			int tileY1 = (int) ((getY() - getRadius()) / TileBG.tileSize);
-			int tileX2 = (int) ((newX + getRadius()) / TileBG.tileSize);
-			int tileY2 = (int) ((getY() + getRadius()) / TileBG.tileSize);
+			int tileX1 = (int) ((newX - getRadius()) / Terrain.tileSize);
+			int tileY1 = (int) ((getY() - getRadius()) / Terrain.tileSize);
+			int tileX2 = (int) ((newX + getRadius()) / Terrain.tileSize);
+			int tileY2 = (int) ((getY() + getRadius()) / Terrain.tileSize);
 			int wallX=0,wallY=0;
 			boolean blocked = false;;
 			for (int x=tileX1;x<=tileX2;x++) {
 				for (int y=tileY1;y<=tileY2;y++) {
-					if (!arena.get(x, y).isWalkable()) {
+					if (!arena.get(x, y).isTraversable()) {
 						wallX = x;
 						wallY = y;
 						blocked = true;
@@ -149,10 +149,10 @@ public class Character {
 				}
 			}
 			if (blocked) {
-				int curTileY = (int)(y/TileBG.tileSize);
-				double t = y-(0.5+wallY)*TileBG.tileSize;
-				if (Math.abs(t)>TileBG.tileSize/2 &&
-						arena.get(wallX,curTileY).isWalkable() &&
+				int curTileY = (int)(y/Terrain.tileSize);
+				double t = y-(0.5+wallY)*Terrain.tileSize;
+				if (Math.abs(t)>Terrain.tileSize/2 &&
+						arena.get(wallX,curTileY).isTraversable() &&
 						dy==0) {
 					setDy(Math.copySign(Math.abs(dx*0.7),t));
 				}
@@ -160,15 +160,15 @@ public class Character {
 			}
 		}
 		if (dy!=0) {
-			int tileX3 = (int) ((getX() - getRadius()) / TileBG.tileSize);
-			int tileY3 = (int) ((newY - getRadius()) / TileBG.tileSize);
-			int tileX4 = (int) ((getX() + getRadius()) / TileBG.tileSize);
-			int tileY4 = (int) ((newY + getRadius()) / TileBG.tileSize);
+			int tileX3 = (int) ((getX() - getRadius()) / Terrain.tileSize);
+			int tileY3 = (int) ((newY - getRadius()) / Terrain.tileSize);
+			int tileX4 = (int) ((getX() + getRadius()) / Terrain.tileSize);
+			int tileY4 = (int) ((newY + getRadius()) / Terrain.tileSize);
 			int wallX=0,wallY=0;
 			boolean blocked = false;
 			for (int x=tileX3;x<=tileX4;x++) {
 				for (int y=tileY3;y<=tileY4;y++) {
-					if (!arena.get(x, y).isWalkable()) {
+					if (!arena.get(x, y).isTraversable()) {
 						wallX = x;
 						wallY = y;
 						blocked = true;
@@ -178,10 +178,10 @@ public class Character {
 			}
 	
 			if (blocked) {
-				int curTileX = (int)(x/TileBG.tileSize);
-				double t = x-(0.5+wallX)*TileBG.tileSize;
-				if (Math.abs(t)>TileBG.tileSize/2 &&
-						arena.get(curTileX,wallY).isWalkable() &&
+				int curTileX = (int)(x/Terrain.tileSize);
+				double t = x-(0.5+wallX)*Terrain.tileSize;
+				if (Math.abs(t)>Terrain.tileSize/2 &&
+						arena.get(curTileX,wallY).isTraversable() &&
 						dx==0) {
 					setDx(Math.copySign(Math.abs(dy*0.7),t));
 				}

@@ -1,6 +1,5 @@
 package editor;
 
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -11,9 +10,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
@@ -23,8 +24,9 @@ import javax.imageio.ImageIO;
 import client.graphics.ImageBlender;
 import client.graphics.ParticleEmitter;
 import server.world.Arena;
-import server.world.Tile;
-import server.world.TileBG;
+import server.world.Light;
+import server.world.Thing;
+import server.world.Terrain;
 
 public class DataManager {
 	public static void exportImages(Arena a) throws IOException {
@@ -105,8 +107,8 @@ public class DataManager {
 		return loadObject(new File(path));
 	}
 	
-	public static Collection<TileBG> loadTileListOld() {
-		List<TileBG> tiles = new LinkedList<TileBG>();
+	public static Collection<Terrain> loadTileListOld() {
+		List<Terrain> tiles = new LinkedList<Terrain>();
 		try {
 			FileInputStream fileInputStream = new FileInputStream("resource/tile/tiles");
 			Scanner fileSc = new Scanner(fileInputStream);
@@ -118,7 +120,7 @@ public class DataManager {
 				String tileName = sc.next(); // reads the light tile image
 				String filename = sc.next(); // reads the light tile image
 				sc.close();
-				TileBG t = new TileBG(id);
+				Terrain t = new Terrain(id);
 				t.setName(tileName);
 				t.setImageName(filename);
 				tiles.add(t);
@@ -132,28 +134,52 @@ public class DataManager {
 		return tiles;
 	}
 	
-	public static void loadTileGraphics(Collection<TileBG> tiles) throws FileNotFoundException, IOException {
-		for (TileBG t:tiles) {
+	public static void saveTileListOld(Collection<Terrain> tileList) {
+		try {
+			FileOutputStream fileOutputStream = new FileOutputStream("resource/tile/tiles");
+			PrintWriter wr = new PrintWriter(fileOutputStream);
+			
+			// save tile information
+			Iterator<Terrain> i = tileList.iterator();
+			while (i.hasNext()) {
+				Terrain tile = i.next();
+				wr.print(tile.getId()+" ");
+				wr.print(tile.getName()+" ");
+				wr.print(tile.getImageName());
+				if (i.hasNext()) {
+					wr.println();
+				}
+			}
+			
+			wr.close();
+		} catch (Exception e) {
+			System.err.println("Error while reading map");
+			e.printStackTrace();
+		}
+	}
+	
+	public static void loadTileGraphics(Collection<Terrain> tiles) throws FileNotFoundException, IOException {
+		for (Terrain t:tiles) {
 			t.setImage(ImageIO.read(new FileInputStream("resource/tile/" + t.getImageName())));
 		}
 	}
 	
-	public static void loadObjectGraphics(Collection<Tile> tiles) throws FileNotFoundException, IOException {
-		for (Tile t:tiles) {
+	public static void loadObjectGraphics(Collection<Thing> tiles) throws FileNotFoundException, IOException {
+		for (Thing t:tiles) {
 			t.setImage(ImageIO.read(new FileInputStream("resource/tile/" + t.getImageName())));
 		}
 	}
 	
-	public static HashMap<Integer,TileBG> getTileMap(Collection<TileBG> tiles) {
-		HashMap<Integer,TileBG> tileMap = new HashMap<Integer,TileBG>(tiles.size());
-		for (TileBG t:tiles) {
+	public static HashMap<Integer,Terrain> getTileMap(Collection<Terrain> tiles) {
+		HashMap<Integer,Terrain> tileMap = new HashMap<Integer,Terrain>(tiles.size());
+		for (Terrain t:tiles) {
 			tileMap.put(t.getId(),t);
 		}
 		return tileMap;
 	}
 
-	public static Collection<Tile> loadObjectListOld() {
-		List<Tile> objects = new LinkedList<Tile>();
+	public static Collection<Thing> loadObjectListOld() {
+		List<Thing> objects = new LinkedList<Thing>();
 		try {
 			FileInputStream fileInputStream = new FileInputStream("resource/tile/objects");
 			Scanner fileSc = new Scanner(fileInputStream);
@@ -170,7 +196,7 @@ public class DataManager {
 				double spriteSize = sc.nextDouble();
 				sc.close();
 				
-				Tile o = new Tile(id);
+				Thing o = new Thing(id);
 				o.setWalkable(walkable);
 				o.setTransparent(transparent);
 				o.setCoverType(coverType);
@@ -188,9 +214,39 @@ public class DataManager {
 		return objects;
 	}
 
-	public static HashMap<Integer, Tile> getObjectMap(Collection<Tile> objects) {
-		HashMap<Integer,Tile> objectMap = new HashMap<Integer,Tile>(objects.size());
-		for (Tile t:objects) {
+	public static void saveObjectListOld(Collection<Thing> tileList) {
+		try {
+			FileOutputStream fileOutputStream = new FileOutputStream("resource/tile/tiles");
+			PrintWriter wr = new PrintWriter(fileOutputStream);
+			
+			// save tile information
+			Iterator<Thing> i = tileList.iterator();
+			while (i.hasNext()) {
+				Thing tile = i.next();
+				wr.print(tile.getId()+" ");
+				wr.print(tile.getName()+" ");
+				wr.print(tile.getImageName()+" ");
+				
+				wr.print(tile.isWalkable()+" ");
+				wr.print(tile.isTransparent()+" ");
+				wr.print(tile.getCoverType()+" ");
+				wr.print(tile.getSpriteSize());
+				
+				if (i.hasNext()) {
+					wr.println();
+				}
+			}
+			
+			wr.close();
+		} catch (Exception e) {
+			System.err.println("Error while reading map");
+			e.printStackTrace();
+		}
+	}
+	
+	public static HashMap<Integer, Thing> getObjectMap(Collection<Thing> objects) {
+		HashMap<Integer,Thing> objectMap = new HashMap<Integer,Thing>(objects.size());
+		for (Thing t:objects) {
 			objectMap.put(t.getId(),t);
 		}
 		return objectMap;
@@ -201,9 +257,8 @@ public class DataManager {
 		public String name;
 		public int[][] tileMap;
 		public int[][] objectMap;
-		public List<Point2D> spawn1;
-		public List<Point2D> spawn2;
-		public int[][] lightMap;
+		//public int[][] lightMap;
+		public List<Light> lights;
 	}
 	
 	public static class ArenaGraphicalData implements Serializable {
@@ -249,17 +304,20 @@ public class DataManager {
 		int[][] objectIDMap = new int[a.getWidth()][a.getHeight()];
 		for (int x=0;x<a.getWidth();x++) {
 			for (int y=0;y<a.getHeight();y++) {
-				tileIDMap[x][y] = a.getTile(x, y).getId();
-				objectIDMap[x][y] = a.get(x, y).getId();
+				Terrain te = a.get(x, y).getTerrain();
+				tileIDMap[x][y] = te!=null?te.getId():0;
+				Thing ti = a.get(x, y).getThing();
+				objectIDMap[x][y] = ti!=null?ti.getId():0;
 			}
 		}
 		ArenaData ad = new ArenaData();
 		ad.name = a.getName();
 		ad.tileMap = tileIDMap;
 		ad.objectMap = objectIDMap;
-		ad.spawn1 = a.getSpawn(0);
-		ad.spawn2 = a.getSpawn(1);
-		ad.lightMap = a.getLightmap();
+		//ad.spawn1 = a.getSpawn(0);
+		//ad.spawn2 = a.getSpawn(1);
+		//ad.lightMap = a.getLightmap();
+		ad.lights = a.getLightList();
 		saveObject(ad,"resource/map/"+a.getName()+".arena");
 	}
 }

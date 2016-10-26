@@ -37,7 +37,7 @@ public class HostScreen extends AbstractScreen implements ActionListener {
 
 	private static final long serialVersionUID = -8617632006677046360L;
 	// available maps
-	private static final String[] MAP_LIST       = { "maze", "mansion", "bazaar", "testsmall" };
+	private static final String[] MAP_LIST       = {"mansion"};
 	
 	private int currentMode;
 	private JLabel modeLabel;
@@ -140,7 +140,7 @@ public class HostScreen extends AbstractScreen implements ActionListener {
 
 		for (int i = 0; i < MAP_LIST.length; i++) {
 			try {
-				Image mapImage = ImageIO.read(new FileInputStream("resource/map/" + MAP_LIST[i] + ".bmp"));
+				Image mapImage = ImageIO.read(new FileInputStream("resource/map/" + MAP_LIST[i] + ".png"));
 				scaledMap[i] = mapImage.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
 			} catch (IOException e) {
 				System.out.println("Error loading map image");

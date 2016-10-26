@@ -10,7 +10,7 @@ import server.world.Geometry;
 import server.world.LineOfSight;
 import server.world.Projectile;
 import server.world.Sound;
-import server.world.Tile;
+import server.world.Thing;
 import server.world.Utils;
 import server.world.World;
 
@@ -24,15 +24,15 @@ public abstract class TimedGrenade extends Projectile {
 	}
 
 	@Override
-	protected void onHitWall(World w, double x, double y, Tile t) {
+	protected void onHitWall(World w, double x, double y, Thing t) {
 		// TODO Auto-generated method stub
 		double bounceX = x - getDx()*GameWindow.MS_PER_UPDATE;
 		double bounceY = y - getDy()*GameWindow.MS_PER_UPDATE;
-		if (w.getArena().getTileAt(bounceX, y).isWalkable()) {
+		if (w.getArena().getTileAt(bounceX, y).isTraversable()) {
 			setDirection(Math.PI - getDirection());
 			setX(bounceX);
 			//System.out.println("Bounce X");
-		} else if (w.getArena().getTileAt(x, bounceY).isWalkable()) {
+		} else if (w.getArena().getTileAt(x, bounceY).isTraversable()) {
 			setDirection(- getDirection());
 			setY(bounceY);
 			//System.out.println("Bounce Y");

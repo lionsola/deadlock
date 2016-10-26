@@ -15,7 +15,7 @@ import shared.network.GameEvent.AnimationEvent;
  * without having to deal with low-level animation classes.
  */
 public class AnimationSystem {
-	private ConcurrentLinkedQueue<ParticleEmitter> particleEmitters;
+	//private ConcurrentLinkedQueue<ParticleEmitter> particleEmitters;
 	private ConcurrentLinkedQueue<BasicAnimation> animations;
 
 	/**

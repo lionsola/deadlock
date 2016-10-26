@@ -1,6 +1,9 @@
-package editor;
+package editor.dialogs;
  
 import javax.swing.*;
+
+import editor.Editor;
+
 import java.awt.*;
 import java.awt.event.*;
  
@@ -24,7 +27,7 @@ import java.awt.event.*;
                                 choices[0]);
  * </pre>
  */
-public class ListDialog<T> extends JDialog implements ActionListener {
+public class ListDialog<T> extends JDialog {
 
 	private static final long serialVersionUID = -2705330003771825132L;
     private JList<T> list;
@@ -40,7 +43,7 @@ public class ListDialog<T> extends JDialog implements ActionListener {
      * dialog should appear.
      */
     public ListDialog(Editor editor,
-                       Component locationComp,
+                       final JToggleButton button,
                        String title,
                        final JButton[] buttons,
                        ListModel<T> lm,
@@ -48,7 +51,12 @@ public class ListDialog<T> extends JDialog implements ActionListener {
                        String longValue) {
         super(editor, title, false);
         this.editor = editor;
-        
+        this.addWindowListener(new WindowAdapter() {
+        	@Override
+        	public void windowClosing(WindowEvent e) {
+        		button.doClick();
+        	}
+        });
         JPanel buttonPanel = new JPanel();
         for (JButton b:buttons) {
         	buttonPanel.add(b);
@@ -92,19 +100,13 @@ public class ListDialog<T> extends JDialog implements ActionListener {
         contentPane.add(listPane, BorderLayout.CENTER);
         contentPane.add(buttonPanel, BorderLayout.SOUTH);
  
+        setLocation(button.getX()+button.getWidth(),button.getY());
         pack();
-        //setLocationRelativeTo(locationComp);
-        this.setLocation(locationComp.getX()+locationComp.getWidth(),locationComp.getY());
     }
     
     
 
 	public JList<T> getList() {
 		return list;
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		
 	}
 }

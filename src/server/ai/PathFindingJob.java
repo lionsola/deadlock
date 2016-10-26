@@ -9,7 +9,7 @@ import java.util.List;
 import server.ai.PathFinder.Path;
 import server.world.Arena;
 import server.world.Geometry;
-import server.world.TileBG;
+import server.world.Terrain;
 
 /**
  * Represents a path finding / searching problem and the solving algorithm using A* search.
@@ -34,9 +34,9 @@ public class PathFindingJob implements Runnable {
      */
     public PathFindingJob(Point2D source, Point2D dest, Arena arena, Path result) {
         this.arena = arena;
-        this.source = new Point((int)(source.getX()/TileBG.tileSize),(int)(source.getY()/TileBG.tileSize));
+        this.source = new Point((int)(source.getX()/Terrain.tileSize),(int)(source.getY()/Terrain.tileSize));
         this.pixelDest = dest;
-        this.dest = new Point((int)(pixelDest.getX()/TileBG.tileSize),(int)(pixelDest.getY()/TileBG.tileSize));
+        this.dest = new Point((int)(pixelDest.getX()/Terrain.tileSize),(int)(pixelDest.getY()/Terrain.tileSize));
         this.result = result;
     }
     
@@ -118,21 +118,21 @@ public class PathFindingJob implements Runnable {
         Point topleft = new Point(p.x-1,p.y-1);
         Point btmright = new Point(p.x+1,p.y+1);
         Point btmleft = new Point(p.x-1,p.y+1);
-        if (arena.get(top).isWalkable())    
+        if (arena.get(top).isTraversable())    
             adjPositions.add(top);
-        if (arena.get(btm).isWalkable())
+        if (arena.get(btm).isTraversable())
             adjPositions.add(btm);
-        if (arena.get(left).isWalkable())   
+        if (arena.get(left).isTraversable())   
             adjPositions.add(left);
-        if (arena.get(right).isWalkable())
+        if (arena.get(right).isTraversable())
             adjPositions.add(right);
-        if (arena.get(top).isWalkable() && arena.get(right).isWalkable() && arena.get(topright).isWalkable())
+        if (arena.get(top).isTraversable() && arena.get(right).isTraversable() && arena.get(topright).isTraversable())
             adjPositions.add(topright);
-        if (arena.get(top).isWalkable() && arena.get(left).isWalkable() && arena.get(topleft).isWalkable())
+        if (arena.get(top).isTraversable() && arena.get(left).isTraversable() && arena.get(topleft).isTraversable())
             adjPositions.add(topleft);
-        if (arena.get(btm).isWalkable() && arena.get(right).isWalkable() && arena.get(btmright).isWalkable())
+        if (arena.get(btm).isTraversable() && arena.get(right).isTraversable() && arena.get(btmright).isTraversable())
             adjPositions.add(btmright);
-        if (arena.get(btm).isWalkable() && arena.get(left).isWalkable() && arena.get(btmleft).isWalkable())
+        if (arena.get(btm).isTraversable() && arena.get(left).isTraversable() && arena.get(btmleft).isTraversable())
             adjPositions.add(btmleft);
         return adjPositions;
     }

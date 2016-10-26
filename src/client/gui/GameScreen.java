@@ -42,8 +42,8 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import server.world.Arena;
-import server.world.Tile;
-import server.world.TileBG;
+import server.world.Thing;
+import server.world.Terrain;
 import server.world.Visibility;
 import shared.network.FullCharacterData;
 import shared.network.GameEvent;
@@ -56,7 +56,6 @@ import client.graphics.Animation;
 import client.graphics.AnimationSystem;
 import client.graphics.Renderer;
 import client.image.SoftHardLightComposite;
-import client.image.SoftLightComposite;
 import client.sound.AudioManager;
 import editor.DataManager;
 
@@ -121,10 +120,10 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		this.requestFocusInWindow();
 		this.setIgnoreRepaint(true);
 		setFocusTraversalKeysEnabled(false);
-		Collection<TileBG> tileList = DataManager.loadTileListOld();
-		HashMap<Integer,TileBG> tileTable = DataManager.getTileMap(tileList);
-		Collection<Tile> objectList = DataManager.loadObjectListOld();
-		HashMap<Integer,Tile> objectTable = DataManager.getObjectMap(objectList);
+		Collection<Terrain> tileList = DataManager.loadTileListOld();
+		HashMap<Integer,Terrain> tileTable = DataManager.getTileMap(tileList);
+		Collection<Thing> objectList = DataManager.loadObjectListOld();
+		HashMap<Integer,Thing> objectTable = DataManager.getObjectMap(objectList);
 		try {
 			DataManager.loadTileGraphics(tileList);
 		} catch (IOException e) {
@@ -391,7 +390,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			Shape clip = new Ellipse2D.Double(Renderer.toPixel(c.x - c.hearRange),Renderer.toPixel(c.y - c.hearRange),
 					Renderer.toPixel(c.hearRange*2),Renderer.toPixel(c.hearRange*2));
 			g2D.setClip(clip);
-			Rectangle2D hearBox = getCharacterVisionBox(c.x,c.y,c.hearRange);
+			
+			//Rectangle2D hearBox = getCharacterVisionBox(c.x,c.y,c.hearRange);
 			//Renderer.drawArenaImage(g2D, renderer.getArenaImage(),hearBox);
 			
 			g2D.setClip(null);
@@ -429,10 +429,10 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			Renderer.drawArenaImage(g2D,renderer.getLightMap(),viewBox);
 			g2D.setComposite(save);
 			
-			int tileX = (int)(input.cx/TileBG.tileSize);
-			int tileY = (int)(input.cy/TileBG.tileSize);
-			if (arena.get(tileX,tileY).getCoverType()>0)
-				Renderer.renderProtection(g2D,tileX,tileY,arena.get(tileX,tileY).getCoverType());
+			int tileX = (int)(input.cx/Terrain.tileSize);
+			int tileY = (int)(input.cy/Terrain.tileSize);
+			if (arena.get(tileX,tileY).coverType()>0)
+				Renderer.renderProtection(g2D,tileX,tileY,arena.get(tileX,tileY).coverType());
 			g2D.setClip(null);
 			
 		}

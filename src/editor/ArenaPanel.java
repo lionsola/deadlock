@@ -31,17 +31,23 @@ import client.image.MultiplyComposite;
 import client.image.SoftHardLightComposite;
 import client.image.SoftLightComposite;
 import server.world.Arena;
-import server.world.TileBG;
+import server.world.Terrain;
 import shared.network.FullCharacterData;
 import shared.network.GameDataPackets.InputPacket;
 
 public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWheelListener{
-	enum Layer {ARENA,LIGHT}
 	private static final long serialVersionUID = 2649458143637701147L;
 	private Renderer renderer = new Renderer();
-	private Arena arena;
+	private EditorArena arena;
 	public BufferedImage lightImage;
-	public Layer layer = Layer.ARENA;
+	
+	protected boolean renderTerrain = true;
+	protected boolean renderThings = true;
+	protected boolean renderLight = false;
+	protected boolean renderHardLight = false;
+	protected boolean renderLightSource = false;
+	protected boolean renderGrid;
+	
 	private Camera camera;
 	private double zoomLevel;
 	private ClientPlayer playerInfo = new ClientPlayer();
@@ -50,21 +56,20 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	private double FPS;
 	private volatile boolean running = true;
 	private Thread thread;
-	public ArenaPanel (Arena arena) {
+	
+	
+	public ArenaPanel (EditorArena arena) {
 		super();
 		this.arena = arena;
+		generateLightImage();
 		camera = new Camera(arena,this);
 		this.setFocusable(true);
 		this.requestFocusInWindow();
 		this.setIgnoreRepaint(true);
 		setFocusTraversalKeysEnabled(false);
 		
-		
 		addKeyListener(this);
 		addMouseWheelListener(this);
-		
-		//addMouseListener(this);
-		start();
 	}
 
 	public void start() {
@@ -138,12 +143,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		player.direction = (float) Math.atan2(player.y-input.cy,input.cx-player.x);
 	}
 	
-	public void setArena(Arena a) {
-		arena = a;
-		camera = new Camera(a,this);
-	}
-	
-	public Arena getArena() {
+	public EditorArena getArena() {
 		return arena;
 	}
 	
@@ -173,23 +173,27 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		Graphics2D g2D = (Graphics2D) g;
 		RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2D.setRenderingHints(rh);
-		switch (layer) {
-			case ARENA:
-				Renderer.renderArena(g2D, arena, camera.getDrawArea());
-				if (lightImage!=null) {
-					Composite save = g2D.getComposite();
-					//g2D.setComposite(new MultiplyComposite(0.5f));
-					g2D.setComposite(new SoftHardLightComposite(1f));
-					//long before = System.currentTimeMillis();
-					Renderer.drawArenaImage(g2D, lightImage, camera.getDrawArea());
-					//System.out.println(System.currentTimeMillis()-before);
-					g2D.setComposite(save);
-				}
-				break;
-			case LIGHT:
-				Renderer.renderArena(g2D, arena, camera.getDrawArea());
-				Renderer.renderEditorLight(g2D, arena.getLightmap(), camera.getDrawArea());
-				break;
+		if (renderTerrain)
+			Renderer.renderArenaBG(g2D, arena, camera.getDrawArea());
+		if (renderThings)
+			Renderer.renderArenaObjects(g2D, arena, camera.getDrawArea());
+		if (renderLight) {
+			Composite save = g2D.getComposite();
+			//g2D.setComposite(new MultiplyComposite(0.5f));
+			g2D.setComposite(new SoftHardLightComposite(1f));
+			//long before = System.currentTimeMillis();
+			Renderer.drawArenaImage(g2D, lightImage, camera.getDrawArea());
+			//System.out.println(System.currentTimeMillis()-before);
+			g2D.setComposite(save);
+		}
+		if (renderHardLight) {
+			Renderer.renderEditorHardLight(g2D, arena.getLightmap(), camera.getDrawArea());
+		}
+		if (renderLightSource) {
+			Renderer.renderEditorLightSource(g2D, arena, camera.getDrawArea());
+		}
+		if (renderGrid) {
+			Renderer.renderGrid(g2D, arena, camera.getDrawArea());
 		}
 		Renderer.renderMainCharacter(g2D, player, playerInfo);
 		g.translate(transX, transY);
@@ -206,8 +210,8 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	}
 	
 	// TILE
-	public void saveTiles(HashMap<Integer,TileBG> tileTable) throws FileNotFoundException, IOException {
-		Collection<TileBG> tileList = tileTable.values();
+	public void saveTiles(HashMap<Integer,Terrain> tileTable) throws FileNotFoundException, IOException {
+		Collection<Terrain> tileList = tileTable.values();
 		ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream("resource/tile/tiles")));
 		out.writeObject(tileList);
 		out.close();

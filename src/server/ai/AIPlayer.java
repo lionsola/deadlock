@@ -10,7 +10,7 @@ import server.ai.PathFinder.Path;
 import server.network.ServerPlayer;
 import server.world.Arena;
 import server.world.Geometry;
-import server.world.TileBG;
+import server.world.Terrain;
 import server.world.Utils;
 import shared.network.GameEvent;
 import shared.network.PartialCharacterData;
@@ -29,11 +29,11 @@ public class AIPlayer extends ServerPlayer {
 		EXPLORING_POINT, EXPLORING_RANDOMLY, ATTACKING, RETREATING
 	}
 
-	private static final double PATH_THRESHOLD = TileBG.tileSize/5;
-	private static final double OUTOFRANGE_THRESHOLD = TileBG.tileSize * 2;
-	private static final double COORD_THRESHOLD = TileBG.tileSize / 20;
-	private static final double EXPLORE_DISTANCE = TileBG.tileSize * 15;
-	private static final double RETREAT_DISTANCE = TileBG.tileSize * 5;
+	private static final double PATH_THRESHOLD = Terrain.tileSize/5;
+	private static final double OUTOFRANGE_THRESHOLD = Terrain.tileSize * 2;
+	private static final double COORD_THRESHOLD = Terrain.tileSize / 20;
+	private static final double EXPLORE_DISTANCE = Terrain.tileSize * 15;
+	private static final double RETREAT_DISTANCE = Terrain.tileSize * 5;
 	private PathFinder pathFinder;
 
 	private InputPacket input = new InputPacket();
@@ -209,8 +209,8 @@ public class AIPlayer extends ServerPlayer {
 	private Point2D randomIntr(double d, double e, double direction, double distance) {
 		double newX = d + distance * Math.cos(direction);
 		double newY = e - distance * Math.sin(direction);
-		int tileX = (int) (newX / TileBG.tileSize);
-		int tileY = (int) (newY / TileBG.tileSize);
+		int tileX = (int) (newX / Terrain.tileSize);
+		int tileY = (int) (newY / Terrain.tileSize);
 		if (tileX < 0)
 			tileX = Math.abs(tileX);
 		else if (tileX > arena.getWidth())
@@ -229,7 +229,7 @@ public class AIPlayer extends ServerPlayer {
 		List<Point> emptyTiles = new LinkedList<Point>();
 		for (int i = tileX0; i <= tileX1; i++) {
 			for (int j = tileY0; j <= tileY1; j++) {
-				if (arena.get(i, j).isWalkable())
+				if (arena.get(i, j).isTraversable())
 					emptyTiles.add(new Point(i, j));
 			}
 		}

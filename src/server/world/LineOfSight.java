@@ -104,7 +104,7 @@ public class LineOfSight {
 	
 	public List<Point2D> getLOSPoints(final double px, final double py,
 			double viewRange, double viewAngle, double dir, final Arena a) {
-		double ts = TileBG.tileSize;
+		double ts = Terrain.tileSize;
 		int range = (int)(viewRange / ts + 0.5);
 		int pX = (int)(px / ts);
 		int pY = (int)(py / ts);
@@ -125,10 +125,10 @@ public class LineOfSight {
 
 			for (int x = x1; x <= x2; x++) {
 				for (int y = y1; y <= y2; y++) {
-					if (!a.get(x, y).isTransparent()) {
+					if (!a.get(x, y).isClear()) {
 						// Horizontal Edges
 						// above player & below that is an empty tile
-						if (y < pY && a.get(x, y + 1).isTransparent()) {
+						if (y < pY && a.get(x, y + 1).isClear()) {
 							xa = x * ts;
 							ya = (y + 1) * ts;
 							xb = xa + ts;
@@ -139,7 +139,7 @@ public class LineOfSight {
 						}
 
 						// below player & above that is an empty tile
-						else if (y > pY && a.get(x, y - 1).isTransparent()) {
+						else if (y > pY && a.get(x, y - 1).isClear()) {
 							xa = (x + 1) * ts;
 							ya = y * ts;
 							xb = xa - ts;
@@ -151,7 +151,7 @@ public class LineOfSight {
 						// vertical edges
 						// to the left of player && to the right of that is an
 						// empty tile
-						if (x < pX && a.get(x + 1, y).isTransparent()) {
+						if (x < pX && a.get(x + 1, y).isClear()) {
 							xa = (x + 1) * ts;
 							ya = (y + 1) * ts;
 							xb = xa;
@@ -162,7 +162,7 @@ public class LineOfSight {
 
 						// to the right of player && to the left of that is an
 						// empty tile
-						if (x > pX && a.get(x - 1, y).isTransparent()) {
+						if (x > pX && a.get(x - 1, y).isClear()) {
 							xa = x * ts;
 							ya = y * ts;
 							xb = xa;

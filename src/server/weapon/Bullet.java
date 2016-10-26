@@ -8,14 +8,14 @@ import server.character.PlayerCharacter;
 import server.world.Geometry;
 import server.world.Projectile;
 import server.world.Sound;
-import server.world.Tile;
+import server.world.Thing;
 import server.world.World;
 import shared.network.GameEvent.PlayerDieEvent;
 
 public class Bullet extends Projectile {
 	private static final double BULLET_AIR_RESIST_CONSTANT = 0.0005;
 	private static final double BULLET_PENETRATION_CONSTANT = 0.3;
-	Tile lastHit;
+	Thing lastHit;
 	
 	public Bullet(PlayerCharacter source, double direction, double speed, double size) {
 		super(source, direction, speed, size);
@@ -49,7 +49,7 @@ public class Bullet extends Projectile {
 		
 	}
 
-	protected void onHitWall(World w, double x, double y, Tile t) {
+	protected void onHitWall(World w, double x, double y, Thing t) {
 		setSpeed(getSpeed()-BULLET_PENETRATION_CONSTANT*Geometry.LINE_SAMPLE_THRESHOLD);
 		if (t!=lastHit){
 			w.addSound(Sound.BULLETWALL.id,Sound.BULLETWALL.volume*Math.max(0.5,Math.min(2,getSize()/5)),x,y);
@@ -66,7 +66,7 @@ public class Bullet extends Projectile {
 		super.update(w);
 		if (getSize()<50)
 			setSpeed(getSpeed() - BULLET_AIR_RESIST_CONSTANT*getSize()*getSpeed()*GameWindow.MS_PER_UPDATE) ;
-		if (w.getArena().getTileAt(getX(), getY()).isWalkable())
+		if (w.getArena().getTileAt(getX(), getY()).isTraversable())
 			lastHit = null;
 	}
 

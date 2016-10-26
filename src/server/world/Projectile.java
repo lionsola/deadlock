@@ -117,11 +117,11 @@ public abstract class Projectile {
 			}
 
 			// check projectile vs wall collision
-			int tileX = (int) (x / TileBG.tileSize);
-			int tileY = (int) (y / TileBG.tileSize);
+			int tileX = (int) (x / Terrain.tileSize);
+			int tileY = (int) (y / Terrain.tileSize);
 			Tile t = w.getArena().get(tileX, tileY);
-			if (!t.isWalkable()) {
-				onHitWall(w,x,y,t);	
+			if (!t.isTraversable()) {
+				onHitWall(w,x,y,t.getThing());	
 			}
 		}
 	}
@@ -136,7 +136,7 @@ public abstract class Projectile {
 		return data;
 	}
 	
-	protected abstract void onHitWall(World w, double x, double y, Tile t);
+	protected abstract void onHitWall(World w, double x, double y, Thing t);
 
 	protected abstract void onHitCharacter(World w, PlayerCharacter ch, double x, double y);
 	

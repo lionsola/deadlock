@@ -15,8 +15,8 @@ import server.character.ClassStats;
 import server.character.PlayerCharacter;
 import server.weapon.WeaponFactory;
 import server.world.Arena;
-import server.world.Tile;
-import server.world.TileBG;
+import server.world.Thing;
+import server.world.Terrain;
 import server.world.World;
 import shared.network.GameEvent;
 import shared.network.GameDataPackets.InputPacket;
@@ -28,8 +28,6 @@ import shared.network.GameEvent.ScoreChangedEvent;
 
 /**
  * Is the game server.
- * 
- * @author Anh Pham
  */
 public class MatchServer implements Runnable, GameEventListener {
 	
@@ -72,8 +70,8 @@ public class MatchServer implements Runnable, GameEventListener {
 		WeaponFactory.initWeapons();
 		ClassStats.initClassStats();
 		
-		HashMap<Integer,TileBG> tileTable = DataManager.getTileMap(DataManager.loadTileListOld());
-		HashMap<Integer,Tile> objectTable = DataManager.getObjectMap(DataManager.loadObjectListOld());
+		HashMap<Integer,Terrain> tileTable = DataManager.getTileMap(DataManager.loadTileListOld());
+		HashMap<Integer,Thing> objectTable = DataManager.getObjectMap(DataManager.loadObjectListOld());
 		Arena arena = new Arena(arenaName, tileTable, objectTable);
 		
 		world = new World(arena, this);

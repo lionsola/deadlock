@@ -13,7 +13,7 @@ import editor.Identifiable;
  * 
  * @author Anh Pham
  */
-public class TileBG implements CellRenderable, Identifiable {
+public class Terrain implements CellRenderable, Identifiable {
 	public static final int COVER_NONE = 0;
 	public static final int COVER_LIGHT = 1;
 	public static final int COVER_MEDIUM = 2;
@@ -40,7 +40,7 @@ public class TileBG implements CellRenderable, Identifiable {
 	 * @param tileImage
 	 *            The base image of this tile, used to generate different images for the lighting.
 	 */
-	public TileBG(int id, BufferedImage tileImage, Color color) {
+	public Terrain(int id, BufferedImage tileImage, Color color) {
 		this.id = id;
 		this.color = color;
 		this.tileImage = tileImage;
@@ -55,7 +55,7 @@ public class TileBG implements CellRenderable, Identifiable {
 	 * @param transparent
 	 *            If true, the characters can see through the tile.
 	 */
-	public TileBG(int id) {
+	public Terrain(int id) {
 		this.id = id;
 		this.color = null;
 		this.tileImage = null;

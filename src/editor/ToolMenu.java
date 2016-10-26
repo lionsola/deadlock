@@ -3,7 +3,8 @@ package editor;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.LinkedList;
 
 import javax.swing.BorderFactory;
@@ -20,143 +21,161 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import client.gui.GUIFactory;
-import editor.Tool.TilePaint;
-import server.world.Tile;
-import server.world.TileBG;
+import editor.Tool.*;
+import editor.dialogs.ListDialog;
+import editor.dialogs.NewLightDialog;
+import editor.dialogs.TileBGDialog;
+import server.world.Thing;
+import server.world.Terrain;
 
 public class ToolMenu extends JPanel {
 	private static final long serialVersionUID = 5669888117742429060L;
 	final Editor editor;
+	
+	JToggleButton activeButton; 
+	
 	public ToolMenu(final Editor editor) {
 		this.editor = editor;
 		this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 		
-		final JButton tilePaint = new JButton("Tiles");
-		tilePaint.addActionListener(new ActionListener() {
-
+		final JButton move = new JButton("Move");
+		move.addActionListener(new ActionListener() { 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				CustomListModel<TileBG> tlm = new CustomListModel<TileBG>(new LinkedList<TileBG>(editor.tiles));
-				JButton add = new JButton("Add");
-				JButton edit = new JButton("Edit");
-				JButton[] buttons = {add,edit};
-				final ListDialog<TileBG> list = new ListDialog<TileBG>(editor, tilePaint, "Tile", buttons, tlm, null,null);
-				list.setVisible(true);
-				list.getList().setCellRenderer(cellRenderer);
-				list.getList().addListSelectionListener(new ListSelectionListener() {
-					@Override
-					public void valueChanged(ListSelectionEvent e) {
-						editor.setTool(new TilePaint(editor.arenaPanel, list.getList().getSelectedValue()));
+				editor.setTool(new MoveTool(editor.getArenaPanel()));
+			}});
+		this.add(move);
+		
+		final JToggleButton tilePaint = new JToggleButton("Tiles");
+		tilePaint.addItemListener(new ItemListener() {
+			ListDialog<Terrain> list = null;
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange()==ItemEvent.SELECTED) {
+					if (list==null) {
+						CustomListModel<Terrain> tlm = new CustomListModel<Terrain>(new LinkedList<Terrain>(editor.tiles));
+						JButton add = new JButton("Add");
+						JButton edit = new JButton("Edit");
+						JButton[] buttons = {edit,add};
+						list = new ListDialog<Terrain>(editor, tilePaint, "Tile", buttons, tlm, null,null);
+						
+						list.getList().setCellRenderer(cellRenderer);
+						list.getList().addListSelectionListener(new ListSelectionListener() {
+							@Override
+							public void valueChanged(ListSelectionEvent e) {
+								editor.setTool(new TilePaint(editor.getArenaPanel(), list.getList().getSelectedValue()));
+							}
+						});
+						add.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent arg0) {
+								new TileBGDialog(editor,null).setVisible(true);
+							}
+						});
+						edit.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent arg0) {
+								new TileBGDialog(editor,list.getList().getSelectedValue()).setVisible(true);
+							}
+						});
 					}
-				});
-				add.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						new TileBGDialog(editor,null).setVisible(true);
-					}
-				});
-				edit.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						new TileBGDialog(editor,list.getList().getSelectedValue()).setVisible(true);
-					}
-				});
-			}
-		});
-		this.add(tilePaint);
-		
-		final JButton objectPaint = new JButton("Objects");
-		objectPaint.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				CustomListModel<Tile> tlm = new CustomListModel<Tile>(new LinkedList<Tile>(editor.objects));
-				JButton edit = new JButton("Edit");
-				JButton[] buttons = {edit};
-				final ListDialog<Tile> list = new ListDialog<Tile>(editor, tilePaint, "Tile", buttons, tlm, null,null);
-				list.getList().setCellRenderer(cellRenderer);
-				list.setVisible(true);
-				//list.getList().setCellRenderer();
-				list.getList().addListSelectionListener(new ListSelectionListener() {
-					@Override
-					public void valueChanged(ListSelectionEvent e) {
-						editor.setTool(new Tool.ObjectPaint(editor.arenaPanel, list.getList().getSelectedValue()));
-					}
-				});
-				edit.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-					}
-				});
-			}
-		});
-		
-		this.add(objectPaint);
-		
-		final JButton open = new JButton("Open");
-		open.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				editor.openArena();
-			}
-		});
-		this.add(open);
-		
-		final JButton openNew = new JButton("OpenN");
-		openNew.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				editor.openArenaNew();
-			}
-		});
-		this.add(openNew);
-		
-		final JButton save = new JButton("Export");
-		save.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				DataManager.exportArenaData(editor.arenaPanel.getArena());
-			}
-		});
-		this.add(save);
-		
-		final JButton saveImages = new JButton("Export Images");
-		saveImages.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				new Thread(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							DataManager.exportImages(editor.arenaPanel.getArena());
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}}).start();
-			}
-		});
-		this.add(saveImages);
-		
-		final JToggleButton light = new JToggleButton("Light");
-		light.addActionListener(new ActionListener() {
-			LightDialog dialog = new LightDialog(editor,light);
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if (light.isSelected()) {
-					dialog.setVisible(true);
-					editor.arenaPanel.layer = ArenaPanel.Layer.LIGHT;
-					editor.setTool(new Tool.LightPaint(editor.arenaPanel, dialog));
-				} else {
-					editor.arenaPanel.layer = ArenaPanel.Layer.ARENA;
-					editor.arenaPanel.generateLightImage();
-					dialog.setVisible(false);
-					editor.setTool(new Tool.MoveTool(editor.arenaPanel));
+					list.setVisible(true);
+				} else if (e.getStateChange()==ItemEvent.DESELECTED) {
+					list.setVisible(false);
+					editor.setTool(new Tool.MoveTool(editor.getArenaPanel()));
 				}
 			}
 		});
-		this.add(light);
+		tilePaint.addItemListener(toggleButtonSwitch);
+		this.add(tilePaint);
+		
+		final JToggleButton objectPaint = new JToggleButton("Objects");
+		objectPaint.addItemListener(new ItemListener() {
+			ListDialog<Thing> list = null;
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange()==ItemEvent.SELECTED) {
+					if (list==null) {
+						CustomListModel<Thing> tlm = new CustomListModel<Thing>(new LinkedList<Thing>(editor.objects));
+						JButton edit = new JButton("Edit");
+						JButton[] buttons = {edit};
+						list = new ListDialog<Thing>(editor, objectPaint, "Tile", buttons, tlm, null,null);
+						list.getList().setCellRenderer(cellRenderer);
+						list.getList().addListSelectionListener(new ListSelectionListener() {
+							@Override
+							public void valueChanged(ListSelectionEvent e) {
+								editor.setTool(new Tool.ObjectPaint(editor.getArenaPanel(), list.getList().getSelectedValue()));
+							}
+						});
+						edit.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent arg0) {
+							}
+						});
+					}
+					list.setVisible(true);
+				} else if (e.getStateChange()==ItemEvent.DESELECTED) {
+					list.setVisible(false);
+					editor.setTool(new Tool.MoveTool(editor.getArenaPanel()));
+				}
+			}
+		});
+		objectPaint.addItemListener(toggleButtonSwitch);
+		this.add(objectPaint);
+		
+		final JToggleButton editSprite = new JToggleButton("Edit sprite");
+		editSprite.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange()==ItemEvent.SELECTED) {
+					editor.setTool(new Tool.SpriteSwitcher(editor.getArenaPanel()));
+				} else if (e.getStateChange()==ItemEvent.DESELECTED) {
+					editor.setTool(new Tool.MoveTool(editor.getArenaPanel()));
+				}
+			}
+		});
+		editSprite.addItemListener(toggleButtonSwitch);
+		this.add(editSprite);
+		
+		final JToggleButton nLight = new JToggleButton("LightSource");
+		nLight.addActionListener(new ActionListener() {
+			NewLightDialog dialog = new NewLightDialog(editor,nLight);
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (nLight.isSelected()) {
+					dialog.setVisible(true);
+					editor.getArenaPanel().renderLightSource = true;
+					editor.setTool(new Tool.NewLightPaint(editor.getArenaPanel(), dialog));
+				} else {
+					editor.getArenaPanel().renderLightSource = false;
+					editor.getArenaPanel().generateLightImage();
+					dialog.setVisible(false);
+					editor.setTool(new Tool.MoveTool(editor.getArenaPanel()));
+				}
+			}
+		});
+		nLight.addItemListener(toggleButtonSwitch);
+		this.add(nLight);
 	}
+	
+	private ItemListener toggleButtonSwitch = new ItemListener() {
+		@Override
+		public void itemStateChanged(ItemEvent e) {
+			if (e.getStateChange()==ItemEvent.SELECTED) {
+				if (e.getSource()!=activeButton) {
+					// deactivate the current active button & dialog first
+					if (activeButton!=null)
+						activeButton.doClick();
+					
+					// set this one to be the one
+					activeButton = (JToggleButton) e.getSource();
+				}
+			} else if (e.getStateChange()==ItemEvent.DESELECTED) {
+				if (e.getSource()==activeButton) {
+					activeButton = null;
+				}
+			}
+		}};
 	
 	private ListCellRenderer<CellRenderable> cellRenderer = new ListCellRenderer<CellRenderable>() {
 		@Override

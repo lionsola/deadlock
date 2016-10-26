@@ -7,7 +7,7 @@ import java.util.List;
 import javax.swing.JComponent;
 
 import server.world.Arena;
-import server.world.TileBG;
+import server.world.Terrain;
 
 /**
  * This class will handle the drawing of a minimap.
@@ -74,7 +74,7 @@ public class Minimap extends JComponent {
 		// render minimap
 		for (int i = OFFSET; i < arena.getWidth() + OFFSET; i++) {
 			for (int j = OFFSET; j < arena.getHeight() + OFFSET; j++) {
-				boolean walkable = arena.get(i - OFFSET, j - OFFSET).isWalkable();
+				boolean walkable = arena.get(i - OFFSET, j - OFFSET).isTraversable();
 				if (!walkable) {
 					g.setColor(UNWALKABLE_TILE_COLOR);
 					int x = i * TILE_SIZE;
@@ -98,8 +98,8 @@ public class Minimap extends JComponent {
 				g.setColor(PLAYER_COLOR);
 			}
 
-			int characterX = (int)(REAL_OFFSET + (p.character.x * TILE_SIZE / TileBG.tileSize) - RADIUS);
-			int characterY = (int) (REAL_OFFSET + (p.character.y * TILE_SIZE / TileBG.tileSize) - RADIUS);
+			int characterX = (int)(REAL_OFFSET + (p.character.x * TILE_SIZE / Terrain.tileSize) - RADIUS);
+			int characterY = (int) (REAL_OFFSET + (p.character.y * TILE_SIZE / Terrain.tileSize) - RADIUS);
 			int characterSize = 2 * RADIUS;
 			g.fillOval(characterX, characterY, characterSize, characterSize);
 		}

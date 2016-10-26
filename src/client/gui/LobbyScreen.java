@@ -48,7 +48,7 @@ import shared.network.LobbyRequest.PlayerLeaveRequest;
 import shared.network.LobbyRequest.StartGameRequest;
 import shared.network.LobbyRequest.SwitchTeamRequest;
 import shared.network.LobbyRequest.ToggleReadyRequest;
-import client.game.Class;
+import client.data.Class;
 import client.sound.AudioManager;
 import client.sound.MusicPlayer;
 
