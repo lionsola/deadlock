@@ -21,10 +21,10 @@ public abstract class Projectile {
 	private double prevX;
 	private double prevY;
 	
-	private double dx;
-	private double dy;
+	transient private double dx;
+	transient private double dy;
 	
-	private int lastHitId;
+	transient private int lastHitId;
 	
 	private final double size;
 	private double direction;

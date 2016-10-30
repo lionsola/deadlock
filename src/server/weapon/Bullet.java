@@ -2,7 +2,7 @@ package server.weapon;
 
 import java.awt.geom.Line2D;
 
-import client.graphics.Animation;
+import client.graphics.AnimationSystem;
 import client.gui.GameWindow;
 import server.character.PlayerCharacter;
 import server.world.Geometry;
@@ -10,10 +10,10 @@ import server.world.Projectile;
 import server.world.Sound;
 import server.world.Thing;
 import server.world.World;
-import shared.network.GameEvent.PlayerDieEvent;
 
 public class Bullet extends Projectile {
 	private static final double BULLET_AIR_RESIST_CONSTANT = 0.0005;
+	private static final double BULLET_SPEED_REDUCTION_CONSTANT = 0.0001;
 	private static final double BULLET_PENETRATION_CONSTANT = 0.3;
 	Thing lastHit;
 	
@@ -39,18 +39,12 @@ public class Bullet extends Projectile {
 		}
 		
 		System.out.println("Damage ratio: "+damageRatio);
-		ch.onHit(damageRatio*getDamage());
-		w.addAnimation(Animation.BLOOD,x,y,this.getDirection());
-		// KILL
-		if (ch.getHealthPoints() <= 0) {
-			w.getEventListener().onEventReceived(new PlayerDieEvent(id, ch.id));
-			w.onPlayerDeath(ch);
-		}
-		
+		ch.onHit(w,damageRatio*getDamage(),id);
+		w.addAnimation(AnimationSystem.BLOOD,x,y,this.getDirection());
 	}
 
 	protected void onHitWall(World w, double x, double y, Thing t) {
-		setSpeed(getSpeed()-BULLET_PENETRATION_CONSTANT*Geometry.LINE_SAMPLE_THRESHOLD);
+		setSpeed(getSpeed()-BULLET_PENETRATION_CONSTANT*Geometry.LINE_SAMPLE_THRESHOLD-BULLET_SPEED_REDUCTION_CONSTANT);
 		if (t!=lastHit){
 			w.addSound(Sound.BULLETWALL.id,Sound.BULLETWALL.volume*Math.max(0.5,Math.min(2,getSize()/5)),x,y);
 			lastHit = t;
@@ -64,14 +58,13 @@ public class Bullet extends Projectile {
 	@Override
 	public void update(World w) {
 		super.update(w);
-		if (getSize()<50)
-			setSpeed(getSpeed() - BULLET_AIR_RESIST_CONSTANT*getSize()*getSpeed()*GameWindow.MS_PER_UPDATE) ;
+		setSpeed(getSpeed() - BULLET_AIR_RESIST_CONSTANT*getSize()*getSpeed()*GameWindow.MS_PER_UPDATE);
 		if (w.getArena().getTileAt(getX(), getY()).isTraversable())
 			lastHit = null;
 	}
 
 	@Override
 	public boolean isConsumed() {
-		return getSpeed()<=0;
+		return getSpeed()<=0.00000001;
 	}
 }

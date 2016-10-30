@@ -34,16 +34,14 @@ public final class SoftHardLightComposite extends RGBComposite {
             super( alpha, srcColorModel, dstColorModel );
         }
 
-        public void composeRGB( int[] src, int[] dst, float alpha ) {
-            int w = src.length;
-
-            for ( int i = 0; i < w; i += 3 ) {
-                int sr = src[i];
-                int dir = dst[i];
-                int sg = src[i+1];
-                int dig = dst[i+1];
-                int sb = src[i+2];
-                int dib = dst[i+2];
+        public void composeRGB( int[] src, int srcChannels, int[] dst, int dstChannels, float alpha ) {
+            for ( int si = 0, di = 0; si < src.length && di<dst.length; si += srcChannels, di += dstChannels ) {
+                int sr = src[si];
+                int dir = dst[di];
+                int sg = src[si+1];
+                int dig = dst[di+1];
+                int sb = src[si+2];
+                int dib = dst[di+2];
                 //int sa = src[i+3];
                 //int dia = dst[i+3];
                 int dor, dog, dob;
@@ -71,9 +69,9 @@ public final class SoftHardLightComposite extends RGBComposite {
                 float a = alpha;//*sa/255f;
                 float ac = 1-a;
 
-                dst[i] = (int)(a*dor + ac*dir);
-                dst[i+1] = (int)(a*dog + ac*dig);
-                dst[i+2] = (int)(a*dob + ac*dib);
+                dst[di] = (int)(a*dor + ac*dir);
+                dst[di+1] = (int)(a*dog + ac*dig);
+                dst[di+2] = (int)(a*dob + ac*dib);
                 //dst[i+3] = (int)(sa*alpha + dia*ac);
             }
         }

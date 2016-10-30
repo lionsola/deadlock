@@ -17,6 +17,11 @@ import shared.network.GameEvent.AnimationEvent;
 public class AnimationSystem {
 	//private ConcurrentLinkedQueue<ParticleEmitter> particleEmitters;
 	private ConcurrentLinkedQueue<BasicAnimation> animations;
+	public static final byte BULLETTRAIL = 4;
+	public static final byte ENEMYMARK = 3;
+	public static final byte BULLETWALL = 2;
+	public static final byte BLOOD = 1;
+	public static final byte GUNSHOT = 0;
 
 	/**
 	 * Constructor. Create a new animation system.
@@ -97,19 +102,19 @@ public class AnimationSystem {
 	}
 
 	public void addProjectileTrail(double x, double y, double direction, double speed, double size) {
-		addCustomAnimation(new LineAnimation(100,x,y,direction,speed,size));
+		addCustomAnimation(new LineAnimation(50,x,y,direction,speed,size));
 	}
 	
 	public void addAnimation(AnimationEvent e) {
 		switch(e.id) {
-			case Animation.GUNSHOT:
+			case AnimationSystem.GUNSHOT:
 				addShotAnimation(e.x,e.y,e.direction);
 				break;
-			case Animation.BLOOD:
+			case AnimationSystem.BLOOD:
 				addBloodAnimation(e.x,e.y,e.direction);
 				break;
-			case Animation.ENEMYMARK:
-				addCustomAnimation(new ExpandingCircleAnimation(e.x,e.y,2,500, 0,Color.RED));
+			case AnimationSystem.ENEMYMARK:
+				addCustomAnimation(new ExpandingCircleAnimation(e.x,e.y,2,1000, 0,Color.RED));
 			default:
 				System.err.println("");
 				break;

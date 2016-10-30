@@ -80,19 +80,6 @@ public abstract class GameEvent implements Serializable {
 		}
 	}
 
-	public static class PowerUpPickedUpEvent extends GameEvent {
-		private static final long serialVersionUID = 2494937010949207076L;
-		public final float x;
-		public final float y;
-		public final int id;
-
-		public PowerUpPickedUpEvent(double x, double y, int id) {
-			this.x = (float)x;
-			this.y = (float)y;
-			this.id = id;
-		}
-	}
-
 	public static class GameEndEvent extends GameEvent {
 		private static final long serialVersionUID = 4030097780765059510L;
 	}

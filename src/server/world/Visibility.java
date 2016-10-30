@@ -13,6 +13,7 @@ import java.util.List;
 
 import client.graphics.Renderer;
 import shared.network.FullCharacterData;
+import shared.network.Vision;
 
 /** Calculate visible area from a position
  * Re-written in Java based on Haxe code from Red Blob Games
@@ -77,6 +78,30 @@ public class Visibility {
 
 	public Area generateLoS(final FullCharacterData p, final Arena a) {
 		return genLOSAreaPixel(p.x, p.y, p.viewRange, p.viewAngle, p.direction, a);
+	}
+	
+	public Area generateLoS(final Vision v, final Arena a) {
+		return genLOSAreaPixel(v.x, v.y, v.range, v.angle, v.direction, a);
+	}
+	
+	public Area genLOSAreaMeter(final double px, final double py,
+			double viewRange, double viewAngle, double dir, final Arena a) {
+		List<Point2D> points = getLOSPoints(px,py,viewRange,viewAngle,dir,a);
+		
+		GeneralPath losBoxy = new GeneralPath();
+		
+		losBoxy.moveTo(points.get(0).getX(),points.get(0).getY());
+		for (Point2D p:points) {
+			losBoxy.lineTo(p.getX(),p.getY());
+		}
+		
+		Area area = new Area(losBoxy);
+		
+		area.intersect(new Area(new Arc2D.Double(px - viewRange,py - viewRange, viewRange * 2, viewRange * 2,
+				Math.toDegrees(dir-viewAngle/2), Math.toDegrees(viewAngle), Arc2D.PIE)));
+		//System.out.println("calculated LoS in " + (System.nanoTime()-startTime) + " ns");
+		
+		return area;
 	}
 	
 	public Area genLOSAreaPixel(final double px, final double py,

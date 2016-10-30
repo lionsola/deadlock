@@ -237,7 +237,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		// place holder for map
 		JLabel map = null;
 		try {
-			Image mapImage = ImageIO.read(new FileInputStream("resource/map/" + arenaName + ".bmp"));
+			Image mapImage = ImageIO.read(new FileInputStream("resource/map/" + arenaName + ".png"));
 			Image scaledMap = mapImage.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
 			map = new JLabel(new ImageIcon(scaledMap));
 		} catch (IOException e) {

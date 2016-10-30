@@ -1,5 +1,6 @@
 package server.character;
 
+import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -9,14 +10,14 @@ import java.util.List;
 import client.gui.GameWindow;
 import server.status.StatusEffect;
 import server.world.Arena;
-import server.world.LineOfSight;
 import server.world.Projectile;
 import server.world.Sound;
 import server.world.Terrain;
 import server.world.Utils;
+import server.world.Visibility;
 import server.world.World;
-import shared.core.Vector2D;
 import shared.network.PartialCharacterData;
+import shared.network.Vision;
 import shared.network.GameDataPackets.WorldStatePacket;
 import shared.network.GameEvent.AnimationEvent;
 import shared.network.GameEvent.SoundEvent;
@@ -25,7 +26,7 @@ import shared.network.GameEvent.SoundEvent;
  * This class will define the base behaviour of every type of Character.
  */
 public class Character {
-	public static final double BASE_SPEED	= 0.0035;
+	public static final double BASE_SPEED	= 0.003;
 	public static final double BASE_HP		= 100;
 	public static final double BASE_RADIUS	= 0.5;
 	public static final double BASE_FOVRANGE= 20;
@@ -35,10 +36,10 @@ public class Character {
 	
 	private double x = 0;
 	private double y = 0;
-	private Vector2D pos;
+	//private Vector2D pos;
 	private double dx = 0;
 	private double dy = 0;
-	private Vector2D vel;
+	//private Vector2D vel;
 	
 	public final int id; // the player's ID
 	
@@ -56,7 +57,7 @@ public class Character {
 	
 	private final double maxHP;
 	private double healthPoints; // the number of health points the server.character class has
-	private LineOfSight los = new LineOfSight();
+	private Visibility los = new Visibility();
 	private Armor armor;
 	private List<StatusEffect> statusEffects = new LinkedList<StatusEffect>();
 	private WorldStatePacket perception = new WorldStatePacket();
@@ -215,17 +216,30 @@ public class Character {
 	}
 
 	protected void updatePerception(World w) {
+		perception.visions.clear();
 		perception.characters.clear();
-		Area los = this.los.genLOSAreaMeter(x, y,getFovRange(), getFovAngle(),getDirection(),w.getArena());
+		perception.projectiles.clear();
+		Area los = new Area();
+		if (!isDead()) {
+			los = getLoS(w.getArena());
+			perception.visions.add(getVision());
+		} else {
+			for (Character c : w.getCharacters()) {
+				if (c.team==team) {
+					los.add(c.getLoS(w.getArena()));
+					perception.visions.add(c.getVision());
+				}
+			}
+		}
+		// add the characters if they are inside vision
 		for (Character c : w.getCharacters()) {
-			// if (Point.distance(ch.getX(),ch.getY(),c.x,c.y)<ch.getViewRange()+10)
-			if (c.id!=id && los.intersects(c.getBoundingBox())) {
+			if (c.id!=id && (c.team==team || c.intersects(los))) {
 				perception.characters.add(c.generatePartial());
 			}
 		}
 
 		// copy the projectiles over if they are in line of sight
-		perception.projectiles.clear();
+		
 		for (Projectile pr : w.getProjectiles()) {
 			if (los.contains(pr.getX(),pr.getY()) ||
 					los.contains(pr.getPrevX(), pr.getPrevY())) {
@@ -314,7 +328,7 @@ public class Character {
 	 * @return the view range of the server.character
 	 */
 	public double getFovRange() {
-		return BASE_FOVRANGE*fovRangeF;
+		return isDead()?0:BASE_FOVRANGE*fovRangeF;
 	}
 
 	/**
@@ -437,6 +451,10 @@ public class Character {
 		this.dy = dy;
 	}
 
+	public boolean isDead() {
+		return getHealthPoints()<=0;
+	}
+	
 	/**
 	 * Returns the health points of the server.character
 	 * 
@@ -446,8 +464,8 @@ public class Character {
 		return healthPoints;
 	}
 
-	public void onHit(double damage) {
-		healthPoints -= damage;
+	public void onHit(World w, double damage, int sourceId) {
+		healthPoints = Math.max(0, healthPoints-damage);
 	}
 	
 	/**
@@ -478,6 +496,10 @@ public class Character {
 	 */
 	public void resetStats() {
 		healthPoints = maxHP;
+		for (StatusEffect se:statusEffects) {
+			se.onFinish();
+		}
+		statusEffects.clear();
 	}
 
 	public double getHearF() {
@@ -544,5 +566,29 @@ public class Character {
 	
 	public void addAnimation(int id, double x, double y, double direction) {
 		getPerception().events.add(new AnimationEvent(id,x,y,direction));
+	}
+	
+	public Vision getVision() {
+		Vision v = new Vision();
+		v.x = getX();
+		v.y = getY();
+		v.radius = getRadius();
+		v.direction = getDirection();
+		v.range = getFovRange();
+		v.angle = getFovAngle();
+		return v;
+	}
+	
+	public boolean intersects(Shape s) {
+		double r = getRadius()*0.7;
+		return s.contains(x, y) ||
+				s.contains(x-r,y-r) ||
+				s.contains(x-r,y+r) ||
+				s.contains(x+r,y+r) ||
+				s.contains(x+r,y-r) ||
+				s.contains(x+getRadius(),y) ||
+				s.contains(x-getRadius(),y) ||
+				s.contains(x,y+getRadius()) ||
+				s.contains(x,y-getRadius()); 
 	}
 }

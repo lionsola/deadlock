@@ -44,7 +44,7 @@ public class GameDataPackets {
 		//public List<PartialCharacterData> hostages;
 		public List<ProjectileData> projectiles = new LinkedList<ProjectileData>();
 		public List<GameEvent> events = new LinkedList<GameEvent>();
-
+		public List<Vision> visions = new LinkedList<Vision>();
 	}
 	
 }

@@ -26,6 +26,9 @@ public class ServerPlayer {
     public int deaths = 0;
     public Socket socket;
     public PlayerCharacter character;
+	public MatchServer.InputReceiver inputReceiver;
+	public ObjectOutputStream oos;
+	public ObjectInputStream ois;
     
     /**
      * Constructor.
@@ -49,15 +52,17 @@ public class ServerPlayer {
     public InputPacket getInput () {
         while (true) {
             try {
-                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-                Object message = ois.readObject();
-                if (message instanceof InputPacket) {
-                    InputPacket input = ((InputPacket)message);
-                    return input;
-                }
+            	if (socket.getInputStream().available()>0) {
+	                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+	                Object message = ois.readObject();
+	                if (message instanceof InputPacket) {
+	                    InputPacket input = ((InputPacket)message);
+	                    return input;
+	                }
+            	}
             } catch (ClassNotFoundException | IOException e) {
-                System.out.println("Error while receiving request from player "+id);
-                //e.printStackTrace();
+                System.out.println("Error while receiving input from player "+id);
+                e.printStackTrace();
             }
         }
     }

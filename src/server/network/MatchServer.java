@@ -23,26 +23,19 @@ import shared.network.GameDataPackets.InputPacket;
 import shared.network.GameDataPackets.WorldStatePacket;
 import shared.network.GameEvent.GameEndEvent;
 import shared.network.GameEvent.GameEventListener;
-import shared.network.GameEvent.PlayerDieEvent;
-import shared.network.GameEvent.ScoreChangedEvent;
 
 /**
  * Is the game server.
  */
-public class MatchServer implements Runnable, GameEventListener {
-	
-	private World world;
-	private boolean playing = false;
-	private boolean scoreChanged = false;
+public abstract class MatchServer implements Runnable, GameEventListener {
+	protected World world;
+	protected boolean playing = false;
 	private List<ServerPlayer> players;
-	private List<GameEvent> events;
+	private List<GameEvent> events = new LinkedList<GameEvent>();
 	private List<String> chatTexts = new LinkedList<String>();
 	
-	private int scoreThreshold = 30;
-	private int timeThreshold = 600000;
-	private int team1Score = 0;
-	private int team2Score = 0;
-	private int gameTimeCounter;
+	private long timeThreshold = 600000;
+	private long gameTimeCounter;
 
 	/**
 	 * Creates a new game server, which the host use to run the game
@@ -56,85 +49,92 @@ public class MatchServer implements Runnable, GameEventListener {
 	 * @throws IOException
 	 *             IO exception
 	 */
-	public MatchServer(List<ServerPlayer> players, String arenaName) throws FileNotFoundException, IOException {
+	public MatchServer(List<ServerPlayer> players, String arenaName) {
 		this.players = players;
-		
-		
-		events = new LinkedList<GameEvent>();
-		
-		setUp(players,arenaName);
+		WeaponFactory.initWeapons();
+		ClassStats.initClassStats();
+		for (ServerPlayer p:players) {
+			p.inputReceiver = new InputReceiver(this,p);
+			p.inputReceiver.start();
+		}
+		initializeWorld(arenaName);
+		setUp(world,players);
 		new Thread(this).start();
 	}
 
-	private void setUp(List<ServerPlayer> players, String arenaName) throws FileNotFoundException, IOException{
-		WeaponFactory.initWeapons();
-		ClassStats.initClassStats();
-		
+	protected void initializeWorld(String arenaName) {
 		HashMap<Integer,Terrain> tileTable = DataManager.getTileMap(DataManager.loadTileListOld());
 		HashMap<Integer,Thing> objectTable = DataManager.getObjectMap(DataManager.loadObjectListOld());
 		Arena arena = new Arena(arenaName, tileTable, objectTable);
-		
-		world = new World(arena, this);
-		
-		PathFinder pathFinder = new PathFinder(arena);
+
+		this.world = new World(arena, this);
+	}
+	
+	protected void setUp(World world, List<ServerPlayer> players) {
+		PathFinder pathFinder = new PathFinder(world.getArena());
 		for (ServerPlayer p : players) {
-			if (p instanceof AIPlayer) {
-				((AIPlayer) p).init(arena, pathFinder);
+			if (p.character==null) {
+				PlayerCharacter character = CharacterFactory.newCharacter(p.id, p.team, p.type);
+				p.setCharacter(character);
+			}  else {
+				//p.character.resetStats();
+				// At the moment, just create everything new
+				PlayerCharacter character = CharacterFactory.newCharacter(p.id, p.team, p.type);
+				p.setCharacter(character);
 			}
-			PlayerCharacter character = CharacterFactory.newCharacter(p.id, p.team, p.type);
-			world.addPlayer(character);
-			p.setCharacter(character);
-			new Thread(new InputReceiver(p, character)).start();
+			if (p instanceof AIPlayer) {
+				((AIPlayer) p).init(world.getArena(), pathFinder);
+			}
+			
+			world.addPlayer(p.character);
 		}
 	}
 	
-	private boolean checkEndGame() {
-		return gameTimeCounter > timeThreshold || team1Score >= scoreThreshold || team2Score >= scoreThreshold;
-	}
+	protected abstract void update(World world);
+	
+	protected abstract boolean checkEndGame();
+	
+	protected abstract int getWinningTeam();
 	
 	@Override
 	public void run() {
-		int delayCount = 0;
-
+		// PRE- COUNTDOWN to get everyone prepared
+		// TODO check if everyone is connected to the game already
+		final int PRE_COUNTDOWN = 3000;
+		gameTimeCounter = -PRE_COUNTDOWN;
 		while (!playing) {
 			sendState();
-			delayCount += 30;
-			if (delayCount >= 3000)
+			gameTimeCounter += 30;
+			if (gameTimeCounter >= 0) {
 				playing = true;
-			try {
-				Thread.sleep(30);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} else {
+				try {
+					Thread.sleep(30);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		
+		// START THE MATCH		
 		gameTimeCounter = 0;
-		while (playing) {
-			long last = System.currentTimeMillis();
-			if (checkEndGame()) {
-				events.add(new GameEndEvent());
-				// world.update();
+		while (gameTimeCounter < timeThreshold && !checkEndGame()) {
+			long wait = 0;
+			if (!playing) {
+				wait = 50;
+			} else {
+				long last = System.currentTimeMillis();
+				gameTimeCounter += GameWindow.MS_PER_UPDATE;
+				// simulate the world
+				world.update();
+				update(world);
+		
+				// send world state out
 				sendState();
-				events.add(new GameEndEvent());
-				sendState();
-				playing = false;
-				break;
+		
+				wait = GameWindow.MS_PER_UPDATE - (System.currentTimeMillis() - last);
 			}
-			gameTimeCounter += GameWindow.MS_PER_UPDATE;
-			// simulate the world
-			world.update();
-
-			// send world state out every 2 frames
-			//if (tick) {
-			//	sendState();
-			//}
-			//tick = !tick;
-			sendState();
-
-			long wait = GameWindow.MS_PER_UPDATE - (System.currentTimeMillis() - last);
-
-			if (wait > 0) {
+			if (wait>0) {
 				try {
 					Thread.sleep(wait);
 				} catch (InterruptedException e) {
@@ -143,45 +143,50 @@ public class MatchServer implements Runnable, GameEventListener {
 				}
 			}
 		}
+		
+		for (ServerPlayer p:players) {
+			p.inputReceiver.active = false;
+			try {
+				p.inputReceiver.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		events.add(new GameEndEvent());
+		sendState();
+		events.add(new GameEndEvent());
+		sendState();
+		for (ServerPlayer p:players) {
+			try {
+				p.socket.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
-
+	
 	/**
 	 * Sends the state of the server
 	 */
 	private void sendState() {
-		WorldStatePacket wsp = world.generateState();
-		wsp.time = System.currentTimeMillis();
-		if (scoreChanged) {
-			// generate teams' new score
-			team1Score = 0;
-			team2Score = 0;
-			for (ServerPlayer p : players) {
-				if (p.team == 0) {
-					team2Score += p.deaths;
-				} else {
-					team1Score += p.deaths;
-				}
-			}
-			events.add(new ScoreChangedEvent(team1Score, team2Score));
-			scoreChanged = false;
-		}
-		wsp.events = events;
-		wsp.chatTexts = chatTexts;
 		// Send world data to players
 		for (ServerPlayer p : players) {
 			WorldStatePacket per = p.character.getPerception();
 			per.chatTexts  = chatTexts;
-			per.events.addAll(wsp.events);
-			per.time = wsp.time;
+			if (events.size()>0) {
+				per.events.addAll(events);
+			}
+			per.time = gameTimeCounter;
 			per.player = p.character.generate();
 			p.sendData(per);
 			per.events.clear();
 		}
-		events = new LinkedList<GameEvent>();
-		chatTexts = new LinkedList<String>();
+		events.clear();
+		chatTexts.clear();
 	}
 
-	private ServerPlayer findPlayer(int id) {
+	protected ServerPlayer findPlayer(int id) {
 		for (ServerPlayer p : players) {
 			if (p.id == id) {
 				return p;
@@ -190,59 +195,43 @@ public class MatchServer implements Runnable, GameEventListener {
 		return null;
 	}
 
-	@Override
-	public void onEventReceived(GameEvent event) {
-		if (event instanceof PlayerDieEvent) {
-			PlayerDieEvent e = (PlayerDieEvent) event;
-			ServerPlayer killer = findPlayer(e.killerID);
-			ServerPlayer killed = findPlayer(e.killedID);
-
-			killed.deaths++;
-			if (killer.team != killed.team) {
-				killer.kills++;
-			} else {
-				killer.kills--;
-			}
-			scoreChanged = true;
-			events.add(event);
-		} else {
-			events.add(event);
-		}
+	protected void setDuration(long duration) {
+		this.timeThreshold = duration;
+	}
+	
+	synchronized protected void addEvent(GameEvent event) {
+		events.add(event);
 	}
 
+	protected List<ServerPlayer> getPlayers() {
+		return players;
+	}
+	
 	/**
 	 * Receive & process input data from players in another thread to avoid blockings the server.
 	 */
-	private class InputReceiver implements Runnable {
+	static class InputReceiver extends Thread {
 		private ServerPlayer player;
-		private PlayerCharacter character;
+		private MatchServer server;
+		public boolean active = true;
 
-		public InputReceiver(ServerPlayer player, PlayerCharacter character) {
+		public InputReceiver(MatchServer server, ServerPlayer player) {
+			this.server = server;
 			this.player = player;
-			this.character = character;
 		}
-
+		
 		@Override
 		public void run() {
-			while (!playing) {
-				player.getInput();
-			}
-			while (playing) {
+			while (active) {
 				InputPacket input = player.getInput();
-				character.setInput(input);
+				if (player.character!=null) {
+					player.character.setInput(input);
+				}
 				if (input.chatText != null)
-					synchronized (chatTexts) {
-						chatTexts.add(player.name + ": " + input.chatText);
+					synchronized (server.chatTexts) {
+						server.chatTexts.add(player.name + ": " + input.chatText);
 					}
-			}
-
-			try {
-				player.socket.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 	}
-	
 }

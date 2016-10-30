@@ -1,6 +1,6 @@
 package server.weapon;
 
-import client.graphics.Animation;
+import client.graphics.AnimationSystem;
 import client.gui.GameWindow;
 import server.ability.Ability;
 import server.character.PlayerCharacter;
@@ -40,7 +40,7 @@ public abstract class Weapon extends Ability {
 			double direction = c.disperseDirection();
 			fire(w,c,direction);
 			
-			w.addAnimation(Animation.GUNSHOT, c.getX(), c.getY(), direction);
+			w.addAnimation(AnimationSystem.GUNSHOT, c.getX(), c.getY(), direction);
 			w.addSound(type.soundId, type.noise, c.getX(), c.getY());
 			
 			c.addDispersion(getInstability());
@@ -72,7 +72,7 @@ public abstract class Weapon extends Ability {
 	protected void fireOneBullet (World w, PlayerCharacter c, double direction) {
 		w.addProjectile(new Bullet(c, direction, randomizeStat(type.projectileSpeed,0.1), type.size));
 	}
-
+	
 	@Override
 	public boolean isReady() {
 		return super.isReady() && ammoLeft>0; 
@@ -81,6 +81,14 @@ public abstract class Weapon extends Ability {
 	@Override
 	public double getCooldownPercent() {
 		return Math.min(super.getCooldownPercent(), Math.min(1,1.0*reloadTimer/type.reloadTime));
+	}
+	
+	@Override
+	public void reset() {
+		super.reset();
+		instability = type.instability;
+		ammoLeft = type.magSize;
+		reloadTimer = 0;
 	}
 	
 	public double getInstability() {

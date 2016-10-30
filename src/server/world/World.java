@@ -143,13 +143,6 @@ public class World {
 		projectiles.addAll(newProjectiles);
 		newProjectiles.clear();
 	}
-
-	public void onPlayerDeath(PlayerCharacter c) {
-		//Point spawn = randomizeSpawnPoint(c.team);
-		//c.setX(spawn.x * TileBG.tileSize);
-		//c.setY(spawn.y * TileBG.tileSize);
-		//c.resetStats();
-	}
 	
 	/**
 	 * Returns the arena used by the world

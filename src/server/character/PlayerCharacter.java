@@ -9,6 +9,7 @@ import server.world.Utils;
 import server.world.World;
 import shared.network.FullCharacterData;
 import shared.network.GameDataPackets.InputPacket;
+import shared.network.GameEvent.PlayerDieEvent;
 
 import java.awt.geom.Point2D;
 
@@ -16,14 +17,11 @@ import client.gui.GameWindow;
 
 /**
  * The <code>ControlledCharacter</code> class defines the behaviour that all types of Characters
- * must inherit. Here the Accessor and Mutator methods are located for ease of access elsewhere in
- * the code and to avoid code duplication. The ControlledCharacter class encompasses how ALL
- * Characters have to behave.
+ * must inherit.
  * 
  * A <code>ControlledCharacter</code> also uses a specific set of <code>Weapons</code>.
  */
 public class PlayerCharacter extends Character {
-	public enum MovementMode {WALK,SNEAK,STOP}
 	
 	private static final double MOVEMENT_DISPERSION_FACTOR = 0.1;
 	private static final double ROTATION_DISPERSION_FACTOR = 0.3;
@@ -35,8 +33,6 @@ public class PlayerCharacter extends Character {
 	
 	private int typeID; // the type of the server.character, e.g. Sniper
 
-	private float cx = 0; // x position of the crosshairs
-	private float cy = 0; // y position of the crosshairs
 	private double charDispersion = 0;
 
 	private Weapon primary; // the primary server.weapon of the server.character class
@@ -94,26 +90,39 @@ public class PlayerCharacter extends Character {
 	 */
 	@Override
 	public void update(World world) {
-		// translate directional input into movement vector
-		processInput();
-		
-		// apply collision detection to correct the movement vector
-		super.updateCollision(world);
-		super.updatePerception(world);
-		
-		if (passive!=null)
-			passive.update(world);
-		
-		if (ability!=null)
-			ability.update(world);
-		
-		if (primary!=null)
-			primary.update(world, this);
-		
-		super.updateStatusEffects();
-		super.updatePosition();
-		super.updateNoise(world);
-		updateCrosshair();
+		synchronized (input) {
+			if (isDead()) {
+				input.top = false;
+				input.down = false;
+				input.left = false;
+				input.right = false;
+				input.fire1 = false;
+				input.fire2 = false;
+			}
+			
+			// translate directional input into movement vector
+			processInput();
+			// apply collision detection to correct the movement vector
+			super.updateCollision(world);
+			
+			super.updatePerception(world);
+			
+			if (passive!=null)
+				passive.update(world);
+			
+			if (ability!=null)
+				ability.update(world);
+			
+			if (primary!=null)
+				primary.update(world, this);
+			
+			super.updateStatusEffects();
+			
+			super.updatePosition();
+			
+			super.updateNoise(world);
+			updateCrosshair();
+		}
 	}
 	
 	private void updateCrosshair() {
@@ -123,7 +132,7 @@ public class PlayerCharacter extends Character {
 
 	public double getCrosshairSize() {
 		double angle = charDispersion*MAX_DISPERSION_ANGLE+getWeapon().type.gunDispersion;
-		return Math.tan(angle)*Point2D.distance(getX(),getY(),cx,cy);
+		return Math.tan(angle)*Point2D.distance(getX(),getY(),getInput().cx,getInput().cy);
 	}
 	
 	public double disperseDirection() {
@@ -138,7 +147,6 @@ public class PlayerCharacter extends Character {
 	public Weapon getWeapon() {
 		return primary;
 	}
-
 
 	/**
 	 * Returns the characters type ID, i.e. the characters class
@@ -156,14 +164,13 @@ public class PlayerCharacter extends Character {
 	 *            the input to be processed
 	 */
 	private void processInput() {
-		cx = getInput().cx;
-		cy = getInput().cy;
 		// update direction
-		double newDirection = Math.atan2(getY() - cy, cx - getX());
-		double dDirection = Math.abs(Geometry.wrapAngle(newDirection - getDirection()));
-		addDispersion(instaF*ROTATION_DISPERSION_FACTOR*dDirection);
-		setDirection(newDirection);
-		
+		if (!isDead()) {
+			double newDirection = Math.atan2(getY() - getInput().cy, getInput().cx - getX());
+			double dDirection = Math.abs(Geometry.wrapAngle(newDirection - getDirection()));
+			addDispersion(instaF*ROTATION_DISPERSION_FACTOR*dDirection);
+			setDirection(newDirection);
+		}
 		if (getInput().down && getInput().top) {
 			getInput().down = false;
 			getInput().top = false;
@@ -202,7 +209,7 @@ public class PlayerCharacter extends Character {
 		setDy(dy*speed);
 	}
 	
-	public void setInput(shared.network.GameDataPackets.InputPacket input) {
+	public void setInput(InputPacket input) {
 		this.input = input;
 	}
 	
@@ -234,8 +241,6 @@ public class PlayerCharacter extends Character {
 		return fc;
 	}
 
-	
-
 	public InputPacket getInput() {
 		return input;
 	}
@@ -255,8 +260,7 @@ public class PlayerCharacter extends Character {
 	public void setPassive(Passive p) {
 		passive = p;
 	}
-
-
+	
 	public double getInstaF() {
 		return instaF;
 	}
@@ -266,7 +270,25 @@ public class PlayerCharacter extends Character {
 	}
 	
 	@Override
+	public void resetStats() {
+		super.resetStats();
+		charDispersion = 0;
+		primary.reset();
+		ability.reset();
+	}
+	
+	@Override
 	public double getNoiseF() {
 		return super.getNoiseF()*(getInput().sneaking?0.5:1);
+	}
+	
+	@Override
+	public void onHit(World w, double damage, int sourceId) {
+		if (isDead())
+			return;
+		super.onHit(w, damage, sourceId);
+		if (getHealthPoints()<=0) {
+			w.getEventListener().onEventReceived(new PlayerDieEvent(sourceId, id));
+		}
 	}
 }

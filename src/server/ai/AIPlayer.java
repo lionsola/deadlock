@@ -10,6 +10,7 @@ import server.ai.PathFinder.Path;
 import server.network.ServerPlayer;
 import server.world.Arena;
 import server.world.Geometry;
+import server.world.Sound;
 import server.world.Terrain;
 import server.world.Utils;
 import shared.network.GameEvent;
@@ -81,7 +82,7 @@ public class AIPlayer extends ServerPlayer {
 		// waiting for input
 		while (wsp == null) {
 			try {
-				Thread.sleep(10);
+				Thread.sleep(50);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -95,12 +96,16 @@ public class AIPlayer extends ServerPlayer {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
+		if (character.isDead())
+			return new InputPacket();
+		
 		Point2D self = new Point2D.Double(wsp.player.x, wsp.player.y);
 
 		// identify an enemy in sight
 		PartialCharacterData enemy = null;
 		for (PartialCharacterData c : wsp.characters) {
-			if (c.team != team) {
+			if (c.team != team && c.healthPoints>0) {
 				enemy = c;
 				break;
 			}
@@ -129,7 +134,7 @@ public class AIPlayer extends ServerPlayer {
 					SoundEvent e = (SoundEvent) event;
 					float eventDist = Geometry.diagonalDistance(e.x, e.y, self.getX(), self.getY());
 					// if this one is closer than last one
-					if (eventDist < min && e.volume>50) {
+					if (eventDist < min && Sound.isGunshotSound(e.id)) {
 						// take this one instead
 						newIntr = new Point2D.Double(e.x, e.y);
 						min = eventDist;
@@ -174,7 +179,7 @@ public class AIPlayer extends ServerPlayer {
 			} else {
 				// if alr close to one checkpoint, move on
 				if (distToCheckPoint < PATH_THRESHOLD) {
-					System.out.println("AI " + id + " arrived at " + curPath.get(0));
+					//System.out.println("AI " + id + " arrived at " + curPath.get(0));
 					curPath.remove(0);
 				}
 
@@ -182,12 +187,15 @@ public class AIPlayer extends ServerPlayer {
 				if (!curPath.isEmpty()) {
 					moveToward(self, curPath.get(0));
 					if (state != AIState.RETREATING && state != AIState.ATTACKING) {
-						pointCursorAt(curPath.get(0));
+						if (curPath.size()>1)
+							pointCursorAt(curPath.get(1));
+						else 
+							pointCursorAt(curPath.get(0));
 					}
 				}
 			}
 		}
-		//this.wsp = null;
+		//wsp = null;
 		return input;
 		
 	}

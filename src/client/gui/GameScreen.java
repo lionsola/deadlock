@@ -49,10 +49,10 @@ import shared.network.FullCharacterData;
 import shared.network.GameEvent;
 import shared.network.PartialCharacterData;
 import shared.network.ProjectileData;
+import shared.network.Vision;
 import shared.network.GameDataPackets.InputPacket;
 import shared.network.GameDataPackets.WorldStatePacket;
 import shared.network.GameEvent.*;
-import client.graphics.Animation;
 import client.graphics.AnimationSystem;
 import client.graphics.Renderer;
 import client.image.SoftHardLightComposite;
@@ -236,8 +236,11 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		if (wsp != null) {
 			this.wsp = wsp;
 			for (ClientPlayer p : players) {
-				p.active = false;
+				if (p.id!=id) {
+					p.active = false;
+				}
 			}
+			Utils.findPlayer(players, id).character = wsp.player;
 			for (PartialCharacterData cdata : wsp.characters) {
 				ClientPlayer p = Utils.findPlayer(players, cdata.id);
 				if (p != null) {
@@ -330,12 +333,14 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private void sendInput() {
 		// send input
 		try {
-			ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-			input.time = System.currentTimeMillis();
-			out.writeObject(input);
+			if (!socket.isClosed()) {
+				ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+				input.time = System.currentTimeMillis();
+				out.writeObject(input);
+			}
 		} catch (IOException e) {
 			System.out.println("Exception when trying to send input to network");
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 
@@ -397,14 +402,18 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			g2D.setClip(null);
 			globalAnimations.render(g2D);
 			
-			Area los = visibility.generateLoS(c, arena);
-			double r = c.radius*1.5;
-			los.add(new Area(new Ellipse2D.Double(Renderer.toPixel(c.x - r),Renderer.toPixel(c.y - r),
-					Renderer.toPixel(r*2),Renderer.toPixel(r*2))));
+			Area los = new Area();
+			for (Vision v:wsp.visions) {
+				los.add(visibility.generateLoS(v, arena));
+				double r = v.radius*1.5;
+				los.add(new Area(new Ellipse2D.Double(Renderer.toPixel(v.x - r),Renderer.toPixel(v.y - r),
+						Renderer.toPixel(r*2),Renderer.toPixel(r*2))));
+			}
 			
 			Rectangle2D viewBox = getCharacterVisionBox(c.x,c.y,c.viewRange);
 			g2D.setClip(los);
-			Renderer.drawArenaImage(g2D,renderer.getLightArenaImage(),viewBox);
+			//Renderer.drawArenaImage(g2D,renderer.getLightArenaImage(),viewBox);
+			Renderer.drawArenaImage(g2D,renderer.getLightArenaImage(),camera.getDrawArea());
 
 			ClientPlayer localPlayer = Utils.findPlayer(players, id);
 
@@ -420,13 +429,14 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				Renderer.renderProjectile(g2D,data);
 				visualAnimations.addProjectileTrail(data.x, data.y, data.prevX, data.prevY ,data.size);
 			}
-			
+			//Renderer.renderLOS(g2D, los);
 			Renderer.renderMainCharacter(g2D, mainCharacter, localPlayer);
 			
-			g2D.setClip(los);
+			//g2D.setClip(los);
 			Composite save = g2D.getComposite();
 			g2D.setComposite(new SoftHardLightComposite(1f));
 			Renderer.drawArenaImage(g2D,renderer.getLightMap(),viewBox);
+			
 			g2D.setComposite(save);
 			
 			int tileX = (int)(input.cx/Terrain.tileSize);
@@ -595,7 +605,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			} else if (event instanceof AnimationEvent) {
 				AnimationEvent e = (AnimationEvent) event;
 				visualAnimations.addAnimation(e);
-				if (e.id==Animation.BLOOD) {
+				if (e.id==AnimationSystem.BLOOD) {
 					renderer.addBloodToArena(e.x, e.y, e.direction);
 				}
 			} else if (event instanceof GameEndEvent) {
@@ -607,7 +617,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 					e.printStackTrace();
 				}
 			} else if (event instanceof EnemyInfoEvent) {
-				
+				EnemyInfoEvent e = (EnemyInfoEvent) event;
+				globalAnimations.addAnimation(new AnimationEvent(AnimationSystem.ENEMYMARK,e.x,e.y,0));
 			}
 		}
 	};

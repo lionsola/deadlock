@@ -42,7 +42,7 @@ public class Renderer {
 	public static final double CHARACTER_WIDTH = 0.1;
 	public static final double HEALTHBAR_WIDTH = 0.25;
 	//private static Color defaultColor = Color.WHITE;
-	private static final Color[] teamColors = {Color.GREEN.darker(),Color.RED.darker()};
+	public static final Color[] teamColors = {Color.GREEN.darker(),Color.RED.darker()};
 	/**
 	 * @return the arenaImage
 	 */
@@ -150,12 +150,13 @@ public class Renderer {
 	}
 
 	public static void renderOtherCharacter(Graphics2D g2D, PartialCharacterData c, int typeId) {
-		renderArmor(g2D,c.x,c.y,c.radius,c.direction+c.armorStart,c.armorAngle,c.team);
 		renderCharacter(g2D,c.x,c.y,c.direction,c.radius,typeId,c.team);
+		renderArmor(g2D,c.x,c.y,c.radius,c.direction+c.armorStart,c.armorAngle,c.team);
 	}
 	
 	private static void renderArmor(Graphics2D g2D, double cx, double cy, double cr, double start, double extent,int team) {
 		g2D.setStroke(new BasicStroke(toPixel(CHARACTER_WIDTH*2)));
+		
 		g2D.setColor(teamColors[team]);
 		drawArc(g2D,cx,cy,cr,start,extent,Arc2D.OPEN);
 	}
@@ -175,8 +176,6 @@ public class Renderer {
 		g2D.setColor(teamColors[team]);
 		//fillCircle(g2D,x,y,r);
 		drawCircle(g2D,x,y,r);
-		
-
 		
 		// draw head
 		Point2D h = Geometry.PolarToCartesian(r*0.4, direction);

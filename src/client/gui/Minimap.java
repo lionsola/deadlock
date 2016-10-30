@@ -21,13 +21,13 @@ public class Minimap extends JComponent {
 	private static final long serialVersionUID = -1715530638861052738L;
 
 	private static final int TILE_SIZE = 3; // tile size
-	private static final int RADIUS = 3; // server.character radius
+	private static final int RADIUS = 3; // character radius
 	private static final int OFFSET = 10; // client.gui offset factor from top and left
 
 	private static final int REAL_OFFSET = OFFSET * TILE_SIZE;
 
 	private static final int charTransparency = 180;
-	private static final int transparency = 170;
+	private static final int transparency = 150;
 	private static final Color BORDER_COLOR = new Color(0, 0, 0, transparency * 2 / 3);
 	private static final Color UNWALKABLE_TILE_COLOR = new Color(25, 140, 255, transparency);
 
@@ -103,6 +103,12 @@ public class Minimap extends JComponent {
 			int characterSize = 2 * RADIUS;
 			g.fillOval(characterX, characterY, characterSize, characterSize);
 		}
+		g.setColor(PLAYER_COLOR);
+		ClientPlayer p = mainPlayer;
+		int characterX = (int)(REAL_OFFSET + (p.character.x * TILE_SIZE / Terrain.tileSize) - RADIUS);
+		int characterY = (int) (REAL_OFFSET + (p.character.y * TILE_SIZE / Terrain.tileSize) - RADIUS);
+		int characterSize = 2 * RADIUS;
+		g.fillOval(characterX, characterY, characterSize, characterSize);
 	}
 
 }

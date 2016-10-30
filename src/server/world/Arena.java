@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -69,7 +70,7 @@ public class Arena {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public Arena(String name, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable) throws FileNotFoundException, IOException {
+	public Arena(String name, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable) {
 		this((ArenaData) DataManager.loadObject("resource/map/"+name+".arena"),tileTable,objectTable);
 	}
 	
@@ -199,7 +200,13 @@ public class Arena {
 	}
 
 	public void generateLightMap() {
+		int INITIAL_LIGHT = 0x202020;
+		
 		int[][] lightMap = new int[getWidth()][getHeight()];
+		for (int[] lights:lightMap) {
+			Arrays.fill(lights, INITIAL_LIGHT);
+		}
+		
 		for (Light l:lightList) {
 			int x1 = Math.min(getWidth()-1, Math.max(0,l.getX() - l.getRange()));
 			int x2 = Math.min(getWidth()-1, Math.max(0,l.getX() + l.getRange()));
@@ -229,7 +236,7 @@ public class Arena {
 								d = d*(1-blockCount/MAX_BLOCK_COUNT);
 							}
 						}
-						int sRGB = l.getColor();
+						int sRGB = l.getColor()*(255-INITIAL_LIGHT)/255;
 						int sR = (sRGB >> 16) & 0xFF;
 						int sG = (sRGB >> 8) & 0xFF;
 						int sB = (sRGB) & 0xFF;

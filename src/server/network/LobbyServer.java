@@ -12,6 +12,7 @@ import java.util.List;
 
 import client.gui.ClientPlayer;
 import server.ai.AIPlayer;
+import server.ai.DummyPlayer;
 import shared.network.LobbyRequest;
 import shared.network.LobbyRequest.ChangeCharacterRequest;
 import shared.network.LobbyRequest.ChatRequest;
@@ -61,9 +62,10 @@ public class LobbyServer implements Runnable {
 				return;
 		}
 		running = false;
-		sendRequest(new StartGameRequest());
-		new MatchServer(players, arena);
 		serverSocket.close();
+		
+		sendRequest(new StartGameRequest());
+		new TeamBattle(players, arena);
 	}
 
 	/**
@@ -102,7 +104,6 @@ public class LobbyServer implements Runnable {
 		try {
 			serverSocket.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -113,7 +114,7 @@ public class LobbyServer implements Runnable {
 	 * @param type The type of the AI player.
 	 */
 	public void addAIPlayer (int team, int type) {
-	    AIPlayer p = new AIPlayer(count, team);
+	    ServerPlayer p = new DummyPlayer(count, team);
 	    p.type = type;
 	    p.active = true;
 	    count++;
@@ -166,13 +167,13 @@ public class LobbyServer implements Runnable {
 				new ObjectOutputStream(socket.getOutputStream()).writeObject(generateInformationPacket(p.id));
 
 				// start listening to requests from them
-				new Thread(new LobbyRequestReceiver(p)).start();
+				new LobbyRequestReceiver(this,p).start();
 
 				System.out.println("ClientPlayer at " + socket.getRemoteSocketAddress() + " connected, id = " + p.id);
 			} catch (IOException | ClassNotFoundException e) {
-				System.out.println("Exception caught when a client tries to connect.");
+				//System.out.println("Exception caught when a client tries to connect.");
 				System.out.println(e.getMessage());
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}
 	}
@@ -195,59 +196,47 @@ public class LobbyServer implements Runnable {
 	/**
 	 * Used to receive lobby requests in another thread to avoid blocking other operations.
 	 */
-	private class LobbyRequestReceiver implements Runnable {
+	private class LobbyRequestReceiver extends Thread {
 	    private ServerPlayer player;
+	    private LobbyServer server;
 	    
 	    /**
 	     * Constructor
 	     * @param player The player that this receiver is listening to.
 	     */
-	    public LobbyRequestReceiver (ServerPlayer player) {
+	    public LobbyRequestReceiver (LobbyServer server, ServerPlayer player) {
+	    	this.server = server;
 	        this.player = player;
 	    }
+	    
     	@Override
         public void run() {
-            while (isRunning()) {
+            while (server.isRunning()) {
                 try {
                     ObjectInputStream ois = new ObjectInputStream(player.socket.getInputStream());
                     Object message = ois.readObject();
                     if (message instanceof SwitchTeamRequest) {
                         SwitchTeamRequest request = ((SwitchTeamRequest)message);
-                        for (ServerPlayer p:players) {
-                            if (p.id == request.playerId) {
-                                p.team = request.desTeam;
-                                break;
-                            }
-                        }
-                        sendRequest(request);
+                        player.team = request.desTeam;
+                        server.sendRequest(request);
                     } else if (message instanceof ToggleReadyRequest) {
                         ToggleReadyRequest request = ((ToggleReadyRequest)message);
-                        for (ServerPlayer p:players) {
-                            if (p.id == request.id) {
-                                p.active = request.ready;
-                                break;
-                            }
-                        }
-                        sendRequest(request);
+                        player.active = true;
+                        server.sendRequest(request);
                     } else if (message instanceof ChangeCharacterRequest) {
                         ChangeCharacterRequest request = ((ChangeCharacterRequest)message);
-                        for (ServerPlayer p:players) {
-                            if (p.id == request.playerId) {
-                                p.type = request.typeId;
-                                break;
-                            }
-                        }
-                        sendRequest(request);
+                        player.type = request.typeId;
+                        server.sendRequest(request);
                     } else if (message instanceof ChatRequest) {
                     	ChatRequest request = ((ChatRequest)message);
-                    	sendRequest(request);
+                    	server.sendRequest(request);
                     }
                 } catch (SocketException | EOFException e) {
                     // DISCONNECT
-                    removePlayer(player.id);
+                	server.removePlayer(player.id);
                     return;
                 } catch (IOException | ClassNotFoundException e) {
-                    System.out.println("Error while receiving request from client");
+                    System.out.println("LobbyServer: Error while receiving request from player "+player.id);
                     e.printStackTrace();
                     return;
                 }

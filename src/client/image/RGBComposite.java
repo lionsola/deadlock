@@ -76,7 +76,7 @@ public abstract class RGBComposite implements Composite {
             return a < 0 ? 0 : a > 255 ? 255 : a;
         }
 	
-        public abstract void composeRGB( int[] src, int[] dst, float alpha );
+        public abstract void composeRGB( int[] src, int srcChannels, int[] dst, int dstChannels, float alpha );
 
         public void compose( Raster src, Raster dstIn, WritableRaster dstOut ) {
             float alpha = this.alpha;
@@ -91,7 +91,7 @@ public abstract class RGBComposite implements Composite {
             for ( int y = y0; y < y1; y++ ) {
                 srcPix = src.getPixels( x, y, w, 1, srcPix );
                 dstPix = dstIn.getPixels( x, y, w, 1, dstPix );
-                composeRGB( srcPix, dstPix, alpha );
+                composeRGB( srcPix, src.getNumBands(), dstPix, dstIn.getNumBands(),alpha );
                 dstOut.setPixels( x, y, w, 1, dstPix );
             }
         }

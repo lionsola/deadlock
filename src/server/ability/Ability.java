@@ -35,4 +35,8 @@ public abstract class Ability {
 	public double getCooldownPercent() {
 		return Math.min(1,1.0*cooldownTimer/cooldown);
 	}
+	
+	public void reset() {
+		cooldownTimer = cooldown;
+	}
 }

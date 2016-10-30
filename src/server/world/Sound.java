@@ -16,4 +16,8 @@ public enum Sound {
 		this.id = id;
 		this.volume = volume;
 	}
+	
+	public static boolean isGunshotSound(int id) {
+		return id>0 && id<30;
+	}
 }
