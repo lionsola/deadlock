@@ -121,7 +121,7 @@ public abstract class MatchServer implements Runnable, GameEventListener {
 		while (gameTimeCounter < timeThreshold && !checkEndGame()) {
 			long wait = 0;
 			if (!playing) {
-				wait = 50;
+				wait = GameWindow.MS_PER_UPDATE;
 			} else {
 				long last = System.currentTimeMillis();
 				gameTimeCounter += GameWindow.MS_PER_UPDATE;
@@ -159,7 +159,7 @@ public abstract class MatchServer implements Runnable, GameEventListener {
 		sendState();
 		for (ServerPlayer p:players) {
 			try {
-				p.socket.close();
+				p.connection.getSocket().close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

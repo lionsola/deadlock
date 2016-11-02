@@ -41,7 +41,7 @@ public class AudioManager implements Runnable {
 	 * located
 	 */
 	public AudioManager() {
-		threadPool = Executors.newFixedThreadPool(15);
+		threadPool = Executors.newFixedThreadPool(10);
 		pending = new ConcurrentLinkedQueue<PlayMessage>();
 		soundMap = new HashMap<Integer, Sound>();
 		

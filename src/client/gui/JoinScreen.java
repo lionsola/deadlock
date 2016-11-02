@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
+import shared.network.Connection;
 import shared.network.LobbyRequest.LobbyInformationPacket;
 
 /**
@@ -86,35 +87,23 @@ public class JoinScreen extends AbstractScreen implements ActionListener {
 			} else {
 				name.setBorder(new LineBorder(Color.WHITE));
 			}
-			if (port.getText().equals("")) {
-				port.setBorder(new LineBorder(Color.RED, 2));
-			}
-			if (ip.getText().equals("")) {
-				ip.setBorder(new LineBorder(Color.RED, 2));
-			}
+			
 			if (!name.getText().equals("") && !port.getText().equals("") && !ip.getText().equals("")) {
 				try {
 					ip.setBorder(new LineBorder(Color.WHITE));
 					port.setBorder(new LineBorder(Color.WHITE));
 					int portnumber = Integer.parseInt(port.getText());
 					Socket socket = new Socket(ip.getText(), portnumber);
+					Connection connection = new Connection(socket);
 					// send name
-					new ObjectOutputStream(socket.getOutputStream()).writeObject(name.getText());
-					LobbyInformationPacket lip = (LobbyInformationPacket) new ObjectInputStream(socket.getInputStream()).readObject();
-					game.setScreen(new LobbyScreen(socket, lip, game));
+					connection.send(name.getText());
+					LobbyInformationPacket lip = (LobbyInformationPacket) connection.receive();
+					game.setScreen(new LobbyScreen(null,connection, lip, game));
 				} catch (IOException e1) {
 					ip.setBorder(new LineBorder(Color.RED, 2));
 					port.setBorder(new LineBorder(Color.RED, 2));
 					System.out.println("Error joining game at " + ip.getText() + ":" + port.getText());
 					e1.printStackTrace();
-				} catch (ClassNotFoundException e1) {
-					ip.setBorder(new LineBorder(Color.RED, 2));
-					port.setBorder(new LineBorder(Color.RED, 2));
-					System.out.println("Error reading lobby information from network.");
-					e1.printStackTrace();
-				} catch (Exception e2) {
-					ip.setBorder(new LineBorder(Color.RED, 2));
-					port.setBorder(new LineBorder(Color.RED, 2));
 				}
 			}
 		} else if (e.getSource() == backButton) {

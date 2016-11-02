@@ -38,6 +38,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import server.network.LobbyServer;
+import shared.network.Connection;
 import shared.network.LobbyRequest;
 import shared.network.LobbyRequest.ChangeArenaRequest;
 import shared.network.LobbyRequest.ChangeCharacterRequest;
@@ -62,7 +63,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 
 	private static final long serialVersionUID = -5689724117739992298L;
 	private LobbyServer lobbyServer;
-	private Socket socket;
+	private Connection connection;
 	private JButton playButton;
 	private JButton readyButton;
 
@@ -99,37 +100,14 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 	 * @param game
 	 *            The game loop which the lobby screen will be used in
 	 */
-	public LobbyScreen(Socket socket, LobbyInformationPacket lip, GameWindow game) {
+	public LobbyScreen(LobbyServer lobbyServer, Connection connection, LobbyInformationPacket lip, GameWindow game) {
 		super(game);
-		useDefaultBackground();
-		this.socket = socket;
-		initLobbyInfo(lip);
-		clientPlayer = findPlayer(lip.id);
-		initUI(false);
-		new Thread(requestListener).start();
-	}
-
-	/**
-	 * Creates a new LobbyScreen used in the game loop
-	 * 
-	 * @param lobbyServer
-	 *            The lobby server of the lobby
-	 * @param socket
-	 *            The socket of the lobby
-	 * @param lip
-	 *            The Lobby info packet of the lobby
-	 * @param game
-	 *            The game loop which the lobby screen will be used in
-	 */
-	public LobbyScreen(LobbyServer lobbyServer, Socket socket, LobbyInformationPacket lip, GameWindow game) {
-		super(game);
-		useDefaultBackground();
-
 		this.lobbyServer = lobbyServer;
-		this.socket = socket;
+		useDefaultBackground();
+		this.connection = connection;
 		initLobbyInfo(lip);
 		clientPlayer = findPlayer(lip.id);
-		initUI(true);
+		initUI(lobbyServer!=null);
 		new Thread(requestListener).start();
 	}
 
@@ -422,20 +400,14 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 	 *            The request to be sent
 	 */
 	private void sendRequest(LobbyRequest request) {
-		try {
-			new ObjectOutputStream(socket.getOutputStream()).writeObject(request);
-		} catch (IOException e) {
-			System.out.println("Error sending request " + request.getClass() + " to network.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		}
+		connection.send(request);
 	}
 
 	@Override
 	public void onEscape() {
 		super.onEscape();
 		try {
-			socket.close();
+			connection.getSocket().close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -450,9 +422,8 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		public void run() {
 			while (true) {
 				try {
-					ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-					System.out.println("Message stream available: " + ois.available());
-					Object message = ois.readObject();
+					//System.out.println("Message stream available: " + ois.available());
+					Object message = connection.receive();
 					if (message instanceof ChangeArenaRequest) {
 						loadArena(((ChangeArenaRequest) message).arenaName);
 					} else if (message instanceof NewPlayerRequest) {
@@ -478,7 +449,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 						team2Model.invalidate();
 					} else if (message instanceof StartGameRequest) {
 						AudioManager.stopMusic();
-						game.setScreen(new GameScreen(game, clientPlayer.id, socket, arenaName, team1, team2));
+						game.setScreen(new GameScreen(game, clientPlayer.id, connection, arenaName, team1, team2));
 						AudioManager.playMusic("menumusic.wav", MusicPlayer.DEFAULT_VOLUME - 15);
 						break;
 					} else if (message instanceof SwitchTeamRequest) {
@@ -509,7 +480,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 				} catch (SocketException se) {
 					onEscape();
 					break;
-				} catch (IOException | ClassNotFoundException e) {
+				} catch (IOException e) {
 					System.out.println("Error while receiving message from lobbyServer");
 					System.out.println(e.getMessage());
 				}

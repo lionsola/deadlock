@@ -1,5 +1,6 @@
 package server.world;
 
+import java.awt.Color;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.io.File;
@@ -200,11 +201,12 @@ public class Arena {
 	}
 
 	public void generateLightMap() {
-		int INITIAL_LIGHT = 0x202020;
+		int INITIAL_LIGHT = 0x0f;
+		int INITIAL_LIGHT_RGB = new Color(INITIAL_LIGHT,INITIAL_LIGHT,INITIAL_LIGHT).getRGB();
 		
 		int[][] lightMap = new int[getWidth()][getHeight()];
 		for (int[] lights:lightMap) {
-			Arrays.fill(lights, INITIAL_LIGHT);
+			Arrays.fill(lights, INITIAL_LIGHT_RGB);
 		}
 		
 		for (Light l:lightList) {
@@ -236,10 +238,10 @@ public class Arena {
 								d = d*(1-blockCount/MAX_BLOCK_COUNT);
 							}
 						}
-						int sRGB = l.getColor()*(255-INITIAL_LIGHT)/255;
-						int sR = (sRGB >> 16) & 0xFF;
-						int sG = (sRGB >> 8) & 0xFF;
-						int sB = (sRGB) & 0xFF;
+						int sRGB = l.getColor();
+						int sR = ((sRGB >> 16) & 0xFF) *(255-INITIAL_LIGHT)/255;
+						int sG = ((sRGB >> 8) & 0xFF) *(255-INITIAL_LIGHT)/255;
+						int sB = ((sRGB) & 0xFF) *(255-INITIAL_LIGHT)/255;
 						
 						int dRGB = lightMap[x][y];
 						int dR = (dRGB >> 16) & 0xFF;

@@ -5,7 +5,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import client.gui.GameWindow;
 import server.character.PlayerCharacter;
+import shared.network.Connection;
 import shared.network.GameDataPackets.InputPacket;
 import shared.network.GameDataPackets.WorldStatePacket;
 
@@ -24,11 +26,9 @@ public class ServerPlayer {
     public int type = 0;
     public int kills = 0;
     public int deaths = 0;
-    public Socket socket;
+    public Connection connection;
     public PlayerCharacter character;
 	public MatchServer.InputReceiver inputReceiver;
-	public ObjectOutputStream oos;
-	public ObjectInputStream ois;
     
     /**
      * Constructor.
@@ -37,11 +37,11 @@ public class ServerPlayer {
      * @param name This player's name.
      * @param socket The socket to communicate with the client.
      */
-    public ServerPlayer (int id, int team, String name, Socket socket) {
+    public ServerPlayer (int id, int team, String name, Connection connection) {
         this.id = id;
         this.team = team;
         this.name = name;
-        this.socket = socket;
+        this.connection = connection;
     }
     
     /**
@@ -49,22 +49,23 @@ public class ServerPlayer {
      * else it will burn CPU cycles.
      * @return The input packet of this player.
      */
-    public InputPacket getInput () {
-        while (true) {
-            try {
-            	if (socket.getInputStream().available()>0) {
-	                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-	                Object message = ois.readObject();
-	                if (message instanceof InputPacket) {
-	                    InputPacket input = ((InputPacket)message);
-	                    return input;
-	                }
-            	}
-            } catch (ClassNotFoundException | IOException e) {
-                System.out.println("Error while receiving input from player "+id);
-                e.printStackTrace();
-            }
-        }
+    public InputPacket getInput() {
+    	while (true) {
+			try {
+				Object message = null;
+				while (connection.getSocket().getInputStream().available()>200) {
+					message = connection.receive();
+				}
+				if (message!=null && message instanceof InputPacket) {
+				    InputPacket input = ((InputPacket)message);
+				    return input;
+				} else {
+					Thread.sleep(GameWindow.MS_PER_UPDATE);
+				}
+			} catch (InterruptedException | IOException e) {
+				e.printStackTrace();
+			}
+    	}
     }
     
     /**
@@ -72,13 +73,7 @@ public class ServerPlayer {
      * @param wsp The state to be sent, already filtered for this player.
      */
     public void sendData(WorldStatePacket wsp) {
-        try {
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            out.writeObject(wsp);
-        } catch (IOException e) {
-            System.out.println("Exception when trying to send data to player " + socket.getRemoteSocketAddress());
-            e.printStackTrace();
-        }
+        connection.send(wsp);
     }
     
     public void setCharacter(PlayerCharacter c) {

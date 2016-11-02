@@ -20,5 +20,4 @@ public class ClientPlayer implements Serializable {
 	public int kills;
 	public int deaths;
 	public PartialCharacterData character;
-
 }

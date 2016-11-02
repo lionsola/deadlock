@@ -1,18 +1,14 @@
 package server.network;
 
-import java.io.EOFException;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
 import client.gui.ClientPlayer;
-import server.ai.AIPlayer;
 import server.ai.DummyPlayer;
+import shared.network.Connection;
 import shared.network.LobbyRequest;
 import shared.network.LobbyRequest.ChangeCharacterRequest;
 import shared.network.LobbyRequest.ChatRequest;
@@ -81,14 +77,8 @@ public class LobbyServer implements Runnable {
 	 */
 	private void sendRequest(LobbyRequest request) {
 		for (ServerPlayer p : players) {
-			if (p.socket != null) {
-				try {
-					new ObjectOutputStream(p.socket.getOutputStream()).writeObject(request);
-				} catch (IOException e) {
-					System.out.println("Error sending " + request.getClass() + " to player " + p.id);
-					System.out.println(e.getMessage());
-				}
-			}
+			if (p.connection!=null)
+				p.connection.send(request);
 		}
 	}
 
@@ -139,7 +129,7 @@ public class LobbyServer implements Runnable {
 	    sendRequest(new PlayerLeaveRequest(id));
 	    players.remove(p);
 	    try {
-            p.socket.close();
+            p.connection.getSocket().close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -151,26 +141,27 @@ public class LobbyServer implements Runnable {
 		while (running) {
 			try {
 				Socket socket = serverSocket.accept();
-
+				Connection connection = new Connection(socket);
 				// get their name
-				String name = (String) new ObjectInputStream(socket.getInputStream()).readObject();
+				String name = (String) connection.receive();
 
 				// generate an ID for a player
 				int id = count;
 				int team = getTeamWithLeastPlayer();
 				count++;
-				ServerPlayer p = new ServerPlayer(id, team, name, socket);
+				ServerPlayer p = new ServerPlayer(id, team, name, connection);
 				// tell other clients about the newly connected player
 				sendRequest(new LobbyRequest.NewPlayerRequest(generateClientPlayer(p)));
 				players.add(p);
+				
 				// send the lobby information back to them
-				new ObjectOutputStream(socket.getOutputStream()).writeObject(generateInformationPacket(p.id));
+				connection.send(generateInformationPacket(p.id));
 
 				// start listening to requests from them
 				new LobbyRequestReceiver(this,p).start();
 
 				System.out.println("ClientPlayer at " + socket.getRemoteSocketAddress() + " connected, id = " + p.id);
-			} catch (IOException | ClassNotFoundException e) {
+			} catch (IOException e) {
 				//System.out.println("Exception caught when a client tries to connect.");
 				System.out.println(e.getMessage());
 				//e.printStackTrace();
@@ -212,33 +203,25 @@ public class LobbyServer implements Runnable {
     	@Override
         public void run() {
             while (server.isRunning()) {
-                try {
-                    ObjectInputStream ois = new ObjectInputStream(player.socket.getInputStream());
-                    Object message = ois.readObject();
-                    if (message instanceof SwitchTeamRequest) {
-                        SwitchTeamRequest request = ((SwitchTeamRequest)message);
-                        player.team = request.desTeam;
-                        server.sendRequest(request);
-                    } else if (message instanceof ToggleReadyRequest) {
-                        ToggleReadyRequest request = ((ToggleReadyRequest)message);
-                        player.active = true;
-                        server.sendRequest(request);
-                    } else if (message instanceof ChangeCharacterRequest) {
-                        ChangeCharacterRequest request = ((ChangeCharacterRequest)message);
-                        player.type = request.typeId;
-                        server.sendRequest(request);
-                    } else if (message instanceof ChatRequest) {
-                    	ChatRequest request = ((ChatRequest)message);
-                    	server.sendRequest(request);
-                    }
-                } catch (SocketException | EOFException e) {
-                    // DISCONNECT
-                	server.removePlayer(player.id);
-                    return;
-                } catch (IOException | ClassNotFoundException e) {
-                    System.out.println("LobbyServer: Error while receiving request from player "+player.id);
-                    e.printStackTrace();
-                    return;
+                Object message = player.connection.receive();
+                if (message instanceof SwitchTeamRequest) {
+                    SwitchTeamRequest request = ((SwitchTeamRequest)message);
+                    player.team = request.desTeam;
+                    server.sendRequest(request);
+                } else if (message instanceof ToggleReadyRequest) {
+                    ToggleReadyRequest request = ((ToggleReadyRequest)message);
+                    player.active = true;
+                    server.sendRequest(request);
+                } else if (message instanceof ChangeCharacterRequest) {
+                    ChangeCharacterRequest request = ((ChangeCharacterRequest)message);
+                    player.type = request.typeId;
+                    server.sendRequest(request);
+                } else if (message instanceof ChatRequest) {
+                	ChatRequest request = ((ChatRequest)message);
+                	server.sendRequest(request);
+                } else {
+                	System.err.println("Invalid request received!");
+                	System.err.println(message);
                 }
             }
         }

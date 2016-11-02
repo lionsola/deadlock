@@ -23,6 +23,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
 import server.network.LobbyServer;
+import shared.network.Connection;
 import shared.network.GameModeData;
 import shared.network.LobbyRequest.LobbyInformationPacket;
 
@@ -174,16 +175,13 @@ public class HostScreen extends AbstractScreen implements ActionListener {
 					LobbyServer lobbyServer = new LobbyServer(portnumber, MAP_LIST[currentMap]);
 
 					Socket socket = new Socket("localhost", portnumber);
-					new ObjectOutputStream(socket.getOutputStream()).writeObject(name.getText());
-					LobbyInformationPacket lip = (LobbyInformationPacket) new ObjectInputStream(socket.getInputStream()).readObject();
-					game.setScreen(new LobbyScreen(lobbyServer, socket, lip, game));
+					Connection connection = new Connection(socket);
+					connection.send(name.getText());
+					LobbyInformationPacket lip = (LobbyInformationPacket) connection.receive();
+					game.setScreen(new LobbyScreen(lobbyServer, connection, lip, game));
 				} catch (IOException e1) {
 					port.setBorder(new LineBorder(Color.RED, 2));
 					System.out.println("Error creating network on port " + port.getText());
-					e1.printStackTrace();
-				} catch (ClassNotFoundException e1) {
-					port.setBorder(new LineBorder(Color.RED, 2));
-					System.out.println("Error reading lobby information from network.");
 					e1.printStackTrace();
 				}
 			}

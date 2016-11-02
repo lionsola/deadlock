@@ -45,6 +45,7 @@ import server.world.Arena;
 import server.world.Thing;
 import server.world.Terrain;
 import server.world.Visibility;
+import shared.network.Connection;
 import shared.network.FullCharacterData;
 import shared.network.GameEvent;
 import shared.network.PartialCharacterData;
@@ -72,7 +73,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private Arena arena;
 	private Camera camera;
 	private final int id;
-	private Socket socket;
+	private Connection connection;
 	private InputPacket input = new InputPacket();
 	private WorldStatePacket wsp;
 	private AnimationSystem globalAnimations;
@@ -101,7 +102,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	 *            The game loop which will use the game screen
 	 * @param id
 	 *            The id of the local player
-	 * @param socket
+	 * @param connection
 	 *            The socket to communicate with the server
 	 * @param arenaName
 	 *            The name of the arena for this game
@@ -112,7 +113,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	 * @throws IOException
 	 *             Exception thrown on gamescreen
 	 */
-	public GameScreen(GameWindow game, int id, Socket socket, String arenaName, List<ClientPlayer> team1, List<ClientPlayer> team2) throws IOException {
+	public GameScreen(GameWindow game, int id, Connection connection, String arenaName, List<ClientPlayer> team1, List<ClientPlayer> team2) throws IOException {
 		super();
 		this.game = game;
 		this.setSize(game.getWidth(), game.getHeight());
@@ -157,8 +158,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		// TODO fix later, this is messy - create connection in one place and
 		// read from it in another
 
-		this.socket = socket;
-		socket.setSoTimeout(5);
+		this.connection = connection;
+		//connection.getSocket().setSoTimeout(5);
 		setCursor(Renderer.createCursor());
 		
 		addKeyListener(this);
@@ -331,16 +332,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	 * Send an input of a player to gamescreen
 	 */
 	private void sendInput() {
-		// send input
-		try {
-			if (!socket.isClosed()) {
-				ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-				input.time = System.currentTimeMillis();
-				out.writeObject(input);
-			}
-		} catch (IOException e) {
-			System.out.println("Exception when trying to send input to network");
-			//e.printStackTrace();
+		if (!connection.getSocket().isClosed()) {
+			connection.send(input);
 		}
 	}
 
@@ -354,14 +347,13 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		WorldStatePacket wsp = null;
 
 		try {
-			InputStream in = socket.getInputStream();
+			InputStream in = connection.getSocket().getInputStream();
 			while (in.available() > 1000) {
-				wsp = (WorldStatePacket) new ObjectInputStream(in).readObject();
+				wsp = (WorldStatePacket) connection.receive();
 			}
 		} catch (IOException e) {
 			System.out.println("Timeout when reading data from network");
-		} catch (ClassNotFoundException e) {}
-
+		}
 		return wsp;
 	}
 
@@ -612,7 +604,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				playing = false;
 				game.setScreen(new MainMenuScreen(game));
 				try {
-					socket.close();
+					connection.getSocket().close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
