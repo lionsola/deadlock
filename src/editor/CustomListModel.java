@@ -7,7 +7,7 @@ import javax.swing.AbstractListModel;
 public class CustomListModel<T> extends AbstractListModel<T> {
 
 	private static final long serialVersionUID = 1480642633891355142L;
-	private List<T> tiles;
+	private List<T> list;
 
 	/**
 	 * Creates a new TeamListModel using a list of players
@@ -16,23 +16,23 @@ public class CustomListModel<T> extends AbstractListModel<T> {
 	 *            a list of each team
 	 */
 	public CustomListModel(List<T> team) {
-		this.tiles = team;
+		this.list = team;
 	}
 
 	@Override
 	public T getElementAt(int index) {
-		return tiles.get(index);
+		return list.get(index);
 	}
 
 	@Override
 	public int getSize() {
-		return tiles.size();
+		return list.size();
 	}
 
 	/**
 	 * Invalidate the list so the it gets redrawn on the screen.
 	 */
 	public void invalidate() {
-		this.fireContentsChanged(this, 0, getSize());
+		this.fireContentsChanged(this, 0, list.size()-1);
 	}
 }

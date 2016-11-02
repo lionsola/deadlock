@@ -36,7 +36,7 @@ public class Arena {
 	private transient List<Point2D> t2Spawns; // spawn points of team 2
 	protected List<Light> lightList;
 	
-	int[][] lightMap;
+	protected int[][] lightMap;
 	
 	protected Tile[][] tMap;
 	

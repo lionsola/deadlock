@@ -5,10 +5,14 @@ import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
+
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
@@ -43,8 +47,8 @@ public class Editor extends JFrame {
 
 	Tool currentTool;
 
-	Collection<Terrain> tiles;
-	Collection<Thing> objects;
+	List<Terrain> tiles;
+	List<Thing> objects;
 
 	HashMap<Integer,Terrain> tileTable;
 	HashMap<Integer,Thing> objectTable;
@@ -64,7 +68,8 @@ public class Editor extends JFrame {
             //setUndecorated(true);
         }
         
-		tiles = DataManager.loadTileListOld();
+		//tiles = DataManager.loadTileListOld();
+		tiles = (List<Terrain>) DataManager.loadObject(DataManager.FILE_TILES);
         try {
 			DataManager.loadTileGraphics(tiles);
 		} catch (IOException e) {
@@ -73,7 +78,8 @@ public class Editor extends JFrame {
 		}
 		tileTable = DataManager.getTileMap(tiles);
         
-        objects = DataManager.loadObjectListOld();
+        //objects = DataManager.loadObjectListOld();
+        objects = (List<Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
         try {
 			DataManager.loadObjectGraphics(objects);
 		} catch (IOException e) {
@@ -85,6 +91,15 @@ public class Editor extends JFrame {
         
         this.setJMenuBar(new MenuBar(this));
         this.getContentPane().add(new ToolMenu(this),BorderLayout.WEST);
+        this.addWindowListener(new WindowAdapter() {
+        	@Override
+        	public void windowClosing(WindowEvent e) {
+        		//DataManager.saveObject(tiles, DataManager.FILE_TILES);
+        		//DataManager.saveObject(objects, DataManager.FILE_OBJECTS);
+        		//DataManager.saveTileListOld(tiles);
+        		//DataManager.saveObjectListOld(objects);
+        	}
+        });
         pack();
         setVisible(true);
         setLocationRelativeTo(null);
@@ -145,14 +160,12 @@ public class Editor extends JFrame {
     	currentTool = tool;
     }
     
-    public void addTileBG(Terrain t) {
-    	tiles.add(t);
-    	tileTable.put(t.getId(), t);
+    public HashMap<Integer,Thing> getObjectTable() {
+    	return objectTable;
     }
     
-    public void addObject(Thing t) {
-    	objects.add(t);
-    	objectTable.put(t.getId(), t);
+    public HashMap<Integer,Terrain> getTerrainTable() {
+    	return tileTable;
     }
     
     public static void main(String[] args) {
@@ -168,5 +181,13 @@ public class Editor extends JFrame {
 
 	public void newArena(String n, int w, int h) {
 		setArena(new EditorArena(n,w,h,tileTable,objectTable));
+	}
+
+	public Collection<Thing> getObjectList() {
+		return objects;
+	}
+
+	public Collection<Terrain> getTerrainList() {
+		return tiles;
 	}
 }

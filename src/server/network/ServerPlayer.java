@@ -1,10 +1,6 @@
 package server.network;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
-
 import client.gui.GameWindow;
 import server.character.PlayerCharacter;
 import shared.network.Connection;

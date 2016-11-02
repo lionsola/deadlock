@@ -266,23 +266,33 @@ public class Renderer {
 				if (t==null || t.getId()==0)
 					continue;
 				
-				double xM = 0, yM = 0, rot = 0;
+				double xS = 0, yS = 0, rot = 0;
+				boolean flip = false;
 				SpriteConfig config = a.get(x, y).getSpriteConfig();
 				BufferedImage image = t.getImage();
 				if (config==null) {
 					int w = image.getWidth()/32;
 					int h = image.getHeight()/32;
-					xM = (x%w)*ts;
-					yM = (y%h)*ts;
+					xS = (x%w)*ts;
+					yS = (y%h)*ts;
 				} else {
-					xM = config.spriteX*ts;
-					yM = config.spriteY*ts;
+					xS = config.spriteX*ts;
+					yS = config.spriteY*ts;
 					rot = config.rotation*Math.PI/2;
+					flip = config.flip;
+					
 				}
 				
-				double sw = ts*t.getSpriteSize();
+				double wD = ts*t.getSpriteSize();
+				double xD = x*ts-(wD-ts)*0.5;
+				double yD = y*ts-(wD-ts)*0.5;
 				g2D.rotate(-rot,toPixel((x+0.5)*ts),toPixel((y+0.5)*ts));
-				drawImage(g2D,image, xM, yM, ts, ts, x*ts-(sw-ts)*0.5, y*ts-(sw-ts)*0.5, sw, sw);
+				if (!flip) {
+					drawImage(g2D,image, xS, yS, ts, ts, xD, yD, wD, wD);
+				}
+				else {
+					drawImage(g2D,image, xS, yS, ts, ts, xD+wD, yD, -wD-1.0/ppm, wD);
+				}
 				g2D.rotate(rot,toPixel((x+0.5)*ts),toPixel((y+0.5)*ts));
 				
 				double xa = x*ts;

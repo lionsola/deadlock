@@ -2,6 +2,7 @@ package server.world;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.Serializable;
 
 import editor.CellRenderable;
 import editor.Identifiable;
@@ -13,7 +14,8 @@ import editor.Identifiable;
  * 
  * @author Anh Pham
  */
-public class Terrain implements CellRenderable, Identifiable {
+public class Terrain implements CellRenderable, Identifiable, Serializable {
+	private static final long serialVersionUID = 2914169403817715835L;
 	public static final int COVER_NONE = 0;
 	public static final int COVER_LIGHT = 1;
 	public static final int COVER_MEDIUM = 2;
@@ -24,8 +26,7 @@ public class Terrain implements CellRenderable, Identifiable {
 	protected int id;
 	protected String name;
 	protected Color color;
-	protected int textureType;
-	protected BufferedImage tileImage;
+	protected transient BufferedImage tileImage;
 
 	protected String imageName;
 
@@ -97,13 +98,5 @@ public class Terrain implements CellRenderable, Identifiable {
 	
 	public int getId() {
 		return id;
-	}
-	
-	public void setTextureType(int type) {
-		this.textureType = type;
-	}
-	
-	public int getTextureType() {
-		return textureType;
 	}
 }

@@ -17,15 +17,18 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import editor.Editor;
 import server.world.Thing;
+import server.world.Utils;
 
 public class TileDialog extends JDialog implements ActionListener {
 	private static final long serialVersionUID = 5917436825785813483L;
+	private Editor editor;
 	private Thing tile;
 	
 	private JFormattedTextField id;
@@ -38,12 +41,12 @@ public class TileDialog extends JDialog implements ActionListener {
 	
 	private BufferedImage curTileImage;
 	private JCheckBox walkable;
-	private JCheckBox sightBlocking;
+	private JCheckBox clear;
 	private JComboBox<String> cover;
 	
 	public TileDialog (Editor editor, Thing tile) {
 		super(editor, "Edit tile", true);
-		this.tile = tile;
+		this.editor = editor;
 		//Create and populate the top panel.
         JPanel topPanel = new JPanel(new GridBagLayout());
         
@@ -57,16 +60,18 @@ public class TileDialog extends JDialog implements ActionListener {
         topPanel.add(id,c);
         
         c.gridy += 1;
-        name = new JTextField(tile.getName());
+        name = new JTextField();
         name.setHorizontalAlignment(JTextField.CENTER);
         topPanel.add(name,c);
         
         c.gridy += 1;
         c.fill = GridBagConstraints.BOTH;
-        tileImage = new JLabel(new ImageIcon(tile.getImage()));
-        if (tile.getImage()!=null) {
-        	topPanel.add(tileImage,c);
-        }
+        tileImage = new JLabel();
+        topPanel.add(tileImage,c);
+        
+        c.gridy += 1;
+        imageName = new JLabel();
+    	topPanel.add(imageName,c);
         
         c.gridy += 1;
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -76,24 +81,43 @@ public class TileDialog extends JDialog implements ActionListener {
         
         c.gridy += 1;
         walkable = new JCheckBox("Walkable");
-        walkable.setSelected(tile.isWalkable());
+        //walkable.setSelected(tile.isWalkable());
         topPanel.add(walkable,c);
         
         c.gridy += 1;
-        sightBlocking = new JCheckBox("Sight-blocking");
-        sightBlocking.setSelected(!tile.isTransparent());
-        topPanel.add(sightBlocking,c);
+        clear = new JCheckBox("Sight-blocking");
+        //sightBlocking.setSelected(!tile.isTransparent());
+        topPanel.add(clear,c);
         
         c.gridy += 1;
         String[] coverTypes = {"None","Light","Medium","Heavy"};
         cover = new JComboBox<String>(coverTypes);
-        cover.setSelectedIndex(tile.getCoverType());
+        //cover.setSelectedIndex(tile.getCoverType());
         topPanel.add(cover,c);
         
         c.gridy += 1;
         save = new JButton("Save");
         save.addActionListener(this);
         topPanel.add(save,c);
+        
+        if (tile!=null) {
+        	id.setValue(tile.getId());
+        	id.setEditable(false);
+        	this.tile = tile;
+        	name.setText(tile.getName());
+        	walkable.setSelected(tile.isWalkable());
+        	clear.setSelected(tile.isTransparent());
+        	cover.setSelectedIndex(tile.getCoverType());
+        	if (tile.getImage()!=null) {
+        		tileImage.setIcon(new ImageIcon(tile.getImage()));
+        	}
+        	imageName.setText(tile.getImageName());
+        	curTileImage = tile.getImage();
+        } else {
+        	int ID = Utils.random().nextInt();
+        	//this.tile = new TileBG(ID);
+        	id.setValue(ID);
+        }
         
         this.setContentPane(topPanel);
         this.pack();
@@ -103,15 +127,31 @@ public class TileDialog extends JDialog implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		if (arg0.getSource()==save) {
-			if (this.tile!=null) {
-				tile.setName(name.getText());
-				tile.setImage(curTileImage);
-				tile.setImageName(imageName.getText());
-				
-				tile.setCoverType(cover.getSelectedIndex());
-				tile.setTransparent(!sightBlocking.isSelected());
-				tile.setWalkable(walkable.isSelected());
+			if (this.tile==null) {
+				int idNumber = ((Number)id.getValue()).intValue();
+				if (editor.getObjectTable().containsKey(idNumber)) {
+					JOptionPane.showMessageDialog(this,"Existing ID");
+					return;
+				} else if (name.getText().equals("")) {
+					JOptionPane.showMessageDialog(this,"Empty name field!");
+					return;
+				} else if (curTileImage==null || imageName.getText().equals("")) {
+					JOptionPane.showMessageDialog(this,"Pick an image!");
+					return;				
+				} else {
+					this.tile = new Thing(idNumber);
+					editor.getObjectList().add(tile);
+					editor.getObjectTable().put(tile.getId(), tile);
+				}
 			}
+
+			tile.setName(name.getText());
+			tile.setImage(curTileImage);
+			tile.setImageName(imageName.getText());
+			
+			tile.setCoverType(cover.getSelectedIndex());
+			tile.setTransparent(!clear.isSelected());
+			tile.setWalkable(walkable.isSelected());
 			
 			// Close the dialog
 			this.setVisible(false);

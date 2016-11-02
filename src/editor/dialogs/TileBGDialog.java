@@ -15,6 +15,7 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -86,6 +87,7 @@ public class TileBGDialog extends JDialog implements ActionListener {
         		tileImage.setIcon(new ImageIcon(tile.getImage()));
         	}
         	imageName.setText(tile.getImageName());
+        	curTileImage = tile.getImage();
         } else {
         	int ID = Utils.random().nextInt();
         	//this.tile = new TileBG(ID);
@@ -100,11 +102,26 @@ public class TileBGDialog extends JDialog implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		if (arg0.getSource()==save) {
-			if (this.tile!=null) {
-				tile.setName(name.getText());
-				tile.setImage(curTileImage);
-				tile.setImageName(imageName.getText());
+			if (this.tile==null) {
+				int idNumber = ((Number)id.getValue()).intValue();
+				if (editor.getTerrainTable().containsKey(idNumber)) {
+					JOptionPane.showMessageDialog(this,"This ID already exists!");
+					return;
+				} else if (name.getText().equals("")) {
+					JOptionPane.showMessageDialog(this,"Empty name field!");
+					return;
+				} else if (curTileImage==null || imageName.getText().equals("")) {
+					JOptionPane.showMessageDialog(this,"Pick an image!");
+					return;
+				} else {
+					this.tile = new Terrain(idNumber);
+					editor.getTerrainList().add(tile);
+					editor.getTerrainTable().put(tile.getId(), tile);
+				}
 			}
+			tile.setName(name.getText());
+			tile.setImage(curTileImage);
+			tile.setImageName(imageName.getText());
 			
 			// Close the dialog
 			this.setVisible(false);

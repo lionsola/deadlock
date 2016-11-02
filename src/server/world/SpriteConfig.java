@@ -7,4 +7,5 @@ public class SpriteConfig implements Serializable {
 	public int spriteX;
 	public int spriteY;
 	public int rotation;
+	public boolean flip;
 }

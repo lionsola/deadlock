@@ -5,14 +5,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.LinkedList;
-
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.ListCellRenderer;
@@ -25,6 +24,7 @@ import editor.Tool.*;
 import editor.dialogs.ListDialog;
 import editor.dialogs.NewLightDialog;
 import editor.dialogs.TileBGDialog;
+import editor.dialogs.TileDialog;
 import server.world.Thing;
 import server.world.Terrain;
 
@@ -53,10 +53,11 @@ public class ToolMenu extends JPanel {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange()==ItemEvent.SELECTED) {
 					if (list==null) {
-						CustomListModel<Terrain> tlm = new CustomListModel<Terrain>(new LinkedList<Terrain>(editor.tiles));
+						final CustomListModel<Terrain> tlm = new CustomListModel<Terrain>(editor.tiles);
 						JButton add = new JButton("Add");
 						JButton edit = new JButton("Edit");
-						JButton[] buttons = {edit,add};
+						JButton delete = new JButton("Delete");
+						JButton[] buttons = {edit,add,delete};
 						list = new ListDialog<Terrain>(editor, tilePaint, "Tile", buttons, tlm, null,null);
 						
 						list.getList().setCellRenderer(cellRenderer);
@@ -70,12 +71,31 @@ public class ToolMenu extends JPanel {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
 								new TileBGDialog(editor,null).setVisible(true);
+								tlm.invalidate();
 							}
 						});
 						edit.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
 								new TileBGDialog(editor,list.getList().getSelectedValue()).setVisible(true);
+							}
+						});
+						delete.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								int result = JOptionPane.showConfirmDialog(editor,
+										"Deleting an object will affect all maps that use it.\nProceed?",
+										"WARNING", JOptionPane.OK_CANCEL_OPTION);
+								if (result==JOptionPane.OK_OPTION) {
+									String s = JOptionPane.showInputDialog(editor,
+											"Just to double check, are you sure?");
+									if (s.equals("yup")) {
+										Terrain t = list.getList().getSelectedValue();
+										editor.tiles.remove(t);
+										editor.tileTable.remove(t.getId());
+										tlm.invalidate();
+									}
+								}
 							}
 						});
 					}
@@ -96,9 +116,11 @@ public class ToolMenu extends JPanel {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange()==ItemEvent.SELECTED) {
 					if (list==null) {
-						CustomListModel<Thing> tlm = new CustomListModel<Thing>(new LinkedList<Thing>(editor.objects));
+						final CustomListModel<Thing> tlm = new CustomListModel<Thing>(editor.objects);
+						JButton add = new JButton("Add");
 						JButton edit = new JButton("Edit");
-						JButton[] buttons = {edit};
+						JButton delete = new JButton("Delete");
+						JButton[] buttons = {edit,add,delete};
 						list = new ListDialog<Thing>(editor, objectPaint, "Tile", buttons, tlm, null,null);
 						list.getList().setCellRenderer(cellRenderer);
 						list.getList().addListSelectionListener(new ListSelectionListener() {
@@ -107,9 +129,35 @@ public class ToolMenu extends JPanel {
 								editor.setTool(new Tool.ObjectPaint(editor.getArenaPanel(), list.getList().getSelectedValue()));
 							}
 						});
+						add.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent arg0) {
+								new TileDialog(editor,null).setVisible(true);
+								tlm.invalidate();
+							}
+						});
 						edit.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
+								new TileDialog(editor,list.getList().getSelectedValue()).setVisible(true);
+							}
+						});
+						delete.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								int result = JOptionPane.showConfirmDialog(editor,
+										"Deleting an object will affect all maps that use it.\nProceed?",
+										"WARNING", JOptionPane.OK_CANCEL_OPTION);
+								if (result==JOptionPane.OK_OPTION) {
+									String s = JOptionPane.showInputDialog(editor,
+											"Just to double check, are you sure?");
+									if (s.equals("yup")) {
+										Thing t = list.getList().getSelectedValue();
+										editor.objects.remove(t);
+										editor.objectTable.remove(t.getId());
+										tlm.invalidate();
+									}
+								}
 							}
 						});
 					}

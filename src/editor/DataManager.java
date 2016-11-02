@@ -25,29 +25,36 @@ import client.graphics.ImageBlender;
 import client.graphics.ParticleEmitter;
 import server.world.Arena;
 import server.world.Light;
+import server.world.SpriteConfig;
 import server.world.Thing;
 import server.world.Terrain;
 
 public class DataManager {
+	public static final String FILE_TILES = "resource/tile/tiles";
+	public static final String FILE_OBJECTS = "resource/tile/objects";
+	public static final String FILE_TILES_OLD = "resource/tile/tiles_old";
+	public static final String FILE_OBJECTS_OLD = "resource/tile/objects_old";
+	public static final String DIR_MAP = "resource/map/";
+	
 	public static void exportImages(Arena a) throws IOException {
 		BufferedImage arenaImage = ImageBlender.drawArena(a);
 		
-		ImageIO.write(arenaImage, "png", new File("resource/map/"+a.getName()+"_plain.png"));
+		ImageIO.write(arenaImage, "png", new File(DIR_MAP+a.getName()+"_plain.png"));
 		
 		BufferedImage midImage = ImageBlender.applyMiddlegroundEffect(arenaImage);
-		ImageIO.write(midImage, "png", new File("resource/map/"+a.getName()+"_mid.png"));
+		ImageIO.write(midImage, "png", new File(DIR_MAP+a.getName()+"_mid.png"));
 		
 		BufferedImage darkImage = ImageBlender.applyBackgroundEffect(arenaImage);
-		ImageIO.write(darkImage, "png", new File("resource/map/"+a.getName()+"_dark.png"));
+		ImageIO.write(darkImage, "png", new File(DIR_MAP+a.getName()+"_dark.png"));
 		
 		BufferedImage lightImage = ImageBlender.applyForegroundEffect(arenaImage);
-		ImageIO.write(lightImage, "png", new File("resource/map/"+a.getName()+"_light.png"));
+		ImageIO.write(lightImage, "png", new File(DIR_MAP+a.getName()+"_light.png"));
 		
 		BufferedImage lightMap = ImageBlender.drawLightImage(a);
-		ImageIO.write(lightMap, "png", new File("resource/map/"+a.getName()+"_lightmap.png"));
+		ImageIO.write(lightMap, "png", new File(DIR_MAP+a.getName()+"_lightmap.png"));
 		
 		BufferedImage wholeMap = ImageBlender.blendLightImage(lightImage, lightMap);
-		ImageIO.write(wholeMap, "png", new File("resource/map/"+a.getName()+".png"));
+		ImageIO.write(wholeMap, "png", new File(DIR_MAP+a.getName()+".png"));
 	}
 	
 	/*
@@ -110,7 +117,7 @@ public class DataManager {
 	public static Collection<Terrain> loadTileListOld() {
 		List<Terrain> tiles = new LinkedList<Terrain>();
 		try {
-			FileInputStream fileInputStream = new FileInputStream("resource/tile/tiles");
+			FileInputStream fileInputStream = new FileInputStream(FILE_TILES_OLD);
 			Scanner fileSc = new Scanner(fileInputStream);
 			// load tile information
 			while (fileSc.hasNext()) {
@@ -136,14 +143,14 @@ public class DataManager {
 	
 	public static void saveTileListOld(Collection<Terrain> tileList) {
 		try {
-			FileOutputStream fileOutputStream = new FileOutputStream("resource/tile/tiles");
+			FileOutputStream fileOutputStream = new FileOutputStream(FILE_TILES_OLD);
 			PrintWriter wr = new PrintWriter(fileOutputStream);
 			
 			// save tile information
 			Iterator<Terrain> i = tileList.iterator();
 			while (i.hasNext()) {
 				Terrain tile = i.next();
-				wr.print(tile.getId()+" ");
+				wr.print(Integer.toHexString(tile.getId())+" ");
 				wr.print(tile.getName()+" ");
 				wr.print(tile.getImageName());
 				if (i.hasNext()) {
@@ -181,7 +188,7 @@ public class DataManager {
 	public static Collection<Thing> loadObjectListOld() {
 		List<Thing> objects = new LinkedList<Thing>();
 		try {
-			FileInputStream fileInputStream = new FileInputStream("resource/tile/objects");
+			FileInputStream fileInputStream = new FileInputStream(FILE_OBJECTS_OLD);
 			Scanner fileSc = new Scanner(fileInputStream);
 			// load tile information
 			while (fileSc.hasNext()) {
@@ -216,14 +223,14 @@ public class DataManager {
 
 	public static void saveObjectListOld(Collection<Thing> tileList) {
 		try {
-			FileOutputStream fileOutputStream = new FileOutputStream("resource/tile/tiles");
+			FileOutputStream fileOutputStream = new FileOutputStream(FILE_OBJECTS_OLD);
 			PrintWriter wr = new PrintWriter(fileOutputStream);
 			
 			// save tile information
 			Iterator<Thing> i = tileList.iterator();
 			while (i.hasNext()) {
 				Thing tile = i.next();
-				wr.print(tile.getId()+" ");
+				wr.print(Integer.toHexString(tile.getId())+" ");
 				wr.print(tile.getName()+" ");
 				wr.print(tile.getImageName()+" ");
 				
@@ -257,7 +264,7 @@ public class DataManager {
 		public String name;
 		public int[][] tileMap;
 		public int[][] objectMap;
-		//public int[][] lightMap;
+		public SpriteConfig[][] configMap;
 		public List<Light> lights;
 	}
 	
@@ -302,12 +309,17 @@ public class DataManager {
 	public static void exportArenaData(Arena a) {
 		int[][] tileIDMap = new int[a.getWidth()][a.getHeight()];
 		int[][] objectIDMap = new int[a.getWidth()][a.getHeight()];
+		SpriteConfig[][] configMap = new SpriteConfig[a.getWidth()][a.getHeight()];
 		for (int x=0;x<a.getWidth();x++) {
 			for (int y=0;y<a.getHeight();y++) {
 				Terrain te = a.get(x, y).getTerrain();
 				tileIDMap[x][y] = te!=null?te.getId():0;
 				Thing ti = a.get(x, y).getThing();
 				objectIDMap[x][y] = ti!=null?ti.getId():0;
+				SpriteConfig sc = a.get(x, y).getSpriteConfig();
+				if (sc.flip || sc.rotation!=0 || sc.spriteX!=0 || sc.spriteY!=0) {
+					configMap[x][y] = sc;
+				}
 			}
 		}
 		ArenaData ad = new ArenaData();

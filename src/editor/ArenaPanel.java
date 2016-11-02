@@ -26,18 +26,14 @@ import client.graphics.Renderer;
 import client.gui.Camera;
 import client.gui.ClientPlayer;
 import client.gui.GameWindow;
-import client.image.HardLightComposite;
-import client.image.MultiplyComposite;
 import client.image.SoftHardLightComposite;
-import client.image.SoftLightComposite;
-import server.world.Arena;
 import server.world.Terrain;
 import shared.network.FullCharacterData;
 import shared.network.GameDataPackets.InputPacket;
 
 public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWheelListener{
 	private static final long serialVersionUID = 2649458143637701147L;
-	private Renderer renderer = new Renderer();
+	//private Renderer renderer = new Renderer();
 	private EditorArena arena;
 	public BufferedImage lightImage;
 	
@@ -49,7 +45,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	protected boolean renderGrid;
 	
 	private Camera camera;
-	private double zoomLevel;
+	//private double zoomLevel;
 	private ClientPlayer playerInfo = new ClientPlayer();
 	FullCharacterData player = new FullCharacterData();
 	private InputPacket input = new InputPacket();

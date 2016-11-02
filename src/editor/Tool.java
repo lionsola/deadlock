@@ -132,11 +132,11 @@ public class Tool extends MouseInputAdapter {
 		
 		@Override
 		public void mousePressed(MouseEvent e) {
-			if (e.getButton()==MouseEvent.BUTTON1) {
-				Point p = getPointedTile(e);
-				Tile tile = arenaPanel.getArena().get(p); 
-				Thing thing = tile.getThing();
-				if (thing!=null) {
+			Point p = getPointedTile(e);
+			Tile tile = arenaPanel.getArena().get(p); 
+			Thing thing = tile.getThing();
+			if (thing!=null) {
+				if (e.getButton()==MouseEvent.BUTTON1) {
 					BufferedImage image = thing.getImage();
 					int w = image.getWidth()/32;
 					int h = image.getHeight()/32;
@@ -151,17 +151,18 @@ public class Tool extends MouseInputAdapter {
 							config.spriteY = (config.spriteY+1)%h;
 						}
 					}
-				}
-			} else if (e.getButton()==MouseEvent.BUTTON3) {
-				Point p = getPointedTile(e);
-				Tile tile = arenaPanel.getArena().get(p); 
-				Thing thing = tile.getThing();
-				if (thing!=null) {
+				} else if (e.getButton()==MouseEvent.BUTTON3) {
 					if (tile.getSpriteConfig()==null) {
 						tile.setSpriteConfig(new SpriteConfig());
 					}
 					SpriteConfig config = tile.getSpriteConfig();
 					config.rotation = (config.rotation+1)%4;
+				} else if (e.getButton()==MouseEvent.BUTTON2) {
+					if (tile.getSpriteConfig()==null) {
+						tile.setSpriteConfig(new SpriteConfig());
+					}
+					SpriteConfig config = tile.getSpriteConfig();
+					config.flip = !config.flip;
 				}
 			}
 		}
