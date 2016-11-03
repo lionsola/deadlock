@@ -1,6 +1,7 @@
 package editor;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -52,13 +53,16 @@ public class Editor extends JFrame {
 
 	HashMap<Integer,Terrain> tileTable;
 	HashMap<Integer,Thing> objectTable;
+	
+	public boolean tileDataChanged = false;
+	
     public Editor() {
         GraphicsDevice screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         width = (int) screenSize.getWidth();
         height = (int) screenSize.getHeight();
-
+        
         setTitle("Map Editor");
         // setIgnoreRepaint(true);
         //setResizable(false);
@@ -67,7 +71,7 @@ public class Editor extends JFrame {
         if (screen.isFullScreenSupported()) {
             //setUndecorated(true);
         }
-        
+        this.setBackground(Color.BLACK);
 		//tiles = DataManager.loadTileListOld();
 		tiles = (List<Terrain>) DataManager.loadObject(DataManager.FILE_TILES);
         try {
@@ -94,10 +98,12 @@ public class Editor extends JFrame {
         this.addWindowListener(new WindowAdapter() {
         	@Override
         	public void windowClosing(WindowEvent e) {
-        		//DataManager.saveObject(tiles, DataManager.FILE_TILES);
-        		//DataManager.saveObject(objects, DataManager.FILE_OBJECTS);
-        		//DataManager.saveTileListOld(tiles);
-        		//DataManager.saveObjectListOld(objects);
+        		if (tileDataChanged) {
+	        		DataManager.saveObject(tiles, DataManager.FILE_TILES);
+	        		DataManager.saveObject(objects, DataManager.FILE_OBJECTS);
+	        		DataManager.saveTileListOld(tiles);
+	        		DataManager.saveObjectListOld(objects);
+        		}
         	}
         });
         pack();
@@ -154,6 +160,7 @@ public class Editor extends JFrame {
     	arenaPanel.removeMouseListener(currentTool);
     	arenaPanel.removeMouseMotionListener(currentTool);
     	arenaPanel.removeMouseWheelListener(currentTool);
+    	
     	arenaPanel.addMouseListener(tool);
     	arenaPanel.addMouseMotionListener(tool);
     	arenaPanel.addMouseWheelListener(tool);
@@ -170,9 +177,7 @@ public class Editor extends JFrame {
     
     public static void main(String[] args) {
 		try {
-		    // Set System L&F
-		    UIManager.setLookAndFeel(
-		        UIManager.getSystemLookAndFeelClassName());
+		    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} 
 		catch (Exception e) {
 		}

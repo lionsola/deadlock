@@ -51,20 +51,24 @@ public class TileBGDialog extends JDialog implements ActionListener {
         c.gridy = 0;
         id = new JFormattedTextField();
         id.setHorizontalAlignment(JTextField.CENTER);
+        id.setToolTipText("Terrain's ID");
         topPanel.add(id,c);
         
         c.gridy += 1;
         name = new JTextField();
         name.setHorizontalAlignment(JTextField.CENTER);
+        name.setToolTipText("Terrain's name");
         topPanel.add(name,c);
         
         c.gridy += 1;
         c.fill = GridBagConstraints.BOTH;
         tileImage = new JLabel();
+        tileImage.setToolTipText("Terrain Sprite");
     	topPanel.add(tileImage,c);
         
     	c.gridy += 1;
         imageName = new JLabel();
+        imageName.setToolTipText("Sprite File");
     	topPanel.add(imageName,c);
     	
         c.gridy += 1;
@@ -122,7 +126,7 @@ public class TileBGDialog extends JDialog implements ActionListener {
 			tile.setName(name.getText());
 			tile.setImage(curTileImage);
 			tile.setImageName(imageName.getText());
-			
+			editor.tileDataChanged = true;
 			// Close the dialog
 			this.setVisible(false);
 			this.dispose();

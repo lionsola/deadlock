@@ -157,9 +157,16 @@ public abstract class MatchServer implements Runnable, GameEventListener {
 		sendState();
 		events.add(new GameEndEvent());
 		sendState();
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		for (ServerPlayer p:players) {
 			try {
-				p.connection.getSocket().close();
+				if (p.connection.getSocket()!=null)
+					p.connection.getSocket().close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

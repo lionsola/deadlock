@@ -1,6 +1,7 @@
 package server.weapon;
 
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 
 import client.graphics.AnimationSystem;
 import client.gui.GameWindow;
@@ -30,7 +31,8 @@ public class Bullet extends Projectile {
 		//w.getEventListener().onEventReceived(new BulletHitPlayerEvent( x, y));
 		double damageRatio;
 		double HEADSHOT_DISTANCE = ch.getRadius()/10;
-		double bulletDist = Line2D.ptLineDist(getX()-getDx(), getY()-getDy(), x, y, ch.getX(), ch.getY());
+		Point2D h = ch.getHead();
+		double bulletDist = Line2D.ptLineDist(getX()-getDx(), getY()-getDy(), x, y, h.getX(), h.getY());
 		if (bulletDist<=HEADSHOT_DISTANCE) {
 			damageRatio = 99999;
 		}

@@ -18,13 +18,13 @@ import javax.swing.event.ChangeListener;
 
 import editor.Editor;
 
-public class NewLightDialog extends JDialog {
+public class LightSourceDialog extends JDialog {
 	private static final long serialVersionUID = 5917436825785813483L;
 	private JButton color;
 	private int range = 3;
-	public NewLightDialog (final Editor editor, final JToggleButton button) {
+	public LightSourceDialog (final Editor editor, final JToggleButton button) {
 		super(editor, "Light", false);
-        JPanel topPanel = new JPanel(new GridBagLayout());
+        JPanel panel = new JPanel(new GridBagLayout());
         //editor.setTool(tool);
         addWindowListener(new WindowAdapter(){
 			@Override
@@ -35,7 +35,7 @@ public class NewLightDialog extends JDialog {
         rangePicker.setMajorTickSpacing(1);
         rangePicker.setPaintTicks(true);
         rangePicker.setPaintLabels(true);
-        
+        rangePicker.setToolTipText("Light range (in tiles)");
         rangePicker.addChangeListener(new ChangeListener(){
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -50,7 +50,7 @@ public class NewLightDialog extends JDialog {
         
         c.gridx = 0;
         c.gridy = 0;
-        topPanel.add(rangePicker);
+        panel.add(rangePicker);
         
         c.gridy += 1;
         color = new JButton("0xffffffff");
@@ -65,9 +65,10 @@ public class NewLightDialog extends JDialog {
 				color.setText(Integer.toHexString(newColor.getRGB()));
 			}
         });
-        topPanel.add(color,c);
+        color.setToolTipText("Light color (alpha channel is ignored)");
+        panel.add(color,c);
         
-        this.setContentPane(topPanel);
+        this.setContentPane(panel);
         this.pack();
         this.setLocationRelativeTo(editor);
 	}

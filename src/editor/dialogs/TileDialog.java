@@ -43,6 +43,7 @@ public class TileDialog extends JDialog implements ActionListener {
 	private JCheckBox walkable;
 	private JCheckBox clear;
 	private JComboBox<String> cover;
+	private JFormattedTextField spriteSize;
 	
 	public TileDialog (Editor editor, Thing tile) {
 		super(editor, "Edit tile", true);
@@ -57,20 +58,24 @@ public class TileDialog extends JDialog implements ActionListener {
         c.gridy = 0;
         id = new JFormattedTextField();
         id.setHorizontalAlignment(JTextField.CENTER);
+        id.setToolTipText("Thing's ID");
         topPanel.add(id,c);
         
         c.gridy += 1;
         name = new JTextField();
         name.setHorizontalAlignment(JTextField.CENTER);
+        name.setToolTipText("Thing's name");
         topPanel.add(name,c);
         
         c.gridy += 1;
         c.fill = GridBagConstraints.BOTH;
         tileImage = new JLabel();
+        tileImage.setToolTipText("Thing's sprite");
         topPanel.add(tileImage,c);
         
         c.gridy += 1;
         imageName = new JLabel();
+        imageName.setToolTipText("Sprite file");
     	topPanel.add(imageName,c);
         
         c.gridy += 1;
@@ -80,20 +85,26 @@ public class TileDialog extends JDialog implements ActionListener {
         topPanel.add(loadImage,c);
         
         c.gridy += 1;
+        spriteSize = new JFormattedTextField();
+        spriteSize.setToolTipText("Sprite size");
+        topPanel.add(spriteSize,c);
+        
+        c.gridy += 1;
         walkable = new JCheckBox("Walkable");
-        //walkable.setSelected(tile.isWalkable());
         topPanel.add(walkable,c);
         
         c.gridy += 1;
-        clear = new JCheckBox("Sight-blocking");
-        //sightBlocking.setSelected(!tile.isTransparent());
+        clear = new JCheckBox("Clear");
         topPanel.add(clear,c);
         
         c.gridy += 1;
+        JPanel coverPanel = new JPanel();
+        coverPanel.add(new JLabel("Cover: "));
         String[] coverTypes = {"None","Light","Medium","Heavy"};
         cover = new JComboBox<String>(coverTypes);
         //cover.setSelectedIndex(tile.getCoverType());
-        topPanel.add(cover,c);
+        coverPanel.add(cover);
+        topPanel.add(coverPanel,c);
         
         c.gridy += 1;
         save = new JButton("Save");
@@ -113,6 +124,7 @@ public class TileDialog extends JDialog implements ActionListener {
         	}
         	imageName.setText(tile.getImageName());
         	curTileImage = tile.getImage();
+        	spriteSize.setValue(tile.getSpriteSize());
         } else {
         	int ID = Utils.random().nextInt();
         	//this.tile = new TileBG(ID);
@@ -150,9 +162,11 @@ public class TileDialog extends JDialog implements ActionListener {
 			tile.setImageName(imageName.getText());
 			
 			tile.setCoverType(cover.getSelectedIndex());
-			tile.setTransparent(!clear.isSelected());
+			tile.setTransparent(clear.isSelected());
 			tile.setWalkable(walkable.isSelected());
+			tile.setSpriteSize(((Number)spriteSize.getValue()).doubleValue());
 			
+			editor.tileDataChanged = true;
 			// Close the dialog
 			this.setVisible(false);
 			this.dispose();

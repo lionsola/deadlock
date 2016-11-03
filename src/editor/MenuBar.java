@@ -110,7 +110,7 @@ public class MenuBar extends JMenuBar {
 		
 		JMenu edit = new JMenu("Edit");
 		add(edit);
-		final JMenuItem editSize = new JMenuItem("Map size");
+		final JMenuItem editSize = new JMenuItem("Map");
 		editSize.addActionListener(new ActionListener() {
 
 			@Override
@@ -120,31 +120,48 @@ public class MenuBar extends JMenuBar {
 				JPanel panel = new JPanel();
 				panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 				
+				JPanel namePanel = new JPanel();
+				namePanel.add(new JLabel("Name: "));
+				JTextField name = new JTextField(editor.getArenaPanel().getArena().getName());
+				name.setColumns(15);
+				name.setEditable(true);
+				namePanel.add(name);
+				panel.add(namePanel);
+				
 				JPanel sizePanel = new JPanel();
 				JFormattedTextField width = new JFormattedTextField(a.getWidth());
 				JFormattedTextField height = new JFormattedTextField(a.getHeight());
 				
+				sizePanel.add(new JLabel("Size: "));
 				sizePanel.add(width);
 				sizePanel.add(new JLabel(" x "));
 				sizePanel.add(height);
 				
 				panel.add(sizePanel);
 				
-				panel.add(new JLabel("Horizontal alignment"));
+				JPanel hAPanel = new JPanel();
+				hAPanel.add(new JLabel("Horizontal alignment: "));
 				String[] hAligns = { "Left", "Right" };
 				JComboBox<String> hAlign = new JComboBox<String>(hAligns);
-				panel.add(hAlign);
+				hAlign.setMaximumSize(hAlign.getPreferredSize());
+				hAPanel.add(hAlign);
+				panel.add(hAPanel);
 				
-				panel.add(new JLabel("Vertical alignment"));
+				JPanel vAPanel = new JPanel();
+				vAPanel.add(new JLabel("Vertical alignment: "));
 				String[] vAligns = { "Top", "Bottom" };
 				JComboBox<String> vAlign = new JComboBox<String>(vAligns);
-				panel.add(vAlign);
+				vAlign.setMaximumSize(vAlign.getPreferredSize());
+				vAPanel.add(vAlign);
+				panel.add(vAPanel);
 				
-				int result = JOptionPane.showConfirmDialog(editor,panel,"Edit map size",JOptionPane.OK_CANCEL_OPTION);
+				int result = JOptionPane.showConfirmDialog(editor,panel,"Edit map",JOptionPane.OK_CANCEL_OPTION,
+						JOptionPane.PLAIN_MESSAGE);
 				if (result==JOptionPane.OK_OPTION) {
 					int w = Integer.parseInt(width.getText());
 					int h = Integer.parseInt(height.getText());
-					if (w>0 && h>0) {
+					if (w>0 && h>0 && !name.getText().equals("")) {
+						a.setName(name.getText());
 						a.changeSize(w,h, hAlign.getSelectedIndex(), vAlign.getSelectedIndex());
 					}
 				}
@@ -208,6 +225,7 @@ public class MenuBar extends JMenuBar {
 		view.add(hardLight);
 		
 		JCheckBoxMenuItem grid = new JCheckBoxMenuItem("Grid");
+		grid.setSelected(true);
 		grid.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {

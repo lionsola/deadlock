@@ -42,7 +42,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	protected boolean renderLight = false;
 	protected boolean renderHardLight = false;
 	protected boolean renderLightSource = false;
-	protected boolean renderGrid;
+	protected boolean renderGrid = true;
 	
 	private Camera camera;
 	//private double zoomLevel;
@@ -62,6 +62,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		this.setFocusable(true);
 		this.requestFocusInWindow();
 		this.setIgnoreRepaint(true);
+		this.setBackground(Color.DARK_GRAY);
 		setFocusTraversalKeysEnabled(false);
 		
 		addKeyListener(this);

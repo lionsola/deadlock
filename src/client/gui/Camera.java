@@ -17,8 +17,7 @@ public class Camera {
 	private Component parent;
 	private int x;
 	private int y;
-	private final double arenaWidthMeter;
-	private final double arenaHeightMeter;
+	private Arena arena;
 
 	/**
 	 * Creates a camera which will follow the player
@@ -28,8 +27,7 @@ public class Camera {
 	 */
 	public Camera(Arena arena, Component parent) {
 		this.parent = parent;
-		this.arenaWidthMeter = arena.getWidthMeter();
-		this.arenaHeightMeter = arena.getHeightMeter();
+		this.arena = arena;
 		//x = arenaWidthMeter / 2;
 		//y = arenaHeightMeter / 2;
 	}
@@ -53,8 +51,8 @@ public class Camera {
 	 *            The parent
 	 */
 	public void update(double px, double py) {
-		int arenaWidthPixel = (int) (arenaWidthMeter*Renderer.getPPM()+0.5);
-		int arenaHeightPixel = (int) (arenaHeightMeter*Renderer.getPPM()+0.5);
+		int arenaWidthPixel = (int) (arena.getWidthMeter()*Renderer.getPPM()+0.5);
+		int arenaHeightPixel = (int) (arena.getHeightMeter()*Renderer.getPPM()+0.5);
 		
 		if (arenaWidthPixel > parent.getWidth()) {
 			x = Math.min(Renderer.toPixel(px), (int)(arenaWidthPixel - parent.getWidth() / 2.0));
@@ -134,8 +132,8 @@ public class Camera {
 	}
 
 	public Rectangle2D getDrawArea() {
-		return new Rectangle2D.Double(getTopLeftXMeter(), getTopLeftYMeter(),
-				Renderer.toMeter(parent.getWidth()), Renderer.toMeter(parent.getHeight()));
+		return new Rectangle2D.Double(Math.max(0,getTopLeftXMeter()), Math.max(0,getTopLeftYMeter()),
+				Math.min(arena.getWidthMeter(),Renderer.toMeter(parent.getWidth())), Math.min(arena.getHeightMeter(),Renderer.toMeter(parent.getHeight())));
 	}
 
 	public Rectangle getDrawAreaPixel() {

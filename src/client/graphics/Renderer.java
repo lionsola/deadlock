@@ -79,6 +79,7 @@ public class Renderer {
 	private static double ppm = Renderer.DEFAULT_PPM;
 	
 	public void initArenaImages(Arena arena) {
+		
 		try {
 			arenaImage = ImageIO.read(new FileInputStream("resource/map/"+arena.getName()+"_mid.png"));
 		} catch (IOException e) {
@@ -329,8 +330,8 @@ public class Renderer {
 		double ts = Terrain.tileSize;
 		int x1 = Math.max(0, (int) (window.getX() / ts));
 		int y1 = Math.max(0, (int) (window.getY() / ts));
-		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (window.getWidth() / ts) + 1);
-		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (window.getHeight() / ts) + 1);
+		int x2 = Math.min(a.getWidth(), x1 + (int) (window.getWidth() / ts) + 1);
+		int y2 = Math.min(a.getHeight(), y1 + (int) (window.getHeight() / ts) + 1);
 		
 		for (int x = x1; x <= x2; x++) {
 			Renderer.drawLine(g2D, x*ts, y1*ts, x*ts, y2*ts);
@@ -422,9 +423,13 @@ public class Renderer {
 		int screenY = toPixel(y);
 		int screenW = toPixel(w+x-Renderer.toMeter(screenX));
 		int screenH = toPixel(h+y-Renderer.toMeter(screenY));
-		g2D.drawImage(image, screenX, screenY, screenW+screenX, screenH+screenY,
-				toPixelDefault(sx), toPixelDefault(sy), toPixelDefault(sx+sw), toPixelDefault(sy+sh),
-				null);
+		try {
+			g2D.drawImage(image, screenX, screenY, screenW+screenX, screenH+screenY,toPixelDefault(sx), toPixelDefault(sy),
+					toPixelDefault(sx+sw), toPixelDefault(sy+sh),
+					null);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	static void fillRect(Graphics2D g2D, double x, double y, double w, double h) {

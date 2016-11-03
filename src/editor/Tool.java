@@ -4,9 +4,10 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
+import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputAdapter;
 import client.graphics.Renderer;
-import editor.dialogs.NewLightDialog;
+import editor.dialogs.LightSourceDialog;
 import server.world.Thing;
 import server.world.Tile;
 import server.world.Light;
@@ -35,10 +36,10 @@ public class Tool extends MouseInputAdapter {
 		
 		@Override
 		public void mousePressed(MouseEvent e) {
-			if (e.getButton()==MouseEvent.BUTTON1) {
+			if (SwingUtilities.isLeftMouseButton(e)) {
 				Point p = getPointedTile(e);
 				arenaPanel.getArena().setTerrain(p.x, p.y, tile);
-			} else if (e.getButton()==MouseEvent.BUTTON2) {
+			} else if (SwingUtilities.isRightMouseButton(e)) {
 				Point p = getPointedTile(e);
 				arenaPanel.getArena().setTerrain(p.x, p.y, null);
 			}
@@ -60,10 +61,10 @@ public class Tool extends MouseInputAdapter {
 		
 		@Override
 		public void mousePressed(MouseEvent e) {
-			if (e.getButton()==MouseEvent.BUTTON1) {
+			if (SwingUtilities.isLeftMouseButton(e)) {
 				Point p = getPointedTile(e);
 				arenaPanel.getArena().setThing(p.x, p.y, object);
-			} else if (e.getButton()==MouseEvent.BUTTON2) {
+			} else if (SwingUtilities.isRightMouseButton(e)) {
 				Point p = getPointedTile(e);
 				arenaPanel.getArena().setThing(p.x, p.y, null);
 			}
@@ -76,19 +77,19 @@ public class Tool extends MouseInputAdapter {
 	}
 	
 	public static class NewLightPaint extends Tool {
-		NewLightDialog colorPicker;
-		public NewLightPaint(ArenaPanel arenaPanel, NewLightDialog lightDialog) {
+		LightSourceDialog colorPicker;
+		public NewLightPaint(ArenaPanel arenaPanel, LightSourceDialog lightDialog) {
 			super(arenaPanel);
 			this.colorPicker = lightDialog;
 		}
 		
 		@Override
 		public void mousePressed(MouseEvent e) {
-			if (e.getButton()==MouseEvent.BUTTON1) {
+			if (SwingUtilities.isLeftMouseButton(e)) {
 				Point p = getPointedTile(e);
 				arenaPanel.getArena().addLight(new Light(p.x,p.y,colorPicker.getColor(),colorPicker.getRange()));
 				arenaPanel.generateLightImage();
-			} else if (e.getButton()==MouseEvent.BUTTON2) {
+			} else if (SwingUtilities.isRightMouseButton(e)) {
 				Point p = getPointedTile(e);
 				arenaPanel.getArena().clearLight(p.x, p.y);
 				arenaPanel.generateLightImage();
@@ -136,7 +137,7 @@ public class Tool extends MouseInputAdapter {
 			Tile tile = arenaPanel.getArena().get(p); 
 			Thing thing = tile.getThing();
 			if (thing!=null) {
-				if (e.getButton()==MouseEvent.BUTTON1) {
+				if (SwingUtilities.isLeftMouseButton(e)) {
 					BufferedImage image = thing.getImage();
 					int w = image.getWidth()/32;
 					int h = image.getHeight()/32;
@@ -151,13 +152,13 @@ public class Tool extends MouseInputAdapter {
 							config.spriteY = (config.spriteY+1)%h;
 						}
 					}
-				} else if (e.getButton()==MouseEvent.BUTTON3) {
+				} else if (SwingUtilities.isRightMouseButton(e)) {
 					if (tile.getSpriteConfig()==null) {
 						tile.setSpriteConfig(new SpriteConfig());
 					}
 					SpriteConfig config = tile.getSpriteConfig();
 					config.rotation = (config.rotation+1)%4;
-				} else if (e.getButton()==MouseEvent.BUTTON2) {
+				} else if (SwingUtilities.isMiddleMouseButton(e)) {
 					if (tile.getSpriteConfig()==null) {
 						tile.setSpriteConfig(new SpriteConfig());
 					}

@@ -5,6 +5,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -22,7 +27,7 @@ import javax.swing.event.ListSelectionListener;
 import client.gui.GUIFactory;
 import editor.Tool.*;
 import editor.dialogs.ListDialog;
-import editor.dialogs.NewLightDialog;
+import editor.dialogs.LightSourceDialog;
 import editor.dialogs.TileBGDialog;
 import editor.dialogs.TileDialog;
 import server.world.Thing;
@@ -38,7 +43,14 @@ public class ToolMenu extends JPanel {
 		this.editor = editor;
 		this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 		
-		final JButton move = new JButton("Move");
+		final JButton move = new JButton();
+		stylizeToolButton(move);
+		try {
+			move.setIcon(new ImageIcon(ImageIO.read(new File("resource/editor/hand.png"))));
+		} catch (IOException e1) {
+			move.setText("H");
+		}
+		move.setToolTipText("Hand Tool");
 		move.addActionListener(new ActionListener() { 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -46,7 +58,15 @@ public class ToolMenu extends JPanel {
 			}});
 		this.add(move);
 		
-		final JToggleButton tilePaint = new JToggleButton("Tiles");
+		
+		final JToggleButton tilePaint = new JToggleButton();
+		stylizeToolButton(tilePaint);
+		try {
+			tilePaint.setIcon(new ImageIcon(ImageIO.read(new File("resource/editor/terrain.png"))));
+		} catch (IOException e1) {
+			tilePaint.setText("Terrain");
+		}
+		tilePaint.setToolTipText("Terrain Paint");
 		tilePaint.addItemListener(new ItemListener() {
 			ListDialog<Terrain> list = null;
 			@Override
@@ -84,7 +104,9 @@ public class ToolMenu extends JPanel {
 							@Override
 							public void actionPerformed(ActionEvent e) {
 								int result = JOptionPane.showConfirmDialog(editor,
-										"Deleting an object will affect all maps that use it.\nProceed?",
+										"Deleting an object will affect all maps that use it."
+										+ "\nRemove this object from those maps first."
+										+ "\nProceed?",
 										"WARNING", JOptionPane.OK_CANCEL_OPTION);
 								if (result==JOptionPane.OK_OPTION) {
 									String s = JOptionPane.showInputDialog(editor,
@@ -93,6 +115,7 @@ public class ToolMenu extends JPanel {
 										Terrain t = list.getList().getSelectedValue();
 										editor.tiles.remove(t);
 										editor.tileTable.remove(t.getId());
+										editor.tileDataChanged = true;
 										tlm.invalidate();
 									}
 								}
@@ -109,7 +132,14 @@ public class ToolMenu extends JPanel {
 		tilePaint.addItemListener(toggleButtonSwitch);
 		this.add(tilePaint);
 		
-		final JToggleButton objectPaint = new JToggleButton("Objects");
+		final JToggleButton objectPaint = new JToggleButton();
+		stylizeToolButton(objectPaint);
+		try {
+			objectPaint.setIcon(new ImageIcon(ImageIO.read(new File("resource/editor/thing.png"))));
+		} catch (IOException e1) {
+			objectPaint.setText("Thing");
+		}
+		objectPaint.setToolTipText("Thing Paint");
 		objectPaint.addItemListener(new ItemListener() {
 			ListDialog<Thing> list = null;
 			@Override
@@ -146,7 +176,9 @@ public class ToolMenu extends JPanel {
 							@Override
 							public void actionPerformed(ActionEvent e) {
 								int result = JOptionPane.showConfirmDialog(editor,
-										"Deleting an object will affect all maps that use it.\nProceed?",
+										"Deleting an object will affect all maps that use it."
+										+ "\nRemove this object from those maps first."
+										+ "\nProceed?",
 										"WARNING", JOptionPane.OK_CANCEL_OPTION);
 								if (result==JOptionPane.OK_OPTION) {
 									String s = JOptionPane.showInputDialog(editor,
@@ -155,6 +187,7 @@ public class ToolMenu extends JPanel {
 										Thing t = list.getList().getSelectedValue();
 										editor.objects.remove(t);
 										editor.objectTable.remove(t.getId());
+										editor.tileDataChanged = true;
 										tlm.invalidate();
 									}
 								}
@@ -171,7 +204,14 @@ public class ToolMenu extends JPanel {
 		objectPaint.addItemListener(toggleButtonSwitch);
 		this.add(objectPaint);
 		
-		final JToggleButton editSprite = new JToggleButton("Edit sprite");
+		final JToggleButton editSprite = new JToggleButton();
+		stylizeToolButton(editSprite);
+		try {
+			editSprite.setIcon(new ImageIcon(ImageIO.read(new File("resource/editor/rotate.png"))));
+		} catch (IOException e1) {
+			editSprite.setText("Sprite");
+		}
+		editSprite.setToolTipText("Edit Sprite");
 		editSprite.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
@@ -185,12 +225,19 @@ public class ToolMenu extends JPanel {
 		editSprite.addItemListener(toggleButtonSwitch);
 		this.add(editSprite);
 		
-		final JToggleButton nLight = new JToggleButton("LightSource");
-		nLight.addActionListener(new ActionListener() {
-			NewLightDialog dialog = new NewLightDialog(editor,nLight);
+		final JToggleButton light = new JToggleButton();
+		stylizeToolButton(light);
+		try {
+			light.setIcon(new ImageIcon(ImageIO.read(new File("resource/editor/light.png"))));
+		} catch (IOException e1) {
+			light.setText("Light");
+		}
+		light.setToolTipText("Light Source");
+		light.addActionListener(new ActionListener() {
+			LightSourceDialog dialog = new LightSourceDialog(editor,light);
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if (nLight.isSelected()) {
+				if (light.isSelected()) {
 					dialog.setVisible(true);
 					editor.getArenaPanel().renderLightSource = true;
 					editor.setTool(new Tool.NewLightPaint(editor.getArenaPanel(), dialog));
@@ -202,8 +249,16 @@ public class ToolMenu extends JPanel {
 				}
 			}
 		});
-		nLight.addItemListener(toggleButtonSwitch);
-		this.add(nLight);
+		light.addItemListener(toggleButtonSwitch);
+		this.add(light);
+	}
+	
+	private static void stylizeToolButton(AbstractButton button) {
+		//button.setOpaque(true);
+		button.setFocusable(false);
+		//button.setBackground(Color.BLACK);
+		button.setBorderPainted(false);
+		button.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 	}
 	
 	private ItemListener toggleButtonSwitch = new ItemListener() {
@@ -230,7 +285,7 @@ public class ToolMenu extends JPanel {
 		public Component getListCellRendererComponent(JList<? extends CellRenderable> list,
 				final CellRenderable value, int index, boolean isSelected, boolean cellHasFocus) {
 			ImageIcon icon = new ImageIcon(value.getImage());
-			JLabel tile = new JLabel(value.getName(), icon, SwingConstants.LEFT);
+			JLabel tile = new JLabel(icon, SwingConstants.LEFT);
 			tile.setOpaque(true);
 			tile.setFont(GUIFactory.font_s);
 			tile.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
@@ -242,6 +297,7 @@ public class ToolMenu extends JPanel {
 				tile.setBackground(list.getBackground());
 				tile.setForeground(list.getForeground());
 			}
+			tile.setToolTipText(value.getName());
 			return tile;
 		}
 	};

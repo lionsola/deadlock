@@ -31,7 +31,7 @@ public class Arena {
 	public static final int T1_COLOR = 0x00ff00; // red spawn colour
 	public static final int T2_COLOR = 0xff0000; // green spawn colour
 
-	private String name; // the name of the map
+	protected String name; // the name of the map
 	private transient List<Point2D> t1Spawns; // spawn points of team 1
 	private transient List<Point2D> t2Spawns; // spawn points of team 2
 	protected List<Light> lightList;
@@ -88,6 +88,7 @@ public class Arena {
 				tMap[x][y] = new Tile();
 			}
 		}
+		this.lightList = new LinkedList<Light>();
 	}
 	
 	private void initialize(ArenaData ad, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable) {
@@ -265,22 +266,25 @@ public class Arena {
 		t2Spawns = new LinkedList<Point2D>();
 		for (int x=0;x<getWidth();x++) {
 			for (int y=0;y<getWidth();y++) {
-				if (get(x,y).getThing().getId()==T1_COLOR) {
-					t1Spawns.add(new Point2D.Double((x+0.5)*Terrain.tileSize, (y+0.5)*Terrain.tileSize));
-				} else if (get(x,y).getThing().getId()==T2_COLOR) {
-					t2Spawns.add(new Point2D.Double((x+0.5)*Terrain.tileSize, (y+0.5)*Terrain.tileSize));
+				Thing t = get(x,y).getThing();
+				if (t!=null) {
+					if (t.getId()==T1_COLOR) {
+						t1Spawns.add(new Point2D.Double((x+0.5)*Terrain.tileSize, (y+0.5)*Terrain.tileSize));
+					} else if (t.getId()==T2_COLOR) {
+						t2Spawns.add(new Point2D.Double((x+0.5)*Terrain.tileSize, (y+0.5)*Terrain.tileSize));
+					}
 				}
 			}
 		}
 	}
 	
 	public void setTerrain(int x, int y, Terrain t) {
-		if (x>0 && x<getWidth() && y>0 && y<getHeight())
+		if (x>=0 && x<getWidth() && y>=0 && y<getHeight())
 			tMap[x][y].setTerrain(t);
 	}
 
 	public void setThing(int x, int y, Thing ob) {
-		if (x>0 && x<getWidth() && y>0 && y<getHeight())
+		if (x>=0 && x<getWidth() && y>=0 && y<getHeight())
 			tMap[x][y].setThing(ob);
 	}
 	

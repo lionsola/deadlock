@@ -291,4 +291,10 @@ public class PlayerCharacter extends Character {
 			w.getEventListener().onEventReceived(new PlayerDieEvent(sourceId, id));
 		}
 	}
+
+	public Point2D getHead() {
+		Point2D head = Geometry.PolarToCartesian(getRadius()*0.4, getDirection());
+		head.setLocation(head.getX()+getX(),head.getY()+getY());
+		return head;
+	}
 }

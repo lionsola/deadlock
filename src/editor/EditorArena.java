@@ -74,4 +74,8 @@ public class EditorArena extends Arena {
 		}
 		tMap = newTMap;
 	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 }

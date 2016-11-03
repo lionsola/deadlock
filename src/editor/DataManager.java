@@ -317,7 +317,7 @@ public class DataManager {
 				Thing ti = a.get(x, y).getThing();
 				objectIDMap[x][y] = ti!=null?ti.getId():0;
 				SpriteConfig sc = a.get(x, y).getSpriteConfig();
-				if (sc.flip || sc.rotation!=0 || sc.spriteX!=0 || sc.spriteY!=0) {
+				if (sc!=null && (sc.flip || sc.rotation!=0 || sc.spriteX!=0 || sc.spriteY!=0)) {
 					configMap[x][y] = sc;
 				}
 			}
