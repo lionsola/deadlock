@@ -9,8 +9,10 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+/**
+ * Representing a single sound, the most basic type of sound.
+ */
 public class SingleSound implements Sound {
-	// the client.sound' sample byte array
 	private AudioFormat format;
 	private byte[] samples;
 

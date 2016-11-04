@@ -7,6 +7,11 @@ import server.world.Geometry;
 import server.world.Projectile;
 import server.world.Utils;
 
+/**
+ * Defines a piece of armour that certain classes can wear
+ * (example: ballistic shield). The armour protects damage coming from
+ * a certain angle.
+ */
 public class Armor {
 	private double startAngle;
 	private double extend;

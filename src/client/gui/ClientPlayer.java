@@ -5,9 +5,7 @@ import java.io.Serializable;
 import shared.network.PartialCharacterData;
 
 /**
- * Models a client player.
- * 
- * @author Anh Pham
+ * Store player data on client side.
  */
 public class ClientPlayer implements Serializable {
 

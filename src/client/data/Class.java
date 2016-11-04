@@ -6,8 +6,9 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * This class (and this package) will hold client-side textual
- * and game-play data.
+ * This class (and this package) is supposed to load client-side textual
+ * and game-play data. The role might be delegated to another class if
+ * there's too little data.
  */
 public class Class {
 	private static ArrayList<Class> classes;

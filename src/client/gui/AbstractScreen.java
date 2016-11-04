@@ -13,8 +13,6 @@ import javax.swing.JPanel;
 /**
  * Abstract class. AbstractScreen objects are used within a GameWindow to switch between, well, screens.
  * i.e MenuScreen, GameScreen, OptionScreen ...
- * 
- * @author Anh Pham
  */
 public abstract class AbstractScreen extends JPanel {
 

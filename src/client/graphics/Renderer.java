@@ -12,6 +12,8 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.geom.Arc2D;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -33,8 +35,9 @@ import shared.network.PartialCharacterData;
 import shared.network.ProjectileData;
 
 /**
- * Supposed to be the client.graphics "engine" of the game, this class provides all the rendering methods
- * needed to draw things on the client.gui.
+ * This class provides all the rendering methods
+ * needed to draw things. It converts values in meter
+ * to pixel before drawing. 
  */
 public class Renderer {
 	public static final int CURSOR_BMP_SIZE = 33;
@@ -42,7 +45,7 @@ public class Renderer {
 	public static final double CHARACTER_WIDTH = 0.1;
 	public static final double HEALTHBAR_WIDTH = 0.25;
 	//private static Color defaultColor = Color.WHITE;
-	public static final Color[] teamColors = {Color.GREEN.darker(),Color.RED.darker()};
+	public static final Color[] teamColors = {new Color(0x2eb62e),new Color(0xb62e2e)};
 	/**
 	 * @return the arenaImage
 	 */
@@ -132,6 +135,10 @@ public class Renderer {
 		// render the character
 		renderCharacter(g2D, player.x, player.y, player.direction, player.radius, playerInfo.type,playerInfo.team);
 		renderArmor(g2D,player.x, player.y, player.radius,player.direction+player.armorStart,player.armorAngle,playerInfo.team);
+		
+	}
+
+	public static void renderUI(Graphics2D g2D, FullCharacterData player) {
 		// render the health bar
 		g2D.setStroke(new BasicStroke(toPixel(HEALTHBAR_WIDTH)));
 		g2D.setColor(new Color(255, 50, 50));
@@ -149,7 +156,7 @@ public class Renderer {
 			drawLine(g2D, x, topy, x + length, topy);
 		}
 	}
-
+	
 	public static void renderOtherCharacter(Graphics2D g2D, PartialCharacterData c, int typeId) {
 		renderCharacter(g2D,c.x,c.y,c.direction,c.radius,typeId,c.team);
 		renderArmor(g2D,c.x,c.y,c.radius,c.direction+c.armorStart,c.armorAngle,c.team);
@@ -188,9 +195,10 @@ public class Renderer {
 
 	public static void renderProjectile(Graphics2D g2D, ProjectileData pd) {
 		g2D.setColor(Color.WHITE);
-		g2D.setStroke(new BasicStroke(2));
+		g2D.setStroke(new BasicStroke(1));
 		drawLine(g2D, pd.x, pd.y,pd.prevX,pd.prevY);
 		if (pd.size > 50) {
+			g2D.setStroke(new BasicStroke(1));
 			drawCircle(g2D,pd.x,pd.y,pd.size/2000);
 		}
 	}
@@ -390,19 +398,22 @@ public class Renderer {
 	}
 	
 	static void drawLine(Graphics2D g2D, double x1, double y1, double x2, double y2) {
-		g2D.drawLine(toPixel(x1), toPixel(y1), toPixel(x2), toPixel(y2));
+		//g2D.drawLine(toPixel(x1), toPixel(y1), toPixel(x2), toPixel(y2));
+		g2D.draw(new Line2D.Double(x1*ppm,y1*ppm,x2*ppm,y2*ppm));
 	}
 	
 	private static void drawArc(Graphics2D g2D, double cx, double cy, double cr, double start, double extent, int type) {
-		g2D.draw(new Arc2D.Double(toPixel(cx-cr),toPixel(cy-cr),toPixel(cr*2),toPixel(cr*2),Math.toDegrees(start),Math.toDegrees(extent),type));
+		g2D.draw(new Arc2D.Double((cx-cr)*ppm,(cy-cr)*ppm,(cr*2)*ppm,(cr*2)*ppm,Math.toDegrees(start),Math.toDegrees(extent),type));
 	}
 	
 	static void drawCircle(Graphics2D g2D, double x, double y, double radius) {
-		g2D.drawOval(toPixel(x-radius), toPixel(y-radius), toPixel(radius*2), toPixel(radius*2));
+		//g2D.drawOval(toPixel(x-radius), toPixel(y-radius), toPixel(radius*2), toPixel(radius*2));
+		g2D.draw(new Ellipse2D.Double((x-radius)*ppm, (y-radius)*ppm, radius*2*ppm, radius*2*ppm));
 	}
 	
 	static void fillCircle(Graphics2D g2D, double x, double y, double radius) {
-		g2D.fillOval(toPixel(x-radius), toPixel(y-radius), toPixel(radius*2), toPixel(radius*2));
+		//g2D.fillOval(toPixel(x-radius), toPixel(y-radius), toPixel(radius*2), toPixel(radius*2));
+		g2D.fill(new Ellipse2D.Double((x-radius)*ppm, (y-radius)*ppm, radius*2*ppm, radius*2*ppm));
 	}
 	
 	public static void drawArenaImage(Graphics2D g2D, Image image, Rectangle2D window) {
@@ -433,7 +444,7 @@ public class Renderer {
 	}
 	
 	static void fillRect(Graphics2D g2D, double x, double y, double w, double h) {
-		g2D.fillRect(toPixel(x), toPixel(y), toPixel(w), toPixel(h));
+		g2D.fill(new Rectangle2D.Double(x*ppm,y*ppm,w*ppm,h*ppm));
 	}
 	
 	static void fillPolygon(Graphics2D g2D, Point2D[] points) {
@@ -445,7 +456,8 @@ public class Renderer {
 	}
 	
 	static void drawRect(Graphics2D g2D, double x, double y, double w, double h) {
-		g2D.drawRect(toPixel(x), toPixel(y), toPixel(w), toPixel(h));
+		//g2D.drawRect(toPixel(x), toPixel(y), toPixel(w), toPixel(h));
+		g2D.draw(new Rectangle2D.Double(x*ppm,y*ppm,w*ppm,h*ppm));
 	}
 	
 	static void drawRectangle(Graphics2D g2D, double x, double y, double w, double h, Stroke stroke, Color color) {
@@ -484,17 +496,14 @@ public class Renderer {
 	public static double toMeter(int pixel) {
 		return pixel/Renderer.ppm;
 	}
-
-	public static void renderProtection(Graphics2D g2D, int tileX, int tileY, double protection) {
-		double y = (tileY+0.1)*Terrain.tileSize;
-		double x = (tileX+0.1)*Terrain.tileSize;
-		g2D.setStroke(new BasicStroke(toPixel(0.1)));
-		g2D.setColor(Color.WHITE);
-		drawLine(g2D,x,y,x+0.8*Terrain.tileSize*protection/3.0,y);
-		double w = 0.8;
-		x = (tileX+(1-w)/2)*Terrain.tileSize;
-		y = (tileY+(1-w)/2)*Terrain.tileSize;
-		w = w*Terrain.tileSize;
-		drawImage(g2D,Sprite.SHIELD,x,y,w,w);
+	
+	public static void renderProtection(Graphics2D g2D, int tileX, int tileY, int coverType) {
+		if (coverType>0) {
+			double w = 0.7;
+			double x = (tileX+(1-w)/2)*Terrain.tileSize;
+			double y = (tileY+(1-w)/2)*Terrain.tileSize;
+			w = w*Terrain.tileSize;
+			drawImage(g2D,Sprite.SHIELD[coverType-1],x,y,w,w);
+		}
 	}
 }

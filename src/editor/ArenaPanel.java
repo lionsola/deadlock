@@ -31,6 +31,10 @@ import server.world.Terrain;
 import shared.network.FullCharacterData;
 import shared.network.GameDataPackets.InputPacket;
 
+/**
+ * This panel is used in the editor to show the arena along with other
+ * editor elements (light, light sources, etc.)
+ */
 public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWheelListener{
 	private static final long serialVersionUID = 2649458143637701147L;
 	//private Renderer renderer = new Renderer();

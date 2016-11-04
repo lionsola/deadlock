@@ -4,9 +4,13 @@ import client.gui.GameWindow;
 import server.character.PlayerCharacter;
 import server.world.World;
 
+/**
+ * Charged abilities are abilities that changes based on
+ * how long the activate button is held.
+ */
 public abstract class ChargedAbility extends Ability {
 	private long timeElapsed;
-	private boolean throwing;
+	private boolean charging;
 	
 	public ChargedAbility(PlayerCharacter c, long cooldown) {
 		super(c,cooldown);
@@ -15,16 +19,16 @@ public abstract class ChargedAbility extends Ability {
 	@Override
 	public void update(World w) {
 		super.update(w);
-		if (!throwing && isReady() && self().getInput().fire2) {
-			throwing = true;
+		if (!charging && isReady() && self().getInput().fire2) {
+			charging = true;
 			timeElapsed = 0;
-		} else if (throwing && !self().getInput().fire2) {
-			throwing = false;
+		} else if (charging && !self().getInput().fire2) {
+			charging = false;
 			this.startCooldown();
 			activate(w,timeElapsed);
 		}
 		
-		if (throwing) {
+		if (charging) {
 			timeElapsed += GameWindow.MS_PER_UPDATE;
 		}
 	}

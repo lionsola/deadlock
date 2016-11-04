@@ -106,6 +106,9 @@ public class Arena {
 				tMap[x][y] = new Tile();
 				tMap[x][y].setTerrain(tileMap[x][y]);
 				tMap[x][y].setThing(objectMap[x][y]);
+				if (ad.configMap!=null) {
+					tMap[x][y].setSpriteConfig(ad.configMap[x][y]);
+				}
 			}
 		}
 		generateSpawnPoints();

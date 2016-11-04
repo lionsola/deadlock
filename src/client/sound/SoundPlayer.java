@@ -99,5 +99,4 @@ public class SoundPlayer implements Runnable {
 		line.drain();
 		line.close();
 	}
-
 }

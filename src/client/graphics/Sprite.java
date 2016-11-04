@@ -1,12 +1,16 @@
 package client.graphics;
 
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 
 import javax.imageio.ImageIO;
 
 import server.world.Utils;
 
+/**
+ * Load and store the sprites needed in-game.
+ */
 public class Sprite {
 	public static final int MAXTYPE = 4;
 	private static Image COMMANDO_RED;
@@ -19,7 +23,7 @@ public class Sprite {
 	private static Image SNIPER_GREEN;
 	private static Image TANK_GREEN;
 	private static Image SPECOPS_GREEN;
-	public static Image SHIELD;
+	public static BufferedImage[] SHIELD;
 	private static Image[][] images = new Image[5][2];
 	private static Image[] BLOOD = new Image[4];
 
@@ -54,8 +58,11 @@ public class Sprite {
 			images[3][RED] = SPECOPS_RED;
 			images[3][GREEN] = SPECOPS_GREEN;
 			
-			SHIELD = ImageIO.read(new FileInputStream("resource/shield.png"));
-
+			SHIELD = new BufferedImage[3];
+			
+			SHIELD[0] = ImageIO.read(new FileInputStream("resource/shield1.png"));
+			SHIELD[1] = ImageIO.read(new FileInputStream("resource/shield2.png"));
+			SHIELD[2] = ImageIO.read(new FileInputStream("resource/shield3.png"));
 		} catch (Exception e) {
 			System.out.println("Error while loading server.character images");
 			System.out.println(e.getMessage());
@@ -77,6 +84,9 @@ public class Sprite {
 	//	return images[type][color];
 	//}
 	
+	/**
+	 * Return a random blood sprite.
+	 */
 	public static Image getBloodImage() {
 		return BLOOD[Utils.random().nextInt(BLOOD.length)];
 	}

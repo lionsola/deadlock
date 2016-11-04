@@ -5,6 +5,10 @@ import java.awt.Color;
 import client.gui.GameWindow;
 import server.world.Utils;
 
+/**
+ * This class is used to continuously produce particle effects in-game,
+ * such as fire, water or smoke. 
+ */
 public class ParticleEmitter {
 	double pDirection;
 	double pSpeed;

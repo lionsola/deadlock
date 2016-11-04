@@ -15,9 +15,6 @@ import javax.swing.text.DefaultCaret;
 
 /**
  * Chat panel to be used in lobby and game screen, showing chats from players.
- * 
- * @author Shobitha
- * @author Anh Pham
  */
 public class ChatPanel extends JPanel {
 

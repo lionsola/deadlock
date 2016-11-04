@@ -2,24 +2,20 @@ package client.sound;
 
 import javax.sound.sampled.AudioFormat;
 
-/**
- * The Sound class used to contain a client.sound's sample byte array
- * 
- * @author Anh Pham
- */
+
 public interface Sound {
 
 	/**
-	 * Gets the sames of the client.sound
+	 * Gets the samples to play the sound
 	 * 
-	 * @return Returns a byte array of a client.sound
+	 * @return The byte array representing the sound
 	 */
 	public byte[] getSamples();
 
 	/**
-	 * Gets the format of a client.sound
+	 * Gets the format of the sound
 	 * 
-	 * @return returns the format of a client.sound
+	 * @return The format of the sound
 	 */
 	public AudioFormat getFormat();
 }

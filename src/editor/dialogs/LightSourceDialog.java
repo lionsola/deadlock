@@ -3,6 +3,7 @@ package editor.dialogs;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -68,9 +69,13 @@ public class LightSourceDialog extends JDialog {
         color.setToolTipText("Light color (alpha channel is ignored)");
         panel.add(color,c);
         
-        this.setContentPane(panel);
+        
+        getContentPane().add(panel);
+        //setContentPane(panel);
         this.pack();
-        this.setLocationRelativeTo(editor);
+        Point p = button.getLocationOnScreen();
+        p.x += button.getWidth();
+        setLocation(p);
 	}
 
 	public int getRange() {

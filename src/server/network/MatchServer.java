@@ -10,7 +10,6 @@ import client.gui.GameWindow;
 import editor.DataManager;
 import server.ai.AIPlayer;
 import server.ai.PathFinder;
-import server.character.CharacterFactory;
 import server.character.ClassStats;
 import server.character.PlayerCharacter;
 import server.weapon.WeaponFactory;
@@ -74,12 +73,12 @@ public abstract class MatchServer implements Runnable, GameEventListener {
 		PathFinder pathFinder = new PathFinder(world.getArena());
 		for (ServerPlayer p : players) {
 			if (p.character==null) {
-				PlayerCharacter character = CharacterFactory.newCharacter(p.id, p.team, p.type);
+				PlayerCharacter character = PlayerCharacter.newCharacter(p.id, p.team, p.type);
 				p.setCharacter(character);
 			}  else {
 				//p.character.resetStats();
 				// At the moment, just create everything new
-				PlayerCharacter character = CharacterFactory.newCharacter(p.id, p.team, p.type);
+				PlayerCharacter character = PlayerCharacter.newCharacter(p.id, p.team, p.type);
 				p.setCharacter(character);
 			}
 			if (p instanceof AIPlayer) {

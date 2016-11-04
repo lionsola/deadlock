@@ -7,6 +7,9 @@ import javax.sound.sampled.AudioFormat;
 
 import server.world.Utils;
 
+/**
+ * A sound that keeps alternating between different files.
+ */
 public class AlternatingSound implements Sound {
 	private int lastPlayed = 0;
 	private List<SingleSound> sounds = new ArrayList<SingleSound>();

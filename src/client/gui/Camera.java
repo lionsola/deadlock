@@ -10,8 +10,6 @@ import shared.network.FullCharacterData;
 
 /**
  * Follows the player as he moves to display the appropriate area of the screen.
- * 
- * @author Anh Pham
  */
 public class Camera {
 	private Component parent;

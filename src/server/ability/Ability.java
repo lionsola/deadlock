@@ -4,6 +4,10 @@ import client.gui.GameWindow;
 import server.character.PlayerCharacter;
 import server.world.World;
 
+/**
+ * This abstract class defines the framework
+ * which should be followed by all abilities.
+ */
 public abstract class Ability {
 	public final long cooldown;
 	private long cooldownTimer;

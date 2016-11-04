@@ -12,10 +12,6 @@ import client.graphics.Sprite;
 
 /**
  * The master frame that holds the game screens.
- * 
- *  @author Anh Pham
- * 
- * @author Anh Pham
  */
 public class GameWindow extends JFrame {
 	
@@ -37,6 +33,7 @@ public class GameWindow extends JFrame {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		width = (int) screenSize.getWidth();
 		height = (int) screenSize.getHeight();
+		setPreferredSize(new Dimension(width,height));
 
 		setTitle("Deadlock");
 		// setIgnoreRepaint(true);
@@ -53,11 +50,6 @@ public class GameWindow extends JFrame {
 		setLocationRelativeTo(null);
 
 		init();
-	}
-
-	@Override
-	public Dimension getPreferredSize() {
-		return new Dimension(width, height);
 	}
 
 	/**

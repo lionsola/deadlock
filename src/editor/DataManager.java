@@ -326,6 +326,7 @@ public class DataManager {
 		ad.name = a.getName();
 		ad.tileMap = tileIDMap;
 		ad.objectMap = objectIDMap;
+		ad.configMap = configMap;
 		//ad.spawn1 = a.getSpawn(0);
 		//ad.spawn2 = a.getSpawn(1);
 		//ad.lightMap = a.getLightmap();

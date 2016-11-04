@@ -91,9 +91,9 @@ public class AnimationSystem {
 	 *            The y coordinate of the animation.
 	 */
 	public void addBulletWallAnimation(double x, double y) {
-		int n = 8;
+		int n = 10;
 		for (int i = 0; i < n; i++) {
-			double randomDirection = i * Math.PI * 2 / n + server.world.Utils.random().nextGaussian() / 5;
+			double randomDirection = Math.PI*2*Utils.random().nextDouble();
 			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.1,0.5, 500, Color.WHITE);
 			p.setGrowth(-0.35, -0.35);
 			p.setSizeDefault(true);
@@ -101,6 +101,9 @@ public class AnimationSystem {
 		}
 	}
 
+	/**
+	 * Create a trailing effect for a projectile (bullet, grenade, etc.).
+	 */
 	public void addProjectileTrail(double x, double y, double direction, double speed, double size) {
 		addCustomAnimation(new LineAnimation(50,x,y,direction,speed,size));
 	}
@@ -142,10 +145,9 @@ public class AnimationSystem {
 	}
 
 	/**
-	 * Render it on the client.graphics object.
+	 * Render it on the graphics object.
 	 * 
-	 * @param g
-	 *            The client.graphics object to be rendered to.
+	 * @param g The graphics object to be rendered to.
 	 */
 	public void render(Graphics g) {
 		for (BasicAnimation a : animations) {

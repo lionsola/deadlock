@@ -14,7 +14,11 @@ import server.world.Light;
 import server.world.SpriteConfig;
 import server.world.Terrain;
 
-public class Tool extends MouseInputAdapter {
+/**
+ * Tools are used to modify an arena. This abstract class provides convenient methods
+ * for all tools to use.
+ */
+public abstract class Tool extends MouseInputAdapter {
 	protected final ArenaPanel arenaPanel;
 	public Tool(ArenaPanel arenaPanel) {
 		this.arenaPanel = arenaPanel;

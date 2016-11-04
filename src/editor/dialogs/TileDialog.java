@@ -26,6 +26,9 @@ import editor.Editor;
 import server.world.Thing;
 import server.world.Utils;
 
+/**
+ * A dialog to edit a Thing type.
+ */
 public class TileDialog extends JDialog implements ActionListener {
 	private static final long serialVersionUID = 5917436825785813483L;
 	private Editor editor;

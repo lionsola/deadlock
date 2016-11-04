@@ -18,8 +18,6 @@ import shared.network.FullCharacterData;
 
 /**
  * Provide image processing methods.
- * 
- * @author Anh Pham
  */
 public class ImageBlender {
 	

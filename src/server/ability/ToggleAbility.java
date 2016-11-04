@@ -3,6 +3,10 @@ package server.ability;
 import server.character.PlayerCharacter;
 import server.world.World;
 
+/**
+ * Toggle abilities can be turned on and off using the activate button.
+ * However, there is a cooldown period for both actions.
+ */
 public abstract class ToggleAbility extends Ability {
 	private boolean isActive = false;
 	public ToggleAbility(PlayerCharacter self, long cooldown) {

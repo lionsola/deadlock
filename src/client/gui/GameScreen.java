@@ -9,7 +9,6 @@ import java.awt.Graphics2D;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.RenderingHints;
-import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -59,12 +58,10 @@ import editor.DataManager;
 
 /**
  * The GUI where the match takes place, i.e. the arena with players.
- * 
  */
 public class GameScreen extends JLayeredPane implements KeyListener, MouseListener, Runnable, MouseWheelListener {
-
 	private static final long serialVersionUID = 1383374303503610168L;
-	// private World world;
+
 	private FullCharacterData mainCharacter = new FullCharacterData();
 	private GameWindow game;
 	private Arena arena;
@@ -112,12 +109,19 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	 */
 	public GameScreen(GameWindow game, int id, Connection connection, String arenaName, List<ClientPlayer> team1, List<ClientPlayer> team2) throws IOException {
 		super();
-		this.game = game;
-		this.setSize(game.getWidth(), game.getHeight());
+		
+		
+		setSize(game.getWidth(), game.getHeight());
 		this.setFocusable(true);
 		this.requestFocusInWindow();
 		this.setIgnoreRepaint(true);
 		setFocusTraversalKeysEnabled(false);
+		setCursor(Renderer.createCursor());
+		addKeyListener(this);
+		addMouseListener(this);
+		addMouseWheelListener(this);
+		
+		// Loading the arena
 		Collection<Terrain> tileList = DataManager.loadTileListOld();
 		HashMap<Integer,Terrain> tileTable = DataManager.getTileMap(tileList);
 		Collection<Thing> objectList = DataManager.loadObjectListOld();
@@ -135,12 +139,16 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			e.printStackTrace();
 		}
 		this.arena = new Arena(arenaName, tileTable, objectTable);
+		
+		// Initialise fields
+		this.game = game;
 		this.visibility = new Visibility();
 		this.team1 = team1;
 		this.team2 = team2;
-		this.players = new LinkedList<ClientPlayer>();
+		players = new LinkedList<ClientPlayer>();
 		players.addAll(team1);
 		players.addAll(team2);
+		
 		for (ClientPlayer p : players) {
 			p.character = new PartialCharacterData();
 		}
@@ -151,24 +159,15 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		audioManager = new AudioManager();
 		input = new InputPacket();
 		camera = new Camera(arena, this);
-
-		// TODO fix later, this is messy - create connection in one place and
-		// read from it in another
-
 		this.connection = connection;
-		//connection.getSocket().setSoTimeout(5);
-		setCursor(Renderer.createCursor());
 		
-		addKeyListener(this);
-		addMouseListener(this);
-		addMouseWheelListener(this);
 		initUI();
 		renderer.initArenaImages(arena);
 		new Thread(this).start();
 	}
 
 	/**
-	 * The game loop.
+	 * The main game loop.
 	 */
 	@Override
 	public void run() {
@@ -185,16 +184,15 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			previous = current;
 			lag += elapsed;
 
-			//System.out.println("Lag: " + lag);
 			while (lag >= GameWindow.MS_PER_UPDATE) {
 				update();
 				lag -= GameWindow.MS_PER_UPDATE;
 			}
-			//System.out.println("Calling repaint");
+			
 			repaint();
 
 			long waitTime = GameWindow.MS_PER_UPDATE - (System.currentTimeMillis() - current);
-			//System.out.println("Waiting for " + waitTime + " milisecs");
+			
 			try {
 				Thread.sleep(waitTime);
 			} catch (Exception e) {}
@@ -207,7 +205,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				frameCount = 0;
 				totalTime = 0;
 			}
-			///FPS = averageFPS;
+			
 		}
 	}
 
@@ -221,7 +219,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		WorldStatePacket wsp = receiveState();
 
 		// update state
-		// TODO this queue should be used for interpolation
+		// TODO NETWORK this queue should be used for interpolation
 		// at the moment it's just a placeholder and keeps exactly 5 past states
 		// (around 100ms delay)
 		// while (wsps.size() > 0) {
@@ -246,6 +244,9 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 					p.active = true;
 				}
 			}
+			for (ProjectileData data : wsp.projectiles) {
+				visualAnimations.addProjectileTrail(data.x, data.y, data.prevX, data.prevY ,data.size);
+			}
 			mainCharacter = wsp.player;
 			mainCharacter.direction = (float) Math.atan2(mainCharacter.y - input.cy, input.cx - mainCharacter.x);
 
@@ -261,7 +262,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	}
 
 	/**
-	 * Initialises the UI
+	 * Initialises the UI components
 	 */
 	private void initUI() {
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -293,8 +294,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		chatPanel.setMaximumSize(new Dimension(800, 300));
 		chatPanel.getInputLabel().setText(Utils.findPlayer(players, id).name + ": ");
 		this.add(chatPanel);
-		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "doSomething");
-		this.getActionMap().put("doSomething", new AbstractAction() {
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "triggerChat");
+		this.getActionMap().put("triggerChat", new AbstractAction() {
 			private static final long serialVersionUID = -6566354847061381139L;
 
 			@Override
@@ -312,7 +313,6 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				chatPanel.getScroller().getVerticalScrollBar().setValue(chatPanel.getTextArea().getHeight());
 			}
 		});
-
 	}
 
 	/**
@@ -335,7 +335,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	}
 
 	/**
-	 * Receives the state of the gamescreen
+	 * Receive the world state from server
 	 * 
 	 * @return Returns the WorldStatePacket of the gamescreen
 	 */
@@ -371,26 +371,24 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		Graphics2D g2D = (Graphics2D) g;
 		RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2D.setRenderingHints(rh);
-
+		FullCharacterData c = mainCharacter;
 		if (wsp != null) {
-			// render the dark part
-			//long before = System.nanoTime();
-			
-			FullCharacterData c = mainCharacter;
-			
-			//System.out.println(System.nanoTime()-before);
+			// render the region outside of both vision and hearing
 			Renderer.drawArenaImage(g2D, renderer.getDarkArenaImage(),camera.getDrawArea());
 			
+			// render the hearing region
+			/*
 			Shape clip = new Ellipse2D.Double(Renderer.toPixel(c.x - c.hearRange),Renderer.toPixel(c.y - c.hearRange),
 					Renderer.toPixel(c.hearRange*2),Renderer.toPixel(c.hearRange*2));
 			g2D.setClip(clip);
-			
-			//Rectangle2D hearBox = getCharacterVisionBox(c.x,c.y,c.hearRange);
-			//Renderer.drawArenaImage(g2D, renderer.getArenaImage(),hearBox);
+			Rectangle2D hearBox = getCharacterVisionBox(c.x,c.y,c.hearRange);
+			Renderer.drawArenaImage(g2D, renderer.getArenaImage(),hearBox);
+			*/
 			
 			g2D.setClip(null);
 			globalAnimations.render(g2D);
 			
+			// create the vision region
 			Area los = new Area();
 			for (Vision v:wsp.visions) {
 				los.add(visibility.generateLoS(v, arena));
@@ -398,13 +396,13 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				los.add(new Area(new Ellipse2D.Double(Renderer.toPixel(v.x - r),Renderer.toPixel(v.y - r),
 						Renderer.toPixel(r*2),Renderer.toPixel(r*2))));
 			}
-			
-			Rectangle2D viewBox = getCharacterVisionBox(c.x,c.y,c.viewRange);
+			double r = c.radius*1.5;
+			los.add(new Area(new Ellipse2D.Double(Renderer.toPixel(c.x - r),Renderer.toPixel(c.y - r),
+					Renderer.toPixel(r*2),Renderer.toPixel(r*2))));
 			g2D.setClip(los);
 			//Renderer.drawArenaImage(g2D,renderer.getLightArenaImage(),viewBox);
 			Renderer.drawArenaImage(g2D,renderer.getLightArenaImage(),camera.getDrawArea());
 
-			ClientPlayer localPlayer = Utils.findPlayer(players, id);
 
 			for (ClientPlayer data : players) {
 				if (data.id != id && data.active) {
@@ -413,29 +411,33 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				}
 			}
 
+			// render projectiles
 			visualAnimations.render(g2D);
 			for (ProjectileData data : wsp.projectiles) {
 				Renderer.renderProjectile(g2D,data);
-				visualAnimations.addProjectileTrail(data.x, data.y, data.prevX, data.prevY ,data.size);
 			}
-			//Renderer.renderLOS(g2D, los);
-			Renderer.renderMainCharacter(g2D, mainCharacter, localPlayer);
 			
-			//g2D.setClip(los);
+			// render the main character
+			//Renderer.renderLOS(g2D, los);
+			ClientPlayer localPlayer = Utils.findPlayer(players, id);
+			Renderer.renderMainCharacter(g2D, c, localPlayer);
+			
+			// Render lighting & shadow
 			Composite save = g2D.getComposite();
 			g2D.setComposite(new SoftHardLightComposite(1f));
-			Renderer.drawArenaImage(g2D,renderer.getLightMap(),viewBox);
 			
+			Rectangle2D viewBox = getCharacterVisionBox(c.x,c.y,c.viewRange);
+			Renderer.drawArenaImage(g2D,renderer.getLightMap(),viewBox);
 			g2D.setComposite(save);
 			
-			int tileX = (int)(input.cx/Terrain.tileSize);
-			int tileY = (int)(input.cy/Terrain.tileSize);
-			if (arena.get(tileX,tileY).coverType()>0)
-				Renderer.renderProtection(g2D,tileX,tileY,arena.get(tileX,tileY).coverType());
-			g2D.setClip(null);
-			
 		}
-		Renderer.renderCrosshair(g2D,input.cx,input.cy,mainCharacter.crosshairSize);
+		g2D.setClip(null);
+		int tileX = (int)(input.cx/Terrain.tileSize);
+		int tileY = (int)(input.cy/Terrain.tileSize);
+		if (arena.get(tileX,tileY).coverType()>0)
+			Renderer.renderProtection(g2D,tileX,tileY,arena.get(tileX,tileY).coverType());
+		Renderer.renderUI(g2D,c);
+		Renderer.renderCrosshair(g2D,input.cx,input.cy,c.crosshairSize);
 		g.translate(transX, transY);
 		g2D.drawString("FPS: "+FPS, 10, 10);
 	}
@@ -454,9 +456,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 
 		// if enter enable chat
 
-		// else pass the event to the mainCharacter
-		// TODO CLIENT: send event to network
-		// TODO SERVER: receive event and process
+
 		keyChanged(e, true);
 	}
 
@@ -611,6 +611,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			}
 		}
 	};
+	
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		zoomLevel = Math.max(-0.5,Math.min(0.5,zoomLevel + 0.05*e.getPreciseWheelRotation()));

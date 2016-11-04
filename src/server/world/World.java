@@ -17,8 +17,6 @@ import shared.network.GameEvent.GameEventListener;
 /**
  * The physical world inside a match, which handles everything including characters, projectiles and
  * collision.
- * 
- * @author Anh Pham
  */
 public class World {
 	

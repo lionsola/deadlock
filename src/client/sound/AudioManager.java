@@ -9,8 +9,6 @@ import server.weapon.WeaponFactory;
 
 /**
  * Manages the audio in game.
- * 
- * @author Anh Pham
  */
 public class AudioManager implements Runnable {
 	
@@ -31,7 +29,7 @@ public class AudioManager implements Runnable {
 	ExecutorService threadPool;
 	ConcurrentLinkedQueue<PlayMessage> pending;
 	
-	HashMap<Integer, Sound> soundMap;
+	private HashMap<Integer, Sound> soundMap;
 	
 	private static final String SOUND_DIR = "resource/audio/sounds/";
 	private static final String MUSIC_DIR = "resource/audio/music/";

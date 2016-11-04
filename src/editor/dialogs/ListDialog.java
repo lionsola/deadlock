@@ -8,25 +8,11 @@ import java.awt.*;
 import java.awt.event.*;
  
 /*
- * ListDialog.java is meant to be used by programs such as
- * ListDialogRunner.  It requires no additional files.
+ * ListDialog is meant to be used to display a list of objects.
+ * A cell renderer should be provided along with buttons. The first button given
+ * is also triggered with a double click on a list item.
  */
- 
-/**
- * Use this modal dialog to let the user choose one string from a long
- * list.  See ListDialogRunner.java for an example of using ListDialog.
- * The basics:
- * <pre>
-    String[] choices = {"A", "long", "array", "of", "strings"};
-    String selectedName = ListDialog.showDialog(
-                                componentInControllingFrame,
-                                locatorComponent,
-                                "A description of the list:",
-                                "Dialog Title",
-                                choices,
-                                choices[0]);
- * </pre>
- */
+
 public class ListDialog<T> extends JDialog {
 
 	private static final long serialVersionUID = -2705330003771825132L;
@@ -100,8 +86,11 @@ public class ListDialog<T> extends JDialog {
         contentPane.add(listPane, BorderLayout.CENTER);
         contentPane.add(buttonPanel, BorderLayout.SOUTH);
  
-        setLocation(button.getX()+button.getWidth(),button.getY());
+        
         pack();
+        Point p = button.getLocationOnScreen();
+        p.x += button.getWidth();
+        this.setLocation(p);
     }
     
     

@@ -234,10 +234,13 @@ public class ToolMenu extends JPanel {
 		}
 		light.setToolTipText("Light Source");
 		light.addActionListener(new ActionListener() {
-			LightSourceDialog dialog = new LightSourceDialog(editor,light);
+			LightSourceDialog dialog = null;
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				if (light.isSelected()) {
+					if (dialog==null) {
+						dialog = new LightSourceDialog(editor,light);
+					}
 					dialog.setVisible(true);
 					editor.getArenaPanel().renderLightSource = true;
 					editor.setTool(new Tool.NewLightPaint(editor.getArenaPanel(), dialog));

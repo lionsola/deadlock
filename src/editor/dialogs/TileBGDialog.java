@@ -24,6 +24,9 @@ import editor.Editor;
 import server.world.Terrain;
 import server.world.Utils;
 
+/**
+ * A dialog to edit a Terrain type.
+ */
 public class TileBGDialog extends JDialog implements ActionListener {
 	private static final long serialVersionUID = 5917436825785813483L;
 	private Editor editor;
