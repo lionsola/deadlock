@@ -15,15 +15,15 @@ import server.passive.Shield;
 import server.weapon.Weapon;
 import server.weapon.WeaponFactory;
 import server.world.Geometry;
-import server.world.Sound;
 import server.world.Utils;
 import server.world.World;
 import shared.network.FullCharacterData;
 import shared.network.GameDataPackets.InputPacket;
-import shared.network.GameEvent.PlayerDieEvent;
+import shared.network.GameEvent.*;
 
 import java.awt.geom.Point2D;
 
+import client.graphics.AnimationSystem;
 import client.gui.GameWindow;
 
 /**
@@ -34,17 +34,21 @@ import client.gui.GameWindow;
  */
 public class PlayerCharacter extends Character {
 	
-	private static final double MOVEMENT_DISPERSION_FACTOR = 0.1;
-	private static final double ROTATION_DISPERSION_FACTOR = 0.3;
+	public static final double MOVEMENT_DISPERSION_FACTOR = 0.1;
+	public static final double ROTATION_DISPERSION_FACTOR = 0.3;
 	
-	private static final double MAX_DISPERSION_ANGLE = 0.1;
-	private static final double DISPERSION_DEC = 0.006;
+	public static final double MAX_DISPERSION_ANGLE = 0.1;
+	public static final double DISPERSION_DEC = 0.006;
+	
+	public static final int PING_SOUND_ID = 34;
+	public static final double PING_SOUND_VOLUME = 30;
 
 	private double instaF = 1;
 	
 	private int typeID; // the type of the server.character, e.g. Sniper
 
 	private double charDispersion = 0;
+	private double gunDirection = 0;
 
 	private Weapon primary; // the primary server.weapon of the server.character class
 	private Ability ability;
@@ -52,6 +56,7 @@ public class PlayerCharacter extends Character {
 	
 	private InputPacket input = new InputPacket();
 	
+	private int pingTimer;
 
 	/**
 	 * Creating a new controlled server.character
@@ -103,7 +108,7 @@ public class PlayerCharacter extends Character {
 	public void update(World world) {
 		synchronized (input) {
 			if (isDead()) {
-				input.top = false;
+				input.up = false;
 				input.down = false;
 				input.left = false;
 				input.right = false;
@@ -118,6 +123,9 @@ public class PlayerCharacter extends Character {
 			
 			super.updatePerception(world);
 			
+			// send ping
+			sendPing(world);
+			
 			if (passive!=null)
 				passive.update(world);
 			
@@ -130,7 +138,6 @@ public class PlayerCharacter extends Character {
 			super.updateStatusEffects();
 			
 			super.updatePosition();
-			
 			super.updateNoise(world);
 			updateCrosshair();
 		}
@@ -138,11 +145,20 @@ public class PlayerCharacter extends Character {
 	
 	private void updateCrosshair() {
 		addDispersion(instaF*MOVEMENT_DISPERSION_FACTOR*getCurrentSpeed()*GameWindow.MS_PER_UPDATE);
+		gunDirection += sway*instaF*MOVEMENT_DISPERSION_FACTOR*getCurrentSpeed()*GameWindow.MS_PER_UPDATE/2;
+		
 		addDispersion(-DISPERSION_DEC*(0.5+charDispersion));
+		double gunDirMag = Math.abs(gunDirection)-0.01*MAX_DISPERSION_ANGLE*(0.5+Math.abs(gunDirection)/MAX_DISPERSION_ANGLE);
+		gunDirection = Math.copySign(Math.max(0, gunDirMag),gunDirection);
+		
+		if (Math.abs(getGunDirection())>MAX_DISPERSION_ANGLE) {
+			gunDirection = Math.copySign(MAX_DISPERSION_ANGLE,getGunDirection());
+		}
 	}
 
 	public double getCrosshairSize() {
-		double angle = charDispersion*MAX_DISPERSION_ANGLE+getWeapon().type.gunDispersion;
+		//double angle = Math.abs(gunDirection)+getWeapon().type.gunDispersion;
+		double angle = getWeapon().type.gunDispersion;
 		return Math.tan(angle)*Point2D.distance(getX(),getY(),getInput().cx,getInput().cy);
 	}
 	
@@ -178,13 +194,14 @@ public class PlayerCharacter extends Character {
 		// update direction
 		if (!isDead()) {
 			double newDirection = Math.atan2(getY() - getInput().cy, getInput().cx - getX());
-			double dDirection = Math.abs(Geometry.wrapAngle(newDirection - getDirection()));
-			addDispersion(instaF*ROTATION_DISPERSION_FACTOR*dDirection);
+			double dDirection = Geometry.wrapAngle(newDirection - getDirection());
+			addDispersion(instaF*ROTATION_DISPERSION_FACTOR*Math.abs(dDirection));
+			gunDirection += -dDirection*0.05;
 			setDirection(newDirection);
 		}
-		if (getInput().down && getInput().top) {
+		if (getInput().down && getInput().up) {
 			getInput().down = false;
-			getInput().top = false;
+			getInput().up = false;
 		}
 		if (getInput().left && getInput().right) {
 			getInput().left = false;
@@ -195,7 +212,7 @@ public class PlayerCharacter extends Character {
 		
 		if (getInput().down)
 			dy = 1;
-		else if (getInput().top)
+		else if (getInput().up)
 			dy = -1;
 		if (getInput().right)
 			dx = 1;
@@ -244,11 +261,12 @@ public class PlayerCharacter extends Character {
 		fc.x = (float) getX();
 		fc.y = (float) getY();
 		fc.crosshairSize = (float) getCrosshairSize();
-		fc.hearRange = (float) (50.0/(Sound.DISTANCE_VOLUME_DROP_RATE*(1-getHearF())));
+		fc.hearRange = (float) (50.0/(World.DISTANCE_VOLUME_DROP_RATE*(1-getHearF())));
 		if (getArmor()!=null) {
 			fc.armorAngle = (float) getArmor().getAngle();
 			fc.armorStart = (float) getArmor().getStart();
 		}
+		fc.gunDirection = (float) getGunDirection();
 		return fc;
 	}
 
@@ -258,6 +276,11 @@ public class PlayerCharacter extends Character {
 
 	public void addDispersion(double dispersion) {
 		charDispersion = Math.max(0,Math.min(1,charDispersion+dispersion));
+	}
+	
+	
+	public double getGunDirection() {
+		return gunDirection;
 	}
 	
 	public void setWeapon(Weapon w) {
@@ -374,5 +397,23 @@ public class PlayerCharacter extends Character {
 				System.exit(-1);
 				return null;
 		}
+	}
+
+	private void sendPing(World w) {
+		int PING_COOLDOWN = 500;
+		if (input.alt && input.fire2 && pingTimer>=PING_COOLDOWN) {
+			// send ping
+			for (PlayerCharacter p:w.getCharacters()) {
+				p.getPerception().events.add(new SoundEvent(PING_SOUND_ID,PING_SOUND_VOLUME,input.cx,input.cy));
+				p.getPerception().events.add(new AnimationEvent(AnimationSystem.PING_ANIMATION_ID,input.cx,input.cy,0,true));
+			}
+			pingTimer = 0;
+		} else if (pingTimer<PING_COOLDOWN) {
+			pingTimer += GameWindow.MS_PER_UPDATE;
+		}
+	}
+	
+	public void setGunDirection(double gunDirection) {
+		this.gunDirection = gunDirection;
 	}
 }

@@ -11,14 +11,15 @@ import client.gui.GameWindow;
 import server.status.StatusEffect;
 import server.world.Arena;
 import server.world.Projectile;
-import server.world.Sound;
 import server.world.Terrain;
 import server.world.Utils;
 import server.world.Visibility;
 import server.world.World;
-import shared.network.PartialCharacterData;
+import shared.network.CharData;
+import shared.network.ProjectileData;
 import shared.network.Vision;
 import shared.network.GameDataPackets.WorldStatePacket;
+import shared.network.GameEvent;
 import shared.network.GameEvent.AnimationEvent;
 import shared.network.GameEvent.SoundEvent;
 
@@ -33,6 +34,9 @@ public class Character {
 	public static final double BASE_FOVANGLE= Math.toRadians(120);
 	
 	public static final double BASE_HEARING_THRES = 0;
+	
+	public static final int FOOTSTEP_SOUND_ID = 30;
+	public static final double FOOTSTEP_SOUND_VOLUME = 20;
 	
 	private double x = 0;
 	private double y = 0;
@@ -53,7 +57,9 @@ public class Character {
 	public final int team;
 	
 	private double direction; // direction the server.character is facing in radiants
-	private double noise = 0; // character current volume
+	
+	protected int sway = 1;
+	protected double noise = 0; // character current volume
 	
 	private final double maxHP;
 	private double healthPoints; // the number of health points the server.character class has
@@ -210,15 +216,19 @@ public class Character {
 		noise = Math.max(0, noise + inc);
 		double noiseThres = 30;
 		if (noise > noiseThres) {
-			world.addSound(Sound.FOOTSTEP.id,Sound.FOOTSTEP.volume*inc,getX(),getY());
+			world.addSound(FOOTSTEP_SOUND_ID,FOOTSTEP_SOUND_VOLUME*inc,getX(),getY());
 			noise -= noiseThres;
+			sway *= -1;
 		}
 	}
 
 	protected void updatePerception(World w) {
-		perception.visions.clear();
-		perception.characters.clear();
-		perception.projectiles.clear();
+		List<GameEvent> events = perception.events;
+		perception = new WorldStatePacket();
+		perception.events.addAll(events);
+		perception.visions = new LinkedList<Vision>();
+		perception.characters = new LinkedList<CharData>();
+		perception.projectiles = new LinkedList<ProjectileData>();
 		Area los = new Area();
 		if (!isDead()) {
 			los = getLoS(w.getArena());
@@ -454,6 +464,7 @@ public class Character {
 	public boolean isDead() {
 		return getHealthPoints()<=0;
 	}
+
 	
 	/**
 	 * Returns the health points of the server.character
@@ -534,8 +545,8 @@ public class Character {
 		return new Rectangle2D.Double(getX()-getRadius(), getY()-getRadius(), getRadius()*2, getRadius()*2);
 	}
 	
-	public PartialCharacterData generatePartial() {
-		PartialCharacterData data = new PartialCharacterData();
+	public CharData generatePartial() {
+		CharData data = new CharData();
 		data.id = (short) id;
 		data.team = (byte) team;
 		data.x = (float) getX();

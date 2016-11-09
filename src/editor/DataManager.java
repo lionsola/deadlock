@@ -235,7 +235,7 @@ public class DataManager {
 				wr.print(tile.getImageName()+" ");
 				
 				wr.print(tile.isWalkable()+" ");
-				wr.print(tile.isTransparent()+" ");
+				wr.print(tile.isClear()+" ");
 				wr.print(tile.getCoverType()+" ");
 				wr.print(tile.getSpriteSize());
 				
@@ -317,7 +317,7 @@ public class DataManager {
 				Thing ti = a.get(x, y).getThing();
 				objectIDMap[x][y] = ti!=null?ti.getId():0;
 				SpriteConfig sc = a.get(x, y).getSpriteConfig();
-				if (sc!=null && (sc.flip || sc.rotation!=0 || sc.spriteX!=0 || sc.spriteY!=0)) {
+				if (sc!=null) {
 					configMap[x][y] = sc;
 				}
 			}

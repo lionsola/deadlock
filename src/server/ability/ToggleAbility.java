@@ -16,12 +16,12 @@ public abstract class ToggleAbility extends Ability {
 	@Override
 	public void update(World w) {
 		super.update(w);
-		if(!isActive && self().getInput().fire2 && isReady()) {
+		if(!isActive && self().getInput().fire2 && !self().getInput().alt && isReady()) {
 			onActivate(w,self());
 			isActive = true;
 			startCooldown();
 		} else if (isActive) {
-			if (self().getInput().fire2 && isReady()) {
+			if (self().getInput().fire2 && !self().getInput().alt && isReady()) {
 				onDeactivate(w,self());
 				isActive = false;
 				startCooldown();

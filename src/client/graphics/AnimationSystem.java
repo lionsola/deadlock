@@ -17,6 +17,7 @@ import shared.network.GameEvent.AnimationEvent;
 public class AnimationSystem {
 	//private ConcurrentLinkedQueue<ParticleEmitter> particleEmitters;
 	private ConcurrentLinkedQueue<BasicAnimation> animations;
+	public static final byte PING_ANIMATION_ID = 5;
 	public static final byte BULLETTRAIL = 4;
 	public static final byte ENEMYMARK = 3;
 	public static final byte BULLETWALL = 2;
@@ -91,11 +92,12 @@ public class AnimationSystem {
 	 *            The y coordinate of the animation.
 	 */
 	public void addBulletWallAnimation(double x, double y) {
-		int n = 10;
+		int n = 8;
 		for (int i = 0; i < n; i++) {
-			double randomDirection = Math.PI*2*Utils.random().nextDouble();
-			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.1,0.5, 500, Color.WHITE);
-			p.setGrowth(-0.35, -0.35);
+			//double randomDirection = Math.PI*2*Utils.random().nextDouble();
+			double randomDirection = Math.PI*2.0*i/n;
+			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.01, 0.1, 100, Color.WHITE);
+			p.setGrowth(-0.0006, -0.0006);
 			p.setSizeDefault(true);
 			animations.add(p);
 		}
@@ -113,13 +115,20 @@ public class AnimationSystem {
 			case AnimationSystem.GUNSHOT:
 				addShotAnimation(e.x,e.y,e.direction);
 				break;
+			case AnimationSystem.BULLETWALL:
+				addBulletWallAnimation(e.x,e.y);
+				break;
 			case AnimationSystem.BLOOD:
 				addBloodAnimation(e.x,e.y,e.direction);
 				break;
 			case AnimationSystem.ENEMYMARK:
 				addCustomAnimation(new ExpandingCircleAnimation(e.x,e.y,2,1000, 0,Color.RED));
+				break;
+			case AnimationSystem.PING_ANIMATION_ID:
+				addCustomAnimation(new ExpandingCircleAnimation(e.x,e.y,1.5,1000, 0,Color.RED));
+				break;
 			default:
-				System.err.println("");
+				System.err.println("UNKNOWN ANIMATION RECEIVED");
 				break;
 		}
 	}

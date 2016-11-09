@@ -37,6 +37,7 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import server.character.PlayerCharacter;
 import server.world.Arena;
 import server.world.Thing;
 import server.world.Terrain;
@@ -44,7 +45,7 @@ import server.world.Visibility;
 import shared.network.Connection;
 import shared.network.FullCharacterData;
 import shared.network.GameEvent;
-import shared.network.PartialCharacterData;
+import shared.network.CharData;
 import shared.network.ProjectileData;
 import shared.network.Vision;
 import shared.network.GameDataPackets.InputPacket;
@@ -69,10 +70,13 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private final int id;
 	private Connection connection;
 	private InputPacket input = new InputPacket();
-	private WorldStatePacket wsp;
-	private AnimationSystem globalAnimations;
-	private AnimationSystem visualAnimations;
-	private AudioManager audioManager;
+	private List<GameEvent> events = new LinkedList<GameEvent>();
+	private WorldStatePacket currentState;
+	private AnimationSystem nonvisualAnimations = new AnimationSystem();
+	private AnimationSystem visualAnimations = new AnimationSystem();
+	private AnimationSystem globalAnimations = new AnimationSystem();
+	
+	private AudioManager audioManager = new AudioManager();
 	private List<ClientPlayer> team1;
 	private List<ClientPlayer> team2;
 	private List<ClientPlayer> players;
@@ -82,7 +86,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private JLabel teamScore;
 	private ChatPanel chatPanel;
 	private JComponent minimap;
-	private Visibility visibility;
+	private Visibility visibility = new Visibility();
 	private Renderer renderer = new Renderer();
 	private boolean playing = true;
 	private double zoomLevel = 0;
@@ -139,10 +143,13 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			e.printStackTrace();
 		}
 		this.arena = new Arena(arenaName, tileTable, objectTable);
+		renderer.initArenaImages(arena);
+		camera = new Camera(arena, this);
 		
 		// Initialise fields
+		this.id = id;
+		this.connection = connection;
 		this.game = game;
-		this.visibility = new Visibility();
 		this.team1 = team1;
 		this.team2 = team2;
 		players = new LinkedList<ClientPlayer>();
@@ -150,19 +157,10 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		players.addAll(team2);
 		
 		for (ClientPlayer p : players) {
-			p.character = new PartialCharacterData();
+			p.character = new CharData();
 		}
 
-		this.id = id;
-		globalAnimations = new AnimationSystem();
-		visualAnimations = new AnimationSystem();
-		audioManager = new AudioManager();
-		input = new InputPacket();
-		camera = new Camera(arena, this);
-		this.connection = connection;
-		
 		initUI();
-		renderer.initArenaImages(arena);
 		new Thread(this).start();
 	}
 
@@ -226,18 +224,19 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		// wsp = wsps.poll();
 		// }
 		updateCursor();
-		globalAnimations.update();
+		nonvisualAnimations.update();
 		visualAnimations.update();
+		globalAnimations.update();
 		audioManager.update();
 		if (wsp != null) {
-			this.wsp = wsp;
+			this.currentState = wsp;
 			for (ClientPlayer p : players) {
 				if (p.id!=id) {
 					p.active = false;
 				}
 			}
 			Utils.findPlayer(players, id).character = wsp.player;
-			for (PartialCharacterData cdata : wsp.characters) {
+			for (CharData cdata : wsp.characters) {
 				ClientPlayer p = Utils.findPlayer(players, cdata.id);
 				if (p != null) {
 					p.character = cdata;
@@ -251,8 +250,11 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			mainCharacter.direction = (float) Math.atan2(mainCharacter.y - input.cy, input.cx - mainCharacter.x);
 
 			camera.update(mainCharacter);
-			for (GameEvent e : wsp.events) {
-				listener.onEventReceived(e);
+			synchronized (events) {
+				for (GameEvent e : events) {
+					listener.onEventReceived(e);
+				}
+				events.clear();
 			}
 			for (String s : wsp.chatTexts) {
 				chatPanel.addLine(s);
@@ -347,6 +349,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			InputStream in = connection.getSocket().getInputStream();
 			while (in.available() > 1000) {
 				wsp = (WorldStatePacket) connection.receive();
+				events.addAll(wsp.events);
 			}
 		} catch (IOException e) {
 			System.out.println("Timeout when reading data from network");
@@ -372,7 +375,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2D.setRenderingHints(rh);
 		FullCharacterData c = mainCharacter;
-		if (wsp != null) {
+		if (currentState != null) {
 			// render the region outside of both vision and hearing
 			Renderer.drawArenaImage(g2D, renderer.getDarkArenaImage(),camera.getDrawArea());
 			
@@ -386,11 +389,11 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			*/
 			
 			g2D.setClip(null);
-			globalAnimations.render(g2D);
+			nonvisualAnimations.render(g2D);
 			
 			// create the vision region
 			Area los = new Area();
-			for (Vision v:wsp.visions) {
+			for (Vision v:currentState.visions) {
 				los.add(visibility.generateLoS(v, arena));
 				double r = v.radius*1.5;
 				los.add(new Area(new Ellipse2D.Double(Renderer.toPixel(v.x - r),Renderer.toPixel(v.y - r),
@@ -406,14 +409,14 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 
 			for (ClientPlayer data : players) {
 				if (data.id != id && data.active) {
-					PartialCharacterData ch = data.character;
+					CharData ch = data.character;
 					Renderer.renderOtherCharacter(g2D, ch, data.type);
 				}
 			}
 
 			// render projectiles
 			visualAnimations.render(g2D);
-			for (ProjectileData data : wsp.projectiles) {
+			for (ProjectileData data : currentState.projectiles) {
 				Renderer.renderProjectile(g2D,data);
 			}
 			
@@ -432,11 +435,12 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			
 		}
 		g2D.setClip(null);
+		globalAnimations.render(g2D);
 		int tileX = (int)(input.cx/Terrain.tileSize);
 		int tileY = (int)(input.cy/Terrain.tileSize);
 		if (arena.get(tileX,tileY).coverType()>0)
 			Renderer.renderProtection(g2D,tileX,tileY,arena.get(tileX,tileY).coverType());
-		Renderer.renderUI(g2D,c);
+		renderer.renderUI(g2D,c);
 		Renderer.renderCrosshair(g2D,input.cx,input.cy,c.crosshairSize);
 		g.translate(transX, transY);
 		g2D.drawString("FPS: "+FPS, 10, 10);
@@ -480,9 +484,9 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	 */
 	private void keyChanged(KeyEvent e, boolean b) {
 		switch (e.getKeyCode()) {
-			case KeyEvent.VK_SHIFT:
+			case KeyEvent.VK_ALT:
 				// run
-				input.running = b;
+				input.alt = b;
 				break;
 
 			case KeyEvent.VK_C:
@@ -492,7 +496,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				
 			case KeyEvent.VK_W:
 				// move up
-				input.top = b;
+				input.up = b;
 				break;
 
 			case KeyEvent.VK_S:
@@ -509,7 +513,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				// move right
 				input.right = b;
 				break;
-			case KeyEvent.VK_CONTROL:
+			case KeyEvent.VK_SHIFT:
 				input.sneaking = b;
 				break;
 		}
@@ -588,12 +592,17 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				});
 			} else if (event instanceof SoundEvent) {
 				SoundEvent e = (SoundEvent) event;
-				globalAnimations.addNoiseAnimation(e.x, e.y, e.volume);
 				audioManager.playSound(e.id,e.volume);
 				
+				if (e.id!=PlayerCharacter.PING_SOUND_ID)
+					nonvisualAnimations.addNoiseAnimation(e.x, e.y, e.volume);
 			} else if (event instanceof AnimationEvent) {
 				AnimationEvent e = (AnimationEvent) event;
-				visualAnimations.addAnimation(e);
+				if (!e.global) {
+					visualAnimations.addAnimation(e);
+				} else {
+					globalAnimations.addAnimation(e);
+				}
 				if (e.id==AnimationSystem.BLOOD) {
 					renderer.addBloodToArena(e.x, e.y, e.direction);
 				}
@@ -607,7 +616,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				}
 			} else if (event instanceof EnemyInfoEvent) {
 				EnemyInfoEvent e = (EnemyInfoEvent) event;
-				globalAnimations.addAnimation(new AnimationEvent(AnimationSystem.ENEMYMARK,e.x,e.y,0));
+				nonvisualAnimations.addAnimation(new AnimationEvent(AnimationSystem.ENEMYMARK,e.x,e.y,0));
 			}
 		}
 	};

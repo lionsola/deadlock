@@ -120,7 +120,7 @@ public class TileDialog extends JDialog implements ActionListener {
         	this.tile = tile;
         	name.setText(tile.getName());
         	walkable.setSelected(tile.isWalkable());
-        	clear.setSelected(tile.isTransparent());
+        	clear.setSelected(tile.isClear());
         	cover.setSelectedIndex(tile.getCoverType());
         	if (tile.getImage()!=null) {
         		tileImage.setIcon(new ImageIcon(tile.getImage()));

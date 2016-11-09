@@ -112,6 +112,11 @@ public class Editor extends JFrame {
         openArena();
     }
 
+    public void backupTileList() {
+    	DataManager.saveObject(tiles, DataManager.FILE_TILES+"_backup");
+    	DataManager.saveObject(objects, DataManager.FILE_OBJECTS+"_backup");
+    }
+    
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(width, height);

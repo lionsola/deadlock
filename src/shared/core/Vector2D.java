@@ -1,5 +1,7 @@
 package shared.core;
 
+import java.awt.geom.Point2D;
+
 /**
  * Allows for the 2-dimensional representation of various aspects of particles and the other
  * calculations involving them.
@@ -12,6 +14,22 @@ public class Vector2D {
 	public double x; // represents the first dimension.
 	public double y; // represents the second dimension.
 
+	public static Vector2D fromDirection(double magnitude, double direction) {
+        double x = magnitude*Math.cos(direction);
+        double y = -magnitude*Math.sin(direction);
+        return new Vector2D (x,y);
+    }
+    
+    public Vector2D() {
+        x = 0;
+        y = 0;
+    }
+    
+    public Vector2D(Point2D from, Point2D to) {
+        x = to.getX()-from.getX();
+        y = to.getY()-from.getY();
+    }
+	
 	/**
 	 * Creates a Vector2D object.
 	 * 
@@ -117,4 +135,7 @@ public class Vector2D {
 		return x*x + y*y;
 	}
 	
+    public double getDirection() {
+        return Math.atan2(y, x);
+    }
 }

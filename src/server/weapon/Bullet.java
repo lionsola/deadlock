@@ -13,9 +13,13 @@ import server.world.Thing;
 import server.world.World;
 
 public class Bullet extends Projectile {
-	private static final double BULLET_AIR_RESIST_CONSTANT = 0.0005;
-	private static final double BULLET_SPEED_REDUCTION_CONSTANT = 0.0001;
-	private static final double BULLET_PENETRATION_CONSTANT = 0.3;
+	private static final double BULLET_AIR_RESIST_CONSTANT = 0.0001;
+	private static final double BULLET_SPEED_REDUCTION_CONSTANT = 0.00001;
+	private static final double BULLET_PENETRATION_CONSTANT = 0.2;
+	
+	public static final int BULLET_WALL_SOUND_ID = 31;
+	public static final double BULLET_WALL_SOUND_VOLUME = 30;
+	
 	Thing lastHit;
 	
 	public Bullet(PlayerCharacter source, double direction, double speed, double size) {
@@ -46,9 +50,12 @@ public class Bullet extends Projectile {
 	}
 
 	protected void onHitWall(World w, double x, double y, Thing t) {
-		setSpeed(getSpeed()-BULLET_PENETRATION_CONSTANT*Geometry.LINE_SAMPLE_THRESHOLD-BULLET_SPEED_REDUCTION_CONSTANT);
+		double speedReduced = BULLET_PENETRATION_CONSTANT*Projectile.RAYCAST_DISTANCE*t.getCoverType()/3.0
+				+ BULLET_SPEED_REDUCTION_CONSTANT;
+		setSpeed(getSpeed()-speedReduced);
 		if (t!=lastHit){
-			w.addSound(Sound.BULLETWALL.id,Sound.BULLETWALL.volume*Math.max(0.5,Math.min(2,getSize()/5)),x,y);
+			w.addSound(BULLET_WALL_SOUND_ID,BULLET_WALL_SOUND_VOLUME*Math.max(0.5,Math.min(2,getSize()/5)),x,y);
+			w.addAnimation(AnimationSystem.BULLETWALL, x, y, 0);
 			lastHit = t;
 		}
 	}
@@ -67,6 +74,6 @@ public class Bullet extends Projectile {
 
 	@Override
 	public boolean isConsumed() {
-		return getSpeed()<=0.00000001;
+		return getSpeed()<=0.0001;
 	}
 }

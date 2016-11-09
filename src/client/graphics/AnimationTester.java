@@ -11,8 +11,6 @@ import javax.swing.JFrame;
 
 /**
  * Tests the animations.
- * 
- * @author Anh Pham
  */
 public class AnimationTester extends JFrame implements MouseListener, Runnable {
 	

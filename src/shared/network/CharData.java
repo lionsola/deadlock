@@ -7,7 +7,7 @@ import java.io.Serializable;
  * 
  * @author Anh Pham
  */
-public class PartialCharacterData implements Serializable {
+public class CharData implements Serializable {
 	
 	private static final long serialVersionUID = 951232578889372942L;
 	public short id;

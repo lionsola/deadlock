@@ -60,7 +60,7 @@ public class Thing implements CellRenderable, Identifiable, Serializable {
 	/**
 	 * @return the transparent
 	 */
-	public boolean isTransparent() {
+	public boolean isClear() {
 		return transparent;
 	}
 	/**

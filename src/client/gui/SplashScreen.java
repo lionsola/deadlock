@@ -30,7 +30,7 @@ public class SplashScreen extends AbstractScreen {
 		} catch (Exception e) {
 			System.out.println("Error load background image!");
 		}
-		AudioManager.playMusic("menumusic.wav", MusicPlayer.DEFAULT_VOLUME);
+		//AudioManager.playMusic("menumusic.wav", MusicPlayer.DEFAULT_VOLUME);
 		addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyTyped(KeyEvent e) {

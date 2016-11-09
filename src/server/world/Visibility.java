@@ -94,6 +94,7 @@ public class Visibility {
 		for (Point2D p:points) {
 			losBoxy.lineTo(p.getX(),p.getY());
 		}
+		losBoxy.closePath();
 		
 		Area area = new Area(losBoxy);
 		

@@ -27,7 +27,7 @@ public class Utils {
 	}
 
 	public static double getVolumeAtDistance(double volume, double distance, double hearF) {
-		double reducedByDistance = Math.max(0,1-hearF) * Sound.DISTANCE_VOLUME_DROP_RATE * distance;
+		double reducedByDistance = Math.max(0,1-hearF) * World.DISTANCE_VOLUME_DROP_RATE * distance;
 		return (volume - reducedByDistance);
 	}
 

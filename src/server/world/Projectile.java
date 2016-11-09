@@ -30,6 +30,8 @@ public abstract class Projectile {
 	private double direction;
 	
 	private double speed;
+	
+	public static final double RAYCAST_DISTANCE = 0.2;
 
 	/**
 	 * Create a projectile to be use in the world
@@ -94,7 +96,7 @@ public abstract class Projectile {
 		}
 		prevX = x;
 		prevY = y;
-		int checks = (int)Math.ceil(speed*GameWindow.MS_PER_UPDATE/Geometry.LINE_SAMPLE_THRESHOLD);
+		int checks = (int)Math.ceil(speed*GameWindow.MS_PER_UPDATE/RAYCAST_DISTANCE);
 		
 		for (int i=0;i<checks && !isConsumed();i++) {
 			double oldX = x;
@@ -110,9 +112,9 @@ public abstract class Projectile {
 					ch.applyArmor(this,oldX,oldY);
 					if (isConsumed())
 						break;
-					ch.applyArmor(this,oldX,oldY);
-					onHitCharacter(w,ch,x,y);
-					break;
+					else {
+						onHitCharacter(w,ch,x,y);
+					}
 				}
 			}
 

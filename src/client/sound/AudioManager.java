@@ -5,7 +5,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import server.ability.TimedGrenade;
+import server.weapon.Bullet;
 import server.weapon.WeaponFactory;
+import server.character.Character;
+import server.character.PlayerCharacter;
 
 /**
  * Manages the audio in game.
@@ -16,18 +20,15 @@ public class AudioManager implements Runnable {
 	public static final float GAIN_MINVOLUME = -30;
 	public static final float GAIN_RANGE = 25;
 
-	// artificial volume of volume in game
-	// noises will be from 170db (flashbang grenade) to 0db (silence)
+	/** Upper bound of in-game sounds' volume.
+	 * Sounds will be from 170db (flash-bang grenade) to 0db (silence).
+	 */
 	public static final float GAME_RANGE = 170;
-
-	// volume constants in game
-	public static final float BULLETHITNOISE = 30;
-	public static final float BULLETWALLNOISE = 50;
 
 	static MusicPlayer currentMusic = null;
 
-	ExecutorService threadPool;
-	ConcurrentLinkedQueue<PlayMessage> pending;
+	private ExecutorService threadPool;
+	private ConcurrentLinkedQueue<PlayMessage> pending;
 	
 	private HashMap<Integer, Sound> soundMap;
 	
@@ -52,19 +53,21 @@ public class AudioManager implements Runnable {
 		soundMap.put(3, new SingleSound(SOUND_DIR + "gunshot_silent_pistol.wav"));
 		soundMap.put(4, new SingleSound(SOUND_DIR + "gunshot_sniper.wav"));
 		
-		soundMap.put(server.world.Sound.GRENADE_EXPLODE.id,new SingleSound(SOUND_DIR + "grenade_explode.wav"));
+		soundMap.put(TimedGrenade.GRENADE_EXPLODE_SOUND_ID,new SingleSound(SOUND_DIR + "grenade_explode.wav"));
 
 		AlternatingSound footsteps = new AlternatingSound();
 		footsteps.addSound(new SingleSound(SOUND_DIR + "footstep1.wav"));
 		footsteps.addSound(new SingleSound(SOUND_DIR + "footstep2.wav"));
 		footsteps.addSound(new SingleSound(SOUND_DIR + "footstep3.wav"));
 		footsteps.addSound(new SingleSound(SOUND_DIR + "footstep4.wav"));
-		soundMap.put(server.world.Sound.FOOTSTEP.id, footsteps);
+		soundMap.put(Character.FOOTSTEP_SOUND_ID, footsteps);
 		
 		AlternatingSound bulletwall = new AlternatingSound();
 		bulletwall.addSound(new SingleSound(SOUND_DIR + "bulletwall0.wav"));
 		bulletwall.addSound(new SingleSound(SOUND_DIR + "bulletwall1.wav"));
-		soundMap.put(server.world.Sound.BULLETWALL.id,bulletwall);
+		soundMap.put(Bullet.BULLET_WALL_SOUND_ID,bulletwall);
+		
+		soundMap.put(PlayerCharacter.PING_SOUND_ID,new SingleSound(SOUND_DIR + "ping.wav"));
 	}
 
 	/**
@@ -90,7 +93,7 @@ public class AudioManager implements Runnable {
 	}
 
 	public void playSound(int id, float volume) {
-		if (id!=server.world.Sound.NONE.id)
+		if (soundMap.containsKey(id))
 			playSound(soundMap.get(id),volume);
 	}
 

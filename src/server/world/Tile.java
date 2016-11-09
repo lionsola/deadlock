@@ -11,7 +11,7 @@ public class Tile {
 	}
 	
 	public boolean isClear() {
-		return thing==null || thing.isTransparent();
+		return thing==null || thing.isClear();
 	}
 	
 	public int coverType() {

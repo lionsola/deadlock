@@ -36,7 +36,7 @@ public class ExpandingCircleAnimation extends BasicAnimation {
 	 *            The delay before the animation starts playing.
 	 */
 	public ExpandingCircleAnimation(double x, double y, double d, long life, long delay) {
-		this(x, y, d, life, delay, Color.WHITE);
+		this(x, y, d, life, delay, Renderer.DEFAULT_COLOR);
 	}
 
 	/**

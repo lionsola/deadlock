@@ -8,7 +8,7 @@ import java.util.List;
 
 import server.character.Character;
 import server.character.PlayerCharacter;
-import shared.network.PartialCharacterData;
+import shared.network.CharData;
 import shared.network.ProjectileData;
 import shared.network.GameDataPackets.WorldStatePacket;
 import shared.network.GameEvent.AnimationEvent;
@@ -27,6 +27,7 @@ public class World {
 	private List<Projectile> projectiles = new LinkedList<Projectile>();
 	private List<Projectile> newProjectiles = new LinkedList<Projectile>();
 	private GameEventListener listener;
+	public static final double DISTANCE_VOLUME_DROP_RATE = 2.5;
 
 	/**
 	 * Creates the World which is used in GameScreen to play the actual game
@@ -83,10 +84,6 @@ public class World {
 	
 	public void addProjectile(Projectile p) {
 		projectiles.add(p);
-	}
-	
-	public void addSound(Sound s, double x, double y) {
-		addSound(s.id,s.volume,x,y);
 	}
 
 	public void addSound(int id, double volume, double x, double y) {
@@ -159,7 +156,7 @@ public class World {
 	public WorldStatePacket generateState() {
 		WorldStatePacket wsp = new WorldStatePacket();
 
-		wsp.characters = new LinkedList<PartialCharacterData>();
+		wsp.characters = new LinkedList<CharData>();
 		for (PlayerCharacter character : characters) {
 			wsp.characters.add(character.generatePartial());
 		}

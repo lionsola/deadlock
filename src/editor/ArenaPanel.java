@@ -248,7 +248,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		switch (e.getKeyCode()) {
 			case KeyEvent.VK_W:
 				// move up
-				input.top = b;
+				input.up = b;
 				break;
 
 			case KeyEvent.VK_S:

@@ -17,6 +17,8 @@ import server.world.World;
 public abstract class TimedGrenade extends Projectile {
 	private static final double RESIST_CONSTANT = 0.000000013;
 	private long timeLeft;
+	public static final int GRENADE_EXPLODE_SOUND_ID = 32;
+	
 	
 	public TimedGrenade(PlayerCharacter source, double direction, double speed, long timeLeft) {
 		super(source, direction, speed,200);
@@ -69,7 +71,7 @@ public abstract class TimedGrenade extends Projectile {
 	protected abstract void explode(World w);
 	
 	public static class FragGrenade extends TimedGrenade {
-
+		public static final double FRAG_EXPLODE_SOUND_VOLUME = 120;
 		public FragGrenade(PlayerCharacter source, double direction, double speed, long timeLeft) {
 			super(source, direction, speed, timeLeft);
 		}
@@ -80,7 +82,8 @@ public abstract class TimedGrenade extends Projectile {
 			final double BASE_SIZE = 10;
 			final double BASE_SPEED = 0.5;
 			
-			w.addSound(Sound.GRENADE_EXPLODE, getX(), getY());
+			w.addSound(GRENADE_EXPLODE_SOUND_ID,FRAG_EXPLODE_SOUND_VOLUME, getX(), getY());
+			
 			
 			for (int i=0;i<FRAGS*0.8;i++) {
 				double direction = Math.PI*2*i/(FRAGS*0.8);
@@ -92,19 +95,21 @@ public abstract class TimedGrenade extends Projectile {
 				double sizeF = Math.max(1,1 + 0.8*Utils.random().nextGaussian()/2);
 				w.addDelayedProjectile(new Bullet(this, direction, BASE_SPEED/Math.sqrt(sizeF), BASE_SIZE*sizeF));
 			}
+			
 		}
 	}
 	
 	public static class FlashGrenade extends TimedGrenade {
 		public static final double RANGE = 20;
 		public static final long duration = 8000;
+		public static final double FLASH_EXPLODE_SOUND_VOLUME = 170;
 		public FlashGrenade(PlayerCharacter source, double direction, double speed, long timeLeft) {
 			super(source, direction, speed, timeLeft);
 		}
 
 		@Override
 		protected void explode(World w) {
-			w.addSound(Sound.FLASH_EXPLODE, getX(), getY());
+			w.addSound(GRENADE_EXPLODE_SOUND_ID, FLASH_EXPLODE_SOUND_VOLUME, getX(), getY());
 			LineOfSight los = new LineOfSight();
 			Area a = los.genLOSAreaMeter(getX(), getY(), RANGE, Math.PI*2, 0, w.getArena());
 			for (PlayerCharacter c:w.getCharacters()) {

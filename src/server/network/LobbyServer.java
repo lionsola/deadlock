@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import client.gui.ClientPlayer;
+import server.ai.AIPlayer;
 import server.ai.DummyPlayer;
 import shared.network.Connection;
 import shared.network.LobbyRequest;
@@ -104,7 +105,7 @@ public class LobbyServer implements Runnable {
 	 * @param type The type of the AI player.
 	 */
 	public void addAIPlayer (int team, int type) {
-	    ServerPlayer p = new DummyPlayer(count, team);
+	    ServerPlayer p = new AIPlayer(count, team);
 	    p.type = type;
 	    p.active = true;
 	    count++;

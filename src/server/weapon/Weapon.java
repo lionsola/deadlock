@@ -36,20 +36,32 @@ public abstract class Weapon extends Ability {
 
 	public void update(World w, PlayerCharacter c) {
 		super.update(w);
-		if (c.getInput().fire1 && isReady()) {
-			double direction = c.disperseDirection();
-			fire(w,c,direction);
+		if (c.getInput().fire1 && !c.getInput().alt && isReady()) {
+			//double direction = c.disperseDirection();
 			
+			double direction = c.getDirection()+c.getGunDirection();
+			
+			fire(w,c,direction);
+			ammoLeft -= 1;
 			w.addAnimation(AnimationSystem.GUNSHOT, c.getX(), c.getY(), direction);
 			w.addSound(type.soundId, type.noise, c.getX(), c.getY());
 			
 			c.addDispersion(getInstability());
-			ammoLeft -= 1;
+			
+			double maxRecoil = PlayerCharacter.MAX_DISPERSION_ANGLE*getInstability();
+			double recoil = maxRecoil*Math.min(1,Math.abs(Utils.random().nextGaussian())); 
+			recoil = Math.copySign(recoil,c.getGunDirection()*(Utils.random().nextDouble()<0.8?1:-1));
+			c.setGunDirection(c.getGunDirection()+recoil);
+			
 			startCooldown();
 			if (ammoLeft<=0) {
 				reloadTimer = 0;
 			}
-		} else if (ammoLeft==0) {
+		} else if (c.getInput().fire1 && c.getInput().alt) {
+			ammoLeft = 0;
+			reloadTimer = 0;
+		}
+		if (ammoLeft==0) {
 			if (reloadTimer>type.reloadTime) {
 				ammoLeft = type.magSize;
 			}

@@ -3,7 +3,7 @@ package server.passive;
 import client.gui.GameWindow;
 import server.character.PlayerCharacter;
 import server.world.World;
-import shared.network.PartialCharacterData;
+import shared.network.CharData;
 import shared.network.GameEvent.EnemyInfoEvent;
 
 public class Mark extends Passive {
@@ -18,12 +18,11 @@ public class Mark extends Passive {
 	protected boolean trigger() {
 		return !self().getPerception().characters.isEmpty();
 	}
-
 	
 	@Override
 	protected void onUpdate(World w) {
 		if (lastBroadcast<=0) {
-			for (PartialCharacterData c:self().getPerception().characters) {
+			for (CharData c:self().getPerception().characters) {
 				if (c.team!=self().team) {
 					for (PlayerCharacter pc:w.getCharacters()) {
 						if (pc.team==self().team) {

@@ -2,7 +2,7 @@ package client.gui;
 
 import java.io.Serializable;
 
-import shared.network.PartialCharacterData;
+import shared.network.CharData;
 
 /**
  * Store player data on client side.
@@ -17,5 +17,5 @@ public class ClientPlayer implements Serializable {
 	public int type;
 	public int kills;
 	public int deaths;
-	public PartialCharacterData character;
+	public CharData character;
 }

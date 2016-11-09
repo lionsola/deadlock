@@ -58,13 +58,23 @@ public abstract class GameEvent implements Serializable {
 		public final float y;
 		public final float direction;
 		public final byte id;
+		public final boolean global;
 		
 		public AnimationEvent(int id, double x, double y, double rotation) {
 			this.x = (float)x;
 			this.y = (float)y;
 			this.direction = (float)rotation;
 			this.id = (byte) id;
+			global = false;
 		}
+		
+		public AnimationEvent(int id, double x, double y, double rotation, boolean global) {
+			this.x = (float)x;
+			this.y = (float)y;
+			this.direction = (float)rotation;
+			this.id = (byte) id;
+			this.global = global;
+		} 
 	}
 	
 	public static class EnemyInfoEvent extends GameEvent {

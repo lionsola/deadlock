@@ -5,7 +5,7 @@ package shared.network;
  * 
  * @author Anh Pham
  */
-public class FullCharacterData extends PartialCharacterData {
+public class FullCharacterData extends CharData {
 	
 	private static final long serialVersionUID = 6568364547122850939L;
 	
@@ -15,4 +15,5 @@ public class FullCharacterData extends PartialCharacterData {
 	public float viewAngle;
 	
 	public float crosshairSize;
+	public float gunDirection;
 }

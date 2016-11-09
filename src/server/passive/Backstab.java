@@ -3,7 +3,7 @@ package server.passive;
 import server.character.PlayerCharacter;
 import server.world.Geometry;
 import server.world.World;
-import shared.network.PartialCharacterData;
+import shared.network.CharData;
 
 public class Backstab extends Passive {
 	public static final double BS_MIN_ANGLE = 135;
@@ -28,7 +28,7 @@ public class Backstab extends Passive {
 
 	@Override
 	protected boolean trigger() {
-		for (PartialCharacterData c:self().getPerception().characters) {
+		for (CharData c:self().getPerception().characters) {
 			double dir = Geometry.wrapAngle(c.direction - Math.atan2(c.y-self().getY(),c.x-self().getX()));
 			if (Math.abs(dir)<BS_MIN_ANGLE) {
 				return true;

@@ -164,7 +164,7 @@ public abstract class MatchServer implements Runnable, GameEventListener {
 		}
 		for (ServerPlayer p:players) {
 			try {
-				if (p.connection.getSocket()!=null)
+				if (p.connection!=null && p.connection.getSocket()!=null)
 					p.connection.getSocket().close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -186,7 +186,7 @@ public abstract class MatchServer implements Runnable, GameEventListener {
 			per.time = gameTimeCounter;
 			per.player = p.character.generate();
 			p.sendData(per);
-			per.events.clear();
+			per.events = new LinkedList<GameEvent>();
 		}
 		events.clear();
 		chatTexts.clear();

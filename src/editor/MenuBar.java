@@ -107,6 +107,16 @@ public class MenuBar extends JMenuBar {
 			}
 		});
 		file.add(saveImages);
+		file.addSeparator();
+		
+		final JMenuItem backup = new JMenuItem("Back-up Tile Data");
+		backup.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				editor.backupTileList();
+			}
+		});
+		file.add(backup);
 		
 		JMenu edit = new JMenu("Edit");
 		add(edit);
