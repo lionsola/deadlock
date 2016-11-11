@@ -11,6 +11,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
@@ -47,6 +48,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	protected boolean renderHardLight = false;
 	protected boolean renderLightSource = false;
 	protected boolean renderGrid = true;
+	protected boolean renderConfig = false;
 	
 	private Camera camera;
 	//private double zoomLevel;
@@ -174,29 +176,34 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		Graphics2D g2D = (Graphics2D) g;
 		RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2D.setRenderingHints(rh);
+		Rectangle2D window = camera.getDrawArea();
 		if (renderTerrain)
-			Renderer.renderArenaBG(g2D, arena, camera.getDrawArea());
+			Renderer.renderArenaBG(g2D, arena, window);
 		if (renderThings)
-			Renderer.renderArenaObjects(g2D, arena, camera.getDrawArea());
+			Renderer.renderArenaObjects(g2D, arena, window);
 		if (renderLight) {
 			Composite save = g2D.getComposite();
 			//g2D.setComposite(new MultiplyComposite(0.5f));
 			g2D.setComposite(new SoftHardLightComposite(1f));
 			//long before = System.currentTimeMillis();
-			Renderer.drawArenaImage(g2D, lightImage, camera.getDrawArea());
+			Renderer.drawArenaImage(g2D, lightImage, window);
 			//System.out.println(System.currentTimeMillis()-before);
 			g2D.setComposite(save);
 		}
 		if (renderHardLight) {
-			Renderer.renderEditorHardLight(g2D, arena.getLightmap(), camera.getDrawArea());
+			Renderer.renderEditorHardLight(g2D, arena.getLightmap(), window);
 		}
 		if (renderLightSource) {
-			Renderer.renderEditorLightSource(g2D, arena, camera.getDrawArea());
+			Renderer.renderEditorLightSource(g2D, arena, window);
 		}
 		if (renderGrid) {
-			Renderer.renderGrid(g2D, arena, camera.getDrawArea());
+			Renderer.renderGrid(g2D, arena, window);
 		}
-		Renderer.renderMainCharacter(g2D, player, playerInfo);
+		if (renderConfig) {
+			Renderer.renderSpriteConfig(g2D, arena, window);
+		}
+		//Renderer.renderMainCharacter(g2D, player, playerInfo);
+		Renderer.renderCrosshair(g2D, player.x, player.y, 1);
 		g.translate(transX, transY);
 		g2D.drawString("FPS: "+FPS, 10, 10);
 	}

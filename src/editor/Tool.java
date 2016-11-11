@@ -2,6 +2,7 @@ package editor;
 
 import java.awt.Point;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 
 import javax.swing.SwingUtilities;
@@ -20,10 +21,26 @@ import server.world.Terrain;
  */
 public abstract class Tool extends MouseInputAdapter {
 	protected final ArenaPanel arenaPanel;
+	private Point pointedCoord = new Point();
+	
 	public Tool(ArenaPanel arenaPanel) {
 		this.arenaPanel = arenaPanel;
 	}
 
+	public Tile getPointedTile() {
+		return arenaPanel.getArena().get(pointedCoord);
+	}
+	
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		pointedCoord = getPointedTile(e);
+	}
+	
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		pointedCoord = getPointedTile(e);
+	}
+	
 	protected Point getPointedTile(MouseEvent e) {
 		int tx = (int) (Renderer.toMeter(e.getX()+arenaPanel.getCamera().getTopLeftXPixel())/Terrain.tileSize);
 		int ty = (int) (Renderer.toMeter(e.getY()+arenaPanel.getCamera().getTopLeftYPixel())/Terrain.tileSize);
@@ -40,6 +57,7 @@ public abstract class Tool extends MouseInputAdapter {
 		
 		@Override
 		public void mousePressed(MouseEvent e) {
+			super.mousePressed(e);
 			if (SwingUtilities.isLeftMouseButton(e)) {
 				Point p = getPointedTile(e);
 				arenaPanel.getArena().setTerrain(p.x, p.y, tile);
@@ -51,6 +69,7 @@ public abstract class Tool extends MouseInputAdapter {
 		
 		@Override
 		public void mouseDragged(MouseEvent e) {
+			super.mouseDragged(e);
 			mousePressed(e);
 		}
 	}
@@ -65,6 +84,7 @@ public abstract class Tool extends MouseInputAdapter {
 		
 		@Override
 		public void mousePressed(MouseEvent e) {
+			super.mousePressed(e);
 			if (SwingUtilities.isLeftMouseButton(e)) {
 				Point p = getPointedTile(e);
 				arenaPanel.getArena().setThing(p.x, p.y, object);
@@ -76,6 +96,7 @@ public abstract class Tool extends MouseInputAdapter {
 		
 		@Override
 		public void mouseDragged(MouseEvent e) {
+			super.mouseDragged(e);
 			mousePressed(e);
 		}
 	}
@@ -89,6 +110,7 @@ public abstract class Tool extends MouseInputAdapter {
 		
 		@Override
 		public void mousePressed(MouseEvent e) {
+			super.mousePressed(e);
 			if (SwingUtilities.isLeftMouseButton(e)) {
 				Point p = getPointedTile(e);
 				arenaPanel.getArena().addLight(new Light(p.x,p.y,colorPicker.getColor(),colorPicker.getRange()));
@@ -112,6 +134,7 @@ public abstract class Tool extends MouseInputAdapter {
 
 		@Override
 		public void mouseDragged(MouseEvent arg0) {
+			super.mouseDragged(arg0);
 			arenaPanel.player.x = arenaPanel.player.x - (float) Renderer.toMeter(arg0.getX()-prevCx);
 			arenaPanel.player.x = (float)Math.max(0,arenaPanel.player.x);
 			arenaPanel.player.x = (float)Math.min(arenaPanel.getArena().getWidthMeter(),arenaPanel.player.x);
@@ -124,6 +147,7 @@ public abstract class Tool extends MouseInputAdapter {
 
 		@Override
 		public void mouseMoved(MouseEvent arg0) {
+			super.mouseMoved(arg0);
 			prevCx = arg0.getX();
 			prevCy = arg0.getY();
 		}
@@ -136,7 +160,29 @@ public abstract class Tool extends MouseInputAdapter {
 		}
 		
 		@Override
+		public void mouseWheelMoved(MouseWheelEvent e) {
+			super.mouseWheelMoved(e);
+			Point p = getPointedTile(e);
+			Tile tile = arenaPanel.getArena().get(p); 
+			Thing thing = tile.getThing();
+			if (tile.getSpriteConfig()==null) {
+				tile.setSpriteConfig(new SpriteConfig());
+			}
+			SpriteConfig config = tile.getSpriteConfig();
+			
+			if (e.getWheelRotation()<0) {
+				config.rotation -= 1;
+				if (config.rotation<0) {
+					config.rotation += 4;
+				}
+			} else if (e.getWheelRotation()>0){
+				config.rotation = (config.rotation+1)%4;
+			}
+		}
+		
+		@Override
 		public void mousePressed(MouseEvent e) {
+			super.mousePressed(e);
 			Point p = getPointedTile(e);
 			Tile tile = arenaPanel.getArena().get(p); 
 			Thing thing = tile.getThing();
@@ -157,11 +203,7 @@ public abstract class Tool extends MouseInputAdapter {
 						}
 					}
 				} else if (SwingUtilities.isRightMouseButton(e)) {
-					if (tile.getSpriteConfig()==null) {
-						tile.setSpriteConfig(new SpriteConfig());
-					}
-					SpriteConfig config = tile.getSpriteConfig();
-					config.rotation = (config.rotation+1)%4;
+					tile.setSpriteConfig(null);
 				} else if (SwingUtilities.isMiddleMouseButton(e)) {
 					if (tile.getSpriteConfig()==null) {
 						tile.setSpriteConfig(new SpriteConfig());

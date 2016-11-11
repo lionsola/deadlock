@@ -23,6 +23,9 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import client.gui.ClientPlayer;
+import client.image.HardLightComposite;
+import client.image.MultiplyComposite;
+import client.image.OverlayComposite;
 import editor.EditorArena;
 import server.world.Arena;
 import server.world.Geometry;
@@ -165,11 +168,13 @@ public class Renderer {
 			drawLine(g2D, x, topy, x + length, topy);
 		}
 
-		g2D.setColor(new Color(200, 200, 200));
-		g2D.setStroke(dashed);
-		Point2D p3 = Geometry.PolarToCartesian(p.viewRange, p.direction+p.gunDirection);
-		Point2D p1 = Geometry.PolarToCartesian(p.radius*2, p.direction+p.gunDirection);
-		drawLine(g2D,p.x+p3.getX(),p.y-p3.getY(),p.x+p1.getX(),p.y-p1.getY());
+		if (p.viewRange>p.radius*5) {
+			g2D.setColor(new Color(200, 200, 200));
+			g2D.setStroke(dashed);
+			Point2D p3 = Geometry.PolarToCartesian(p.viewRange, p.direction+p.gunDirection);
+			Point2D p1 = Geometry.PolarToCartesian(p.radius*5, p.direction+p.gunDirection);
+			drawLine(g2D,p.x+p3.getX(),p.y-p3.getY(),p.x+p1.getX(),p.y-p1.getY());
+		}
 	}
 	
 	public static void renderOtherCharacter(Graphics2D g2D, CharData c, int typeId) {
@@ -181,18 +186,32 @@ public class Renderer {
 	private static void renderArmor(Graphics2D g2D, double cx, double cy, double cr, double start, double extent,int team) {
 		g2D.setStroke(new BasicStroke(toPixel(CHARACTER_WIDTH*2)));
 		
-		g2D.setColor(teamColors[team]);
+		g2D.setColor(teamColors[team].brighter());
 		drawArc(g2D,cx,cy,cr,start,extent,Arc2D.OPEN);
 	}
 	
 	private static void renderGun(Graphics2D g2D, double x, double y, double r, double gunDirection, int typeId, int team) {
-		double GUN_WIDTH = 0.15;
 		// draw gun
-		g2D.setStroke(new BasicStroke((float) (ppm*GUN_WIDTH)));
-		g2D.setColor(teamColors[team]);
+		BufferedImage gunImage = ImageBlender.deepCopy(Sprite.guns.get(typeId));
+		//BufferedImage gunImage = Sprite.guns.get(0);
+		Graphics2D gunG = (Graphics2D)gunImage.getGraphics();
+		gunG.setComposite(new OverlayComposite(1.0f));
+		gunG.setColor(teamColors[team]);
+		gunG.fillRect(0, 0, gunImage.getWidth(), gunImage.getHeight());
+		gunG.dispose();
+		
+		double gunW = gunImage.getHeight()/DEFAULT_PPM;
+		double gunL = gunImage.getWidth()/DEFAULT_PPM;
+		g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		
+		g2D.rotate(-gunDirection,toPixel(x),toPixel(y));
+		Renderer.drawImage(g2D,gunImage, x+r, toMeter(toPixel(y))-gunW/2,gunL,gunW);
+		g2D.rotate(gunDirection,toPixel(x),toPixel(y));
+		/*
 		Point2D p1 = Geometry.PolarToCartesian(r*0.7, gunDirection);
-		Point2D p2 = Geometry.PolarToCartesian(r*1.7, gunDirection);
+		Point2D p2 = Geometry.PolarToCartesian(r*2, gunDirection);
 		drawLine(g2D,x+p1.getX(),y-p1.getY(),x+p2.getX(),y-p2.getY());
+		*/
 	}
 	
 	
@@ -200,7 +219,9 @@ public class Renderer {
 		g2D.setStroke(new BasicStroke(toPixel(CHARACTER_WIDTH)));
 		g2D.setColor(Color.BLACK);
 		fillCircle(g2D,x, y,r);
+		
 		g2D.setColor(teamColors[team]);
+		
 		//fillCircle(g2D,x,y,r);
 		drawCircle(g2D,x,y,r);
 		
@@ -261,7 +282,7 @@ public class Renderer {
 	}
 	
 	public static void renderArenaBG(Graphics2D g2D, Arena a, Rectangle2D window) {
-		g2D.setColor(new Color(0x080808));
+		g2D.setColor(new Color(0x090909));
 		fillRect(g2D,0,0, a.getWidthMeter(), a.getHeightMeter());
 		
 		double ts = Terrain.tileSize;
@@ -375,6 +396,36 @@ public class Renderer {
 		}
 	}
 	
+	public static void renderSpriteConfig(Graphics2D g2D, EditorArena a, Rectangle2D window) {
+		double ts = Terrain.tileSize;
+		int x1 = Math.max(0, (int) (window.getX() / ts));
+		int y1 = Math.max(0, (int) (window.getY() / ts));
+		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (window.getWidth() / ts) + 1);
+		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (window.getHeight() / ts) + 1);
+		double SIZE = 0.5;
+		//double MARGIN = (1.0-SIZE)/2.0;
+		
+		g2D.setStroke(new BasicStroke(1));
+		for (int x = x1; x <= x2; x++) {
+			for (int y = y1; y <= y2; y++) {
+				SpriteConfig sc = a.get(x, y).getSpriteConfig();
+				if (sc!=null) {
+					if (sc.flip) {
+						Renderer.drawLine(g2D, (x+0.8)*ts, (y+0.2)*ts, (x+0.8)*ts, (y+0.8)*ts);
+						Renderer.fillRect(g2D, (x+0.65)*ts, (y+0.3)*ts, 0.15*ts, 0.4*ts);
+						Renderer.drawRect(g2D, (x+0.8)*ts, (y+0.3)*ts, 0.15*ts, 0.4*ts);
+					}
+					if (sc.rotation>0) {
+						Renderer.fillArc(g2D, (x+0.3)*ts, (y+0.3)*ts, 0.2*ts, 0, Math.PI*sc.rotation/2, Arc2D.PIE);
+					}
+					Renderer.drawString(g2D, sc.spriteX+","+sc.spriteY, x*ts, (y+0.9)*ts);
+				}
+			}
+		}	
+	}
+	
+	
+
 	public static void renderEditorLightSource(Graphics2D g2D, EditorArena a, Rectangle2D window) {
 		double ts = Terrain.tileSize;
 		for (Light l:a.getLightList()) {
@@ -422,6 +473,10 @@ public class Renderer {
 		}
 	}
 	
+	static void drawString(Graphics2D g2D, String s, double x, double y) {
+		g2D.drawString(s, toPixel(x), toPixel(y));
+	}
+	
 	static void drawLine(Graphics2D g2D, double x1, double y1, double x2, double y2) {
 		//g2D.drawLine(toPixel(x1), toPixel(y1), toPixel(x2), toPixel(y2));
 		g2D.draw(new Line2D.Double(x1*ppm,y1*ppm,x2*ppm,y2*ppm));
@@ -429,6 +484,10 @@ public class Renderer {
 	
 	private static void drawArc(Graphics2D g2D, double cx, double cy, double cr, double start, double extent, int type) {
 		g2D.draw(new Arc2D.Double((cx-cr)*ppm,(cy-cr)*ppm,(cr*2)*ppm,(cr*2)*ppm,Math.toDegrees(start),Math.toDegrees(extent),type));
+	}
+	
+	private static void fillArc(Graphics2D g2D, double cx, double cy, double cr, double start, double extent, int type) {
+		g2D.fill(new Arc2D.Double((cx-cr)*ppm,(cy-cr)*ppm,(cr*2)*ppm,(cr*2)*ppm,Math.toDegrees(start),Math.toDegrees(extent),type));
 	}
 	
 	static void drawCircle(Graphics2D g2D, double x, double y, double radius) {

@@ -3,6 +3,7 @@ package client.graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
+import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
@@ -26,6 +27,7 @@ public class Sprite {
 	public static BufferedImage[] SHIELD;
 	private static Image[][] images = new Image[5][2];
 	private static Image[] BLOOD = new Image[4];
+	public static HashMap<Integer,BufferedImage> guns = new HashMap<Integer,BufferedImage>();
 
 	public static void initImage() {
 		try {
@@ -63,6 +65,12 @@ public class Sprite {
 			SHIELD[0] = ImageIO.read(new FileInputStream("resource/shield1.png"));
 			SHIELD[1] = ImageIO.read(new FileInputStream("resource/shield2.png"));
 			SHIELD[2] = ImageIO.read(new FileInputStream("resource/shield3.png"));
+			
+			guns.put(0, ImageIO.read(new FileInputStream("resource/weapon/mp7.png")));
+			guns.put(1, ImageIO.read(new FileInputStream("resource/weapon/shotgun.png")));
+			guns.put(2, ImageIO.read(new FileInputStream("resource/weapon/sniper.png")));
+			guns.put(3, ImageIO.read(new FileInputStream("resource/weapon/pistol.png")));
+			guns.put(4, ImageIO.read(new FileInputStream("resource/weapon/m16.png")));
 		} catch (Exception e) {
 			System.out.println("Error while loading server.character images");
 			System.out.println(e.getMessage());

@@ -56,10 +56,10 @@ public class AnimationSystem {
 	 * @param direction
 	 */
 	public void addShotAnimation(double x, double y, double direction) {
-		for (int i = 0; i < 6; i++) {
-			double randomDirection = direction + (Math.PI/8) * Utils.random().nextGaussian() / 2;
-			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.05, 0.15, 50, Color.WHITE);
-			p.setGrowth(-0.002, -0.002);
+		for (int i = 0; i < 5; i++) {
+			double randomDirection = direction -(Math.PI/4) + (Math.PI/2)*i/4;
+			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.012, 0.12, 100, Color.WHITE);
+			p.setGrowth(-0.0007, -0.0007);
 			p.setSizeDefault(true);
 			animations.add(p);
 		}
@@ -95,7 +95,7 @@ public class AnimationSystem {
 		int n = 8;
 		for (int i = 0; i < n; i++) {
 			//double randomDirection = Math.PI*2*Utils.random().nextDouble();
-			double randomDirection = Math.PI*2.0*i/n;
+			double randomDirection = Math.PI*2.0*i/(n-1);
 			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.01, 0.1, 100, Color.WHITE);
 			p.setGrowth(-0.0006, -0.0006);
 			p.setSizeDefault(true);

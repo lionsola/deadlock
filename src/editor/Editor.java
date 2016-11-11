@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -16,6 +18,7 @@ import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -38,6 +41,7 @@ public class Editor extends JFrame {
     private int height;
     // private int scale;
     private ArenaPanel arenaPanel;
+    private JLabel cursorInfo;
     
     /**
 	 * @return the arenaPanel
@@ -94,7 +98,10 @@ public class Editor extends JFrame {
         getContentPane().setLayout(new BorderLayout());
         
         this.setJMenuBar(new MenuBar(this));
-        this.getContentPane().add(new ToolMenu(this),BorderLayout.WEST);
+        ToolMenu tools = new ToolMenu(this);
+        this.getContentPane().add(tools,BorderLayout.WEST);
+        cursorInfo = new JLabel();
+		this.getContentPane().add(cursorInfo,BorderLayout.SOUTH);
         this.addWindowListener(new WindowAdapter() {
         	@Override
         	public void windowClosing(WindowEvent e) {
@@ -139,6 +146,15 @@ public class Editor extends JFrame {
     	}
     	arenaPanel = new ArenaPanel(a);
     	getContentPane().add(arenaPanel, BorderLayout.CENTER);
+    	arenaPanel.addMouseMotionListener(new MouseMotionListener(){
+			@Override
+			public void mouseDragged(MouseEvent arg0) {
+				cursorInfo.setText(currentTool.getPointedTile().toString());
+			}
+			@Override
+			public void mouseMoved(MouseEvent arg0) {
+				cursorInfo.setText(currentTool.getPointedTile().toString());
+			}});
     	pack();
     	setTool(new Tool.MoveTool(arenaPanel));
     	arenaPanel.start();

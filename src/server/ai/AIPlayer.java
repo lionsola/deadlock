@@ -20,7 +20,6 @@ import shared.core.Vector2D;
 import shared.network.GameDataPackets.InputPacket;
 import shared.network.GameDataPackets.WorldStatePacket;
 import shared.network.GameEvent.SoundEvent;
-import shared.network.ProjectileData;
 
 /**
  * Used to model the behaviour of an AI player.
@@ -99,14 +98,14 @@ public class AIPlayer extends ServerPlayer {
 		}
 		
 		// delay output a bit
-		WorldStatePacket wsp = this.wsp;
 		try {
-			Thread.sleep(50);
+			Thread.sleep(20);
 		} catch (InterruptedException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
+		WorldStatePacket wsp = this.wsp;
 		
 		if (character.isDead())
 			return new InputPacket();
@@ -125,13 +124,11 @@ public class AIPlayer extends ServerPlayer {
 		}
 		
 		// if I'm exploring but there's something more important
-		if (true) {
-			AIState newState = decideAction();
-			if (newState!=state) {
-				state = newState;
-				// well, do it
-				this.execute(state);
-			}
+		AIState newState = decideAction();
+		if (newState!=state) {
+			state = newState;
+			// well, do it
+			this.execute(state);
 		}
 
 		// if I was calculating a path and a path appeared
@@ -268,42 +265,28 @@ public class AIPlayer extends ServerPlayer {
 				// decide on target
 				
 				double minHp = Double.MAX_VALUE;
-				CharData target = null;
+				Point2D target = null;
 				for (CharData e:enemies) {
 					// do raycasting first to decide which one can actually be hit
-					boolean blocked = false;
-					for (CharData ally:allies) {
-						if (Line2D.ptLineDist(wsp.player.x,wsp.player.y,e.x,e.y,ally.x,ally.y)<ally.radius) {
-							blocked = true;
-							break;
-						}
-					}
-					List<Point2D> samples = Geometry.getLineSamples(wsp.player.x,wsp.player.y,e.x,e.y, 0.5);
-					for (Point2D point:samples) {
-						Thing t = arena.getTileAt(point.getX(),point.getY()).getThing();
-						if (t!=null && t.getCoverType()>1) {
-							blocked = true;
-							break;
-						}
-					}
+					Point2D aim = getClearAim(e);
 					
 					// ATM just target the one with lowest hp
-					if (!blocked) {
+					if (aim!=null) {
 						if (e.healthPoints < minHp) {
-							target = e;
+							target = aim;
 							minHp = e.healthPoints;
 						}
 					}
 				}
 				if (target==null) {
-					System.err.println("AI "+this.id+" trying to attack but no target?!");
+					System.err.println("AI "+this.id+" trying to attack but can't aim");
 				} else {
-					pointCursorAt(target.x,target.y);
+					pointCursorAt(target.getX(),target.getY());
+					input.fire1 = true;
 				}
 				
 				// decide whether to shoot it or wait or run somewhere else
 				// ATM just shoot it
-				input.fire1 = true;
 				break;
 			case RETREATING:
 				// decide where to retreat to
@@ -352,6 +335,46 @@ public class AIPlayer extends ServerPlayer {
 			default:
 				break;	
 		}
+	}
+	
+	private Point2D getClearAim(CharData enemy) {
+		boolean blocked = false;
+		Vector2D n = new Vector2D(enemy.y-wsp.player.y,wsp.player.x-enemy.x);
+		n.mult((enemy.radius/2)/Math.sqrt(n.magSqr()));
+		
+		Vector2D enemyPos = new Vector2D(enemy.x,enemy.y);
+		//enemyPos.sub(n);
+		int[] a = {0,1,-1};
+		for (int i=0;i<3;i++) {
+			blocked = false;
+			Vector2D target = enemyPos.clone();
+			Vector2D d = n.clone();
+			d.mult(a[i]);
+			target.add(d);
+			
+			for (CharData ally:allies) {
+				if (Line2D.ptSegDist(wsp.player.x,wsp.player.y,enemy.x,enemy.y,ally.x,ally.y)<ally.radius) {
+					blocked = true;
+					break;
+				}
+			}
+			
+			if (!blocked) {
+				List<Point2D> samples = Geometry.getLineSamples(wsp.player.x,wsp.player.y,target.x,target.y, 0.5);
+				for (Point2D point:samples) {
+					Thing t = arena.getTileAt(point.getX(),point.getY()).getThing();
+					if (t!=null && t.getCoverType()>1) {
+						blocked = true;
+						break;
+					}
+				}
+			}
+			
+			if (!blocked) {
+				return new Point2D.Double(target.x,target.y);
+			}
+		}
+		return null;
 	}
 	
 	private Point2D randomizeExploreDest() {

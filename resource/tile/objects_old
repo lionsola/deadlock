@@ -9,5 +9,5 @@
 ff0000 redspawn redspawn.png true true 0 1.0
 ff00 greenspawn greenspawn.png true true 0 1.0
 0 empty empty.png true true 0 0.0
-804001 woodenfence fence.png true true 1 1.0
+804001 woodenfence fence.png false true 1 1.0
 8001 grasswall grasswall.png false false 1 1.0

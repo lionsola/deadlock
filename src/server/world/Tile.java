@@ -45,4 +45,10 @@ public class Tile {
 	public SpriteConfig getSpriteConfig() {
 		return config;
 	}
+	
+	@Override
+	public String toString() {
+		return "Thing: "+ (thing==null?"empty":thing)
+				+ ", terrain: "+(terrain==null?"empty":terrain);
+	}
 }

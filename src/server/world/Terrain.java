@@ -99,4 +99,8 @@ public class Terrain implements CellRenderable, Identifiable, Serializable {
 	public int getId() {
 		return id;
 	}
+	
+	public String toString() {
+		return getName();
+	}
 }

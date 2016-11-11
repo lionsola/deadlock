@@ -247,5 +247,19 @@ public class MenuBar extends JMenuBar {
 			}
 		});
 		view.add(grid);
+		
+		JCheckBoxMenuItem config = new JCheckBoxMenuItem("Sprite Config.");
+		config.setSelected(false);
+		config.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					editor.getArenaPanel().renderConfig = true;
+				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
+					editor.getArenaPanel().renderConfig = false;
+				}
+			}
+		});
+		view.add(config);
 	}
 }
