@@ -1,9 +1,12 @@
 package server.weapon;
 
+import java.awt.geom.Point2D;
+
 import client.graphics.AnimationSystem;
 import client.gui.GameWindow;
 import server.ability.Ability;
 import server.character.PlayerCharacter;
+import server.world.Geometry;
 import server.world.Utils;
 import server.world.World;
 
@@ -39,9 +42,16 @@ public abstract class Weapon extends Ability {
 		if (c.getInput().fire1 && !c.getInput().alt && isReady()) {
 			//double direction = c.disperseDirection();
 			
-			double direction = c.getDirection()+c.getGunDirection();
+			double direction = c.getDirection();
 			
 			fire(w,c,direction);
+			final double RECOIL_DISTANCE = 0.3;
+			Point2D p = Geometry.PolarToCartesian(RECOIL_DISTANCE*type.instability,
+					Math.PI+direction);
+			
+			c.setX(c.getX()+p.getX());
+			c.setY(c.getY()-p.getY());
+			
 			ammoLeft -= 1;
 			w.addAnimation(AnimationSystem.GUNSHOT, c.getX(), c.getY(), direction);
 			w.addSound(type.soundId, type.noise, c.getX(), c.getY());
@@ -50,8 +60,8 @@ public abstract class Weapon extends Ability {
 			
 			double maxRecoil = PlayerCharacter.MAX_DISPERSION_ANGLE*getInstability();
 			double recoil = maxRecoil*Math.min(1,Math.abs(Utils.random().nextGaussian())); 
-			recoil = Math.copySign(recoil,c.getGunDirection()*(Utils.random().nextDouble()<0.8?1:-1));
-			c.setGunDirection(c.getGunDirection()+recoil);
+			recoil = Math.copySign(recoil,(c.getDirection()-c.getTargetDirection())*(Utils.random().nextDouble()<0.8?1:-1));
+			c.setDirection(c.getDirection()+recoil);
 			
 			startCooldown();
 			if (ammoLeft<=0) {
@@ -77,12 +87,12 @@ public abstract class Weapon extends Ability {
 		return gunDirection + type.gunDispersion*Utils.random().nextGaussian()/2;
 	}
 	
-	private static double randomizeStat(double stat, double limit) {
+	public static double randomizeStat(double stat, double limit) {
 		return stat*(1+limit*Utils.random().nextGaussian()/2);
 	}
 	
-	protected void fireOneBullet (World w, PlayerCharacter c, double direction) {
-		w.addProjectile(new Bullet(c, direction, randomizeStat(type.projectileSpeed,0.1), type.size));
+	protected void fireOneBullet (World w, PlayerCharacter c, double direction, double speed) {
+		w.addProjectile(new Bullet(c, direction, speed, type.size, type.damage));
 	}
 	
 	@Override

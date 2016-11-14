@@ -107,7 +107,11 @@ public class AnimationSystem {
 	 * Create a trailing effect for a projectile (bullet, grenade, etc.).
 	 */
 	public void addProjectileTrail(double x, double y, double direction, double speed, double size) {
-		addCustomAnimation(new LineAnimation(50,x,y,direction,speed,size));
+		if (size<50)
+			addCustomAnimation(new LineAnimation(50,x,y,direction,speed,Math.min(0.05,size/500)));
+		else {
+			addCustomAnimation(new LineAnimation(50,x,y,direction,speed,size/3000));
+		}
 	}
 	
 	public void addAnimation(AnimationEvent e) {

@@ -15,5 +15,4 @@ public class FullCharacterData extends CharData {
 	public float viewAngle;
 	
 	public float crosshairSize;
-	public float gunDirection;
 }

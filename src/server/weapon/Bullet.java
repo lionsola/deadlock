@@ -20,14 +20,20 @@ public class Bullet extends Projectile {
 	public static final int BULLET_WALL_SOUND_ID = 31;
 	public static final double BULLET_WALL_SOUND_VOLUME = 30;
 	
+	private final double baseDamage;
+	private final double baseSpeed;
 	Thing lastHit;
 	
-	public Bullet(PlayerCharacter source, double direction, double speed, double size) {
+	public Bullet(PlayerCharacter source, double direction, double speed, double size, double damage) {
 		super(source, direction, speed, size);
+		baseDamage = damage;
+		baseSpeed = speed;
 	}
 	
-	public Bullet(Projectile source, double direction, double speed, double size) {
+	public Bullet(Projectile source, double direction, double speed, double size, double damage) {
 		super(source, direction, speed, size);
+		baseDamage = damage;
+		baseSpeed = speed;
 	}
 	
 	@Override
@@ -61,7 +67,7 @@ public class Bullet extends Projectile {
 	}
 	
 	public double getDamage() {
-		return getSpeed()*getSize()*8;
+		return baseDamage*getSpeed()/baseSpeed;
 	}
 	
 	@Override

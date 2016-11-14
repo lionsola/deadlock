@@ -105,7 +105,8 @@ public class LobbyServer implements Runnable {
 	 * @param type The type of the AI player.
 	 */
 	public void addAIPlayer (int team, int type) {
-	    ServerPlayer p = new AIPlayer(count, team);
+	    //ServerPlayer p = new AIPlayer(count, team);
+		ServerPlayer p = new DummyPlayer(count, team);
 	    p.type = type;
 	    p.active = true;
 	    count++;

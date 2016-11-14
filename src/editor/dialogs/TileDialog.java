@@ -132,6 +132,7 @@ public class TileDialog extends JDialog implements ActionListener {
         	int ID = Utils.random().nextInt();
         	//this.tile = new TileBG(ID);
         	id.setValue(ID);
+        	spriteSize.setValue(1);
         }
         
         this.setContentPane(topPanel);

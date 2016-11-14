@@ -247,7 +247,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				visualAnimations.addProjectileTrail(data.x, data.y, data.prevX, data.prevY ,data.size);
 			}
 			mainCharacter = wsp.player;
-			mainCharacter.direction = (float) Math.atan2(mainCharacter.y - input.cy, input.cx - mainCharacter.x);
+			//mainCharacter.direction = (float) Math.atan2(mainCharacter.y - input.cy, input.cx - mainCharacter.x);
 
 			camera.update(mainCharacter);
 			synchronized (events) {
@@ -393,15 +393,29 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			
 			// create the vision region
 			Area los = new Area();
+			
+			Vision v = new Vision();
+			v.x = c.x;
+			v.y = c.y;
+			v.angle = c.viewAngle;
+			v.direction = c.direction;
+			v.radius = c.radius;
+			v.range = c.viewRange;
+
+			los.add(visibility.generateLoS(v, arena));
+			double r = v.radius*1.5;
+			los.add(new Area(new Ellipse2D.Double(Renderer.toPixel(v.x - r),Renderer.toPixel(v.y - r),
+					Renderer.toPixel(r*2),Renderer.toPixel(r*2))));
+			
+			/*
 			for (Vision v:currentState.visions) {
 				los.add(visibility.generateLoS(v, arena));
 				double r = v.radius*1.5;
 				los.add(new Area(new Ellipse2D.Double(Renderer.toPixel(v.x - r),Renderer.toPixel(v.y - r),
 						Renderer.toPixel(r*2),Renderer.toPixel(r*2))));
 			}
-			double r = c.radius*1.5;
-			los.add(new Area(new Ellipse2D.Double(Renderer.toPixel(c.x - r),Renderer.toPixel(c.y - r),
-					Renderer.toPixel(r*2),Renderer.toPixel(r*2))));
+			*/
+			
 			g2D.setClip(los);
 			//Renderer.drawArenaImage(g2D,renderer.getLightArenaImage(),viewBox);
 			Renderer.drawArenaImage(g2D,renderer.getLightArenaImage(),camera.getDrawArea());

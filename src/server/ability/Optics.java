@@ -5,10 +5,11 @@ import server.character.PlayerCharacter;
 import server.world.World;
 
 public class Optics extends ToggleAbility {
-	public static final double BINO_RANGE = 0.3;
-	public static final double BINO_ANGLE = -0.8;
-	public static final double BINO_SPEED = -0.5;
-	public static final double BINO_TRANS = 500;
+	public final double RANGE;
+	public final double ANGLE;
+	public final double SPEED;
+	
+	public static final double TRANS = 500;
 	public static final long COOLDOWN = 4000;
 	
 	private long transElapsed = Long.MAX_VALUE;
@@ -16,11 +17,16 @@ public class Optics extends ToggleAbility {
 	private final double angleInc;
 	private final double speedInc;
 	
-	public Optics(PlayerCharacter self) {
+	public Optics(PlayerCharacter self, double rangeMod, double angleMod, double speedMod) {
 		super(self,COOLDOWN);
-		rangeInc = (BINO_RANGE)*GameWindow.MS_PER_UPDATE/BINO_TRANS;
-		angleInc = (BINO_ANGLE)*GameWindow.MS_PER_UPDATE/BINO_TRANS;
-		speedInc = self.cs.getSpeedF()*(BINO_SPEED)*GameWindow.MS_PER_UPDATE/BINO_TRANS;
+		
+		RANGE = rangeMod;
+		ANGLE = angleMod;
+		SPEED = speedMod;
+		
+		rangeInc = (RANGE)*GameWindow.MS_PER_UPDATE/TRANS;
+		angleInc = (ANGLE)*GameWindow.MS_PER_UPDATE/TRANS;
+		speedInc = self.cs.getSpeedF()*SPEED*GameWindow.MS_PER_UPDATE/TRANS;
 	}
 
 	@Override
@@ -35,7 +41,7 @@ public class Optics extends ToggleAbility {
 	
 	@Override
 	protected void onUpdate(World w, PlayerCharacter c) {
-		if (transElapsed<BINO_TRANS) {
+		if (transElapsed<TRANS) {
 			if (isActive()) {
 				self().addFovRangeMod(+rangeInc);
 				self().addFovAngleMod(+angleInc);
@@ -46,6 +52,26 @@ public class Optics extends ToggleAbility {
 				self().addSpeedMod(-speedInc);
 			}
 			transElapsed += GameWindow.MS_PER_UPDATE;
+		}
+	}
+	
+	public static class Scope extends Optics {
+		public static final double SCOPE_RANGE = 0.25;
+		public static final double SCOPE_ANGLE = -0.75;
+		public static final double SCOPE_SPEED = -0.25;
+		
+		public Scope(PlayerCharacter self) {
+			super(self, SCOPE_RANGE, SCOPE_ANGLE, SCOPE_SPEED);
+		}
+	}
+	
+	public static class Binocular extends Optics {
+		public static final double BINO_RANGE = 0.25;
+		public static final double BINO_ANGLE = -0.5;
+		public static final double BINO_SPEED = -0.5;
+		
+		public Binocular(PlayerCharacter self) {
+			super(self, BINO_RANGE, BINO_ANGLE, BINO_SPEED);
 		}
 	}
 }

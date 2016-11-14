@@ -56,7 +56,7 @@ public class Character {
 	public final ClassStats cs;
 	public final int team;
 	
-	private double direction; // direction the server.character is facing in radiants
+	protected double direction; // direction the server.character is facing in radiants
 	
 	protected int sway = 1;
 	protected double noise = 0; // character current volume
@@ -129,69 +129,91 @@ public class Character {
 	 *            the world to update the coordinates in.
 	 */
 	protected void updateCollision(World world) {
-		if (dx == 0 && dy == 0)
-			return;
 		Arena arena = world.getArena();
+		int curTileY = (int)(y/Terrain.tileSize);
+		int curTileX = (int)(x/Terrain.tileSize);
+		if (!arena.get(curTileX,curTileY).isTraversable())
+			return;
 		
+		// CHECK & FIX CURRENT POSITION
+		int leftX = (int)((x-getRadius())/Terrain.tileSize);
+		int rightX = (int)((x+getRadius())/Terrain.tileSize);
+		int topY = (int)((y-getRadius())/Terrain.tileSize);
+		int btmY = (int)((y+getRadius())/Terrain.tileSize);
+		
+		if (!arena.get(leftX,curTileY).isTraversable()||
+				!arena.get(rightX,curTileY).isTraversable()) {
+			double curTileCX = (curTileX+0.5)*Terrain.tileSize;
+			x =  curTileCX + 0.99*Math.copySign(0.5*Terrain.tileSize-getRadius(),
+					x-curTileCX);
+		} else if (!arena.get(curTileX,topY).isTraversable() ||
+				!arena.get(curTileX,btmY).isTraversable()) {
+			double curTileCY = (curTileY+0.5)*Terrain.tileSize;
+			y = curTileCY + 0.99*Math.copySign(0.5*Terrain.tileSize-getRadius(),
+					y-curTileCY);
+		}  
+
+		// CHECK AND FIX DX AND DY
 		double newX = x + dx*GameWindow.MS_PER_UPDATE;
 		double newY = y + dy*GameWindow.MS_PER_UPDATE;
-		// boundBox.setLocation((int)(newX-radius),(int)(newY-radius));
-		// check each corner of box if walkable
 		
-		if (dx!=0) {
-			int tileX1 = (int) ((newX - getRadius()) / Terrain.tileSize);
-			int tileY1 = (int) ((getY() - getRadius()) / Terrain.tileSize);
-			int tileX2 = (int) ((newX + getRadius()) / Terrain.tileSize);
-			int tileY2 = (int) ((getY() + getRadius()) / Terrain.tileSize);
-			int wallX=0,wallY=0;
-			boolean blocked = false;;
-			for (int x=tileX1;x<=tileX2;x++) {
-				for (int y=tileY1;y<=tileY2;y++) {
-					if (!arena.get(x, y).isTraversable()) {
-						wallX = x;
-						wallY = y;
-						blocked = true;
-						break;
-					}
+		if (true) {
+			// go through the tiles that this character occupies
+			// if it continues to move horizontally in the X axis
+			int tileY1 = (int) ((y - getRadius()) / Terrain.tileSize);
+			int newTileX = (int) ((newX + Math.copySign(getRadius(),dx)) / Terrain.tileSize);
+			int tileY2 = (int) ((y + getRadius()) / Terrain.tileSize);
+			
+			int wallY=0;
+			boolean blocked = false;
+			for (int y=tileY1;y<=tileY2;y++) {
+				// if there's one that's untraversable, the whole movement is blocked
+				if (!arena.get(newTileX, y).isTraversable()) {
+					wallY = y;
+					blocked = true;
+					break;
 				}
 			}
 			if (blocked) {
-				int curTileY = (int)(y/Terrain.tileSize);
 				double t = y-(0.5+wallY)*Terrain.tileSize;
+				// if it's close to the edge of an obstacle
 				if (Math.abs(t)>Terrain.tileSize/2 &&
-						arena.get(wallX,curTileY).isTraversable() &&
+						arena.get(newTileX,curTileY).isTraversable() &&
 						dy==0) {
+					// well, *slide vertically toward the empty space
 					setDy(Math.copySign(Math.abs(dx*0.7),t));
 				}
+				// block the horizontal movement
 				dx = 0;
 			}
 		}
-		if (dy!=0) {
-			int tileX3 = (int) ((getX() - getRadius()) / Terrain.tileSize);
-			int tileY3 = (int) ((newY - getRadius()) / Terrain.tileSize);
-			int tileX4 = (int) ((getX() + getRadius()) / Terrain.tileSize);
-			int tileY4 = (int) ((newY + getRadius()) / Terrain.tileSize);
-			int wallX=0,wallY=0;
+		if (true) {
+			// go through the tiles that this character occupies
+			// if it continues to move vertically in the Y axis
+			int tileX1 = (int) ((x - getRadius()) / Terrain.tileSize);
+			int newTileY = (int) ((newY +Math.copySign(getRadius(), dy)) / Terrain.tileSize);
+			int tileX2 = (int) ((x + getRadius()) / Terrain.tileSize);
+			int wallX=0;
 			boolean blocked = false;
-			for (int x=tileX3;x<=tileX4;x++) {
-				for (int y=tileY3;y<=tileY4;y++) {
-					if (!arena.get(x, y).isTraversable()) {
-						wallX = x;
-						wallY = y;
-						blocked = true;
-						break;
-					}
+			for (int x=tileX1;x<=tileX2;x++) {
+				// if there's one that's untraversable, the whole movement is blocked
+				if (!arena.get(x, newTileY).isTraversable()) {
+					wallX = x;
+					blocked = true;
+					break;
 				}
 			}
 	
 			if (blocked) {
-				int curTileX = (int)(x/Terrain.tileSize);
 				double t = x-(0.5+wallX)*Terrain.tileSize;
+				// if it's close to the edge of an obstacle
 				if (Math.abs(t)>Terrain.tileSize/2 &&
-						arena.get(curTileX,wallY).isTraversable() &&
+						arena.get(curTileX,newTileY).isTraversable() &&
 						dx==0) {
+					// well, *slide horizontally toward the empty space
 					setDx(Math.copySign(Math.abs(dy*0.7),t));
 				}
+				// block the vertical movement
 				dy = 0;
 			}
 		}

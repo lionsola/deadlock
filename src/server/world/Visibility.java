@@ -164,7 +164,9 @@ public class Visibility {
 	    for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
 				if (!a.get(x, y).isClear()) {
-					if (y < pY && a.get(x, y + 1).isClear()) {
+					
+					// above player & below that is an empty tile					
+					if (y < pY && (a.get(x, y + 1).isClear() || (x==pX && y+1==pY))) {
 						xa = x * ts;
 						ya = (y + 1) * ts;
 						xb = xa + ts;
@@ -175,7 +177,7 @@ public class Visibility {
 					}
 
 					// below player & above that is an empty tile
-					else if (y > pY && a.get(x, y - 1).isClear()) {
+					else if (y > pY && (a.get(x, y - 1).isClear() || (x==pX && y-1==pY))) {
 						xa = (x + 1) * ts;
 						ya = y * ts;
 						xb = xa - ts;
@@ -187,7 +189,7 @@ public class Visibility {
 					// vertical edges
 					// to the left of player && to the right of that is an
 					// empty tile
-					if (x < pX && a.get(x + 1, y).isClear()) {
+					if (x < pX && (a.get(x + 1, y).isClear() || (x+1==pX && y==pY))) {
 						xa = (x + 1) * ts;
 						ya = (y + 1) * ts;
 						xb = xa;
@@ -198,7 +200,7 @@ public class Visibility {
 
 					// to the right of player && to the left of that is an
 					// empty tile
-					if (x > pX && a.get(x - 1, y).isClear()) {
+					if (x > pX && (a.get(x - 1, y).isClear() || (x-1==pX && y==pY))) {
 						xa = x * ts;
 						ya = y * ts;
 						xb = xa;

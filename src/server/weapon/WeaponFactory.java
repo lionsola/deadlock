@@ -77,7 +77,8 @@ public class WeaponFactory {
 				@Override
 				public void fire(World w, PlayerCharacter c, double direction) {
 					for (int i=0;i<type.bulletsNo;i++) {
-						fireOneBullet(w,c,disperseDirection(direction));
+						double speed = randomizeStat(type.projectileSpeed,0.1);
+						fireOneBullet(w,c,disperseDirection(direction),speed);
 					}
 				}
 			};
@@ -88,7 +89,8 @@ public class WeaponFactory {
 					double gunDirection = direction;
 					for (int i=0;i<type.bulletsNo;i++) {
 						double bulletDirection = 2*type.gunDispersion*(i/(type.bulletsNo-1.0)-0.5);
-						fireOneBullet(w,c,gunDirection+bulletDirection);
+						double speed = randomizeStat(type.projectileSpeed,0.1);
+						fireOneBullet(w,c,gunDirection+bulletDirection,speed);
 					}
 				}
 			};
@@ -97,7 +99,7 @@ public class WeaponFactory {
 			return new Weapon(self,type) {
 				@Override
 				protected void fire(World w, PlayerCharacter c, double direction) {
-					super.fireOneBullet(w, c, disperseDirection(direction));
+					super.fireOneBullet(w, c, disperseDirection(direction),type.projectileSpeed);
 				}
 			};
 		}

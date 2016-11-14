@@ -11,6 +11,7 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.Toolkit;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
@@ -144,7 +145,7 @@ public class Renderer {
 	
 	public static void renderMainCharacter(Graphics2D g2D, FullCharacterData player, ClientPlayer playerInfo) {
 		// render the character
-		renderGun(g2D,player.x,player.y,player.radius,player.direction+player.gunDirection,playerInfo.type,playerInfo.team);
+		renderGun(g2D,player.x,player.y,player.radius,player.direction,playerInfo.type,playerInfo.team);
 		renderCharacter(g2D, player.x, player.y, player.direction, player.radius, playerInfo.type,playerInfo.team);
 		renderArmor(g2D,player.x, player.y, player.radius,player.direction+player.armorStart,player.armorAngle,playerInfo.team);
 		
@@ -171,8 +172,8 @@ public class Renderer {
 		if (p.viewRange>p.radius*5) {
 			g2D.setColor(new Color(200, 200, 200));
 			g2D.setStroke(dashed);
-			Point2D p3 = Geometry.PolarToCartesian(p.viewRange, p.direction+p.gunDirection);
-			Point2D p1 = Geometry.PolarToCartesian(p.radius*5, p.direction+p.gunDirection);
+			Point2D p3 = Geometry.PolarToCartesian(p.viewRange, p.direction);
+			Point2D p1 = Geometry.PolarToCartesian(p.radius*5, p.direction);
 			drawLine(g2D,p.x+p3.getX(),p.y-p3.getY(),p.x+p1.getX(),p.y-p1.getY());
 		}
 	}
@@ -204,30 +205,28 @@ public class Renderer {
 		double gunL = gunImage.getWidth()/DEFAULT_PPM;
 		g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		
-		g2D.rotate(-gunDirection,toPixel(x),toPixel(y));
-		Renderer.drawImage(g2D,gunImage, x+r, toMeter(toPixel(y))-gunW/2,gunL,gunW);
-		g2D.rotate(gunDirection,toPixel(x),toPixel(y));
-		/*
-		Point2D p1 = Geometry.PolarToCartesian(r*0.7, gunDirection);
-		Point2D p2 = Geometry.PolarToCartesian(r*2, gunDirection);
-		drawLine(g2D,x+p1.getX(),y-p1.getY(),x+p2.getX(),y-p2.getY());
-		*/
+		g2D.rotate(-gunDirection,x*ppm,y*ppm);
+		Renderer.drawImage(g2D,gunImage, x+r-0.1, y-gunW/2,gunL,gunW);
+		g2D.rotate(gunDirection,x*ppm,y*ppm);
 	}
 	
 	
 	private static void renderCharacter(Graphics2D g2D, double x, double y, double direction, double r, int typeId, int team) {
 		g2D.setStroke(new BasicStroke(toPixel(CHARACTER_WIDTH)));
 		g2D.setColor(Color.BLACK);
-		fillCircle(g2D,x, y,r);
+		//fillCircle(g2D,x, y,r);
+		double openArc = 1.5;
+		fillArc(g2D,x,y,r, direction+openArc/2, Math.PI*2 - openArc, Arc2D.CHORD);
 		
 		g2D.setColor(teamColors[team]);
 		
 		//fillCircle(g2D,x,y,r);
-		drawCircle(g2D,x,y,r);
+		//drawCircle(g2D,x,y,r);
+		drawArc(g2D,x,y,r, direction+Math.PI/6, Math.PI*(2-2.0/6), Arc2D.OPEN);
 		
 		// draw head
-		Point2D h = Geometry.PolarToCartesian(r*0.4, direction);
-		double hr = r*0.4;
+		Point2D h = Geometry.PolarToCartesian(r*0.35, direction);
+		double hr = r*0.5;
 		g2D.setColor(Color.BLACK);
 		fillCircle(g2D,x+h.getX(),y-h.getY(),hr);
 		g2D.setColor(teamColors[team]);
@@ -239,9 +238,11 @@ public class Renderer {
 
 	public static void renderProjectile(Graphics2D g2D, ProjectileData pd) {
 		g2D.setColor(Color.WHITE);
-		g2D.setStroke(new BasicStroke(pd.size/100));
-		drawLine(g2D, pd.x, pd.y,pd.prevX,pd.prevY);
-		if (pd.size > 50) {
+		if (pd.size < 50) {
+			g2D.setStroke(new BasicStroke((float)(getPPM()*pd.size/1000)));
+			drawLine(g2D, pd.x, pd.y,pd.prevX,pd.prevY);
+		}
+		else if (pd.size >= 50) {
 			g2D.setStroke(new BasicStroke(1));
 			drawCircle(g2D,pd.x,pd.y,pd.size/2000);
 		}
@@ -505,12 +506,22 @@ public class Renderer {
 				window.getX(),window.getY(),window.getWidth(),window.getHeight());
 	}
 	
-	static void drawImage(Graphics2D g2D, Image image, double x, double y, double w, double h) {
+	static void drawImage(Graphics2D g2D, BufferedImage image, double x, double y, double w, double h) {
+		AffineTransform originalTransform = g2D.getTransform();
+		
+        g2D.translate(x*ppm, y*ppm);
+        g2D.scale(w*ppm/image.getWidth(), h*ppm/image.getHeight());
+        
+        g2D.drawImage(image, 0, 0, null);
+	    g2D.setTransform(originalTransform);
+		
+		/*
 		int screenX = toPixel(x);
 		int screenY = toPixel(y);
 		int screenW = toPixel(w+x-Renderer.toMeter(screenX));
 		int screenH = toPixel(h+y-Renderer.toMeter(screenY));
 		g2D.drawImage(image, screenX, screenY, screenW, screenH, null);
+		*/
 	}
 	
 	static void drawImage(Graphics2D g2D, Image image, double sx, double sy, double sw, double sh, double x, double y, double w, double h) {

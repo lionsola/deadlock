@@ -28,23 +28,25 @@ public abstract class TimedGrenade extends Projectile {
 	@Override
 	protected void onHitWall(World w, double x, double y, Thing t) {
 		// TODO Auto-generated method stub
-		double bounceX = x - getDx()*GameWindow.MS_PER_UPDATE;
-		double bounceY = y - getDy()*GameWindow.MS_PER_UPDATE;
-		if (w.getArena().getTileAt(bounceX, y).isTraversable()) {
-			setDirection(Math.PI - getDirection());
-			setX(bounceX);
-			//System.out.println("Bounce X");
-		} else if (w.getArena().getTileAt(x, bounceY).isTraversable()) {
-			setDirection(- getDirection());
-			setY(bounceY);
-			//System.out.println("Bounce Y");
-		} else {
-			setX(bounceX);
-			setY(bounceY);
-			setDirection(getDirection()+Math.PI);
-			//System.out.println("Bounce XY");
+		if (t.getCoverType()>=2) {
+			double bounceX = x - getDx()*GameWindow.MS_PER_UPDATE;
+			double bounceY = y - getDy()*GameWindow.MS_PER_UPDATE;
+			if (w.getArena().getTileAt(bounceX, y).isTraversable()) {
+				setDirection(Math.PI - getDirection());
+				setX(bounceX);
+				//System.out.println("Bounce X");
+			} else if (w.getArena().getTileAt(x, bounceY).isTraversable()) {
+				setDirection(- getDirection());
+				setY(bounceY);
+				//System.out.println("Bounce Y");
+			} else {
+				setX(bounceX);
+				setY(bounceY);
+				setDirection(getDirection()+Math.PI);
+				//System.out.println("Bounce XY");
+			}
+			setSpeed(getSpeed() - Math.min(500*RESIST_CONSTANT*getSize(),getSpeed()*0.5));
 		}
-		setSpeed(getSpeed() - Math.min(500*RESIST_CONSTANT*getSize(),getSpeed()*0.5));
 	}
 
 	@Override
@@ -78,24 +80,23 @@ public abstract class TimedGrenade extends Projectile {
 
 		@Override
 		protected void explode(World w) {
-			final int FRAGS = 25;
+			final int FRAGS = 30;
 			final double BASE_SIZE = 10;
 			final double BASE_SPEED = 0.5;
+			final double DAMAGE = 40;
 			
 			w.addSound(GRENADE_EXPLODE_SOUND_ID,FRAG_EXPLODE_SOUND_VOLUME, getX(), getY());
 			
-			
-			for (int i=0;i<FRAGS*0.8;i++) {
-				double direction = Math.PI*2*i/(FRAGS*0.8);
+			for (int i=0;i<FRAGS*0.9;i++) {
+				double direction = getDirection() + Math.PI*2*i/(FRAGS*0.8);
 				double sizeF = Math.max(1,1 + 0.8*Utils.random().nextGaussian()/2);
-				w.addDelayedProjectile(new Bullet(this, direction, BASE_SPEED/Math.sqrt(sizeF), BASE_SIZE*sizeF));
+				w.addDelayedProjectile(new Bullet(this, direction, BASE_SPEED/Math.sqrt(sizeF), BASE_SIZE*sizeF, DAMAGE));
 			}
-			for (int i=0;i<FRAGS*0.2;i++) {
+			for (int i=0;i<FRAGS*0.1;i++) {
 				double direction = Utils.random().nextDouble()*Math.PI*2;
 				double sizeF = Math.max(1,1 + 0.8*Utils.random().nextGaussian()/2);
-				w.addDelayedProjectile(new Bullet(this, direction, BASE_SPEED/Math.sqrt(sizeF), BASE_SIZE*sizeF));
+				w.addDelayedProjectile(new Bullet(this, direction, BASE_SPEED/Math.sqrt(sizeF), BASE_SIZE*sizeF, DAMAGE));
 			}
-			
 		}
 	}
 	

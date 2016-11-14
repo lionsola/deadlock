@@ -26,7 +26,7 @@ public class Sprite {
 	private static Image SPECOPS_GREEN;
 	public static BufferedImage[] SHIELD;
 	private static Image[][] images = new Image[5][2];
-	private static Image[] BLOOD = new Image[4];
+	private static BufferedImage[] BLOOD = new BufferedImage[4];
 	public static HashMap<Integer,BufferedImage> guns = new HashMap<Integer,BufferedImage>();
 
 	public static void initImage() {
@@ -95,7 +95,7 @@ public class Sprite {
 	/**
 	 * Return a random blood sprite.
 	 */
-	public static Image getBloodImage() {
+	public static BufferedImage getBloodImage() {
 		return BLOOD[Utils.random().nextInt(BLOOD.length)];
 	}
 }

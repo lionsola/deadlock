@@ -48,7 +48,7 @@ public class PlayerCharacter extends Character {
 	private int typeID; // the type of the server.character, e.g. Sniper
 
 	private double charDispersion = 0;
-	private double gunDirection = 0;
+	private double targetDirection = 0;
 
 	private Weapon primary; // the primary server.weapon of the server.character class
 	private Ability ability;
@@ -144,15 +144,19 @@ public class PlayerCharacter extends Character {
 	}
 	
 	private void updateCrosshair() {
-		addDispersion(instaF*MOVEMENT_DISPERSION_FACTOR*getCurrentSpeed()*GameWindow.MS_PER_UPDATE);
-		gunDirection += sway*instaF*MOVEMENT_DISPERSION_FACTOR*getCurrentSpeed()*GameWindow.MS_PER_UPDATE/2;
+		// add the direction swaying when walking / running
+		//addDispersion(instaF*MOVEMENT_DISPERSION_FACTOR*getCurrentSpeed()*GameWindow.MS_PER_UPDATE);
+		direction += sway*instaF*MOVEMENT_DISPERSION_FACTOR*getCurrentSpeed()*GameWindow.MS_PER_UPDATE/2;
 		
-		addDispersion(-DISPERSION_DEC*(0.5+charDispersion));
-		double gunDirMag = Math.abs(gunDirection)-0.01*MAX_DISPERSION_ANGLE*(0.5+Math.abs(gunDirection)/MAX_DISPERSION_ANGLE);
-		gunDirection = Math.copySign(Math.max(0, gunDirMag),gunDirection);
+		// move character direction toward the target direction slowly 
+		//addDispersion(-DISPERSION_DEC*(0.5+charDispersion));
+		double delta = Geometry.wrapAngle(targetDirection - direction);
+		double stabFactor = (0.5+Math.abs(delta)/MAX_DISPERSION_ANGLE);
+		direction += Math.copySign(0.01*MAX_DISPERSION_ANGLE*stabFactor,delta);
 		
-		if (Math.abs(getGunDirection())>MAX_DISPERSION_ANGLE) {
-			gunDirection = Math.copySign(MAX_DISPERSION_ANGLE,getGunDirection());
+		// limit the difference
+		if (Math.abs(delta)>MAX_DISPERSION_ANGLE) {
+			direction = targetDirection + Math.copySign(MAX_DISPERSION_ANGLE,-delta);
 		}
 	}
 
@@ -194,10 +198,10 @@ public class PlayerCharacter extends Character {
 		// update direction
 		if (!isDead()) {
 			double newDirection = Math.atan2(getY() - getInput().cy, getInput().cx - getX());
-			double dDirection = Geometry.wrapAngle(newDirection - getDirection());
+			double dDirection = Geometry.wrapAngle(newDirection - targetDirection);
 			addDispersion(instaF*ROTATION_DISPERSION_FACTOR*Math.abs(dDirection));
-			gunDirection += -dDirection*0.05;
-			setDirection(newDirection);
+			direction += dDirection*0.95;
+			targetDirection = newDirection;
 		}
 		if (getInput().down && getInput().up) {
 			getInput().down = false;
@@ -266,7 +270,6 @@ public class PlayerCharacter extends Character {
 			fc.armorAngle = (float) getArmor().getAngle();
 			fc.armorStart = (float) getArmor().getStart();
 		}
-		fc.gunDirection = (float) getGunDirection();
 		return fc;
 	}
 
@@ -276,11 +279,6 @@ public class PlayerCharacter extends Character {
 
 	public void addDispersion(double dispersion) {
 		charDispersion = Math.max(0,Math.min(1,charDispersion+dispersion));
-	}
-	
-	
-	public double getGunDirection() {
-		return gunDirection;
 	}
 	
 	public void setWeapon(Weapon w) {
@@ -361,17 +359,16 @@ public class PlayerCharacter extends Character {
 				shield.setAbilty(new ChargedAbility.ThrowFlashGrenade(shield));
 				shield.setPassive(new Shield(shield));
 				return shield;
-			
 			case 1:
 				PlayerCharacter scout =  new PlayerCharacter(id, team, ClassStats.classStats.get(type));
 				scout.setWeapon(WeaponFactory.createGun(2,scout));
-				scout.setAbilty(new Optics(scout));
+				scout.setAbilty(new Optics.Binocular(scout));
 				scout.setPassive(new Mark(scout));
 				return scout;
 			case 2:
 				PlayerCharacter sniper =  new PlayerCharacter(id, team, ClassStats.classStats.get(type));
 				sniper.setWeapon(WeaponFactory.createGun(1,sniper));
-				sniper.setAbilty(new Optics(sniper));
+				sniper.setAbilty(new Optics.Scope(sniper));
 				sniper.setPassive(new Overwatch(sniper));
 				return sniper;
 			case 3:
@@ -412,8 +409,8 @@ public class PlayerCharacter extends Character {
 			pingTimer += GameWindow.MS_PER_UPDATE;
 		}
 	}
-	
-	public void setGunDirection(double gunDirection) {
-		this.gunDirection = gunDirection;
+
+	public double getTargetDirection() {
+		return targetDirection;
 	}
 }

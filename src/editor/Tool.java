@@ -191,7 +191,7 @@ public abstract class Tool extends MouseInputAdapter {
 					BufferedImage image = thing.getImage();
 					int w = image.getWidth()/32;
 					int h = image.getHeight()/32;
-					if (w>1 && h>1) {
+					if (w>1 || h>1) {
 						if (tile.getSpriteConfig()==null) {
 							tile.setSpriteConfig(new SpriteConfig());
 						}
