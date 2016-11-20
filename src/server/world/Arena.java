@@ -40,29 +40,6 @@ public class Arena {
 	
 	protected Tile[][] tMap;
 	
-	
-	public Arena(File file, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable) {
-		try {
-			FileInputStream fileInputStream = new FileInputStream(file);
-			
-			Scanner fileSc = new Scanner(fileInputStream);
-			this.name = fileSc.nextLine();
-			
-			fileSc.close();
-			ArenaData ad = (ArenaData) DataManager.loadObject("resource/map/"+name+".arena");
-			initialize(ad,tileTable,objectTable);
-			
-			//tileMap = new TileBG[width][height];
-			//objectMap = new Tile[width][height];
-			//DataManager.loadBitMap(name+"_bg", tileTable, tileMap); // load the tile map
-			//DataManager.loadBitMap(name+"_ob", objectTable,objectMap);
-			//loadPositionMap(name); // and load the position map
-		} catch (Exception e) {
-			System.err.println("Error while reading map");
-			e.printStackTrace();
-		}
-	}
-	
 	/**
 	 * Creating a new Arena
 	 * 
@@ -71,15 +48,15 @@ public class Arena {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public Arena(String name, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable) {
-		this((ArenaData) DataManager.loadObject("resource/map/"+name+".arena"),tileTable,objectTable);
+	public Arena(String name, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable, HashMap<Integer,TriggerPreset> triggerTable) {
+		this((ArenaData) DataManager.loadObject("resource/map/"+name+".arena"),tileTable,objectTable,triggerTable);
 	}
 	
-	public Arena(ArenaData ad, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable) {
-		initialize(ad,tileTable,objectTable);
+	public Arena(ArenaData ad, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable, HashMap<Integer,TriggerPreset> triggerTable) {
+		initialize(ad,tileTable,objectTable,triggerTable);
 	}
 
-	public Arena(String name, int width, int height, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable) {
+	public Arena(String name, int width, int height) {
 		this.name = name;
 		this.lightMap = new int[width][height];
 		this.tMap = new Tile[width][height];
@@ -91,7 +68,7 @@ public class Arena {
 		this.lightList = new LinkedList<Light>();
 	}
 	
-	private void initialize(ArenaData ad, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable) {
+	private void initialize(ArenaData ad, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable, HashMap<Integer,TriggerPreset> triggerTable) {
 		this.name = ad.name;
 		int width = ad.tileMap.length;
 		int height = ad.tileMap[0].length;
@@ -109,6 +86,17 @@ public class Arena {
 				if (ad.configMap!=null) {
 					tMap[x][y].setSpriteConfig(ad.configMap[x][y]);
 				}
+				if (ad.triggerMap!=null) {
+					Trigger tr = ad.triggerMap[x][y];
+					tMap[x][y].setTrigger(tr);
+					if (tr instanceof Trigger.TileSwitchTrigger) {
+						Trigger.TileSwitchTrigger tst = (Trigger.TileSwitchTrigger)tr;
+						tst.setPreset(triggerTable.get(tst.presetID));
+						if (tst.tp==null) {
+							tMap[x][y].setTrigger(null);
+						}
+					}
+				}
 			}
 		}
 		generateSpawnPoints();
@@ -118,7 +106,7 @@ public class Arena {
 		}
 		generateLightMap();
 	}
-
+	
 	/**
 	 * Return the spawn list for a given team.
 	 * @param team The team to get the spawn list for.

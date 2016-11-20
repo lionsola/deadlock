@@ -5,8 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -26,13 +25,16 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import client.graphics.Sprite;
 import client.gui.GUIFactory;
 import editor.Tool.*;
 import editor.dialogs.ListDialog;
 import editor.dialogs.LightSourceDialog;
-import editor.dialogs.TileBGDialog;
-import editor.dialogs.TileDialog;
+import editor.dialogs.TerrainDialog;
+import editor.dialogs.ThingDialog;
+import editor.dialogs.TriggerDialog;
 import server.world.Thing;
+import server.world.TriggerPreset;
 import server.world.Terrain;
 
 public class ToolMenu extends JPanel {
@@ -80,26 +82,20 @@ public class ToolMenu extends JPanel {
 						JButton edit = new JButton("Edit");
 						JButton delete = new JButton("Delete");
 						JButton[] buttons = {edit,add,delete};
-						list = new ListDialog<Terrain>(editor, tilePaint, "Tile", buttons, tlm, null,null);
+						list = new ListDialog<Terrain>(editor, tilePaint, "Terrain", buttons, tlm);
 						
 						list.getList().setCellRenderer(cellRenderer);
-						list.getList().addListSelectionListener(new ListSelectionListener() {
-							@Override
-							public void valueChanged(ListSelectionEvent e) {
-								editor.setTool(new TilePaint(editor.getArenaPanel(), list.getList().getSelectedValue()));
-							}
-						});
 						add.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
-								new TileBGDialog(editor,null).setVisible(true);
+								new TerrainDialog(editor,null).setVisible(true);
 								tlm.invalidate();
 							}
 						});
 						edit.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
-								new TileBGDialog(editor,list.getList().getSelectedValue()).setVisible(true);
+								new TerrainDialog(editor,list.getList().getSelectedValue()).setVisible(true);
 							}
 						});
 						delete.addActionListener(new ActionListener() {
@@ -125,6 +121,7 @@ public class ToolMenu extends JPanel {
 						});
 					}
 					list.setVisible(true);
+					editor.setTool(new Tool.TilePaint(editor.getArenaPanel(), list.getList()));
 				} else if (e.getStateChange()==ItemEvent.DESELECTED) {
 					list.setVisible(false);
 					editor.setTool(new Tool.MoveTool(editor.getArenaPanel()));
@@ -153,25 +150,19 @@ public class ToolMenu extends JPanel {
 						JButton edit = new JButton("Edit");
 						JButton delete = new JButton("Delete");
 						JButton[] buttons = {edit,add,delete};
-						list = new ListDialog<Thing>(editor, objectPaint, "Tile", buttons, tlm, null,null);
+						list = new ListDialog<Thing>(editor, objectPaint, "Thing", buttons, tlm);
 						list.getList().setCellRenderer(cellRenderer);
-						list.getList().addListSelectionListener(new ListSelectionListener() {
-							@Override
-							public void valueChanged(ListSelectionEvent e) {
-								editor.setTool(new Tool.ObjectPaint(editor.getArenaPanel(), list.getList().getSelectedValue()));
-							}
-						});
 						add.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
-								new TileDialog(editor,null).setVisible(true);
+								new ThingDialog(editor,null).setVisible(true);
 								tlm.invalidate();
 							}
 						});
 						edit.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
-								new TileDialog(editor,list.getList().getSelectedValue()).setVisible(true);
+								new ThingDialog(editor,list.getList().getSelectedValue()).setVisible(true);
 							}
 						});
 						delete.addActionListener(new ActionListener() {
@@ -197,6 +188,7 @@ public class ToolMenu extends JPanel {
 						});
 					}
 					list.setVisible(true);
+					editor.setTool(new Tool.ObjectPaint(editor.getArenaPanel(), list.getList()));
 				} else if (e.getStateChange()==ItemEvent.DESELECTED) {
 					list.setVisible(false);
 					editor.setTool(new Tool.MoveTool(editor.getArenaPanel()));
@@ -245,7 +237,7 @@ public class ToolMenu extends JPanel {
 					}
 					dialog.setVisible(true);
 					editor.getArenaPanel().renderLightSource = true;
-					editor.setTool(new Tool.NewLightPaint(editor.getArenaPanel(), dialog));
+					editor.setTool(new Tool.LightPaint(editor.getArenaPanel(), dialog));
 				} else {
 					editor.getArenaPanel().renderLightSource = false;
 					editor.getArenaPanel().generateLightImage();
@@ -256,6 +248,75 @@ public class ToolMenu extends JPanel {
 		});
 		light.addItemListener(toggleButtonSwitch);
 		this.add(light);
+		
+		final JToggleButton trigger = new JToggleButton();
+		stylizeToolButton(trigger);
+		try {
+			trigger.setIcon(new ImageIcon(ImageIO.read(new File("resource/editor/switch.png"))));
+		} catch (IOException e1) {
+			trigger.setText("Light");
+		}
+		trigger.setToolTipText("Light Source");
+		trigger.addItemListener(new ItemListener() {
+			ListDialog<TriggerPreset> list = null;
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange()==ItemEvent.SELECTED) {
+					if (list==null) {
+						final CustomListModel<TriggerPreset> tlm = new CustomListModel<TriggerPreset>(editor.triggers);
+						JButton add = new JButton("Add");
+						JButton edit = new JButton("Edit");
+						JButton delete = new JButton("Delete");
+						JButton[] buttons = {edit,add,delete};
+						list = new ListDialog<TriggerPreset>(editor, trigger, "Trigger", buttons, tlm);
+						list.getList().setCellRenderer(triggerRenderer);
+						add.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent arg0) {
+								new TriggerDialog(editor,null).setVisible(true);
+								tlm.invalidate();
+							}
+						});
+						edit.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent arg0) {
+								new TriggerDialog(editor,list.getList().getSelectedValue()).setVisible(true);
+							}
+						});
+						delete.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								int result = JOptionPane.showConfirmDialog(editor,
+										"Deleting a trigger will affect all maps that use it."
+										+ "\nRemove this trigger from those maps first."
+										+ "\nProceed?",
+										"WARNING", JOptionPane.OK_CANCEL_OPTION);
+								if (result==JOptionPane.OK_OPTION) {
+									String s = JOptionPane.showInputDialog(editor,
+											"Just to double check, are you sure?");
+									if (s.equals("yup")) {
+										TriggerPreset t = list.getList().getSelectedValue();
+										editor.triggers.remove(t);
+										editor.triggerTable.remove(t.getId());
+										editor.tileDataChanged = true;
+										tlm.invalidate();
+									}
+								}
+							}
+						});
+					}
+					list.setVisible(true);
+					editor.setTool(new Tool.TriggerPaint(editor.getArenaPanel(), list.getList()));
+					editor.getArenaPanel().renderTileSwitchTrigger = true;
+				} else if (e.getStateChange()==ItemEvent.DESELECTED) {
+					list.setVisible(false);
+					editor.setTool(new Tool.MoveTool(editor.getArenaPanel()));
+					editor.getArenaPanel().renderTileSwitchTrigger = false;
+				}
+			}
+		});
+		trigger.addItemListener(toggleButtonSwitch);
+		this.add(trigger);
 	}
 	
 	private static void stylizeToolButton(AbstractButton button) {
@@ -289,7 +350,12 @@ public class ToolMenu extends JPanel {
 		@Override
 		public Component getListCellRendererComponent(JList<? extends CellRenderable> list,
 				final CellRenderable value, int index, boolean isSelected, boolean cellHasFocus) {
-			ImageIcon icon = new ImageIcon(value.getImage());
+			BufferedImage iconImage = value.getImage();
+			if (iconImage.getHeight() > Sprite.TILE_SPRITE_SIZE ||
+					iconImage.getWidth() > Sprite.TILE_SPRITE_SIZE) {
+				iconImage = iconImage.getSubimage(0, 0, Sprite.TILE_SPRITE_SIZE, Sprite.TILE_SPRITE_SIZE);
+			}
+			ImageIcon icon = new ImageIcon(iconImage);
 			JLabel tile = new JLabel(icon, SwingConstants.LEFT);
 			tile.setOpaque(true);
 			tile.setFont(GUIFactory.font_s);
@@ -307,4 +373,55 @@ public class ToolMenu extends JPanel {
 		}
 	};
 	
+	private ListCellRenderer<TriggerPreset> triggerRenderer = new ListCellRenderer<TriggerPreset>() {
+		@Override
+		public Component getListCellRendererComponent(JList<? extends TriggerPreset> list,
+				final TriggerPreset value, int index, boolean isSelected, boolean cellHasFocus) {
+			BufferedImage oriImage = value.getOriginalThing().getImage();
+			
+			if (oriImage.getHeight() > Sprite.TILE_SPRITE_SIZE ||
+					oriImage.getWidth() > Sprite.TILE_SPRITE_SIZE) {
+				oriImage = oriImage.getSubimage(0, 0, Sprite.TILE_SPRITE_SIZE, Sprite.TILE_SPRITE_SIZE);
+			}
+			
+			BufferedImage switchImage = value.getSwitchThing().getImage();
+			if (switchImage.getHeight() > Sprite.TILE_SPRITE_SIZE ||
+					switchImage.getWidth() > Sprite.TILE_SPRITE_SIZE) {
+				switchImage = switchImage.getSubimage(0, 0, Sprite.TILE_SPRITE_SIZE, Sprite.TILE_SPRITE_SIZE);
+			}
+			
+			JPanel panel = new JPanel();
+			
+			ImageIcon icon = new ImageIcon(oriImage);
+			JLabel tile = new JLabel(icon, SwingConstants.LEFT);
+			tile.setOpaque(true);
+			tile.setFont(GUIFactory.font_s);
+			tile.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+			tile.setToolTipText(value.getOriginalThing().getName());
+			
+			ImageIcon sicon = new ImageIcon(switchImage);
+			JLabel stile = new JLabel(sicon, SwingConstants.LEFT);
+			stile.setOpaque(true);
+			stile.setFont(GUIFactory.font_s);
+			stile.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+			stile.setToolTipText(value.getSwitchThing().getName());
+			
+			JLabel triggerName = new JLabel(value.getName());
+			triggerName.setFont(GUIFactory.font_s);
+			
+			panel.add(tile);
+			panel.add(stile);
+			panel.add(triggerName);
+			
+			if (isSelected) {
+				panel.setBackground(list.getSelectionBackground());
+				panel.setForeground(list.getSelectionForeground());
+			}
+			else {
+				panel.setBackground(list.getBackground());
+				panel.setForeground(list.getForeground());
+			}
+			return panel;
+		}
+	};
 }

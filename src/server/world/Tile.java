@@ -4,7 +4,9 @@ public class Tile {
 	private Terrain terrain;
 	private Thing thing;
 	private SpriteConfig config;
+	private Trigger trigger;
 	private int oldLight;
+	//private boolean active;
 	
 	public boolean isTraversable() {
 		return thing==null || thing.isWalkable();
@@ -24,6 +26,10 @@ public class Tile {
 	
 	public Thing getThing() {
 		return thing;
+	}
+	
+	public Trigger getTrigger() {
+		return trigger;
 	}
 	
 	public int getLightLevel() {
@@ -50,5 +56,9 @@ public class Tile {
 	public String toString() {
 		return "Thing: "+ (thing==null?"empty":thing)
 				+ ", terrain: "+(terrain==null?"empty":terrain);
+	}
+
+	public void setTrigger(Trigger trigger) {
+		this.trigger = trigger;
 	}
 }

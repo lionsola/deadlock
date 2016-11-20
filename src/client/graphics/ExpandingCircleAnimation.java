@@ -62,7 +62,6 @@ public class ExpandingCircleAnimation extends BasicAnimation {
 		this.y = y;
 		this.startWidth = Math.max(0.3f,0.25f*maxRadius);
 		double startGrowth = maxRadius / (life * 3 / 4) * GameWindow.MS_PER_UPDATE;
-		this.life = life;
 		this.growth = startGrowth;
 		this.color = color;
 	}
@@ -83,7 +82,7 @@ public class ExpandingCircleAnimation extends BasicAnimation {
 
 	@Override
 	public void render(Graphics2D g2D) {
-		g2D.setColor(color);
+		g2D.setColor(new Color(color.getRed(),color.getGreen(), color.getBlue(), (int)Math.max(0,255*this.life/this.duration)));
 		g2D.setStroke(new BasicStroke(Math.max(0.1f,Renderer.toPixel(Math.min(radius, width)))));
 		if (radius > 0)
 			Renderer.drawCircle(g2D,x, y, radius);

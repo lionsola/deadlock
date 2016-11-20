@@ -32,17 +32,17 @@ public class ListDialog<T> extends JDialog {
                        final JToggleButton button,
                        String title,
                        final JButton[] buttons,
-                       ListModel<T> lm,
-                       String initialValue,
-                       String longValue) {
+                       ListModel<T> lm) {
         super(editor, title, false);
         this.editor = editor;
-        this.addWindowListener(new WindowAdapter() {
-        	@Override
-        	public void windowClosing(WindowEvent e) {
-        		button.doClick();
-        	}
-        });
+        if (button!=null) {
+	        this.addWindowListener(new WindowAdapter() {
+	        	@Override
+	        	public void windowClosing(WindowEvent e) {
+	        		button.doClick();
+	        	}
+	        });
+        }
         JPanel buttonPanel = new JPanel();
         for (JButton b:buttons) {
         	buttonPanel.add(b);
@@ -88,9 +88,13 @@ public class ListDialog<T> extends JDialog {
  
         
         pack();
-        Point p = button.getLocationOnScreen();
-        p.x += button.getWidth();
-        this.setLocation(p);
+        if (button!=null) {
+        	Point p = button.getLocationOnScreen();
+        	p.x += button.getWidth();
+            this.setLocation(p);
+        } else {
+        	this.setLocationRelativeTo(editor);
+        }
     }
     
     

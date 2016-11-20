@@ -8,7 +8,6 @@ import client.gui.GameWindow;
 import server.character.PlayerCharacter;
 import server.world.Geometry;
 import server.world.Projectile;
-import server.world.Sound;
 import server.world.Thing;
 import server.world.World;
 

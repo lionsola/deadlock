@@ -49,6 +49,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	protected boolean renderLightSource = false;
 	protected boolean renderGrid = true;
 	protected boolean renderConfig = false;
+	protected boolean renderTileSwitchTrigger = false;
 	
 	private Camera camera;
 	//private double zoomLevel;
@@ -58,10 +59,12 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	private double FPS;
 	private volatile boolean running = true;
 	private Thread thread;
+	private Editor editor;
 	
 	
-	public ArenaPanel (EditorArena arena) {
+	public ArenaPanel (Editor editor, EditorArena arena) {
 		super();
+		this.editor = editor;
 		this.arena = arena;
 		generateLightImage();
 		camera = new Camera(arena,this);
@@ -202,6 +205,10 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		if (renderConfig) {
 			Renderer.renderSpriteConfig(g2D, arena, window);
 		}
+		if (renderTileSwitchTrigger) {
+			Renderer.renderTrigger(g2D, arena, window);
+		}
+		editor.currentTool.render(g2D);
 		//Renderer.renderMainCharacter(g2D, player, playerInfo);
 		Renderer.renderCrosshair(g2D, player.x, player.y, 1);
 		g.translate(transX, transY);

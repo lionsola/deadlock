@@ -12,8 +12,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JFileChooser;
@@ -23,6 +23,7 @@ import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import server.world.Thing;
+import server.world.TriggerPreset;
 import server.world.Terrain;
 import editor.DataManager.ArenaData;
 
@@ -54,9 +55,11 @@ public class Editor extends JFrame {
 
 	List<Terrain> tiles;
 	List<Thing> objects;
+	List<TriggerPreset> triggers;
 
 	HashMap<Integer,Terrain> tileTable;
 	HashMap<Integer,Thing> objectTable;
+	HashMap<Integer,TriggerPreset> triggerTable;
 	
 	public boolean tileDataChanged = false;
 	
@@ -95,6 +98,17 @@ public class Editor extends JFrame {
 		}
         objectTable = DataManager.getObjectMap(objects);
         
+        triggers = (List<TriggerPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
+        if (triggers==null) {
+        	triggers = new LinkedList<TriggerPreset>();
+        }
+        for (TriggerPreset tp:triggers) {
+        	tp.setSwitchThing(objectTable.get(tp.getSwitchThingID()));
+        	tp.setOriginalThing(objectTable.get(tp.getOriginalThingID()));
+        }
+        
+        triggerTable = DataManager.getTriggerMap(triggers);
+        
         getContentPane().setLayout(new BorderLayout());
         
         this.setJMenuBar(new MenuBar(this));
@@ -108,8 +122,10 @@ public class Editor extends JFrame {
         		if (tileDataChanged) {
 	        		DataManager.saveObject(tiles, DataManager.FILE_TILES);
 	        		DataManager.saveObject(objects, DataManager.FILE_OBJECTS);
+	        		DataManager.saveObject(triggers, DataManager.FILE_TRIGGERS);
 	        		DataManager.saveTileListOld(tiles);
 	        		DataManager.saveObjectListOld(objects);
+	        		
         		}
         	}
         });
@@ -144,7 +160,7 @@ public class Editor extends JFrame {
     		arenaPanel.stop();
     		getContentPane().remove(arenaPanel);
     	}
-    	arenaPanel = new ArenaPanel(a);
+    	arenaPanel = new ArenaPanel(this,a);
     	getContentPane().add(arenaPanel, BorderLayout.CENTER);
     	arenaPanel.addMouseMotionListener(new MouseMotionListener(){
 			@Override
@@ -170,7 +186,7 @@ public class Editor extends JFrame {
         EditorArena a = null;
         if (returnVal==JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            a = new EditorArena((ArenaData)DataManager.loadObject(file),tileTable,objectTable);
+            a = new EditorArena((ArenaData)DataManager.loadObject(file),tileTable,objectTable,triggerTable);
         }
         if (a!=null) {
         	setArena(a);
@@ -206,14 +222,32 @@ public class Editor extends JFrame {
     }
 
 	public void newArena(String n, int w, int h) {
-		setArena(new EditorArena(n,w,h,tileTable,objectTable));
+		setArena(new EditorArena(n,w,h));
 	}
 
-	public Collection<Thing> getObjectList() {
+	public List<Thing> getObjectList() {
 		return objects;
 	}
 
-	public Collection<Terrain> getTerrainList() {
+	public List<Terrain> getTerrainList() {
 		return tiles;
+	}
+
+	/**
+	 * @return the triggerTable
+	 */
+	public HashMap<Integer, TriggerPreset> getTriggerTable() {
+		return triggerTable;
+	}
+
+	/**
+	 * @param triggerTable the triggerTable to set
+	 */
+	public void setTriggerTable(HashMap<Integer, TriggerPreset> triggerTable) {
+		this.triggerTable = triggerTable;
+	}
+
+	public List<TriggerPreset> getTriggerList() {
+		return triggers;
 	}
 }

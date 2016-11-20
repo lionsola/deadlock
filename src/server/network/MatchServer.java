@@ -2,6 +2,7 @@ package server.network;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +16,7 @@ import server.character.PlayerCharacter;
 import server.weapon.WeaponFactory;
 import server.world.Arena;
 import server.world.Thing;
+import server.world.TriggerPreset;
 import server.world.Terrain;
 import server.world.World;
 import shared.network.GameEvent;
@@ -62,9 +64,20 @@ public abstract class MatchServer implements Runnable, GameEventListener {
 	}
 
 	protected void initializeWorld(String arenaName) {
-		HashMap<Integer,Terrain> tileTable = DataManager.getTileMap(DataManager.loadTileListOld());
-		HashMap<Integer,Thing> objectTable = DataManager.getObjectMap(DataManager.loadObjectListOld());
-		Arena arena = new Arena(arenaName, tileTable, objectTable);
+		Collection<Terrain> tileList = (List<Terrain>) DataManager.loadObject(DataManager.FILE_TILES);
+		HashMap<Integer,Terrain> tileTable = DataManager.getTileMap(tileList);
+		
+		Collection<Thing> objectList = (List<Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
+		HashMap<Integer,Thing> objectTable = DataManager.getObjectMap(objectList);
+		
+		Collection<TriggerPreset> triggerList = (Collection<TriggerPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
+		for (TriggerPreset tp:triggerList) {
+        	tp.setSwitchThing(objectTable.get(tp.getSwitchThingID()));
+        	tp.setOriginalThing(objectTable.get(tp.getOriginalThingID()));
+        }
+		HashMap<Integer,TriggerPreset> triggerTable = DataManager.getTriggerMap(triggerList);
+		
+		Arena arena = new Arena(arenaName, tileTable, objectTable, triggerTable);
 
 		this.world = new World(arena, this);
 	}

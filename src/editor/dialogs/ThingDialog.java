@@ -11,6 +11,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
@@ -21,29 +23,35 @@ import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import editor.Editor;
-import server.world.Terrain;
+import server.world.Thing;
 import server.world.Utils;
 
 /**
- * A dialog to edit a Terrain type.
+ * A dialog to edit a Thing type.
  */
-public class TileBGDialog extends JDialog implements ActionListener {
+public class ThingDialog extends JDialog implements ActionListener {
 	private static final long serialVersionUID = 5917436825785813483L;
 	private Editor editor;
-	private Terrain tile;
+	private Thing tile;
 	
 	private JFormattedTextField id;
 	private JTextField name;
+	
+	private JLabel tileImage;
 	private JLabel imageName;
 	private JButton loadImage;
 	private JButton save;
-	private JLabel tileImage;
-	private BufferedImage curTileImage;
 	
-	public TileBGDialog (Editor editor, Terrain tile) {
+	private BufferedImage curTileImage;
+	private JCheckBox border;
+	private JCheckBox walkable;
+	private JCheckBox clear;
+	private JComboBox<String> cover;
+	private JFormattedTextField spriteSize;
+	
+	public ThingDialog (Editor editor, Thing tile) {
 		super(editor, "Edit tile", true);
 		this.editor = editor;
-		this.tile = tile;
 		//Create and populate the top panel.
         JPanel topPanel = new JPanel(new GridBagLayout());
         
@@ -54,31 +62,57 @@ public class TileBGDialog extends JDialog implements ActionListener {
         c.gridy = 0;
         id = new JFormattedTextField();
         id.setHorizontalAlignment(JTextField.CENTER);
-        id.setToolTipText("Terrain's ID");
+        id.setToolTipText("Thing's ID");
         topPanel.add(id,c);
         
         c.gridy += 1;
         name = new JTextField();
         name.setHorizontalAlignment(JTextField.CENTER);
-        name.setToolTipText("Terrain's name");
+        name.setToolTipText("Thing's name");
         topPanel.add(name,c);
         
         c.gridy += 1;
         c.fill = GridBagConstraints.BOTH;
         tileImage = new JLabel();
-        tileImage.setToolTipText("Terrain Sprite");
-    	topPanel.add(tileImage,c);
+        tileImage.setToolTipText("Thing's sprite");
+        topPanel.add(tileImage,c);
         
-    	c.gridy += 1;
+        c.gridy += 1;
         imageName = new JLabel();
-        imageName.setToolTipText("Sprite File");
+        imageName.setToolTipText("Sprite file");
     	topPanel.add(imageName,c);
-    	
+        
         c.gridy += 1;
         c.fill = GridBagConstraints.HORIZONTAL;
         loadImage = new JButton("Load image");
         loadImage.addActionListener(this);
         topPanel.add(loadImage,c);
+        
+        c.gridy += 1;
+        spriteSize = new JFormattedTextField();
+        spriteSize.setToolTipText("Sprite size");
+        topPanel.add(spriteSize,c);
+        
+        c.gridy += 1;
+        border = new JCheckBox("Border");
+        topPanel.add(border,c);
+        
+        c.gridy += 1;
+        walkable = new JCheckBox("Walkable");
+        topPanel.add(walkable,c);
+        
+        c.gridy += 1;
+        clear = new JCheckBox("Clear");
+        topPanel.add(clear,c);
+        
+        c.gridy += 1;
+        JPanel coverPanel = new JPanel();
+        coverPanel.add(new JLabel("Cover: "));
+        String[] coverTypes = {"None","Light","Medium","Heavy"};
+        cover = new JComboBox<String>(coverTypes);
+        //cover.setSelectedIndex(tile.getCoverType());
+        coverPanel.add(cover);
+        topPanel.add(coverPanel,c);
         
         c.gridy += 1;
         save = new JButton("Save");
@@ -90,15 +124,21 @@ public class TileBGDialog extends JDialog implements ActionListener {
         	id.setEditable(false);
         	this.tile = tile;
         	name.setText(tile.getName());
+        	walkable.setSelected(tile.isWalkable());
+        	border.setSelected(tile.isBorderDrawn());
+        	clear.setSelected(tile.isClear());
+        	cover.setSelectedIndex(tile.getCoverType());
         	if (tile.getImage()!=null) {
         		tileImage.setIcon(new ImageIcon(tile.getImage()));
         	}
         	imageName.setText(tile.getImageName());
         	curTileImage = tile.getImage();
+        	spriteSize.setValue(tile.getSpriteSize());
         } else {
         	int ID = Utils.random().nextInt();
         	//this.tile = new TileBG(ID);
         	id.setValue(ID);
+        	spriteSize.setValue(1);
         }
         
         this.setContentPane(topPanel);
@@ -111,24 +151,32 @@ public class TileBGDialog extends JDialog implements ActionListener {
 		if (arg0.getSource()==save) {
 			if (this.tile==null) {
 				int idNumber = ((Number)id.getValue()).intValue();
-				if (editor.getTerrainTable().containsKey(idNumber)) {
-					JOptionPane.showMessageDialog(this,"This ID already exists!");
+				if (editor.getObjectTable().containsKey(idNumber)) {
+					JOptionPane.showMessageDialog(this,"Existing ID");
 					return;
 				} else if (name.getText().equals("")) {
 					JOptionPane.showMessageDialog(this,"Empty name field!");
 					return;
 				} else if (curTileImage==null || imageName.getText().equals("")) {
 					JOptionPane.showMessageDialog(this,"Pick an image!");
-					return;
+					return;				
 				} else {
-					this.tile = new Terrain(idNumber);
-					editor.getTerrainList().add(tile);
-					editor.getTerrainTable().put(tile.getId(), tile);
+					this.tile = new Thing(idNumber);
+					editor.getObjectList().add(tile);
+					editor.getObjectTable().put(tile.getId(), tile);
 				}
 			}
+
 			tile.setName(name.getText());
 			tile.setImage(curTileImage);
 			tile.setImageName(imageName.getText());
+			tile.setBorder(border.isSelected());
+			
+			tile.setCoverType(cover.getSelectedIndex());
+			tile.setClear(clear.isSelected());
+			tile.setWalkable(walkable.isSelected());
+			tile.setSpriteSize(((Number)spriteSize.getValue()).doubleValue());
+			
 			editor.tileDataChanged = true;
 			// Close the dialog
 			this.setVisible(false);

@@ -16,3 +16,5 @@ ff00 greenspawn greenspawn.png true true 0 1.0
 804004 kitchensurface kitchensurface.png false true 1 1.0
 804005 kitchensurface2 kitchensurface2.png false true 1 1.0
 b65b9 shower shower.png true false 0 1.0
+820001 door door.png false false 2 1.0
+f921df9a dooropen dooropen.png true true 0 1.0

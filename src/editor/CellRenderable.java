@@ -1,8 +1,8 @@
 package editor;
 
-import java.awt.Image;
+import java.awt.image.BufferedImage;
 
 public interface CellRenderable {
 	public String getName();
-	public Image getImage();
+	public BufferedImage getImage();
 }

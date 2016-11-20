@@ -40,6 +40,7 @@ import javax.swing.SwingUtilities;
 import server.character.PlayerCharacter;
 import server.world.Arena;
 import server.world.Thing;
+import server.world.TriggerPreset;
 import server.world.Terrain;
 import server.world.Visibility;
 import shared.network.Connection;
@@ -88,6 +89,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private JComponent minimap;
 	private Visibility visibility = new Visibility();
 	private Renderer renderer = new Renderer();
+	private HashMap<Integer,Thing> objectTable;
+	
 	private boolean playing = true;
 	private double zoomLevel = 0;
 	
@@ -126,10 +129,15 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		addMouseWheelListener(this);
 		
 		// Loading the arena
-		Collection<Terrain> tileList = DataManager.loadTileListOld();
+		Collection<Terrain> tileList = (List<Terrain>) DataManager.loadObject(DataManager.FILE_TILES);
 		HashMap<Integer,Terrain> tileTable = DataManager.getTileMap(tileList);
-		Collection<Thing> objectList = DataManager.loadObjectListOld();
-		HashMap<Integer,Thing> objectTable = DataManager.getObjectMap(objectList);
+		
+		Collection<Thing> objectList = (List<Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
+		objectTable = DataManager.getObjectMap(objectList);
+		
+		Collection<TriggerPreset> triggerList = (Collection<TriggerPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
+		HashMap<Integer,TriggerPreset> triggerTable = DataManager.getTriggerMap(triggerList);
+		
 		try {
 			DataManager.loadTileGraphics(tileList);
 		} catch (IOException e) {
@@ -142,7 +150,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			System.err.println("Error while loading tile images.");
 			e.printStackTrace();
 		}
-		this.arena = new Arena(arenaName, tileTable, objectTable);
+		this.arena = new Arena(arenaName, tileTable, objectTable,triggerTable);
 		renderer.initArenaImages(arena);
 		camera = new Camera(arena, this);
 		
@@ -631,6 +639,13 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			} else if (event instanceof EnemyInfoEvent) {
 				EnemyInfoEvent e = (EnemyInfoEvent) event;
 				nonvisualAnimations.addAnimation(new AnimationEvent(AnimationSystem.ENEMYMARK,e.x,e.y,0));
+			} else if (event instanceof TileChanged) {
+				TileChanged e = (TileChanged) event;
+				arena.get(e.tx, e.ty).setThing(objectTable.get(e.switchThingID));
+				arena.generateLightMap();
+				renderer.redrawLightImage(arena);
+				
+				renderer.redrawArenaImage(arena,e.tx,e.ty);
 			}
 		}
 	};

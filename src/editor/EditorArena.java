@@ -8,19 +8,21 @@ import server.world.Light;
 import server.world.Terrain;
 import server.world.Thing;
 import server.world.Tile;
+import server.world.TriggerPreset;
 
 public class EditorArena extends Arena {
 	Light[][] lights;
-	public EditorArena(ArenaData ad, HashMap<Integer, Terrain> tileTable, HashMap<Integer, Thing> objectTable) {
-		super(ad, tileTable, objectTable);
+	public EditorArena(ArenaData ad, HashMap<Integer, Terrain> tileTable, HashMap<Integer, Thing> objectTable,
+			HashMap<Integer,TriggerPreset> triggerTable) {
+		super(ad, tileTable, objectTable, triggerTable);
 		lights = new Light[getWidth()][getHeight()];
 		for (Light l:lightList) {
 			lights[l.getX()][l.getY()] = l;
 		}
 	}
 
-	public EditorArena(String n, int w, int h, HashMap<Integer, Terrain> tileTable, HashMap<Integer, Thing> objectTable) {
-		super(n,w,h,tileTable,objectTable);
+	public EditorArena(String n, int w, int h) {
+		super(n,w,h);
 		lights = new Light[getWidth()][getHeight()];
 	}
 

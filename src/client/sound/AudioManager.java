@@ -34,6 +34,8 @@ public class AudioManager implements Runnable {
 	
 	private static final String SOUND_DIR = "resource/audio/sounds/";
 	private static final String MUSIC_DIR = "resource/audio/music/";
+	
+	public static final int DOOR_OPEN_ID = 36;
 
 	/**
 	 * Creates a new Audio Manager, where the location of all the sounds used for the game are
@@ -53,7 +55,7 @@ public class AudioManager implements Runnable {
 		soundMap.put(3, new SingleSound(SOUND_DIR + "gunshot_silent_pistol.wav"));
 		soundMap.put(4, new SingleSound(SOUND_DIR + "gunshot_sniper.wav"));
 		
-		soundMap.put(TimedGrenade.GRENADE_EXPLODE_SOUND_ID,new SingleSound(SOUND_DIR + "grenade_explode.wav"));
+		
 
 		AlternatingSound footsteps = new AlternatingSound();
 		footsteps.addSound(new SingleSound(SOUND_DIR + "footstep1.wav"));
@@ -66,6 +68,10 @@ public class AudioManager implements Runnable {
 		bulletwall.addSound(new SingleSound(SOUND_DIR + "bulletwall0.wav"));
 		bulletwall.addSound(new SingleSound(SOUND_DIR + "bulletwall1.wav"));
 		soundMap.put(Bullet.BULLET_WALL_SOUND_ID,bulletwall);
+		
+		soundMap.put(TimedGrenade.GRENADE_EXPLODE_SOUND_ID,new SingleSound(SOUND_DIR + "grenade_explode.wav"));
+		
+		soundMap.put(DOOR_OPEN_ID, new SingleSound(SOUND_DIR + "door_open.wav"));
 		
 		soundMap.put(PlayerCharacter.PING_SOUND_ID,new SingleSound(SOUND_DIR + "ping.wav"));
 	}

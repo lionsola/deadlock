@@ -13,6 +13,8 @@ import server.world.Utils;
  * Load and store the sprites needed in-game.
  */
 public class Sprite {
+	public static final int TILE_SPRITE_SIZE = 32;
+	
 	public static final int MAXTYPE = 4;
 	private static Image COMMANDO_RED;
 	private static Image SCOUT_RED;

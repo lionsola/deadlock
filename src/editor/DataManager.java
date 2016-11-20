@@ -27,6 +27,9 @@ import server.world.Arena;
 import server.world.Light;
 import server.world.SpriteConfig;
 import server.world.Thing;
+import server.world.Tile;
+import server.world.Trigger;
+import server.world.TriggerPreset;
 import server.world.Terrain;
 
 public class DataManager {
@@ -35,6 +38,7 @@ public class DataManager {
 	public static final String FILE_TILES_OLD = "resource/tile/tiles_old";
 	public static final String FILE_OBJECTS_OLD = "resource/tile/objects_old";
 	public static final String DIR_MAP = "resource/map/";
+	public static final String FILE_TRIGGERS = "resource/tile/triggers";
 	
 	public static void exportImages(Arena a) throws IOException {
 		BufferedImage arenaImage = ImageBlender.drawArena(a);
@@ -56,18 +60,6 @@ public class DataManager {
 		BufferedImage wholeMap = ImageBlender.blendLightImage(lightImage, lightMap);
 		ImageIO.write(wholeMap, "png", new File(DIR_MAP+a.getName()+".png"));
 	}
-	
-	/*
-	public static Arena loadArena(String name) {
-		
-		ArenaData ad = loadObject
-	}
-	
-	public static Arena loadArena(String name, HashMap<Integer,Tile> tileTable, HashMap<Integer,Object> objectTable) {
-		ArenaData ad = (ArenaData) loadObject("resource/map/"+name+".arena");
-		
-	}
-	*/
 	
 	public static void saveObject(Object object, String path) {
 		ObjectOutputStream oos = null;
@@ -205,7 +197,7 @@ public class DataManager {
 				
 				Thing o = new Thing(id);
 				o.setWalkable(walkable);
-				o.setTransparent(transparent);
+				o.setClear(transparent);
 				o.setCoverType(coverType);
 				o.setName(objectName);
 				o.setImageName(filename);
@@ -259,13 +251,12 @@ public class DataManager {
 		return objectMap;
 	}
 	
-	public static class ArenaData implements Serializable {
-		private static final long serialVersionUID = -5816600310705383411L;
-		public String name;
-		public int[][] tileMap;
-		public int[][] objectMap;
-		public SpriteConfig[][] configMap;
-		public List<Light> lights;
+	public static HashMap<Integer, TriggerPreset> getTriggerMap(Collection<TriggerPreset> triggers) {
+		HashMap<Integer,TriggerPreset> objectMap = new HashMap<Integer,TriggerPreset>(triggers.size());
+		for (TriggerPreset t:triggers) {
+			objectMap.put(t.getId(),t);
+		}
+		return objectMap;
 	}
 	
 	public static class ArenaGraphicalData implements Serializable {
@@ -306,31 +297,42 @@ public class DataManager {
 		}
 	}
 
+	public static class ArenaData implements Serializable {
+		private static final long serialVersionUID = -5816600310705383411L;
+		public String name;
+		public int[][] tileMap;
+		public int[][] objectMap;
+		public SpriteConfig[][] configMap;
+		public Trigger[][] triggerMap;
+		public List<Light> lights;
+	}
+	
 	public static void exportArenaData(Arena a) {
-		int[][] tileIDMap = new int[a.getWidth()][a.getHeight()];
-		int[][] objectIDMap = new int[a.getWidth()][a.getHeight()];
-		SpriteConfig[][] configMap = new SpriteConfig[a.getWidth()][a.getHeight()];
+		ArenaData ad = new ArenaData();
+		
+		ad.name = a.getName();
+		ad.lights = a.getLightList();
+		ad.tileMap = new int[a.getWidth()][a.getHeight()];
+		ad.objectMap = new int[a.getWidth()][a.getHeight()];
+		ad.configMap = new SpriteConfig[a.getWidth()][a.getHeight()];
+		ad.triggerMap = new Trigger[a.getWidth()][a.getHeight()];
+		
 		for (int x=0;x<a.getWidth();x++) {
 			for (int y=0;y<a.getHeight();y++) {
-				Terrain te = a.get(x, y).getTerrain();
-				tileIDMap[x][y] = te!=null?te.getId():0;
-				Thing ti = a.get(x, y).getThing();
-				objectIDMap[x][y] = ti!=null?ti.getId():0;
-				SpriteConfig sc = a.get(x, y).getSpriteConfig();
-				if (sc!=null) {
-					configMap[x][y] = sc;
-				}
+				Tile t = a.get(x, y);
+				
+				Terrain te = t.getTerrain();
+				ad.tileMap[x][y] = te!=null?te.getId():0;
+				
+				Thing ti = t.getThing();
+				ad.objectMap[x][y] = ti!=null?ti.getId():0;
+				
+				ad.configMap[x][y] = t.getSpriteConfig();
+				
+				ad.triggerMap[x][y] = t.getTrigger();
 			}
 		}
-		ArenaData ad = new ArenaData();
-		ad.name = a.getName();
-		ad.tileMap = tileIDMap;
-		ad.objectMap = objectIDMap;
-		ad.configMap = configMap;
-		//ad.spawn1 = a.getSpawn(0);
-		//ad.spawn2 = a.getSpawn(1);
-		//ad.lightMap = a.getLightmap();
-		ad.lights = a.getLightList();
+		
 		saveObject(ad,"resource/map/"+a.getName()+".arena");
 	}
 }

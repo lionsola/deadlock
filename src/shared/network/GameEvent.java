@@ -90,6 +90,18 @@ public abstract class GameEvent implements Serializable {
 		}
 	}
 
+	public static class TileChanged extends GameEvent {
+		private static final long serialVersionUID = 8597074729245066489L;
+		public final short tx;
+		public final short ty;
+		public final int switchThingID;
+		public TileChanged(int tx, int ty, int switchThingID) {
+			this.tx = (short)tx;
+			this.ty = (short)ty;
+			this.switchThingID = switchThingID;
+		}
+	}
+	
 	public static class GameEndEvent extends GameEvent {
 		private static final long serialVersionUID = 4030097780765059510L;
 	}

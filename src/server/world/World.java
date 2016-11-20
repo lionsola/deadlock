@@ -11,6 +11,7 @@ import server.character.PlayerCharacter;
 import shared.network.CharData;
 import shared.network.ProjectileData;
 import shared.network.GameDataPackets.WorldStatePacket;
+import shared.network.GameEvent;
 import shared.network.GameEvent.AnimationEvent;
 import shared.network.GameEvent.GameEventListener;
 
@@ -26,8 +27,15 @@ public class World {
 	
 	private List<Projectile> projectiles = new LinkedList<Projectile>();
 	private List<Projectile> newProjectiles = new LinkedList<Projectile>();
+	
+	private List<Trigger> activeTriggers = new LinkedList<Trigger>();
+	
 	private GameEventListener listener;
 	public static final double DISTANCE_VOLUME_DROP_RATE = 2.5;
+	/**
+	 * To circle the spawn positions
+	 */
+	static int[] curSpawn = new int[2];
 
 	/**
 	 * Creates the World which is used in GameScreen to play the actual game
@@ -41,7 +49,6 @@ public class World {
 		this.listener = listener;
 	}
 
-	static int[] curSpawn = new int[2];
 	/**
 	 * Adds a player to the World
 	 * 
@@ -104,6 +111,12 @@ public class World {
 		}
 	}
 	
+	public void addEvent(GameEvent event) {
+		for (Character ch:characters) {
+			ch.getPerception().events.add(event);
+		}
+	}
+	
 	/**
 	 * Update the world, and all the characters and projectiles in the world. This happens every
 	 * frame.
@@ -125,18 +138,30 @@ public class World {
 		npcs.removeAll(expired);
 		
 		// update projectiles
-		List<Projectile> outOfRange = new LinkedList<Projectile>();
+		List<Projectile> consumed = new LinkedList<Projectile>();
 		for (Projectile p : projectiles) {
 			if (p.isConsumed()) {
-				outOfRange.add(p);
+				consumed.add(p);
 			}
 			else {
 				p.update(this);
 			}
 		}
-		projectiles.removeAll(outOfRange);
+		projectiles.removeAll(consumed);
+		
 		projectiles.addAll(newProjectiles);
 		newProjectiles.clear();
+		
+		// update triggers and remove the inactive ones
+		List<Trigger> inactive = new LinkedList<Trigger>();
+		for (Trigger tr : activeTriggers) {
+			if (!tr.isActive()) {
+				inactive.add(tr);
+			} else {
+				tr.update(this);
+			}
+		}
+		activeTriggers.removeAll(inactive);
 	}
 	
 	/**
@@ -211,5 +236,10 @@ public class World {
 	public List<Projectile> getProjectiles() {
 		return projectiles;
 	}
-}
 
+	public void addActiveTrigger(Trigger t) {
+		if (!activeTriggers.contains(t)) {
+			activeTriggers.add(t);
+		}
+	}
+}

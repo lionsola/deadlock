@@ -12,6 +12,7 @@ import server.status.StatusEffect;
 import server.world.Arena;
 import server.world.Projectile;
 import server.world.Terrain;
+import server.world.Trigger;
 import server.world.Utils;
 import server.world.Visibility;
 import server.world.World;
@@ -43,6 +44,9 @@ public class Character {
 	//private Vector2D pos;
 	private double dx = 0;
 	private double dy = 0;
+	
+	private double realDx = 0;
+	private double realDy = 0;
 	//private Vector2D vel;
 	
 	public final int id; // the player's ID
@@ -106,7 +110,7 @@ public class Character {
 		updateCollision(world);
 		updateStatusEffects();
 		updateNoise(world);
-		updatePosition();
+		updatePosition(world);
 		updatePerception(world);
 	}
 
@@ -141,25 +145,29 @@ public class Character {
 		int topY = (int)((y-getRadius())/Terrain.tileSize);
 		int btmY = (int)((y+getRadius())/Terrain.tileSize);
 		
+		double curTileCX = (curTileX+0.5)*Terrain.tileSize;
+		double curTileCY = (curTileY+0.5)*Terrain.tileSize;
+		
 		if (!arena.get(leftX,curTileY).isTraversable()||
 				!arena.get(rightX,curTileY).isTraversable()) {
-			double curTileCX = (curTileX+0.5)*Terrain.tileSize;
 			x =  curTileCX + 0.99*Math.copySign(0.5*Terrain.tileSize-getRadius(),
 					x-curTileCX);
-		} else if (!arena.get(curTileX,topY).isTraversable() ||
-				!arena.get(curTileX,btmY).isTraversable()) {
-			double curTileCY = (curTileY+0.5)*Terrain.tileSize;
-			y = curTileCY + 0.99*Math.copySign(0.5*Terrain.tileSize-getRadius(),
-					y-curTileCY);
-		}  
+		} else {
+			for (int tx=leftX;tx<=rightX;tx++) {
+				if (!arena.get(tx,topY).isTraversable() || !arena.get(tx,btmY).isTraversable()) {
+					y = curTileCY + 0.99*Math.copySign(0.5*Terrain.tileSize-getRadius(),y-curTileCY);
+					break;
+				}
+			}
+		}
 
 		// CHECK AND FIX DX AND DY
-		double newX = x + dx*GameWindow.MS_PER_UPDATE;
-		double newY = y + dy*GameWindow.MS_PER_UPDATE;
-		
-		if (true) {
+		realDx = 0;
+		realDy = 0;
+		if (dx!=0) {
 			// go through the tiles that this character occupies
 			// if it continues to move horizontally in the X axis
+			double newX = x + dx*GameWindow.MS_PER_UPDATE;
 			int tileY1 = (int) ((y - getRadius()) / Terrain.tileSize);
 			int newTileX = (int) ((newX + Math.copySign(getRadius(),dx)) / Terrain.tileSize);
 			int tileY2 = (int) ((y + getRadius()) / Terrain.tileSize);
@@ -181,15 +189,20 @@ public class Character {
 						arena.get(newTileX,curTileY).isTraversable() &&
 						dy==0) {
 					// well, *slide vertically toward the empty space
-					setDy(Math.copySign(Math.abs(dx*0.7),t));
+					realDy = Math.copySign(Math.abs(dx*0.7),t)*GameWindow.MS_PER_UPDATE;
 				}
+				
 				// block the horizontal movement
-				dx = 0;
+				realDx = curTileCX + 0.99*Math.copySign(0.5*Terrain.tileSize-getRadius(),
+						x-curTileCX) - x;
+			} else {
+				realDx = newX - x;
 			}
 		}
-		if (true) {
+		if (dy!=0) {
 			// go through the tiles that this character occupies
 			// if it continues to move vertically in the Y axis
+			double newY = y + dy*GameWindow.MS_PER_UPDATE;
 			int tileX1 = (int) ((x - getRadius()) / Terrain.tileSize);
 			int newTileY = (int) ((newY +Math.copySign(getRadius(), dy)) / Terrain.tileSize);
 			int tileX2 = (int) ((x + getRadius()) / Terrain.tileSize);
@@ -211,17 +224,76 @@ public class Character {
 						arena.get(curTileX,newTileY).isTraversable() &&
 						dx==0) {
 					// well, *slide horizontally toward the empty space
-					setDx(Math.copySign(Math.abs(dy*0.7),t));
+					realDx = Math.copySign(Math.abs(dy*0.7),t)*GameWindow.MS_PER_UPDATE;
 				}
 				// block the vertical movement
-				dy = 0;
+				realDy = curTileCY + 0.99*Math.copySign(0.5*Terrain.tileSize-getRadius(),
+						y-curTileCY) - y;
+			} else {
+				realDy = newY - y;
 			}
 		}
 	}
 
-	protected void updatePosition() {
-		x += dx*GameWindow.MS_PER_UPDATE;
-		y += dy*GameWindow.MS_PER_UPDATE;
+	protected void updatePosition(World w) {
+		int curTileY = (int)(y/Terrain.tileSize);
+		int curTileX = (int)(x/Terrain.tileSize);
+		
+		final double checkRange = getRadius()+0.01;
+		int leftX = (int)((x-checkRange)/Terrain.tileSize);
+		int rightX = (int)((x+checkRange)/Terrain.tileSize);
+		int topY = (int)((y-checkRange)/Terrain.tileSize);
+		int btmY = (int)((y+checkRange)/Terrain.tileSize);
+		
+		x += realDx;
+		y += realDy;
+		
+		int newTileY = (int)(y/Terrain.tileSize);
+		int newTileX = (int)(x/Terrain.tileSize);
+		
+		if (newTileX != curTileX || newTileY != curTileY) {
+			Trigger newT = w.getArena().get(newTileX,newTileY).getTrigger();
+			if (newT!=null) {
+				newT.onCharacterEnter(this,w);
+			}
+			
+			Trigger oldT = w.getArena().get(curTileX,curTileY).getTrigger();
+			if (oldT!=null) {
+				oldT.onCharacterLeave(this, w);
+			}
+		}
+		
+		int newLeftX = (int)((x-checkRange)/Terrain.tileSize);
+		int newRightX = (int)((x+checkRange)/Terrain.tileSize);
+		int newTopY = (int)((y-checkRange)/Terrain.tileSize);
+		int newBtmY = (int)((y+checkRange)/Terrain.tileSize);
+		for (int x=newLeftX;x<=newRightX;x++) {
+			for (int y=newTopY;y<=newBtmY;y++) {
+				Trigger t = w.getArena().get(x,y).getTrigger();
+				if (t!=null) {
+					if ((x<leftX  && dx<0) ||
+							(x>rightX && dx>0) ||
+							(y<topY && dy<0) ||
+							(y>btmY && dy>0)) {
+						t.onCharacterTouch(this, w);
+					}
+				}
+			}
+		}
+		
+		for (int x=leftX;x<=rightX;x++) {
+			for (int y=topY;y<=btmY;y++) {
+				Trigger t = w.getArena().get(x,y).getTrigger();
+				if (t!=null) {
+					if ((x<newLeftX  && dx>=0) ||
+							(x>newRightX && dx<=0) ||
+							(y<newTopY && dy>=0) ||
+							(y>newBtmY && dy<=0)) {
+						t.onCharacterUntouch(this, w);
+					}
+				}
+			}
+		}
 	}
 	
 	/**
@@ -232,7 +304,7 @@ public class Character {
 	 */
 	protected void updateNoise(World world) {
 		double inc = -0.1;
-		if (dx != 0 || dy != 0)
+		if (realDx != 0 || realDy != 0)
 			inc = getNoiseF()*1;
 
 		noise = Math.max(0, noise + inc);
@@ -386,7 +458,7 @@ public class Character {
 	}
 	
 	public double getCurrentSpeed() {
-		return Math.sqrt(getDx()*getDx()+getDy()*getDy());
+		return Math.sqrt(realDx*realDx + realDy*realDy);
 	}
 	
 	/**
@@ -552,7 +624,7 @@ public class Character {
 	}
 	
 	public boolean isMoving() {
-		return getDx()!=0 || getDy()!=0;
+		return realDx!=0 || realDy!=0;
 	}
 	
 	public double getMovingDirection() {

@@ -9,7 +9,6 @@ import server.weapon.Bullet;
 import server.world.Geometry;
 import server.world.LineOfSight;
 import server.world.Projectile;
-import server.world.Sound;
 import server.world.Thing;
 import server.world.Utils;
 import server.world.World;

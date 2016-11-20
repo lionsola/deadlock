@@ -34,7 +34,7 @@ import client.gui.GameWindow;
  */
 public class PlayerCharacter extends Character {
 	
-	public static final double MOVEMENT_DISPERSION_FACTOR = 0.1;
+	public static final double MOVEMENT_DISPERSION_FACTOR = 0.01;
 	public static final double ROTATION_DISPERSION_FACTOR = 0.3;
 	
 	public static final double MAX_DISPERSION_ANGLE = 0.1;
@@ -137,7 +137,7 @@ public class PlayerCharacter extends Character {
 			
 			super.updateStatusEffects();
 			
-			super.updatePosition();
+			super.updatePosition(world);
 			super.updateNoise(world);
 			updateCrosshair();
 		}

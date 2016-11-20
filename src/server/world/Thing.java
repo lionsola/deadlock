@@ -17,10 +17,14 @@ public class Thing implements CellRenderable, Identifiable, Serializable {
 	protected int id;
 	protected boolean walkable;
 	protected boolean transparent;
+	
 	protected Color color;
 	protected int coverType;
 	protected String name;
 	protected String imageName;
+	
+	protected boolean border;
+	
 	protected double spriteSize; // in meters
 	protected transient BufferedImage objectImage;
 	
@@ -66,7 +70,7 @@ public class Thing implements CellRenderable, Identifiable, Serializable {
 	/**
 	 * @param transparent the transparent to set
 	 */
-	public void setTransparent(boolean transparent) {
+	public void setClear(boolean transparent) {
 		this.transparent = transparent;
 	}
 	/**
@@ -123,8 +127,18 @@ public class Thing implements CellRenderable, Identifiable, Serializable {
 		return color;
 	}
 	
+	public boolean isBorderDrawn() {
+		return border;
+	}
+	
+	public void setBorder(boolean border) {
+		this.border = border;
+	}
+	
 	@Override
 	public String toString() {
 		return getName();
 	}
+
+
 }
