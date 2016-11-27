@@ -24,6 +24,16 @@ public class Utils {
 		child.setLocation(x, y);
 	}
 
+	public static void alignCenterHorizontally(Component child, Component parent) {
+		int x = parent.getX() + (parent.getWidth() - child.getWidth()) / 2;
+		child.setLocation(x,child.getY());
+	}
+	
+	public static void alignCenterVertically(Component child, Component parent) {
+		int y = parent.getY() + (parent.getHeight() - child.getHeight()) / 2;
+		child.setLocation(child.getX(), y);
+	}
+	
 	/**
 	 * Find a player in a list given a specified ID.
 	 * 

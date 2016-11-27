@@ -11,9 +11,9 @@ import server.character.PlayerCharacter;
 import shared.network.CharData;
 import shared.network.ProjectileData;
 import shared.network.GameDataPackets.WorldStatePacket;
-import shared.network.GameEvent;
-import shared.network.GameEvent.AnimationEvent;
-import shared.network.GameEvent.GameEventListener;
+import shared.network.event.AnimationEvent;
+import shared.network.event.GameEvent;
+import shared.network.event.GameEvent.GameEventListener;
 
 /**
  * The physical world inside a match, which handles everything including characters, projectiles and
@@ -58,8 +58,7 @@ public class World {
 	public void addPlayer(PlayerCharacter p) {
 		Point2D spawn = arena.getSpawn(p.team).get(curSpawn[p.team]);
 		curSpawn[p.team] = (curSpawn[p.team]+1)%arena.getSpawn(p.team).size();
-		p.setX(spawn.getX());
-		p.setY(spawn.getY());
+		p.setPosition(this,spawn.getX(),spawn.getY());
 		characters.add(p);
 	}
 

@@ -3,9 +3,9 @@ package server.network;
 import java.util.List;
 
 import server.world.World;
-import shared.network.GameEvent;
-import shared.network.GameEvent.PlayerDieEvent;
-import shared.network.GameEvent.ScoreChangedEvent;
+import shared.network.event.GameEvent;
+import shared.network.event.GameEvent.PlayerDieEvent;
+import shared.network.event.GameEvent.ScoreChangedEvent;
 
 public class TeamBattle extends MatchServer {
 	private int[] score = new int[2];

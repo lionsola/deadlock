@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import server.world.Utils;
-import shared.network.GameEvent.AnimationEvent;
+import shared.network.event.AnimationEvent;
 
 /**
  * Manage the animation effects and provide high-level methods to create new animations in the game
@@ -17,13 +17,6 @@ import shared.network.GameEvent.AnimationEvent;
 public class AnimationSystem {
 	//private ConcurrentLinkedQueue<ParticleEmitter> particleEmitters;
 	private ConcurrentLinkedQueue<BasicAnimation> animations;
-	public static final byte PING_ANIMATION_ID = 5;
-	public static final byte BULLETTRAIL = 4;
-	public static final byte ENEMYMARK = 3;
-	public static final byte BULLETWALL = 2;
-	public static final byte BLOOD = 1;
-	public static final byte GUNSHOT = 0;
-
 	/**
 	 * Constructor. Create a new animation system.
 	 */
@@ -116,19 +109,19 @@ public class AnimationSystem {
 	
 	public void addAnimation(AnimationEvent e) {
 		switch(e.id) {
-			case AnimationSystem.GUNSHOT:
+			case AnimationEvent.GUNSHOT:
 				addShotAnimation(e.x,e.y,e.direction);
 				break;
-			case AnimationSystem.BULLETWALL:
+			case AnimationEvent.BULLETWALL:
 				addBulletWallAnimation(e.x,e.y);
 				break;
-			case AnimationSystem.BLOOD:
+			case AnimationEvent.BLOOD:
 				addBloodAnimation(e.x,e.y,e.direction);
 				break;
-			case AnimationSystem.ENEMYMARK:
+			case AnimationEvent.ENEMYMARK:
 				addCustomAnimation(new ExpandingCircleAnimation(e.x,e.y,2,1000, 0,Color.RED));
 				break;
-			case AnimationSystem.PING_ANIMATION_ID:
+			case AnimationEvent.PING_ANIMATION_ID:
 				addCustomAnimation(new ExpandingCircleAnimation(e.x,e.y,1.5,1000, 0,Color.RED));
 				break;
 			default:

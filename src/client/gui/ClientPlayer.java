@@ -15,6 +15,9 @@ public class ClientPlayer implements Serializable {
 	public String name;
 	public boolean active;
 	public int type;
+	public int weaponId;
+	public int abilityId;
+	public int passiveId;
 	public int kills;
 	public int deaths;
 	public CharData character;

@@ -32,7 +32,6 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import server.network.LobbyServer;
@@ -136,7 +135,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 	 */
 	private void initUI(boolean isHost) {
 		// border width
-		int bw = game.getHeight() / 5;
+		int bw = game.getHeight() / 6;
 		this.setBorder(new EmptyBorder(bw, bw, bw / 2, bw));
 		// team panels
 		JPanel teamPanel = new JPanel();
@@ -185,10 +184,8 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		c.gridwidth = 2;
 		teamPanel.add(GUIFactory.getStyledSeparator(), c);
 
-		c.gridy++;
-
 		JPanel settingPanel = GUIFactory.getTransparentPanel();
-
+		settingPanel.setLayout(new BoxLayout(settingPanel, BoxLayout.Y_AXIS));
 		JPanel characterPanel = GUIFactory.getTransparentPanel();
 		// characterPanel.setBorder(BorderFactory.createLineBorder(Color.WHITE));
 
@@ -222,19 +219,23 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 			map = new JLabel("Error loading map");
 		}
 		settingPanel.add(map);
-		teamPanel.add(settingPanel, c);
+		//c.gridy++;
+		//teamPanel.add(GUIFactory.getStyledSeparator(), c);
 
-		c.gridy++;
-		teamPanel.add(GUIFactory.getStyledSeparator(), c);
-
-		c.gridy++;
-		c.weighty = 0.5;
-		c.anchor = GridBagConstraints.SOUTH;
+		chatPanel = new ChatPanel(5);
+		chatPanel.getInputLabel().setText(clientPlayer.name + ": ");
+		
+		JPanel lower = GUIFactory.getTransparentPanel();
+		lower.setLayout(new BoxLayout(lower,BoxLayout.X_AXIS));
+		lower.add(settingPanel);
+		lower.add(chatPanel);
+		
 		c.fill = GridBagConstraints.BOTH;
-		chatPanel = new ChatPanel();
-		// chatPanel.getTextArea().setRows(5);
-
-		teamPanel.add(chatPanel, c);
+		c.gridy++;
+		teamPanel.add(lower, c);
+		
+		c.gridwidth = 2;
+		c.gridx = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weighty = 0;
 		c.gridy++;
@@ -257,7 +258,6 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		buttonPanel.add(readyButton);
 
 		teamPanel.add(buttonPanel, c);
-		chatPanel.getInputLabel().setText(clientPlayer.name + ": ");
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		this.add(teamPanel);
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "doSomething");
@@ -448,7 +448,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 					} else if (message instanceof StartGameRequest) {
 						AudioManager.stopMusic();
 						game.setScreen(new GameScreen(game, clientPlayer.id, connection, arenaName, team1, team2));
-						AudioManager.playMusic("menumusic.wav", MusicPlayer.DEFAULT_VOLUME - 15);
+						//AudioManager.playMusic("menumusic.wav", MusicPlayer.DEFAULT_VOLUME - 15);
 						break;
 					} else if (message instanceof SwitchTeamRequest) {
 						SwitchTeamRequest request = ((SwitchTeamRequest) message);

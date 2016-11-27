@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
+import shared.network.event.GameEvent;
+
 /**
  * The game data packets sent through the network.
  * 

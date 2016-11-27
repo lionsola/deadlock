@@ -61,7 +61,7 @@ public class Renderer {
 	
 	final float dash1[] = {10.0f,30.0f};
     final BasicStroke dashed =
-        new BasicStroke(1f,
+        new BasicStroke(0.5f,
                         BasicStroke.CAP_BUTT,
                         BasicStroke.JOIN_MITER,
                         10.0f, dash1, 0.0f);
@@ -222,24 +222,15 @@ public class Renderer {
 		
 	}
 
-	public void renderUI(Graphics2D g2D, FullCharacterData p) {
+	public void renderCharacterUI(Graphics2D g2D, FullCharacterData p) {
 		// render the health bar
 		g2D.setStroke(new BasicStroke(toPixel(HEALTHBAR_WIDTH)));
 		g2D.setColor(new Color(255, 50, 50));
 		double length = (0.2*p.healthPoints/Renderer.ppm);
 		double topy = (p.y - p.radius - HEALTHBAR_WIDTH*2);
-		
 		drawLine(g2D, p.x - length / 2, topy, p.x + length / 2, topy);
-		// render the reload bar
-		if (p.reloadPercent < 1) {
-			topy += HEALTHBAR_WIDTH;
-			length = (p.radius*p.reloadPercent);
-			g2D.setStroke(new BasicStroke(toPixel(0.15)));
-			g2D.setColor(Color.WHITE);
-			double x = p.x - length/2;
-			drawLine(g2D, x, topy, x + length, topy);
-		}
 
+		// render direction line
 		if (p.viewRange>p.radius*5) {
 			g2D.setColor(new Color(200, 200, 200));
 			g2D.setStroke(dashed);
@@ -275,7 +266,7 @@ public class Renderer {
 		g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		
 		g2D.rotate(-gunDirection,x*ppm,y*ppm);
-		Renderer.drawImage(g2D,gunImage, x+r-0.1, y-gunW/2,gunL,gunW);
+		Renderer.drawImage(g2D,gunImage, x+r-0.15, y-gunW/2,gunL,gunW);
 		g2D.rotate(gunDirection,x*ppm,y*ppm);
 	}
 	
@@ -647,7 +638,7 @@ public class Renderer {
 			double x = (tileX+(1-w)/2)*Terrain.tileSize;
 			double y = (tileY+(1-w)/2)*Terrain.tileSize;
 			w = w*Terrain.tileSize;
-			drawImage(g2D,Sprite.SHIELD[coverType-1],x,y,w,w);
+			drawImage(g2D,Sprite.COVER[coverType-1],x,y,w,w);
 		}
 	}
 

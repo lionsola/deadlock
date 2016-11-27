@@ -41,8 +41,8 @@ public class GameWindow extends JFrame {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 		if (screen.isFullScreenSupported()) {
-			//setUndecorated(true);
-			//screen.setFullScreenWindow(this);
+			setUndecorated(true);
+			screen.setFullScreenWindow(this);
 		}
 
 		pack();

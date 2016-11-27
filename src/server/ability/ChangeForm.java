@@ -13,7 +13,7 @@ public class ChangeForm extends ToggleAbility {
 	public static final int CF_HUMAN_WEAPON = 101;
 	
 	public ChangeForm(PlayerCharacter self) {
-		super(self, CF_COOLDOWN);
+		super(10,self, CF_COOLDOWN);
 	}
 
 	@Override

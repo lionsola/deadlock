@@ -19,11 +19,11 @@ import server.world.Thing;
 import server.world.TriggerPreset;
 import server.world.Terrain;
 import server.world.World;
-import shared.network.GameEvent;
 import shared.network.GameDataPackets.InputPacket;
 import shared.network.GameDataPackets.WorldStatePacket;
-import shared.network.GameEvent.GameEndEvent;
-import shared.network.GameEvent.GameEventListener;
+import shared.network.event.GameEvent;
+import shared.network.event.GameEvent.GameEndEvent;
+import shared.network.event.GameEvent.GameEventListener;
 
 /**
  * Is the game server.

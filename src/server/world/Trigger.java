@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import server.character.Character;
-import shared.network.GameEvent;
+import shared.network.event.GameEvent;
 
 public abstract class Trigger implements Serializable {
 	private static final long serialVersionUID = 8439427870770047350L;

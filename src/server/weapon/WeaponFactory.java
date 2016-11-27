@@ -62,10 +62,10 @@ public class WeaponFactory {
 				@Override
 				protected void fire(World w, PlayerCharacter c, double direction) {
 					for (int i=0;i<type.bulletsNo;i++) {
-						BatAI bat = new BatAI(ClassStats.classStats.get(21),c.id,c.team);
-						bat.setX(c.getX());
-						bat.setY(c.getY());
-						bat.setDirection(direction);
+						//BatAI bat = new BatAI(ClassStats.classStats.get(21),c.id,c.team);
+						//bat.setX(c.getX());
+						//bat.setY(c.getY());
+						//bat.setDirection(direction);
 						//bat.set
 						//w.addNPC();
 					}

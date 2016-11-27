@@ -4,7 +4,7 @@ import client.gui.GameWindow;
 import server.character.PlayerCharacter;
 import server.world.World;
 import shared.network.CharData;
-import shared.network.GameEvent.EnemyInfoEvent;
+import shared.network.event.GameEvent.EnemyInfoEvent;
 
 public class Mark extends Passive {
 	public static final double MARK_SPEED = 0.1;

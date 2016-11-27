@@ -2,13 +2,13 @@ package server.weapon;
 
 import java.awt.geom.Point2D;
 
-import client.graphics.AnimationSystem;
 import client.gui.GameWindow;
 import server.ability.Ability;
 import server.character.PlayerCharacter;
 import server.world.Geometry;
 import server.world.Utils;
 import server.world.World;
+import shared.network.event.AnimationEvent;
 
 /**
  * The <code>Weapon</code> class defines the behaviour of ALL weapons, both Primary Secondary, etc.
@@ -25,16 +25,21 @@ import server.world.World;
  *
  */
 public abstract class Weapon extends Ability {
+	public static final int ASSAULT_RIFLE_ID = 0;
+	public static final int MARKMAN_RIFLE_ID = 1;
+	public static final int SHOTGUN_ID = 2;
+	public static final int MP7_ID = 3;
+	public static final int SILENT_PISTOL_ID = 4;
+	
 	public final WeaponType type;
 	private double instability;
 	private int ammoLeft;
-	private long reloadTimer = 0;
+	private long reloadTimer;
 
 	public Weapon(PlayerCharacter self, WeaponType type) {
-		super(self,type.cooldown);
+		super(type.weaponId,self,type.cooldown);
 		this.type = type;
-		instability = type.instability;
-		ammoLeft = type.magSize;
+		reset();
 	}
 
 	public void update(World w, PlayerCharacter c) {
@@ -49,11 +54,10 @@ public abstract class Weapon extends Ability {
 			Point2D p = Geometry.PolarToCartesian(RECOIL_DISTANCE*type.instability,
 					Math.PI+direction);
 			
-			c.setX(c.getX()+p.getX());
-			c.setY(c.getY()-p.getY());
+			c.setPosition(w,c.getX()+p.getX(),c.getY()-p.getY());
 			
 			ammoLeft -= 1;
-			w.addAnimation(AnimationSystem.GUNSHOT, c.getX(), c.getY(), direction);
+			w.addAnimation(AnimationEvent.GUNSHOT, c.getX(), c.getY(), direction);
 			w.addSound(type.soundId, type.noise, c.getX(), c.getY());
 			
 			c.addDispersion(getInstability());
@@ -110,7 +114,7 @@ public abstract class Weapon extends Ability {
 		super.reset();
 		instability = type.instability;
 		ammoLeft = type.magSize;
-		reloadTimer = 0;
+		reloadTimer = type.reloadTime;
 	}
 	
 	public double getInstability() {

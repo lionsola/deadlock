@@ -9,8 +9,8 @@ import server.world.World;
  */
 public abstract class ToggleAbility extends Ability {
 	private boolean isActive = false;
-	public ToggleAbility(PlayerCharacter self, long cooldown) {
-		super(self,cooldown);
+	public ToggleAbility(int id, PlayerCharacter self, long cooldown) {
+		super(id,self,cooldown);
 	}
 
 	@Override

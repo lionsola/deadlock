@@ -20,9 +20,9 @@ import shared.network.CharData;
 import shared.network.ProjectileData;
 import shared.network.Vision;
 import shared.network.GameDataPackets.WorldStatePacket;
-import shared.network.GameEvent;
-import shared.network.GameEvent.AnimationEvent;
-import shared.network.GameEvent.SoundEvent;
+import shared.network.event.AnimationEvent;
+import shared.network.event.GameEvent;
+import shared.network.event.SoundEvent;
 
 /**
  * This class will define the base behaviour of every type of Character.
@@ -35,9 +35,6 @@ public class Character {
 	public static final double BASE_FOVANGLE= Math.toRadians(120);
 	
 	public static final double BASE_HEARING_THRES = 0;
-	
-	public static final int FOOTSTEP_SOUND_ID = 30;
-	public static final double FOOTSTEP_SOUND_VOLUME = 20;
 	
 	private double x = 0;
 	private double y = 0;
@@ -71,7 +68,6 @@ public class Character {
 	private Armor armor;
 	private List<StatusEffect> statusEffects = new LinkedList<StatusEffect>();
 	private WorldStatePacket perception = new WorldStatePacket();
-
 	/**
 	 * Creates a new abstract server.character.
 	 * 
@@ -310,7 +306,7 @@ public class Character {
 		noise = Math.max(0, noise + inc);
 		double noiseThres = 30;
 		if (noise > noiseThres) {
-			world.addSound(FOOTSTEP_SOUND_ID,FOOTSTEP_SOUND_VOLUME*inc,getX(),getY());
+			world.addSound(SoundEvent.FOOTSTEP_SOUND_ID,SoundEvent.FOOTSTEP_SOUND_VOLUME*inc,getX(),getY());
 			noise -= noiseThres;
 			sway *= -1;
 		}
@@ -365,7 +361,11 @@ public class Character {
 	 * @return the line of sight area.
 	 */
 	public Area getLoS(Arena a) {
-		return los.genLOSAreaMeter(getX(), getY(), getFovRange(), getFovAngle(), getDirection(), a);
+		try {
+			return los.genLOSAreaMeter(getX(), getY(), getFovRange(), getFovAngle(), getDirection(), a);
+		} catch (Exception e) {
+			return new Area();
+		}
 	}
 
 	/**
@@ -503,18 +503,10 @@ public class Character {
 	 * @param x
 	 *            the x coord of the server.character
 	 */
-	public void setX(double x) {
-		this.x = x;
-	}
-
-	/**
-	 * Sets the y coord of the server.character
-	 * 
-	 * @param y
-	 *            the y coord of the server.character
-	 */
-	public void setY(double y) {
-		this.y = y;
+	public void setPosition(World w, double x, double y) {
+		realDx = x-getX();
+		realDy = y-getY();
+		updatePosition(w);
 	}
 
 	/**

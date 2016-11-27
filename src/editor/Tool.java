@@ -13,8 +13,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputAdapter;
 import client.graphics.Renderer;
 import editor.dialogs.LightSourceDialog;
-import editor.dialogs.ListDialog;
-import editor.dialogs.TriggerDialog;
 import server.world.Thing;
 import server.world.Tile;
 import server.world.Trigger;
@@ -240,7 +238,6 @@ public abstract class Tool extends MouseInputAdapter {
 			super.mouseWheelMoved(e);
 			Point p = getPointedTile(e);
 			Tile tile = arenaPanel.getArena().get(p); 
-			Thing thing = tile.getThing();
 			if (tile.getSpriteConfig()==null) {
 				tile.setSpriteConfig(new SpriteConfig());
 			}

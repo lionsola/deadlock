@@ -5,11 +5,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import server.ability.TimedGrenade;
-import server.weapon.Bullet;
 import server.weapon.WeaponFactory;
-import server.character.Character;
-import server.character.PlayerCharacter;
+import shared.network.event.SoundEvent;
 
 /**
  * Manages the audio in game.
@@ -17,7 +14,7 @@ import server.character.PlayerCharacter;
 public class AudioManager implements Runnable {
 	
 	// volume gain in decibel
-	public static final float GAIN_MINVOLUME = -30;
+	public static final float GAIN_MINVOLUME = -20;
 	public static final float GAIN_RANGE = 25;
 
 	/** Upper bound of in-game sounds' volume.
@@ -35,8 +32,6 @@ public class AudioManager implements Runnable {
 	private static final String SOUND_DIR = "resource/audio/sounds/";
 	private static final String MUSIC_DIR = "resource/audio/music/";
 	
-	public static final int DOOR_OPEN_ID = 36;
-
 	/**
 	 * Creates a new Audio Manager, where the location of all the sounds used for the game are
 	 * located
@@ -62,18 +57,18 @@ public class AudioManager implements Runnable {
 		footsteps.addSound(new SingleSound(SOUND_DIR + "footstep2.wav"));
 		footsteps.addSound(new SingleSound(SOUND_DIR + "footstep3.wav"));
 		footsteps.addSound(new SingleSound(SOUND_DIR + "footstep4.wav"));
-		soundMap.put(Character.FOOTSTEP_SOUND_ID, footsteps);
+		soundMap.put(SoundEvent.FOOTSTEP_SOUND_ID, footsteps);
 		
 		AlternatingSound bulletwall = new AlternatingSound();
 		bulletwall.addSound(new SingleSound(SOUND_DIR + "bulletwall0.wav"));
 		bulletwall.addSound(new SingleSound(SOUND_DIR + "bulletwall1.wav"));
-		soundMap.put(Bullet.BULLET_WALL_SOUND_ID,bulletwall);
+		soundMap.put(SoundEvent.BULLET_WALL_SOUND_ID,bulletwall);
 		
-		soundMap.put(TimedGrenade.GRENADE_EXPLODE_SOUND_ID,new SingleSound(SOUND_DIR + "grenade_explode.wav"));
+		soundMap.put(SoundEvent.GRENADE_EXPLODE_SOUND_ID,new SingleSound(SOUND_DIR + "grenade_explode.wav"));
 		
-		soundMap.put(DOOR_OPEN_ID, new SingleSound(SOUND_DIR + "door_open.wav"));
+		soundMap.put(SoundEvent.DOOR_OPEN_ID, new SingleSound(SOUND_DIR + "door_open.wav"));
 		
-		soundMap.put(PlayerCharacter.PING_SOUND_ID,new SingleSound(SOUND_DIR + "ping.wav"));
+		soundMap.put(SoundEvent.PING_SOUND_ID,new SingleSound(SOUND_DIR + "ping.wav"));
 	}
 
 	/**

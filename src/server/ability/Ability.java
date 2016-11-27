@@ -9,14 +9,25 @@ import server.world.World;
  * which should be followed by all abilities.
  */
 public abstract class Ability {
+	public static final int FRAG_ID = 100;
+	public static final int FLASH_ID = 101;
+	public static final int BINO_ID = 102;
+	public static final int SCOPE_ID = 103;
+	public static final int AMP_ID = 104;	
+	
 	public final long cooldown;
 	private long cooldownTimer;
 	private PlayerCharacter self;
+	private int id;
 	
-	public Ability (PlayerCharacter self, long cooldown) {
+	public Ability (int id, PlayerCharacter self, long cooldown) {
 		this.cooldown = cooldown;
 		this.self = self;
 		cooldownTimer = cooldown;
+	}
+	
+	public int getId() {
+		return id;
 	}
 	
 	public void update(World w) {

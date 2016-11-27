@@ -3,16 +3,12 @@ package server.world;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.geom.Point2D;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Scanner;
-
 import editor.DataManager;
 import editor.DataManager.ArenaData;
 

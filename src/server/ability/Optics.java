@@ -17,8 +17,8 @@ public class Optics extends ToggleAbility {
 	private final double angleInc;
 	private final double speedInc;
 	
-	public Optics(PlayerCharacter self, double rangeMod, double angleMod, double speedMod) {
-		super(self,COOLDOWN);
+	public Optics(int id, PlayerCharacter self, double rangeMod, double angleMod, double speedMod) {
+		super(id,self,COOLDOWN);
 		
 		RANGE = rangeMod;
 		ANGLE = angleMod;
@@ -61,7 +61,7 @@ public class Optics extends ToggleAbility {
 		public static final double SCOPE_SPEED = -0.25;
 		
 		public Scope(PlayerCharacter self) {
-			super(self, SCOPE_RANGE, SCOPE_ANGLE, SCOPE_SPEED);
+			super(SCOPE_ID,self, SCOPE_RANGE, SCOPE_ANGLE, SCOPE_SPEED);
 		}
 	}
 	
@@ -71,7 +71,7 @@ public class Optics extends ToggleAbility {
 		public static final double BINO_SPEED = -0.5;
 		
 		public Binocular(PlayerCharacter self) {
-			super(self, BINO_RANGE, BINO_ANGLE, BINO_SPEED);
+			super(BINO_ID,self, BINO_RANGE, BINO_ANGLE, BINO_SPEED);
 		}
 	}
 }

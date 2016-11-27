@@ -36,7 +36,6 @@ public final class OverlayComposite extends RGBComposite {
 
 		@Override
 		public void composeRGB(int[] src, int srcChannels, int[] dst, int dstChannels, float alpha) {
-			int w = src.length;
 
 			for ( int si = 0, di = 0; si < src.length && di<dst.length; si += srcChannels, di += dstChannels ) {
                 int sr = src[si];

@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -37,7 +38,8 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-import server.character.PlayerCharacter;
+import server.ability.Ability;
+import server.weapon.Weapon;
 import server.world.Arena;
 import server.world.Thing;
 import server.world.TriggerPreset;
@@ -45,13 +47,15 @@ import server.world.Terrain;
 import server.world.Visibility;
 import shared.network.Connection;
 import shared.network.FullCharacterData;
-import shared.network.GameEvent;
 import shared.network.CharData;
 import shared.network.ProjectileData;
 import shared.network.Vision;
 import shared.network.GameDataPackets.InputPacket;
 import shared.network.GameDataPackets.WorldStatePacket;
-import shared.network.GameEvent.*;
+import shared.network.event.AnimationEvent;
+import shared.network.event.GameEvent;
+import shared.network.event.GameEvent.*;
+import shared.network.event.SoundEvent;
 import client.graphics.AnimationSystem;
 import client.graphics.Renderer;
 import client.image.SoftHardLightComposite;
@@ -81,11 +85,13 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private List<ClientPlayer> team1;
 	private List<ClientPlayer> team2;
 	private List<ClientPlayer> players;
+	
 	private TeamListModel team1Model;
 	private TeamListModel team2Model;
 	private JPanel scoreboard;
 	private JLabel teamScore;
 	private ChatPanel chatPanel;
+	private AbilityBar abilityBar;
 	private JComponent minimap;
 	private Visibility visibility = new Visibility();
 	private Renderer renderer = new Renderer();
@@ -118,7 +124,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		super();
 		
 		
-		setSize(game.getWidth(), game.getHeight());
+		setSize(game.getContentPane().getWidth(), game.getContentPane().getHeight());
 		this.setFocusable(true);
 		this.requestFocusInWindow();
 		this.setIgnoreRepaint(true);
@@ -255,6 +261,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				visualAnimations.addProjectileTrail(data.x, data.y, data.prevX, data.prevY ,data.size);
 			}
 			mainCharacter = wsp.player;
+			abilityBar.update(mainCharacter);
 			//mainCharacter.direction = (float) Math.atan2(mainCharacter.y - input.cy, input.cx - mainCharacter.x);
 
 			camera.update(mainCharacter);
@@ -275,12 +282,15 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	 * Initialises the UI components
 	 */
 	private void initUI() {
-		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		//this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		teamScore = GUIFactory.getStyledLabel("0 - 0");
 		teamScore.setHorizontalAlignment(SwingConstants.CENTER);
 		teamScore.setAlignmentX(Component.CENTER_ALIGNMENT);
 		this.add(teamScore);
-		scoreboard = GUIFactory.getTransparentPanel();
+		teamScore.setLocation(10,10);
+		Utils.alignCenterHorizontally(teamScore, this);
+		
+		scoreboard = new JPanel();
 		team1Model = new TeamListModel(team1);
 		team2Model = new TeamListModel(team2);
 
@@ -293,17 +303,25 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 
 		scoreboard.add(team1List);
 		scoreboard.add(team2List);
-		this.add(scoreboard);
+		scoreboard.setSize(scoreboard.getPreferredSize());
+		scoreboard.setBackground(new Color(0,0,0,100));
+		scoreboard.setOpaque(true);
+		this.add(scoreboard,new Integer(1));
+		Utils.setLocationCenterOf(scoreboard, this);
 		scoreboard.setVisible(false);
 
 		minimap = new Minimap(arena, id, players);
 		this.add(minimap);
-		chatPanel = new ChatPanel();
+		minimap.setLocation(20, getHeight()-20-minimap.getHeight());
+		
+		chatPanel = new ChatPanel(10);
 		chatPanel.setVisible(false);
-		chatPanel.getTextArea().setRows(15);
+		//chatPanel.getTextArea().setRows(15);
 		chatPanel.setMaximumSize(new Dimension(800, 300));
 		chatPanel.getInputLabel().setText(Utils.findPlayer(players, id).name + ": ");
+		chatPanel.setSize(chatPanel.getMaximumSize());
 		this.add(chatPanel);
+		Utils.setLocationCenterOf(chatPanel, this);
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "triggerChat");
 		this.getActionMap().put("triggerChat", new AbstractAction() {
 			private static final long serialVersionUID = -6566354847061381139L;
@@ -323,6 +341,43 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				chatPanel.getScroller().getVerticalScrollBar().setValue(chatPanel.getTextArea().getHeight());
 			}
 		});
+		int wId = 0, aId = 0, pId = 0;
+		switch (Utils.findPlayer(players, id).type) {
+			// grenadier
+			case 0:
+				wId = Weapon.ASSAULT_RIFLE_ID;
+				aId = Ability.FRAG_ID;
+				break;
+				
+			// markman
+			case 1:
+				wId = Weapon.MARKMAN_RIFLE_ID;
+				aId = Ability.SCOPE_ID;
+				break;
+				
+			// scout
+			case 2:
+				wId = Weapon.SHOTGUN_ID;
+				aId = Ability.BINO_ID;
+				break;
+				
+			// shield
+			case 3:
+				wId = Weapon.SHOTGUN_ID;
+				aId = Ability.FLASH_ID;
+				break;
+				
+			// agent
+			case 4:
+				wId = Weapon.SILENT_PISTOL_ID;
+				aId = Ability.AMP_ID;
+				break;
+		}
+		abilityBar = new AbilityBar(this,wId,aId,pId);
+		abilityBar.setSize(abilityBar.getPreferredSize());
+		abilityBar.setLocation(0, getHeight() - abilityBar.getHeight() - 20);
+		add(abilityBar);
+		Utils.alignCenterHorizontally(abilityBar, this);
 	}
 
 	/**
@@ -452,7 +507,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			g2D.setComposite(new SoftHardLightComposite(1f));
 			
 			Rectangle2D viewBox = getCharacterVisionBox(c.x,c.y,c.viewRange);
-			Renderer.drawArenaImage(g2D,renderer.getLightMap(),viewBox);
+			//Renderer.drawArenaImage(g2D,renderer.getLightMap(),viewBox);
 			g2D.setComposite(save);
 			
 		}
@@ -462,7 +517,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		int tileY = (int)(input.cy/Terrain.tileSize);
 		if (arena.get(tileX,tileY).coverType()>0)
 			Renderer.renderProtection(g2D,tileX,tileY,arena.get(tileX,tileY).coverType());
-		renderer.renderUI(g2D,c);
+		renderer.renderCharacterUI(g2D,c);
 		Renderer.renderCrosshair(g2D,input.cx,input.cy,c.crosshairSize);
 		g.translate(transX, transY);
 		g2D.drawString("FPS: "+FPS, 10, 10);
@@ -478,7 +533,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 
 		// if tab/some other key show detailed scoreboard
 		if (e.getKeyCode() == KeyEvent.VK_TAB)
-			this.scoreboard.setVisible(true);
+			scoreboard.setVisible(true);
 
 		// if enter enable chat
 
@@ -616,7 +671,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				SoundEvent e = (SoundEvent) event;
 				audioManager.playSound(e.id,e.volume);
 				
-				if (e.id!=PlayerCharacter.PING_SOUND_ID)
+				if (e.id!=SoundEvent.PING_SOUND_ID)
 					nonvisualAnimations.addNoiseAnimation(e.x, e.y, e.volume);
 			} else if (event instanceof AnimationEvent) {
 				AnimationEvent e = (AnimationEvent) event;
@@ -625,7 +680,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				} else {
 					globalAnimations.addAnimation(e);
 				}
-				if (e.id==AnimationSystem.BLOOD) {
+				if (e.id==AnimationEvent.BLOOD) {
 					renderer.addBloodToArena(e.x, e.y, e.direction);
 				}
 			} else if (event instanceof GameEndEvent) {
@@ -638,7 +693,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				}
 			} else if (event instanceof EnemyInfoEvent) {
 				EnemyInfoEvent e = (EnemyInfoEvent) event;
-				nonvisualAnimations.addAnimation(new AnimationEvent(AnimationSystem.ENEMYMARK,e.x,e.y,0));
+				nonvisualAnimations.addAnimation(new AnimationEvent(AnimationEvent.ENEMYMARK,e.x,e.y,0));
 			} else if (event instanceof TileChanged) {
 				TileChanged e = (TileChanged) event;
 				arena.get(e.tx, e.ty).setThing(objectTable.get(e.switchThingID));

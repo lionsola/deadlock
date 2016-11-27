@@ -22,9 +22,6 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
 import client.graphics.Sprite;
 import client.gui.GUIFactory;
 import editor.Tool.*;
@@ -37,13 +34,13 @@ import server.world.Thing;
 import server.world.TriggerPreset;
 import server.world.Terrain;
 
-public class ToolMenu extends JPanel {
+public class ToolBar extends JPanel {
 	private static final long serialVersionUID = 5669888117742429060L;
 	final Editor editor;
 	
 	JToggleButton activeButton; 
 	
-	public ToolMenu(final Editor editor) {
+	public ToolBar(final Editor editor) {
 		this.editor = editor;
 		this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 		
@@ -54,7 +51,7 @@ public class ToolMenu extends JPanel {
 		} catch (IOException e1) {
 			move.setText("H");
 		}
-		move.setToolTipText("Hand Tool");
+		move.setToolTipText("Hand Tool - drag to move map.");
 		move.addActionListener(new ActionListener() { 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -70,7 +67,7 @@ public class ToolMenu extends JPanel {
 		} catch (IOException e1) {
 			tilePaint.setText("Terrain");
 		}
-		tilePaint.setToolTipText("Terrain Paint");
+		tilePaint.setToolTipText("Terrain Paint - left to paint, right to remove");
 		tilePaint.addItemListener(new ItemListener() {
 			ListDialog<Terrain> list = null;
 			@Override
@@ -138,7 +135,7 @@ public class ToolMenu extends JPanel {
 		} catch (IOException e1) {
 			objectPaint.setText("Thing");
 		}
-		objectPaint.setToolTipText("Thing Paint");
+		objectPaint.setToolTipText("Thing Paint - left to paint, right to remove");
 		objectPaint.addItemListener(new ItemListener() {
 			ListDialog<Thing> list = null;
 			@Override
@@ -205,7 +202,7 @@ public class ToolMenu extends JPanel {
 		} catch (IOException e1) {
 			editSprite.setText("Sprite");
 		}
-		editSprite.setToolTipText("Edit Sprite");
+		editSprite.setToolTipText("Edit Sprite - left to switch sprite, scroll to rotate, mid to flip, right to clear");
 		editSprite.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
@@ -226,7 +223,7 @@ public class ToolMenu extends JPanel {
 		} catch (IOException e1) {
 			light.setText("Light");
 		}
-		light.setToolTipText("Light Source");
+		light.setToolTipText("Light Source - choose light range and color, left to add, right to remove");
 		light.addActionListener(new ActionListener() {
 			LightSourceDialog dialog = null;
 			@Override
@@ -254,9 +251,9 @@ public class ToolMenu extends JPanel {
 		try {
 			trigger.setIcon(new ImageIcon(ImageIO.read(new File("resource/editor/switch.png"))));
 		} catch (IOException e1) {
-			trigger.setText("Light");
+			trigger.setText("Trigger");
 		}
-		trigger.setToolTipText("Light Source");
+		trigger.setToolTipText("Trigger - left to add / select / set target tile, right to remove");
 		trigger.addItemListener(new ItemListener() {
 			ListDialog<TriggerPreset> list = null;
 			@Override

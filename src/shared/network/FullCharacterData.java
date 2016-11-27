@@ -9,7 +9,8 @@ public class FullCharacterData extends CharData {
 	
 	private static final long serialVersionUID = 6568364547122850939L;
 	
-	public float reloadPercent;
+	public float weaponCooldown;
+	public float abilityCooldown;
 	public float viewRange;
 	public float hearRange;
 	public float viewAngle;

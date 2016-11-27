@@ -1,4 +1,4 @@
-package shared.network;
+package shared.network.event;
 
 import java.io.Serializable;
 
@@ -37,46 +37,6 @@ public abstract class GameEvent implements Serializable {
 		}
 	}
 
-	public static class SoundEvent extends GameEvent {
-		private static final long serialVersionUID = 4014556827130454737L;
-		public final float x;
-		public final float y;
-		public final float volume;
-		public final byte id;
-
-		public SoundEvent(int id, double volume, double x, double y) {
-			this.x = (float)x;
-			this.y = (float)y;
-			this.volume = (float)volume;
-			this.id = (byte)id;
-		}
-	}
-	
-	public static class AnimationEvent extends GameEvent {
-		private static final long serialVersionUID = 991627988551330392L;
-		public final float x;
-		public final float y;
-		public final float direction;
-		public final byte id;
-		public final boolean global;
-		
-		public AnimationEvent(int id, double x, double y, double rotation) {
-			this.x = (float)x;
-			this.y = (float)y;
-			this.direction = (float)rotation;
-			this.id = (byte) id;
-			global = false;
-		}
-		
-		public AnimationEvent(int id, double x, double y, double rotation, boolean global) {
-			this.x = (float)x;
-			this.y = (float)y;
-			this.direction = (float)rotation;
-			this.id = (byte) id;
-			this.global = global;
-		} 
-	}
-	
 	public static class EnemyInfoEvent extends GameEvent {
 		private static final long serialVersionUID = 6938635895835139027L;
 		public final float x;

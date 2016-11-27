@@ -12,8 +12,8 @@ public abstract class ChargedAbility extends Ability {
 	private long timeElapsed;
 	private boolean charging;
 	
-	public ChargedAbility(PlayerCharacter c, long cooldown) {
-		super(c,cooldown);
+	public ChargedAbility(int id, PlayerCharacter c, long cooldown) {
+		super(id,c,cooldown);
 	}
 
 	@Override
@@ -37,11 +37,11 @@ public abstract class ChargedAbility extends Ability {
 	
 	public static class ThrowFragGrenade extends ChargedAbility {
 		static final double THROWFRAG_SPEED = 0.01;
-		static final long THROWFRAG_COOLDOWN = 1000;
+		static final long THROWFRAG_COOLDOWN = 15000;
 		static final long THROWFRAG_FUSE = 5000;
 		
 		public ThrowFragGrenade(PlayerCharacter c) {
-			super(c,THROWFRAG_COOLDOWN);
+			super(FRAG_ID,c,THROWFRAG_COOLDOWN);
 		}
 		
 		@Override
@@ -52,11 +52,11 @@ public abstract class ChargedAbility extends Ability {
 	
 	public static class ThrowFlashGrenade extends ChargedAbility {
 		static final double THROWFLASH_SPEED = 0.01;
-		static final long THROWFLASH_COOLDOWN = 1000;
+		static final long THROWFLASH_COOLDOWN = 10000;
 		static final long THROWFLASH_FUSE = 5000;
 		
 		public ThrowFlashGrenade(PlayerCharacter c) {
-			super(c,THROWFLASH_COOLDOWN);
+			super(FLASH_ID,c,THROWFLASH_COOLDOWN);
 		}
 		
 		@Override

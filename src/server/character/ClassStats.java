@@ -3,10 +3,11 @@ package server.character;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class ClassStats {
-	public static ArrayList<ClassStats> classStats = null;
+	public static HashMap<Integer,ClassStats> classStats = null;
 	
 	private double sizeF, speedF, maxHP, noiseF;
 	
@@ -45,7 +46,7 @@ public class ClassStats {
 	
 	public static void initClassStats() {
 		if (classStats==null){
-			classStats = new ArrayList<ClassStats>();
+			classStats = new HashMap<Integer,ClassStats>();
 			Scanner sc = null;
 			try {
 				sc = new Scanner(new File("resource/character/classStats"));
@@ -57,7 +58,7 @@ public class ClassStats {
 					cs.maxHP = sc.nextDouble();
 					cs.noiseF = sc.nextDouble();
 					
-					classStats.add(cs);
+					classStats.put(cs.classID,cs);
 				}
 				sc.close();
 			} catch (IOException e) {

@@ -112,7 +112,7 @@ public class Editor extends JFrame {
         getContentPane().setLayout(new BorderLayout());
         
         this.setJMenuBar(new MenuBar(this));
-        ToolMenu tools = new ToolMenu(this);
+        ToolBar tools = new ToolBar(this);
         this.getContentPane().add(tools,BorderLayout.WEST);
         cursorInfo = new JLabel();
 		this.getContentPane().add(cursorInfo,BorderLayout.SOUTH);

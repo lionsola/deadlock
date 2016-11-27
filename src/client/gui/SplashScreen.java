@@ -9,9 +9,6 @@ import java.io.FileInputStream;
 
 import javax.imageio.ImageIO;
 
-import client.sound.AudioManager;
-import client.sound.MusicPlayer;
-
 /**
  * Load the game, meanwhile show name / logo.
  * 

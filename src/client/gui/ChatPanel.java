@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
+import javax.swing.Box;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -23,9 +24,11 @@ public class ChatPanel extends JPanel {
 	private JTextArea textarea;
 	private JScrollPane scroller;
 	private JLabel label;
+	private final int MAX_ROWS;
 
-	public ChatPanel() {
+	public ChatPanel(int maxRows) {
 		this.setOpaque(false);
+		MAX_ROWS = maxRows;
 		setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
@@ -33,10 +36,14 @@ public class ChatPanel extends JPanel {
 		c.weightx = 1;
 		c.gridx = 0;
 		c.gridy = 0;
+		//add(Box.createGlue());
+		//c.weighty = 0;
+		//c.gridy += 1;
 		textarea = GUIFactory.getStyledTextArea();
 		textarea.setEditable(false);
 		textarea.setLineWrap(true);
 		textarea.setWrapStyleWord(true);
+		textarea.setAlignmentY(BOTTOM_ALIGNMENT);
 		((DefaultCaret) textarea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		// JScrollPane scroll = new JScrollPane(textarea);
 		// add(scroll);
@@ -66,6 +73,8 @@ public class ChatPanel extends JPanel {
 
 	public void addLine(String line) {
 		textarea.append(line + "\n");
+		textarea.setRows(Math.min(MAX_ROWS,textarea.getRows()+1));
+		invalidate();
 	}
 
 	public String getInput() {
@@ -102,7 +111,7 @@ public class ChatPanel extends JPanel {
 
 	public static void main(String args[]) {
 		JFrame frame = new JFrame();
-		ChatPanel chat = new ChatPanel();
+		ChatPanel chat = new ChatPanel(10);
 		frame.setContentPane(chat);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.pack();

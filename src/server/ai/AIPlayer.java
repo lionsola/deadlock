@@ -14,12 +14,12 @@ import server.world.Geometry;
 import server.world.Terrain;
 import server.world.Thing;
 import server.world.Utils;
-import shared.network.GameEvent;
 import shared.network.CharData;
 import shared.core.Vector2D;
 import shared.network.GameDataPackets.InputPacket;
 import shared.network.GameDataPackets.WorldStatePacket;
-import shared.network.GameEvent.SoundEvent;
+import shared.network.event.GameEvent;
+import shared.network.event.SoundEvent;
 
 /**
  * Used to model the behaviour of an AI player.
@@ -46,7 +46,6 @@ public class AIPlayer extends ServerPlayer {
 	private List<GameEvent> events = new LinkedList<GameEvent>();
 	private Path nextPath;
 	private List<Point2D> curPath;
-	private List<InterestPoint> ips;
 	private Point2D curIntr;
 	private Arena arena;
 	private AIState state = AIState.IDLING;
@@ -116,10 +115,12 @@ public class AIPlayer extends ServerPlayer {
 		allies = new LinkedList<CharData>();
 		// identify an enemy in sight
 		for (CharData c : wsp.characters) {
-			if (c.team != team && c.healthPoints>0) {
-				enemies.add(c);
-			} else if (c.team == team) {
-				allies.add(c);
+			if (c.healthPoints>0) {
+				if (c.team != team) {
+					enemies.add(c);
+				} else if (c.team == team) {
+					allies.add(c);
+				}
 			}
 		}
 		
@@ -244,7 +245,7 @@ public class AIPlayer extends ServerPlayer {
 		AIState state = AIState.EXPLORING;
 		// if there is an enemy
 		if (!enemies.isEmpty()) {
-			if (wsp.player.reloadPercent >= 1 && enemies.size()<=2) {
+			if (wsp.player.weaponCooldown >= 1 && enemies.size()<=2) {
 				// ATTACK
 				state = AIState.ATTACKING;
 			} else if (state != AIState.RETREATING) {

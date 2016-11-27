@@ -12,13 +12,11 @@ import server.world.Projectile;
 import server.world.Thing;
 import server.world.Utils;
 import server.world.World;
+import shared.network.event.SoundEvent;
 
 public abstract class TimedGrenade extends Projectile {
 	private static final double RESIST_CONSTANT = 0.000000013;
 	private long timeLeft;
-	public static final int GRENADE_EXPLODE_SOUND_ID = 32;
-	
-	
 	public TimedGrenade(PlayerCharacter source, double direction, double speed, long timeLeft) {
 		super(source, direction, speed,200);
 		this.timeLeft = timeLeft;
@@ -30,11 +28,11 @@ public abstract class TimedGrenade extends Projectile {
 		if (t.getCoverType()>=2) {
 			double bounceX = x - getDx()*GameWindow.MS_PER_UPDATE;
 			double bounceY = y - getDy()*GameWindow.MS_PER_UPDATE;
-			if (w.getArena().getTileAt(bounceX, y).isTraversable()) {
+			if (w.getArena().getTileAt(bounceX, y).coverType()<2) {
 				setDirection(Math.PI - getDirection());
 				setX(bounceX);
 				//System.out.println("Bounce X");
-			} else if (w.getArena().getTileAt(x, bounceY).isTraversable()) {
+			} else if (w.getArena().getTileAt(x, bounceY).coverType()<2) {
 				setDirection(- getDirection());
 				setY(bounceY);
 				//System.out.println("Bounce Y");
@@ -84,7 +82,7 @@ public abstract class TimedGrenade extends Projectile {
 			final double BASE_SPEED = 0.5;
 			final double DAMAGE = 40;
 			
-			w.addSound(GRENADE_EXPLODE_SOUND_ID,FRAG_EXPLODE_SOUND_VOLUME, getX(), getY());
+			w.addSound(SoundEvent.GRENADE_EXPLODE_SOUND_ID,FRAG_EXPLODE_SOUND_VOLUME, getX(), getY());
 			
 			for (int i=0;i<FRAGS*0.9;i++) {
 				double direction = getDirection() + Math.PI*2*i/(FRAGS*0.8);
@@ -109,7 +107,7 @@ public abstract class TimedGrenade extends Projectile {
 
 		@Override
 		protected void explode(World w) {
-			w.addSound(GRENADE_EXPLODE_SOUND_ID, FLASH_EXPLODE_SOUND_VOLUME, getX(), getY());
+			w.addSound(SoundEvent.GRENADE_EXPLODE_SOUND_ID, FLASH_EXPLODE_SOUND_VOLUME, getX(), getY());
 			LineOfSight los = new LineOfSight();
 			Area a = los.genLOSAreaMeter(getX(), getY(), RANGE, Math.PI*2, 0, w.getArena());
 			for (PlayerCharacter c:w.getCharacters()) {

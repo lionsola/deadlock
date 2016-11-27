@@ -19,11 +19,12 @@ import server.world.Utils;
 import server.world.World;
 import shared.network.FullCharacterData;
 import shared.network.GameDataPackets.InputPacket;
-import shared.network.GameEvent.*;
+import shared.network.event.AnimationEvent;
+import shared.network.event.GameEvent.*;
+import shared.network.event.SoundEvent;
 
 import java.awt.geom.Point2D;
 
-import client.graphics.AnimationSystem;
 import client.gui.GameWindow;
 
 /**
@@ -40,9 +41,6 @@ public class PlayerCharacter extends Character {
 	public static final double MAX_DISPERSION_ANGLE = 0.1;
 	public static final double DISPERSION_DEC = 0.006;
 	
-	public static final int PING_SOUND_ID = 34;
-	public static final double PING_SOUND_VOLUME = 30;
-
 	private double instaF = 1;
 	
 	private int typeID; // the type of the server.character, e.g. Sniper
@@ -255,9 +253,14 @@ public class PlayerCharacter extends Character {
 		fc.healthPoints = (float) getHealthPoints();
 		fc.radius = (float) getRadius();
 		if (primary.isReady())
-			fc.reloadPercent = 1;
+			fc.weaponCooldown = 1;
 		else {
-			fc.reloadPercent = (float)primary.getCooldownPercent();
+			fc.weaponCooldown = (float)primary.getCooldownPercent();
+		}
+		if (ability.isReady())
+			fc.abilityCooldown = 1;
+		else {
+			fc.abilityCooldown = (float)ability.getCooldownPercent();
 		}
 		fc.direction = (float) getDirection();
 		fc.viewAngle = (float) getFovAngle();
@@ -353,31 +356,31 @@ public class PlayerCharacter extends Character {
 			case Spy.typeID:
 				return new Spy(id, team);
 				*/
-			case 0:
+			case 3:
 				PlayerCharacter shield =  new PlayerCharacter(id, team, ClassStats.classStats.get(type));
 				shield.setWeapon(WeaponFactory.createGun(3, shield));
 				shield.setAbilty(new ChargedAbility.ThrowFlashGrenade(shield));
 				shield.setPassive(new Shield(shield));
 				return shield;
-			case 1:
+			case 2:
 				PlayerCharacter scout =  new PlayerCharacter(id, team, ClassStats.classStats.get(type));
 				scout.setWeapon(WeaponFactory.createGun(2,scout));
 				scout.setAbilty(new Optics.Binocular(scout));
 				scout.setPassive(new Mark(scout));
 				return scout;
-			case 2:
+			case 1:
 				PlayerCharacter sniper =  new PlayerCharacter(id, team, ClassStats.classStats.get(type));
 				sniper.setWeapon(WeaponFactory.createGun(1,sniper));
 				sniper.setAbilty(new Optics.Scope(sniper));
 				sniper.setPassive(new Overwatch(sniper));
 				return sniper;
-			case 3:
+			case 4:
 				PlayerCharacter agent =  new PlayerCharacter(id, team, ClassStats.classStats.get(type));
 				agent.setWeapon(WeaponFactory.createGun(4,agent));
 				agent.setAbilty(new HearingAmplifier(agent));
 				agent.setPassive(new Backstab(agent));
 				return agent;
-			case 4:
+			case 0:
 				PlayerCharacter gren =  new PlayerCharacter(id, team, ClassStats.classStats.get(type));
 				gren.setWeapon(WeaponFactory.createGun(0,gren));
 				gren.setAbilty(new ChargedAbility.ThrowFragGrenade(gren));
@@ -401,8 +404,8 @@ public class PlayerCharacter extends Character {
 		if (input.alt && input.fire2 && pingTimer>=PING_COOLDOWN) {
 			// send ping
 			for (PlayerCharacter p:w.getCharacters()) {
-				p.getPerception().events.add(new SoundEvent(PING_SOUND_ID,PING_SOUND_VOLUME,input.cx,input.cy));
-				p.getPerception().events.add(new AnimationEvent(AnimationSystem.PING_ANIMATION_ID,input.cx,input.cy,0,true));
+				p.getPerception().events.add(new SoundEvent(SoundEvent.PING_SOUND_ID,SoundEvent.PING_SOUND_VOLUME,input.cx,input.cy));
+				p.getPerception().events.add(new AnimationEvent(AnimationEvent.PING_ANIMATION_ID,input.cx,input.cy,0,true));
 			}
 			pingTimer = 0;
 		} else if (pingTimer<PING_COOLDOWN) {

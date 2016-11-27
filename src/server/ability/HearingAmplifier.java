@@ -17,7 +17,7 @@ public class HearingAmplifier extends ToggleAbility {
 	private final double speedInc;
 	
 	public HearingAmplifier(PlayerCharacter self) {
-		super(self,COOLDOWN);
+		super(AMP_ID,self,COOLDOWN);
 		rangeInc = (HEAR_RANGE)*GameWindow.MS_PER_UPDATE/HEAR_TRANS;
 		hearInc = (HEAR_HEAR)*GameWindow.MS_PER_UPDATE/HEAR_TRANS;
 		speedInc = self.cs.getSpeedF()*(HEAR_SPEED)*GameWindow.MS_PER_UPDATE/HEAR_TRANS;
