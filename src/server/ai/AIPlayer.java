@@ -393,7 +393,7 @@ public class AIPlayer extends ServerPlayer {
 	private void setNewIntr(Point2D self, Point2D point2d) {
 		curIntr = point2d;
 		nextPath = pathFinder.findPath(self, point2d);
-		System.out.println("Set new interest at " + point2d);
+		//System.out.println("Set new interest at " + point2d);
 		// world.getEventListener().onEventReceived(new GunShotEvent(newIntr.x,newIntr.y,0,0));
 	}
 

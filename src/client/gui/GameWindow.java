@@ -26,7 +26,7 @@ public class GameWindow extends JFrame {
 
 	public GameWindow() {
 		GraphicsDevice screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
-		setIgnoreRepaint(true);
+		//setIgnoreRepaint(true);
 		Sprite.initImage();
 		client.data.Class.init();
 		// Should change to load from save file

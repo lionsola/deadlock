@@ -48,17 +48,19 @@ public abstract class Trigger implements Serializable {
 		@Override
 		public void onCharacterTouch(Character c, World w) {
 			// register the character
-			characters.add(c);
-			
-			// if this is the first person to enter the door
-			if (characters.size()==1) {
-				// switch the object
-				w.getArena().get(tx, ty).setThing(tp.getSwitchThing());
+			if (!characters.contains(c)) {
+				characters.add(c);
 				
-				// tell the clients to switch it too
-				w.addEvent(new GameEvent.TileChanged(tx,ty,tp.getSwitchThingID()));
-				
-				w.addSound(tp.getSoundID(), tp.getSoundVolume(), (tx+0.5)*Terrain.tileSize, (ty+0.5)*Terrain.tileSize);
+				// if this is the first person to enter the door
+				if (characters.size()==1) {
+					// switch the object
+					w.getArena().get(tx, ty).setThing(tp.getSwitchThing());
+					
+					// tell the clients to switch it too
+					w.addEvent(new GameEvent.TileChanged(tx,ty,tp.getSwitchThingID()));
+					
+					w.addSound(tp.getSoundID(), tp.getSoundVolume(), (tx+0.5)*Terrain.tileSize, (ty+0.5)*Terrain.tileSize);
+				}
 			}
 		}
 		

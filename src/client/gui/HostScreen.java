@@ -170,11 +170,14 @@ public class HostScreen extends AbstractScreen implements ActionListener {
 					// create new network
 					port.setBorder(new LineBorder(Color.WHITE));
 					int portnumber = Integer.parseInt(port.getText());
+					
 					LobbyServer lobbyServer = new LobbyServer(portnumber, MAP_LIST[currentMap]);
+					
 
 					Socket socket = new Socket("localhost", portnumber);
 					Connection connection = new Connection(socket);
 					connection.send(name.getText());
+					
 					LobbyInformationPacket lip = (LobbyInformationPacket) connection.receive();
 					game.setScreen(new LobbyScreen(lobbyServer, connection, lip, game));
 				} catch (IOException e1) {

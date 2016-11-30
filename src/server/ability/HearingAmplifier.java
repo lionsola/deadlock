@@ -7,7 +7,7 @@ import server.world.World;
 public class HearingAmplifier extends ToggleAbility {
 	public static final double HEAR_RANGE = -0.8;
 	public static final double HEAR_SPEED = -0.2;
-	public static final double HEAR_HEAR = 0.3;
+	public static final double HEAR_HEAR = 0.5;
 	public static final double HEAR_TRANS = 1000;
 	public static final long COOLDOWN = 4000;
 	

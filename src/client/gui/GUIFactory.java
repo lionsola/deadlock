@@ -23,7 +23,11 @@ public class GUIFactory {
 
 	public static final Font font_m = new Font(Font.MONOSPACED, Font.PLAIN, 22);
 	public static final Font font_s = new Font(Font.MONOSPACED, Font.PLAIN, 16);
+	public static final Font font_s_bold = new Font(Font.MONOSPACED, Font.BOLD, 16);
 	public static final Font font_class = new Font(Font.MONOSPACED, Font.BOLD, 20);
+	
+	public static final Color UICOLOR = new Color(50,100,255);
+	public static final Color TRANSBLACK = new Color(0,0,0,127);
 
 	public static JButton getStyledButton(String text) {
 		// TODO add default button image and styling
@@ -65,7 +69,7 @@ public class GUIFactory {
 	 */
 	public static JSeparator getStyledSeparator() {
 		JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
-		sep.setBackground(Color.BLACK);
+		sep.setBackground(new Color(0,0,0,0));
 		sep.setForeground(Color.GRAY);
 		return sep;
 	}
@@ -138,7 +142,10 @@ public class GUIFactory {
 		label.setBackground(Color.BLACK);
 		label.setForeground(Color.WHITE);
 		// made the text in the center
-		label.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+		label.setHorizontalAlignment(SwingConstants.CENTER);
+		label.setVerticalAlignment(SwingConstants.CENTER);
+		label.setAlignmentX(Component.CENTER_ALIGNMENT);
+		label.setAlignmentY(Component.CENTER_ALIGNMENT);
 		label.setFont(font_m);
 		label.setIgnoreRepaint(true);
 		label.setFocusable(false);

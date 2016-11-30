@@ -20,5 +20,6 @@ public class ClientPlayer implements Serializable {
 	public int passiveId;
 	public int kills;
 	public int deaths;
+	public int headshots;
 	public CharData character;
 }

@@ -1,6 +1,5 @@
 package client.graphics;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.IOException;

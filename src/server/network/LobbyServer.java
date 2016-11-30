@@ -8,7 +8,6 @@ import java.util.List;
 
 import client.gui.ClientPlayer;
 import server.ai.AIPlayer;
-import server.ai.DummyPlayer;
 import shared.network.Connection;
 import shared.network.LobbyRequest;
 import shared.network.LobbyRequest.ChangeCharacterRequest;
@@ -62,7 +61,7 @@ public class LobbyServer implements Runnable {
 		serverSocket.close();
 		
 		sendRequest(new StartGameRequest());
-		new TeamBattle(players, arena);
+		new MatchServer(players, arena);
 	}
 
 	/**

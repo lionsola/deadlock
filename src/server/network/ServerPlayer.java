@@ -22,6 +22,7 @@ public class ServerPlayer {
     public int type = 0;
     public int kills = 0;
     public int deaths = 0;
+    public int headshots = 0;
     public Connection connection;
     public PlayerCharacter character;
 	public MatchServer.InputReceiver inputReceiver;

@@ -48,7 +48,6 @@ import shared.network.LobbyRequest.SwitchTeamRequest;
 import shared.network.LobbyRequest.ToggleReadyRequest;
 import client.data.Class;
 import client.sound.AudioManager;
-import client.sound.MusicPlayer;
 
 /**
  * GUI view to show the lobby screen where the player waits before launching the game.
@@ -418,7 +417,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 	private Runnable requestListener = new Runnable() {
 		@Override
 		public void run() {
-			while (true) {
+			while (!connection.getSocket().isClosed()) {
 				try {
 					//System.out.println("Message stream available: " + ois.available());
 					Object message = connection.receive();

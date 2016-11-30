@@ -44,43 +44,45 @@ public abstract class Weapon extends Ability {
 
 	public void update(World w, PlayerCharacter c) {
 		super.update(w);
-		if (c.getInput().fire1 && !c.getInput().alt && isReady()) {
-			//double direction = c.disperseDirection();
-			
-			double direction = c.getDirection();
-			
-			fire(w,c,direction);
-			final double RECOIL_DISTANCE = 0.3;
-			Point2D p = Geometry.PolarToCartesian(RECOIL_DISTANCE*type.instability,
-					Math.PI+direction);
-			
-			c.setPosition(w,c.getX()+p.getX(),c.getY()-p.getY());
-			
-			ammoLeft -= 1;
-			w.addAnimation(AnimationEvent.GUNSHOT, c.getX(), c.getY(), direction);
-			w.addSound(type.soundId, type.noise, c.getX(), c.getY());
-			
-			c.addDispersion(getInstability());
-			
-			double maxRecoil = PlayerCharacter.MAX_DISPERSION_ANGLE*getInstability();
-			double recoil = maxRecoil*Math.min(1,Math.abs(Utils.random().nextGaussian())); 
-			recoil = Math.copySign(recoil,(c.getDirection()-c.getTargetDirection())*(Utils.random().nextDouble()<0.8?1:-1));
-			c.setDirection(c.getDirection()+recoil);
-			
-			startCooldown();
-			if (ammoLeft<=0) {
+		if (!self().isDead()) {
+			if (c.getInput().fire1 && !c.getInput().alt && isReady()) {
+				//double direction = c.disperseDirection();
+				
+				double direction = c.getDirection();
+				
+				fire(w,c,direction);
+				final double RECOIL_DISTANCE = 0.3;
+				Point2D p = Geometry.PolarToCartesian(RECOIL_DISTANCE*type.instability,
+						Math.PI+direction);
+				
+				c.setPosition(w,c.getX()+p.getX(),c.getY()-p.getY());
+				
+				ammoLeft -= 1;
+				w.addAnimation(AnimationEvent.GUNSHOT, c.getX(), c.getY(), direction);
+				w.addSound(type.soundId, type.noise, c.getX(), c.getY());
+				
+				c.addDispersion(getInstability());
+				
+				double maxRecoil = PlayerCharacter.MAX_DISPERSION_ANGLE*getInstability();
+				double recoil = maxRecoil*Math.min(1,Math.abs(Utils.random().nextGaussian())); 
+				recoil = Math.copySign(recoil,(c.getDirection()-c.getTargetDirection())*(Utils.random().nextDouble()<0.8?1:-1));
+				c.setDirection(c.getDirection()+recoil);
+				
+				startCooldown();
+				if (ammoLeft<=0) {
+					reloadTimer = 0;
+				}
+			} else if (c.getInput().fire1 && c.getInput().alt) {
+				ammoLeft = 0;
 				reloadTimer = 0;
 			}
-		} else if (c.getInput().fire1 && c.getInput().alt) {
-			ammoLeft = 0;
-			reloadTimer = 0;
-		}
-		if (ammoLeft==0) {
-			if (reloadTimer>type.reloadTime) {
-				ammoLeft = type.magSize;
-			}
-			else {
-				reloadTimer += GameWindow.MS_PER_UPDATE;
+			if (ammoLeft==0) {
+				if (reloadTimer>type.reloadTime) {
+					ammoLeft = type.magSize;
+				}
+				else {
+					reloadTimer += GameWindow.MS_PER_UPDATE;
+				}
 			}
 		}
 	}

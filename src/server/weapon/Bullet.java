@@ -9,6 +9,7 @@ import server.world.Projectile;
 import server.world.Thing;
 import server.world.World;
 import shared.network.event.AnimationEvent;
+import shared.network.event.GameEvent;
 import shared.network.event.SoundEvent;
 
 public class Bullet extends Projectile {
@@ -36,14 +37,15 @@ public class Bullet extends Projectile {
 	public void onHitCharacter(World w, PlayerCharacter ch, double x, double y) {
 		//w.getEventListener().onEventReceived(new BulletHitPlayerEvent( x, y));
 		double damageRatio;
-		double HEADSHOT_DISTANCE = ch.getRadius()/10;
+		double HEADSHOT_DISTANCE = ch.getRadius()/12;
 		Point2D h = ch.getHead();
 		double bulletDist = Line2D.ptLineDist(getX()-getDx(), getY()-getDy(), x, y, h.getX(), h.getY());
 		if (bulletDist<=HEADSHOT_DISTANCE) {
 			damageRatio = 99999;
+			w.addEvent(new GameEvent.HeadshotEvent(id,ch.id));
 		}
 		else {
-			damageRatio = (1.25-0.5*bulletDist/ch.getRadius());
+			damageRatio = (1.25-0.75*bulletDist/ch.getRadius());
 		}
 		
 		System.out.println("Damage ratio: "+damageRatio);

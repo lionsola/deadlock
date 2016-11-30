@@ -48,6 +48,7 @@ public class Renderer {
 	public static final int CURSOR_SIZE = 5;
 	public static final double CHARACTER_WIDTH = 0.1;
 	public static final double HEALTHBAR_WIDTH = 0.25;
+	
 	public static final Color DEFAULT_COLOR = new Color(0xb6b6b6);
 	public static final Color BACKGROUND_COLOR = new Color(0x090909);
 	public static final Color[] teamColors = {new Color(0x2eb62e),new Color(0xb62e2e)};
@@ -647,8 +648,7 @@ public class Renderer {
 		double ts = Terrain.tileSize;
 		
 		g2D.setColor(BACKGROUND_COLOR);
-		fillRect(g2D,tx*ts,ty*ts, ts, ts);
-		
+		fillRect(g2D,tx*ts,ty*ts,ts,ts);
 		drawTerrain(g2D,a,tx,ty);
 		
 		for (int x=Math.max(tx-1,0);x<=Math.min(tx+1, a.getWidth());x++) {

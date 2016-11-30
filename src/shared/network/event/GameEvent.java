@@ -17,12 +17,23 @@ public abstract class GameEvent implements Serializable {
 
 	public static class PlayerDieEvent extends GameEvent {
 		private static final long serialVersionUID = 7455242055782855036L;
-		public final int killerID;
-		public final int killedID;
+		public final int killerId;
+		public final int killedId;
 
-		public PlayerDieEvent(int killerID, int killedID) {
-			this.killerID = killerID;
-			this.killedID = killedID;
+		public PlayerDieEvent(int killerId, int killedId) {
+			this.killerId = killerId;
+			this.killedId = killedId;
+		}
+	}
+	
+	public static class HeadshotEvent extends GameEvent {
+		private static final long serialVersionUID = 8019912159558651525L;
+		public final int victim;
+		public final int attacker;
+		
+		public HeadshotEvent(int attackerId, int victim) {
+			this.attacker = attackerId;
+			this.victim = victim;
 		}
 	}
 	
@@ -64,5 +75,23 @@ public abstract class GameEvent implements Serializable {
 	
 	public static class GameEndEvent extends GameEvent {
 		private static final long serialVersionUID = 4030097780765059510L;
+		public final byte winner;
+		
+		public GameEndEvent(int winner) {
+			this.winner = (byte) winner;
+		}
+	}
+	
+	public static class RoundEnd extends GameEvent {
+		private static final long serialVersionUID = 4887212456315473164L;
+		public final byte winner;
+		
+		public RoundEnd(int winner) {
+			this.winner = (byte) winner;
+		}
+	}
+	
+	public static class RoundStart extends GameEvent {
+		private static final long serialVersionUID = 8082493004855338971L;
 	}
 }

@@ -3,8 +3,6 @@ package client.gui;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.io.IOException;
-
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -46,9 +44,9 @@ public class AbilityBar extends JPanel {
 		
 		public AbilityIcon(Image image) {
 			super(new ImageIcon(image));
-			setBackground(new Color(0,0,0,0x3f));
-			setOpaque(false);
-			setBorder(BorderFactory.createLineBorder(new Color(50,100,255)));
+			setBackground(GUIFactory.TRANSBLACK);
+			setOpaque(true);
+			setBorder(BorderFactory.createLineBorder(GUIFactory.UICOLOR));
 		}
 		
 		void update(float fill) {

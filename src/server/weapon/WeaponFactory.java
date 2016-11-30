@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 import server.ability.ChangeForm;
-import server.character.BatAI;
-import server.character.ClassStats;
 import server.character.PlayerCharacter;
 import server.world.World;
 

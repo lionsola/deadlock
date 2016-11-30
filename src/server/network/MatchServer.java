@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Timer;
 
 import client.gui.GameWindow;
 import editor.DataManager;
@@ -22,21 +23,29 @@ import server.world.World;
 import shared.network.GameDataPackets.InputPacket;
 import shared.network.GameDataPackets.WorldStatePacket;
 import shared.network.event.GameEvent;
-import shared.network.event.GameEvent.GameEndEvent;
-import shared.network.event.GameEvent.GameEventListener;
+import shared.network.event.GameEvent.*;
 
 /**
  * Is the game server.
  */
-public abstract class MatchServer implements Runnable, GameEventListener {
+public class MatchServer implements Runnable, GameEventListener {
+	private static final int UNDECIDED = -1;
+	private static final int DRAW = -2;
+	enum State {PAUSING, PLAYING, DELAYING}
+	private State state = State.DELAYING;
+	
 	protected World world;
-	protected boolean playing = false;
 	private List<ServerPlayer> players;
 	private List<GameEvent> events = new LinkedList<GameEvent>();
 	private List<String> chatTexts = new LinkedList<String>();
 	
+	private int[] score = new int[2];
+	private int maxScore = 3;
+	
 	private long timeThreshold = 600000;
 	private long gameTimeCounter;
+	private Timer timer;
+	private int waitTimeCounter;
 
 	/**
 	 * Creates a new game server, which the host use to run the game
@@ -102,26 +111,60 @@ public abstract class MatchServer implements Runnable, GameEventListener {
 		}
 	}
 	
-	protected abstract void update(World world);
+	protected int getRoundWinner() {
+		int winner = UNDECIDED;
+		int[] remainingPlayers = new int[2];
+		for (ServerPlayer p:getPlayers()) {
+			if (!p.character.isDead()) {
+				remainingPlayers[p.team] ++;
+			}
+		}
+		if (remainingPlayers[0]==0 || remainingPlayers[1]==0) {
+			if (remainingPlayers[0]==0 && remainingPlayers[1]>0) {
+				winner = 1;
+			} else if (remainingPlayers[0]>0 && remainingPlayers[1]==0) {
+				winner = 0;
+			} else {
+				winner = DRAW;
+			}
+		}
+		return winner;
+	}
 	
-	protected abstract boolean checkEndGame();
+	protected void update(World world) {
+		
+	}
 	
-	protected abstract int getWinningTeam();
+	protected boolean checkEndGame() {
+		//return score[0]>=maxScore || score[1]>=maxScore;
+		return score[0]>=maxScore || score[1]>=maxScore;
+	}
+	
+	
+	protected int getWinningTeam() {
+		if (score[0]>score[1]) {
+			return 0;
+		} else if (score[1]>score[0]) {
+			return 1;
+		} else {
+			return -1;
+		}
+	}
 	
 	@Override
 	public void run() {
 		// PRE- COUNTDOWN to get everyone prepared
 		// TODO check if everyone is connected to the game already
 		final int PRE_COUNTDOWN = 3000;
-		gameTimeCounter = -PRE_COUNTDOWN;
-		while (!playing) {
+		waitTimeCounter = PRE_COUNTDOWN;
+		while (state==State.DELAYING) {
 			sendState();
-			gameTimeCounter += 30;
-			if (gameTimeCounter >= 0) {
-				playing = true;
+			waitTimeCounter -= GameWindow.MS_PER_UPDATE;
+			if (waitTimeCounter <= 0) {
+				state = State.PLAYING;
 			} else {
 				try {
-					Thread.sleep(30);
+					Thread.sleep(GameWindow.MS_PER_UPDATE);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -130,22 +173,50 @@ public abstract class MatchServer implements Runnable, GameEventListener {
 		
 		// START THE MATCH		
 		gameTimeCounter = 0;
-		while (gameTimeCounter < timeThreshold && !checkEndGame()) {
+		while (gameTimeCounter < timeThreshold) {
 			long wait = 0;
-			if (!playing) {
-				wait = GameWindow.MS_PER_UPDATE;
-			} else {
-				long last = System.currentTimeMillis();
-				gameTimeCounter += GameWindow.MS_PER_UPDATE;
+			long last = System.currentTimeMillis();
+			if (state!=State.PAUSING) {
 				// simulate the world
 				world.update();
-				update(world);
-		
+				
 				// send world state out
 				sendState();
-		
-				wait = GameWindow.MS_PER_UPDATE - (System.currentTimeMillis() - last);
+				
+				if (state==State.PLAYING) {
+					gameTimeCounter += GameWindow.MS_PER_UPDATE;
+					int winner = getRoundWinner();
+					if (winner!=UNDECIDED){
+
+						if (winner!=DRAW) {
+							score[winner] += 1;
+							addEvent(new ScoreChangedEvent(score[0],score[1]));
+							addEvent(new GameEvent.RoundEnd(winner));
+						}
+						
+						waitTimeCounter = 5000;
+						// delay before going to next round
+						state = State.DELAYING;
+					}
+				} else if (state==State.DELAYING) {
+					waitTimeCounter -= GameWindow.MS_PER_UPDATE;
+					if (waitTimeCounter <= 0) {
+						if (!checkEndGame()) {
+							initializeWorld(world.getArena().getName());
+							setUp(this.world,getPlayers());
+							addEvent(new GameEvent.RoundStart());
+							state = State.PLAYING;
+						} else {
+							break;
+						}
+					}
+				}
 			}
+			
+			
+			
+			wait = GameWindow.MS_PER_UPDATE - (System.currentTimeMillis() - last);
+			
 			if (wait>0) {
 				try {
 					Thread.sleep(wait);
@@ -165,9 +236,9 @@ public abstract class MatchServer implements Runnable, GameEventListener {
 			}
 		}
 		
-		events.add(new GameEndEvent());
+		events.add(new GameEndEvent(getWinningTeam()));
 		sendState();
-		events.add(new GameEndEvent());
+		events.add(new GameEndEvent(getWinningTeam()));
 		sendState();
 		try {
 			Thread.sleep(1000);
@@ -252,5 +323,27 @@ public abstract class MatchServer implements Runnable, GameEventListener {
 					}
 			}
 		}
+	}
+	
+	
+	
+	public void onEventReceived(GameEvent event) {
+		if (event instanceof PlayerDieEvent) {
+			PlayerDieEvent e = (PlayerDieEvent) event;
+			ServerPlayer killer = findPlayer(e.killerId);
+			ServerPlayer victim = findPlayer(e.killedId);
+
+			victim.deaths++;
+			if (killer.team != victim.team) {
+				killer.kills++;
+			} else {
+				killer.kills--;
+			}
+		} else if (event instanceof HeadshotEvent) {
+			HeadshotEvent e = (HeadshotEvent) event;
+			ServerPlayer attacker = findPlayer(e.attacker);
+			attacker.headshots++;
+		}
+		addEvent(event);
 	}
 }

@@ -19,12 +19,12 @@ public abstract class ChargedAbility extends Ability {
 	@Override
 	public void update(World w) {
 		super.update(w);
-		if (!charging && isReady() && self().getInput().fire2 && !self().getInput().alt) {
+		if (!self().isDead() && !charging && isReady() && self().getInput().fire2 && !self().getInput().alt) {
 			charging = true;
 			timeElapsed = 0;
-		} else if (charging && (!self().getInput().fire2 || self().getInput().alt)) {
+		} else if (charging && (self().isDead() || (!self().getInput().fire2 || self().getInput().alt))) {
 			charging = false;
-			this.startCooldown();
+			startCooldown();
 			activate(w,timeElapsed);
 		}
 		

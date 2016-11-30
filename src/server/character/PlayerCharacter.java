@@ -61,28 +61,8 @@ public class PlayerCharacter extends Character {
 	 * 
 	 * @param id
 	 *            the id of the server.character
-	 * @param typeID
-	 *            the type id, i.e. server.character type of the server.character
 	 * @param team
 	 *            the team the server.character is on
-	 * @param healthPoints
-	 *            the characters health points
-	 * @param stamina
-	 *            the characters stamina value
-	 * @param pSpeed
-	 *            the characters movement speed value
-	 * @param volume
-	 *            the characters volume value
-	 * @param viewRange
-	 *            the characters view range, i.e. line of sight length
-	 * @param viewAngle
-	 *            the characters view angle, i.e. line of sight width
-	 * @param radius
-	 *            the characters radius
-	 * @param primary
-	 *            the characters primary server.weapon
-	 * @param secondary
-	 *            the server.character secondary server.weapon
 	 */
 	protected PlayerCharacter(int id, int team, ClassStats cs, Weapon weapon, Ability ability, Passive passive) {
 		super(cs,id,team);
@@ -110,8 +90,6 @@ public class PlayerCharacter extends Character {
 				input.down = false;
 				input.left = false;
 				input.right = false;
-				input.fire1 = false;
-				input.fire2 = false;
 			}
 			
 			// translate directional input into movement vector
@@ -123,20 +101,22 @@ public class PlayerCharacter extends Character {
 			
 			// send ping
 			sendPing(world);
+			if (!isDead()) { 
+				if (passive!=null)
+					passive.update(world);
+				
+				if (ability!=null)
+					ability.update(world);
+				
+				if (primary!=null)
+					primary.update(world, this);
+				
+				super.updateStatusEffects();
+				
+				super.updatePosition(world);
+				super.updateNoise(world);
+			}
 			
-			if (passive!=null)
-				passive.update(world);
-			
-			if (ability!=null)
-				ability.update(world);
-			
-			if (primary!=null)
-				primary.update(world, this);
-			
-			super.updateStatusEffects();
-			
-			super.updatePosition(world);
-			super.updateNoise(world);
 			updateCrosshair();
 		}
 	}
@@ -268,7 +248,7 @@ public class PlayerCharacter extends Character {
 		fc.x = (float) getX();
 		fc.y = (float) getY();
 		fc.crosshairSize = (float) getCrosshairSize();
-		fc.hearRange = (float) (50.0/(World.DISTANCE_VOLUME_DROP_RATE*(1-getHearF())));
+		fc.hearRange = (float) (SoundEvent.FOOTSTEP_SOUND_VOLUME/(World.DISTANCE_VOLUME_DROP_RATE*(1-getHearF())));
 		if (getArmor()!=null) {
 			fc.armorAngle = (float) getArmor().getAngle();
 			fc.armorStart = (float) getArmor().getStart();

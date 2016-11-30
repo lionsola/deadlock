@@ -23,7 +23,7 @@ public class Mark extends Passive {
 	protected void onUpdate(World w) {
 		if (lastBroadcast<=0) {
 			for (CharData c:self().getPerception().characters) {
-				if (c.team!=self().team) {
+				if (c.team!=self().team && c.healthPoints>0) {
 					for (PlayerCharacter pc:w.getCharacters()) {
 						if (pc.team==self().team) {
 							pc.getPerception().events.add(new EnemyInfoEvent(c.x, c.y, c.id));

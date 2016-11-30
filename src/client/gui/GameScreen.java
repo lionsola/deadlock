@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -26,13 +27,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
@@ -90,6 +91,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private TeamListModel team2Model;
 	private JPanel scoreboard;
 	private JLabel teamScore;
+	private JLabel winnerText;
 	private ChatPanel chatPanel;
 	private AbilityBar abilityBar;
 	private JComponent minimap;
@@ -284,13 +286,22 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private void initUI() {
 		//this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		teamScore = GUIFactory.getStyledLabel("0 - 0");
-		teamScore.setHorizontalAlignment(SwingConstants.CENTER);
-		teamScore.setAlignmentX(Component.CENTER_ALIGNMENT);
-		this.add(teamScore);
-		teamScore.setLocation(10,10);
-		Utils.alignCenterHorizontally(teamScore, this);
+		teamScore.setForeground(GUIFactory.UICOLOR);
 		
 		scoreboard = new JPanel();
+		scoreboard.setLayout(new BoxLayout(scoreboard, BoxLayout.Y_AXIS));
+		scoreboard.add(teamScore);
+		String labels = String.format("%8s %4s %4s %4s  ","Name","K","D","HS");
+		JLabel cols = GUIFactory.getStyledLabel(labels+" "+labels);
+		cols.setFont(GUIFactory.font_s_bold);
+		cols.setForeground(GUIFactory.UICOLOR);
+		scoreboard.add(cols);
+		JSeparator line2 = GUIFactory.getStyledSeparator();
+		line2.setForeground(GUIFactory.UICOLOR);
+		scoreboard.add(line2);
+		
+		
+		JPanel teamPanel = GUIFactory.getTransparentPanel();
 		team1Model = new TeamListModel(team1);
 		team2Model = new TeamListModel(team2);
 
@@ -301,17 +312,36 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		team1List.setOpaque(false);
 		team2List.setOpaque(false);
 
-		scoreboard.add(team1List);
-		scoreboard.add(team2List);
+		teamPanel.add(team1List);
+		JSeparator line = GUIFactory.getStyledSeparator();
+		line.setOrientation(JSeparator.VERTICAL);
+		line.setForeground(GUIFactory.UICOLOR);
+		teamPanel.add(line);
+		line.setPreferredSize(new Dimension(5, scoreboard.getPreferredSize().height));
+		teamPanel.add(team2List);
+		
+		scoreboard.add(teamPanel);
 		scoreboard.setSize(scoreboard.getPreferredSize());
-		scoreboard.setBackground(new Color(0,0,0,100));
+		scoreboard.setBackground(GUIFactory.TRANSBLACK);
 		scoreboard.setOpaque(true);
-		this.add(scoreboard,new Integer(1));
+		
+		add(scoreboard,new Integer(1));
 		Utils.setLocationCenterOf(scoreboard, this);
 		scoreboard.setVisible(false);
 
+		winnerText = GUIFactory.getStyledLabel(" ");
+		winnerText.setVisible(false);
+		winnerText.setFont(GUIFactory.font_m);
+		winnerText.setOpaque(true);
+		winnerText.setBackground(GUIFactory.TRANSBLACK);
+		winnerText.setForeground(GUIFactory.UICOLOR);
+		winnerText.setSize(200, 50);
+		winnerText.setLocation(0, scoreboard.getY()-winnerText.getHeight()-20);
+		Utils.alignCenterHorizontally(winnerText, this);
+		add(winnerText);
+		
 		minimap = new Minimap(arena, id, players);
-		this.add(minimap);
+		add(minimap);
 		minimap.setLocation(20, getHeight()-20-minimap.getHeight());
 		
 		chatPanel = new ChatPanel(10);
@@ -443,13 +473,12 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			Renderer.drawArenaImage(g2D, renderer.getDarkArenaImage(),camera.getDrawArea());
 			
 			// render the hearing region
-			/*
 			Shape clip = new Ellipse2D.Double(Renderer.toPixel(c.x - c.hearRange),Renderer.toPixel(c.y - c.hearRange),
 					Renderer.toPixel(c.hearRange*2),Renderer.toPixel(c.hearRange*2));
 			g2D.setClip(clip);
 			Rectangle2D hearBox = getCharacterVisionBox(c.x,c.y,c.hearRange);
 			Renderer.drawArenaImage(g2D, renderer.getArenaImage(),hearBox);
-			*/
+			
 			
 			g2D.setClip(null);
 			nonvisualAnimations.render(g2D);
@@ -457,6 +486,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			// create the vision region
 			Area los = new Area();
 			
+			/*
 			Vision v = new Vision();
 			v.x = c.x;
 			v.y = c.y;
@@ -469,15 +499,15 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			double r = v.radius*1.5;
 			los.add(new Area(new Ellipse2D.Double(Renderer.toPixel(v.x - r),Renderer.toPixel(v.y - r),
 					Renderer.toPixel(r*2),Renderer.toPixel(r*2))));
+			*/
 			
-			/*
 			for (Vision v:currentState.visions) {
 				los.add(visibility.generateLoS(v, arena));
 				double r = v.radius*1.5;
 				los.add(new Area(new Ellipse2D.Double(Renderer.toPixel(v.x - r),Renderer.toPixel(v.y - r),
 						Renderer.toPixel(r*2),Renderer.toPixel(r*2))));
 			}
-			*/
+			
 			
 			g2D.setClip(los);
 			//Renderer.drawArenaImage(g2D,renderer.getLightArenaImage(),viewBox);
@@ -632,12 +662,12 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		public Component getListCellRendererComponent(JList<? extends ClientPlayer> list, ClientPlayer value, int index, boolean isSelected,
 				boolean cellHasFocus) {
 			// TODO Auto-generated method stub
-			String text = value.name + "     " + value.kills + "     " + value.deaths;
+			String text = String.format("%8s %4d %4d %4d  ",value.name, value.kills, value.deaths, value.headshots);
 			//ClientPlayer localPlayer = Utils.findPlayer(players, id);
 			JLabel player = new JLabel(text/*, new ImageIcon(Sprite.getImage(value.type, value.team == localPlayer.team ? 1 : 0))*/,
 					SwingConstants.LEFT);
-			player.setForeground(Color.WHITE);
-			player.setFont(GUIFactory.font_s);
+			player.setForeground(GUIFactory.UICOLOR);
+			player.setFont(GUIFactory.font_s_bold);
 			return player;
 		}
 	};
@@ -648,8 +678,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		public void onEventReceived(GameEvent event) {
 			if (event instanceof PlayerDieEvent) {
 				PlayerDieEvent e = (PlayerDieEvent) event;
-				ClientPlayer killer = Utils.findPlayer(players, e.killerID);
-				ClientPlayer killed = Utils.findPlayer(players, e.killedID);
+				ClientPlayer killer = Utils.findPlayer(players, e.killerId);
+				ClientPlayer killed = Utils.findPlayer(players, e.killedId);
 
 				killed.deaths++;
 				if (killer.team != killed.team) {
@@ -659,6 +689,10 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				}
 				team1Model.invalidate();
 				team2Model.invalidate();
+			} else if (event instanceof HeadshotEvent) {
+				HeadshotEvent e = (HeadshotEvent) event;
+				ClientPlayer attacker = Utils.findPlayer(players,e.attacker);
+				attacker.headshots++;
 			} else if (event instanceof ScoreChangedEvent) {
 				final ScoreChangedEvent e = (ScoreChangedEvent) event;
 				SwingUtilities.invokeLater(new Runnable() {
@@ -685,12 +719,13 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				}
 			} else if (event instanceof GameEndEvent) {
 				playing = false;
-				game.setScreen(new MainMenuScreen(game));
 				try {
 					connection.getSocket().close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+				// delay a bit, need another even to change back to lobby screen
+				game.setScreen(new MainMenuScreen(game));
 			} else if (event instanceof EnemyInfoEvent) {
 				EnemyInfoEvent e = (EnemyInfoEvent) event;
 				nonvisualAnimations.addAnimation(new AnimationEvent(AnimationEvent.ENEMYMARK,e.x,e.y,0));
@@ -701,6 +736,14 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				renderer.redrawLightImage(arena);
 				
 				renderer.redrawArenaImage(arena,e.tx,e.ty);
+			} else if (event instanceof RoundEnd) {
+				RoundEnd e = (RoundEnd) event;
+				winnerText.setText("Team "+e.winner+" won!");
+				winnerText.setVisible(true);
+				scoreboard.setVisible(true);
+			} else if (event instanceof RoundStart) {
+				scoreboard.setVisible(false);
+				winnerText.setVisible(false);
 			}
 		}
 	};

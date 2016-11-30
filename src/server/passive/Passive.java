@@ -11,16 +11,18 @@ public abstract class Passive {
 	}
 	
 	public void update(World w) {
-		if (!isActive && trigger()) {
-			onActivate(w);
-			isActive = true;
-		} else if (isActive) {
-			if (!trigger()) {
-				onDeactivate(w);
-				isActive = false;
+		if (!self().isDead()) {
+			if (!isActive && trigger()) {
+				onActivate(w);
+				isActive = true;
+			} else if (isActive) {
+				if (!trigger()) {
+					onDeactivate(w);
+					isActive = false;
+				}
 			}
+			onUpdate(w);
 		}
-		onUpdate(w);
 	}
 	
 	protected void onDeactivate(World w) {};
