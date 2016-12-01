@@ -12,7 +12,6 @@ public class FullCharacterData extends CharData {
 	public float weaponCooldown;
 	public float abilityCooldown;
 	public float viewRange;
-	public float hearRange;
 	public float viewAngle;
 	
 	public float crosshairSize;

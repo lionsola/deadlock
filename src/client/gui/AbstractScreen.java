@@ -2,9 +2,9 @@ package client.gui;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 
 import javax.imageio.ImageIO;
@@ -17,7 +17,7 @@ import javax.swing.JPanel;
 public abstract class AbstractScreen extends JPanel {
 
 	private static final long serialVersionUID = 8389167884117662594L;
-	protected Image background;
+	protected BufferedImage background;
 	protected final GameWindow game;
 
 	/**
@@ -26,7 +26,7 @@ public abstract class AbstractScreen extends JPanel {
 	 */
 	public AbstractScreen(GameWindow game) {
 		this.game = game;
-		this.setSize(game.getWidth(), game.getHeight());
+		this.setSize(game.getContentPane().getWidth(), game.getContentPane().getHeight());
 		// this.setIgnoreRepaint(true);
 		this.setFocusable(true);
 		this.requestFocusInWindow();
@@ -45,12 +45,16 @@ public abstract class AbstractScreen extends JPanel {
 	 */
 	public void update() {};
 
+	protected void setBackground(BufferedImage bg) {
+		background = bg;
+	}
+	
 	/**
 	 * Use the default background for each screen.
 	 */
 	protected void useDefaultBackground() {
 		try {
-			background = ImageIO.read(new FileInputStream("resource/background/menu.png"));
+			background = ImageIO.read(new FileInputStream("resource/background/mansion.png"));
 		} catch (Exception e) {
 			System.out.println("Error load background image!");
 			background = null;
@@ -67,7 +71,7 @@ public abstract class AbstractScreen extends JPanel {
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		if (background != null)
-			g.drawImage(background, 0, 0, this.getWidth(), this.getHeight(), null);
+			g.drawImage(background, (getWidth()-background.getWidth())/2, (getHeight()-background.getHeight())/2, null);
 		else {
 			g.setColor(Color.BLACK);
 			g.fillRect(0, 0, game.getWidth(), game.getHeight());

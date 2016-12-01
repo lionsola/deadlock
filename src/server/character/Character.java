@@ -673,6 +673,7 @@ public class Character {
 		v.direction = getDirection();
 		v.range = getFovRange();
 		v.angle = getFovAngle();
+		v.hearRange = (float) (SoundEvent.FOOTSTEP_SOUND_VOLUME/(World.DISTANCE_VOLUME_DROP_RATE*(1-getHearF())));
 		return v;
 	}
 	

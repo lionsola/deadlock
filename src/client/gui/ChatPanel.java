@@ -1,13 +1,17 @@
 package client.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.TextArea;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
@@ -23,6 +27,7 @@ public class ChatPanel extends JPanel {
 	private JTextArea textarea;
 	private JScrollPane scroller;
 	private JLabel label;
+	private JSeparator separator;
 	private final int MAX_ROWS;
 
 	public ChatPanel(int maxRows) {
@@ -38,7 +43,9 @@ public class ChatPanel extends JPanel {
 		//add(Box.createGlue());
 		//c.weighty = 0;
 		//c.gridy += 1;
-		textarea = GUIFactory.getStyledTextArea();
+		textarea = new JTextArea();
+		//textarea.setBackground(new Color(0,0,0,0));
+		textarea.setOpaque(false);
 		textarea.setEditable(false);
 		textarea.setLineWrap(true);
 		textarea.setWrapStyleWord(true);
@@ -56,16 +63,21 @@ public class ChatPanel extends JPanel {
 		scroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		add(scroller, c);
 
-		text = GUIFactory.getStyledTextField();
+		text = new JTextField();
+		text.setEditable(true);
+		text.setOpaque(false);
 		text.setBorder(null);
 		label = GUIFactory.getStyledLabel("");
+		label.setOpaque(false);
+		label.setBorder(null);
 		JPanel inputPanel = GUIFactory.getTransparentPanel();
 		inputPanel.setLayout(new BorderLayout());
 		inputPanel.add(label, BorderLayout.WEST);
 		inputPanel.add(text, BorderLayout.CENTER);
 		c.weighty = 0;
 		c.gridy++;
-		add(GUIFactory.getStyledSeparator(), c);
+		separator = GUIFactory.getStyledSeparator(); 
+		add(separator, c);
 		c.gridy++;
 		add(inputPanel, c);
 	}
@@ -102,6 +114,10 @@ public class ChatPanel extends JPanel {
 
 	public JLabel getInputLabel() {
 		return label;
+	}
+
+	public JSeparator getSeparator() {
+		return separator;
 	}
 
 	public void startTyping() {

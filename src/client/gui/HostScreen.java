@@ -69,13 +69,12 @@ public class HostScreen extends AbstractScreen implements ActionListener {
 		this.setLayout(new GridBagLayout());
 
 		// main panel
-		JPanel menuPanel = new JPanel();
+		JPanel menuPanel = GUIFactory.getTransparentPanel();
 		menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.PAGE_AXIS));
-		menuPanel.setOpaque(false);
+		
 		// button panel
-		JPanel buttonPanel = new JPanel();
+		JPanel buttonPanel = GUIFactory.getTransparentPanel();
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
-		buttonPanel.setOpaque(false);
 
 		hostButton = GUIFactory.getStyledFunctionButton("Host");
 		backButton = GUIFactory.getStyledFunctionButton("Back");

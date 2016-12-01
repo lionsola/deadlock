@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -137,9 +138,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		int bw = game.getHeight() / 6;
 		this.setBorder(new EmptyBorder(bw, bw, bw / 2, bw));
 		// team panels
-		JPanel teamPanel = new JPanel();
-		teamPanel.setOpaque(false);
-		// teamPanel.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+		JPanel teamPanel = GUIFactory.getTransparentPanel();
 		teamPanel.setLayout(new GridBagLayout());
 		teamPanel.setMaximumSize(new Dimension(game.getWidth() * 7 / 10, game.getHeight() * 8 / 10));
 		GridBagConstraints c = new GridBagConstraints();
@@ -147,11 +146,11 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		c.insets = new Insets(5, 5, 5, 5);
 
 		c.weightx = 1;
-		team1Button = GUIFactory.getStyledButton("  Team 1");
+		team1Button = GUIFactory.getStyledFunctionButton("  Team 1");
 		team1Button.addActionListener(this);
 		teamPanel.add(team1Button, c);
 		c.gridx = 1;
-		team2Button = GUIFactory.getStyledButton("  Team 2");
+		team2Button = GUIFactory.getStyledFunctionButton("  Team 2");
 		team2Button.addActionListener(this);
 		teamPanel.add(team2Button, c);
 		c.gridy = 1;
@@ -209,25 +208,28 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		// place holder for map
 		JLabel map = null;
 		try {
-			Image mapImage = ImageIO.read(new FileInputStream("resource/map/" + arenaName + ".png"));
-			Image scaledMap = mapImage.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
-			map = new JLabel(new ImageIcon(scaledMap));
+			BufferedImage mapImage = ImageIO.read(new FileInputStream("resource/map/" + arenaName + ".png"));
+			float ratio = 150f/Math.max(mapImage.getWidth(),mapImage.getHeight());
+			map = new JLabel(new ImageIcon(mapImage.getScaledInstance((int)(mapImage.getWidth()*ratio),(int)(mapImage.getHeight()*ratio), Image.SCALE_SMOOTH)),JLabel.CENTER);
 		} catch (IOException e) {
 			System.out.println("Error loading map image");
 			e.printStackTrace();
 			map = new JLabel("Error loading map");
 		}
+		map.setAlignmentX(Component.CENTER_ALIGNMENT);
 		settingPanel.add(map);
+		GUIFactory.stylizeMenuComponent(settingPanel);
 		//c.gridy++;
 		//teamPanel.add(GUIFactory.getStyledSeparator(), c);
 
 		chatPanel = new ChatPanel(5);
+		GUIFactory.stylizeMenuComponent(chatPanel);
 		chatPanel.getInputLabel().setText(clientPlayer.name + ": ");
 		
 		JPanel lower = GUIFactory.getTransparentPanel();
 		lower.setLayout(new BoxLayout(lower,BoxLayout.X_AXIS));
-		lower.add(settingPanel);
 		lower.add(chatPanel);
+		lower.add(settingPanel);
 		
 		c.fill = GridBagConstraints.BOTH;
 		c.gridy++;
@@ -493,11 +495,11 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 			//ImageIcon icon = new ImageIcon(Sprite.getImage(value.type, value.team));
 			//JLabel player = new JLabel(value.name, icon, SwingConstants.LEFT);
 			JLabel player = new JLabel(value.name, SwingConstants.LEFT);
+			GUIFactory.stylizeMenuComponent(player);
 			if (value.active)
-				player.setForeground(Color.WHITE);
+				player.setForeground(player.getForeground().brighter());
 			else
-				player.setForeground(Color.GRAY);
-			player.setFont(GUIFactory.font_s);
+				player.setForeground(player.getForeground().darker());
 			return player;
 		}
 	};

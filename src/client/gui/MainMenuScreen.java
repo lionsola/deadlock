@@ -7,6 +7,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -32,12 +34,11 @@ public class MainMenuScreen extends AbstractScreen implements ActionListener {
 	public MainMenuScreen(GameWindow game) {
 		super(game);
 		useDefaultBackground();
-		setSize(game.getWidth(),game.getHeight());
 		menuPanel = new JPanel();
-		menuPanel.setLayout(new GridLayout(4, 1));
+		menuPanel.setLayout(new BoxLayout(menuPanel,BoxLayout.Y_AXIS));
 		menuPanel.setMaximumSize(new Dimension(400, 600));
 		menuPanel.setOpaque(false);
-		menuPanel.setLocation(game.getWidth() - menuPanel.getWidth(), 1000);
+		
 
 		this.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -49,10 +50,18 @@ public class MainMenuScreen extends AbstractScreen implements ActionListener {
 		//settingsButton = GUIFactory.getStyledFunctionButton("Settings");
 		quitButton = GUIFactory.getStyledFunctionButton("Quit");
 
-		initButton(hostButton);
-		initButton(joinButton);
+		hostButton.addActionListener(this);
+		menuPanel.add(hostButton);
+		
+		menuPanel.add(Box.createVerticalStrut(10));
+		
+		joinButton.addActionListener(this);
+		menuPanel.add(joinButton);
 		//initButton(settingsButton);
-		initButton(quitButton);
+		menuPanel.add(Box.createVerticalStrut(10));
+		
+		quitButton.addActionListener(this);
+		menuPanel.add(quitButton);
 
 	}
 
@@ -63,8 +72,7 @@ public class MainMenuScreen extends AbstractScreen implements ActionListener {
 	 *            the button to be initialised
 	 */
 	private void initButton(JButton button) {
-		button.addActionListener(this);
-		menuPanel.add(button);
+		
 	}
 
 	@Override

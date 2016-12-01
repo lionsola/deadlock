@@ -285,19 +285,19 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	 */
 	private void initUI() {
 		//this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		teamScore = GUIFactory.getStyledLabel("0 - 0");
-		teamScore.setForeground(GUIFactory.UICOLOR);
+		teamScore = new JLabel("0 - 0");
+		GUIFactory.stylizeHUDComponent(teamScore);
+		teamScore.setFont(GUIFactory.font_m);
 		
 		scoreboard = new JPanel();
 		scoreboard.setLayout(new BoxLayout(scoreboard, BoxLayout.Y_AXIS));
 		scoreboard.add(teamScore);
 		String labels = String.format("%8s %4s %4s %4s  ","Name","K","D","HS");
-		JLabel cols = GUIFactory.getStyledLabel(labels+" "+labels);
-		cols.setFont(GUIFactory.font_s_bold);
-		cols.setForeground(GUIFactory.UICOLOR);
+		JLabel cols = new JLabel(labels+" "+labels);
+		GUIFactory.stylizeHUDComponent(cols);
 		scoreboard.add(cols);
-		JSeparator line2 = GUIFactory.getStyledSeparator();
-		line2.setForeground(GUIFactory.UICOLOR);
+		JSeparator line2 = new JSeparator();
+		GUIFactory.stylizeHUDComponent(line2);
 		scoreboard.add(line2);
 		
 		
@@ -313,9 +313,9 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		team2List.setOpaque(false);
 
 		teamPanel.add(team1List);
-		JSeparator line = GUIFactory.getStyledSeparator();
+		JSeparator line = new JSeparator();
 		line.setOrientation(JSeparator.VERTICAL);
-		line.setForeground(GUIFactory.UICOLOR);
+		GUIFactory.stylizeHUDComponent(line);
 		teamPanel.add(line);
 		line.setPreferredSize(new Dimension(5, scoreboard.getPreferredSize().height));
 		teamPanel.add(team2List);
@@ -329,22 +329,23 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		Utils.setLocationCenterOf(scoreboard, this);
 		scoreboard.setVisible(false);
 
-		winnerText = GUIFactory.getStyledLabel(" ");
+		winnerText = new JLabel(" ");
+		GUIFactory.stylizeHUDComponent(winnerText);
+		
 		winnerText.setVisible(false);
 		winnerText.setFont(GUIFactory.font_m);
-		winnerText.setOpaque(true);
-		winnerText.setBackground(GUIFactory.TRANSBLACK);
-		winnerText.setForeground(GUIFactory.UICOLOR);
 		winnerText.setSize(200, 50);
 		winnerText.setLocation(0, scoreboard.getY()-winnerText.getHeight()-20);
 		Utils.alignCenterHorizontally(winnerText, this);
 		add(winnerText);
 		
 		minimap = new Minimap(arena, id, players);
+		GUIFactory.stylizeHUDComponent(minimap);
 		add(minimap);
 		minimap.setLocation(20, getHeight()-20-minimap.getHeight());
 		
 		chatPanel = new ChatPanel(10);
+		GUIFactory.stylizeHUDComponent(chatPanel);
 		chatPanel.setVisible(false);
 		//chatPanel.getTextArea().setRows(15);
 		chatPanel.setMaximumSize(new Dimension(800, 300));
@@ -404,6 +405,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				break;
 		}
 		abilityBar = new AbilityBar(this,wId,aId,pId);
+		GUIFactory.stylizeHUDComponent(abilityBar);
 		abilityBar.setSize(abilityBar.getPreferredSize());
 		abilityBar.setLocation(0, getHeight() - abilityBar.getHeight() - 20);
 		add(abilityBar);
@@ -473,11 +475,15 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			Renderer.drawArenaImage(g2D, renderer.getDarkArenaImage(),camera.getDrawArea());
 			
 			// render the hearing region
-			Shape clip = new Ellipse2D.Double(Renderer.toPixel(c.x - c.hearRange),Renderer.toPixel(c.y - c.hearRange),
-					Renderer.toPixel(c.hearRange*2),Renderer.toPixel(c.hearRange*2));
-			g2D.setClip(clip);
-			Rectangle2D hearBox = getCharacterVisionBox(c.x,c.y,c.hearRange);
-			Renderer.drawArenaImage(g2D, renderer.getArenaImage(),hearBox);
+			Area a = new Area();
+			for (Vision v:currentState.visions) {
+				a.add(new Area(new Ellipse2D.Double(Renderer.toPixel(v.x - v.hearRange),Renderer.toPixel(v.y - v.hearRange),
+					Renderer.toPixel(v.hearRange*2),Renderer.toPixel(v.hearRange*2))));
+			
+				//Rectangle2D hearBox = getCharacterVisionBox(c.x,c.y,c.hearRange);
+			}
+			g2D.setClip(a);
+			Renderer.drawArenaImage(g2D, renderer.getArenaImage(),camera.getDrawArea());
 			
 			
 			g2D.setClip(null);
@@ -485,22 +491,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			
 			// create the vision region
 			Area los = new Area();
-			
-			/*
-			Vision v = new Vision();
-			v.x = c.x;
-			v.y = c.y;
-			v.angle = c.viewAngle;
-			v.direction = c.direction;
-			v.radius = c.radius;
-			v.range = c.viewRange;
 
-			los.add(visibility.generateLoS(v, arena));
-			double r = v.radius*1.5;
-			los.add(new Area(new Ellipse2D.Double(Renderer.toPixel(v.x - r),Renderer.toPixel(v.y - r),
-					Renderer.toPixel(r*2),Renderer.toPixel(r*2))));
-			*/
-			
 			for (Vision v:currentState.visions) {
 				los.add(visibility.generateLoS(v, arena));
 				double r = v.radius*1.5;
@@ -666,8 +657,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			//ClientPlayer localPlayer = Utils.findPlayer(players, id);
 			JLabel player = new JLabel(text/*, new ImageIcon(Sprite.getImage(value.type, value.team == localPlayer.team ? 1 : 0))*/,
 					SwingConstants.LEFT);
-			player.setForeground(GUIFactory.UICOLOR);
-			player.setFont(GUIFactory.font_s_bold);
+			GUIFactory.stylizeHUDComponent(player);
 			return player;
 		}
 	};

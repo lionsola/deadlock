@@ -36,21 +36,23 @@ public class Bullet extends Projectile {
 	@Override
 	public void onHitCharacter(World w, PlayerCharacter ch, double x, double y) {
 		//w.getEventListener().onEventReceived(new BulletHitPlayerEvent( x, y));
-		double damageRatio;
-		double HEADSHOT_DISTANCE = ch.getRadius()/12;
-		Point2D h = ch.getHead();
-		double bulletDist = Line2D.ptLineDist(getX()-getDx(), getY()-getDy(), x, y, h.getX(), h.getY());
-		if (bulletDist<=HEADSHOT_DISTANCE) {
-			damageRatio = 99999;
-			w.addEvent(new GameEvent.HeadshotEvent(id,ch.id));
+		if (!ch.isDead()) {
+			double damageRatio;
+			double HEADSHOT_DISTANCE = ch.getRadius()/12;
+			Point2D h = ch.getHead();
+			double bulletDist = Line2D.ptLineDist(getX()-getDx(), getY()-getDy(), x, y, h.getX(), h.getY());
+			if (bulletDist<=HEADSHOT_DISTANCE) {
+				damageRatio = 99999;
+				w.addEvent(new GameEvent.HeadshotEvent(id,ch.id));
+			}
+			else {
+				damageRatio = (1.25-0.75*bulletDist/ch.getRadius());
+			}
+			
+			System.out.println("Damage ratio: "+damageRatio);
+			ch.onHit(w,damageRatio*getDamage(),id);
 		}
-		else {
-			damageRatio = (1.25-0.75*bulletDist/ch.getRadius());
-		}
-		
-		System.out.println("Damage ratio: "+damageRatio);
-		ch.onHit(w,damageRatio*getDamage(),id);
-		w.addAnimation(AnimationEvent.BLOOD,x,y,this.getDirection());
+		w.addGlobalAnimation(AnimationEvent.BLOOD,x,y,this.getDirection());
 	}
 
 	protected void onHitWall(World w, double x, double y, Thing t) {

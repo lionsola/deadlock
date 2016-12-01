@@ -3,9 +3,13 @@ package client.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.TextComponent;
 
+import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
@@ -13,6 +17,8 @@ import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
+import javax.swing.text.JTextComponent;
 
 /**
  * A factory class to provide a unified look-and-feel to the game's GUI elements.
@@ -21,7 +27,7 @@ import javax.swing.SwingConstants;
  */
 public class GUIFactory {
 
-	public static final Font font_m = new Font(Font.MONOSPACED, Font.PLAIN, 22);
+	public static final Font font_m = new Font(Font.MONOSPACED, Font.BOLD, 22);
 	public static final Font font_s = new Font(Font.MONOSPACED, Font.PLAIN, 16);
 	public static final Font font_s_bold = new Font(Font.MONOSPACED, Font.BOLD, 16);
 	public static final Font font_class = new Font(Font.MONOSPACED, Font.BOLD, 20);
@@ -86,20 +92,7 @@ public class GUIFactory {
 		button.setText(text);
 
 		button.setSize(196, 53);
-		// button.setBorder(null);
-		// button.setBackground(Color.BLACK);
-		button.setOpaque(false);
-		button.setContentAreaFilled(false);
-		// button.setBorderPainted(false);
-
-		button.setForeground(Color.WHITE);
-		// center-align the text
-		button.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-		button.setFont(font_m);
-		button.setIgnoreRepaint(true);
-		button.setFocusable(false);
-		// button.setContentAreaFilled(false);
-
+		stylizeMenuComponent(button);
 		return button;
 	}
 
@@ -110,17 +103,7 @@ public class GUIFactory {
 	 */
 	public static JTextField getStyledTextField() {
 		JTextField textField = new JTextField();
-
-		// button.setBorder(null);
-		textField.setBackground(Color.BLACK);
-		textField.setForeground(Color.WHITE);
-		textField.setEditable(true);
-		// center-align the text
-		textField.setAlignmentX(Component.CENTER_ALIGNMENT);
-		textField.setFont(font_s);
-		textField.setIgnoreRepaint(true);
-		textField.setOpaque(false);
-
+		stylizeMenuComponent(textField);
 		return textField;
 	}
 
@@ -134,21 +117,8 @@ public class GUIFactory {
 	 * @throws
 	 */
 	public static JLabel getStyledLabel(String text) {
-		JLabel label = new JLabel();
-		label.setText(text);
-
-		label.setSize(216, 29);
-		label.setBorder(null);
-		label.setBackground(Color.BLACK);
-		label.setForeground(Color.WHITE);
-		// made the text in the center
-		label.setHorizontalAlignment(SwingConstants.CENTER);
-		label.setVerticalAlignment(SwingConstants.CENTER);
-		label.setAlignmentX(Component.CENTER_ALIGNMENT);
-		label.setAlignmentY(Component.CENTER_ALIGNMENT);
-		label.setFont(font_m);
-		label.setIgnoreRepaint(true);
-		label.setFocusable(false);
+		JLabel label = new JLabel(text);
+		stylizeMenuComponent(label);
 		return label;
 	}
 
@@ -171,7 +141,6 @@ public class GUIFactory {
 		// center-align the text
 		button.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
-		button.setIgnoreRepaint(true);
 		button.setFocusable(false);
 		button.setContentAreaFilled(false);
 
@@ -198,32 +167,96 @@ public class GUIFactory {
 		// center-align the text
 		button.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
-		button.setIgnoreRepaint(true);
 		button.setFocusable(false);
 		button.setContentAreaFilled(false);
 
 		return button;
 	}
 
+	public static void stylizeMenuComponent(JComponent component) {
+		component.setBackground(Color.DARK_GRAY);
+		component.setForeground(Color.WHITE);
+		component.setOpaque(true);
+		
+		component.setFont(font_m);
+		int margin = 5;
+		// center-align the text
+		if (component instanceof ChatPanel) {
+			ChatPanel chatpanel = (ChatPanel) component;
+			chatpanel.getTextArea().setOpaque(false);
+			chatpanel.getInputField().setOpaque(false);
+			chatpanel.getInputLabel().setOpaque(false);
+		} else if (component instanceof JLabel) {
+			JLabel label = (JLabel) component;
+			label.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+			label.setHorizontalAlignment(SwingConstants.CENTER);
+			label.setVerticalAlignment(SwingConstants.CENTER);
+			component.setFocusable(false);
+		} else if (component instanceof AbstractButton) {
+			AbstractButton button = (AbstractButton) component;
+			button.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+			button.setHorizontalAlignment(SwingConstants.CENTER);
+			button.setVerticalAlignment(SwingConstants.CENTER);
+			component.setFocusable(false);
+		} else if (component instanceof JTextField) {
+			JTextField text = (JTextField) component;
+			//text.setHorizontalAlignment(SwingConstants.CENTER);
+			text.setEditable(true);
+			margin = 2;
+		}
+		component.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2, true),
+				BorderFactory.createEmptyBorder(margin,margin,margin,margin)));
+		//button.setIgnoreRepaint(true);
+		
+	}
+	
+	public static void stylizeHUDComponent(JComponent component) {
+		component.setOpaque(true);
+		component.setForeground(UICOLOR);
+		component.setBackground(TRANSBLACK);
+		component.setAlignmentX(Component.CENTER_ALIGNMENT);
+		component.setAlignmentY(Component.CENTER_ALIGNMENT);
+		component.setFont(font_s_bold);
+		int margin = 10;
+		// center-align the text
+		if (component instanceof ChatPanel) {
+			ChatPanel chatpanel = (ChatPanel) component;
+			stylizeHUDComponent(chatpanel.getTextArea());
+			stylizeHUDComponent(chatpanel.getInputField());
+			stylizeHUDComponent(chatpanel.getInputLabel());
+			stylizeHUDComponent(chatpanel.getSeparator());
+			chatpanel.getTextArea().setOpaque(false);
+			chatpanel.getInputField().setOpaque(false);
+			chatpanel.getInputLabel().setOpaque(false);
+		} else if (component instanceof JLabel) {
+			JLabel label = (JLabel) component;
+			label.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+			label.setHorizontalAlignment(SwingConstants.CENTER);
+			label.setVerticalAlignment(SwingConstants.CENTER);
+		} else if (component instanceof AbstractButton) {
+			AbstractButton button = (AbstractButton) component;
+			button.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+			button.setHorizontalAlignment(SwingConstants.CENTER);
+			button.setVerticalAlignment(SwingConstants.CENTER);
+		} else if (component instanceof JTextField) {
+			JTextField text = (JTextField) component;
+			text.setHorizontalAlignment(SwingConstants.CENTER);
+			margin = 2;
+		}
+		//component.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(UICOLOR, 2, true),
+		//		BorderFactory.createEmptyBorder(margin,margin,margin,margin)));
+	}
+	
 	/**
 	 * Creates and returns a new styled JTextArea.
 	 * 
 	 * @return a styled JTextArea.
 	 */
 	public static JTextArea getStyledTextArea() {
-		JTextArea textField = new JTextArea();
-
-		// button.setBorder(null);
-		textField.setBackground(Color.BLACK);
-		textField.setForeground(Color.WHITE);
-		textField.setEditable(true);
-		// center-align the text
-		textField.setAlignmentX(Component.LEFT_ALIGNMENT);
-		textField.setFont(font_s);
-		textField.setIgnoreRepaint(true);
-		textField.setOpaque(false);
-
-		return textField;
+		JTextArea textArea = new JTextArea();
+		stylizeMenuComponent(textArea);
+		textArea.setFont(font_s_bold);
+		return textArea;
 	}
 
 }

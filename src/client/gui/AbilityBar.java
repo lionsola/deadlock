@@ -46,7 +46,7 @@ public class AbilityBar extends JPanel {
 			super(new ImageIcon(image));
 			setBackground(GUIFactory.TRANSBLACK);
 			setOpaque(true);
-			setBorder(BorderFactory.createLineBorder(GUIFactory.UICOLOR));
+			setBorder(BorderFactory.createLineBorder(GUIFactory.UICOLOR,2,true));
 		}
 		
 		void update(float fill) {

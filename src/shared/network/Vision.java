@@ -10,4 +10,5 @@ public class Vision implements Serializable {
 	public double range;
 	public double direction;
 	public double angle;
+	public double hearRange;
 }

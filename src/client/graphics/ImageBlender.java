@@ -143,6 +143,7 @@ public class ImageBlender {
 	}
 	
 	public static BufferedImage applyMiddlegroundEffect(BufferedImage source) {
+		/*
 		BufferedImage d = deepCopy(source);
 		BufferedImage black = ge.createCompatibleImage(d.getWidth(),d.getHeight(),Transparency.OPAQUE);
 		Graphics2D blackG2D = (Graphics2D) black.getGraphics();
@@ -153,7 +154,8 @@ public class ImageBlender {
 		g2D.setComposite(new SoftHardLightComposite(1f));
 		g2D.drawImage(black,0,0,d.getWidth(),d.getHeight(),null);
 		g2D.dispose();
-		return d;
+		*/
+		return darkenImage(source,0.7f,0.6f);
 	}
 	
 	public static BufferedImage applyForegroundEffect(BufferedImage source) {

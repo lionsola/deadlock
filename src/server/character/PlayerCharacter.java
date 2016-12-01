@@ -248,7 +248,6 @@ public class PlayerCharacter extends Character {
 		fc.x = (float) getX();
 		fc.y = (float) getY();
 		fc.crosshairSize = (float) getCrosshairSize();
-		fc.hearRange = (float) (SoundEvent.FOOTSTEP_SOUND_VOLUME/(World.DISTANCE_VOLUME_DROP_RATE*(1-getHearF())));
 		if (getArmor()!=null) {
 			fc.armorAngle = (float) getArmor().getAngle();
 			fc.armorStart = (float) getArmor().getStart();

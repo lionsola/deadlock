@@ -65,7 +65,7 @@ public class Minimap extends JComponent {
 		super.paintComponent(g);
 		
 		// render border
-		g.setColor(BORDER_COLOR);
+		g.setColor(getBackground());
 		int borderWidth = arena.getWidth() * TILE_SIZE;
 		int borderHeight = arena.getHeight() * TILE_SIZE;
 		g.fillRect(0, 0, borderWidth, borderHeight);
@@ -75,7 +75,7 @@ public class Minimap extends JComponent {
 			for (int j = 0; j < arena.getHeight(); j++) {
 				boolean walkable = arena.get(i, j).isTraversable();
 				if (!walkable) {
-					g.setColor(UNWALKABLE_TILE_COLOR);
+					g.setColor(getForeground());
 					int x = i * TILE_SIZE;
 					int y = j * TILE_SIZE;
 					g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
