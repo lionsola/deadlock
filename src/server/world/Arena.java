@@ -192,7 +192,7 @@ public class Arena {
 		int INITIAL_LIGHT = 0x0f;
 		int INITIAL_LIGHT_RGB = new Color(INITIAL_LIGHT,INITIAL_LIGHT,INITIAL_LIGHT).getRGB();
 		
-		int[][] lightMap = new int[getWidth()][getHeight()];
+		int[][] lightMap = new int[getWidth()*2][getHeight()*2];
 		for (int[] lights:lightMap) {
 			Arrays.fill(lights, INITIAL_LIGHT_RGB);
 		}
@@ -202,29 +202,47 @@ public class Arena {
 			int x2 = Math.min(getWidth()-1, Math.max(0,l.getX() + l.getRange()));
 			int y1 = Math.min(getHeight()-1, Math.max(0, l.getY() - l.getRange()));
 			int y2 = Math.min(getHeight()-1, Math.max(0, l.getY() + l.getRange()));
-			for (int x=x1;x<=x2;x++) {
-				for (int y=y1;y<=y2;y++) {
-					double d = 1.0-Point.distance(l.getX(), l.getY(), x, y)/l.getRange();
+			Point2D lightPos = new Point2D.Double(l.getX()+0.5,l.getY()+0.5);
+			for (int x=x1*2;x<=x2*2;x++) {
+				for (int y=y1*2;y<=y2*2;y++) {
+					Point2D dest = new Point2D.Double((x+0.5)/2.0, (y+0.5)/2.0);
+					Point2D minLCDest = null;
+					double minDist = Double.MAX_VALUE;
+					if (!get(x/2,y/2).isClear()) {
+						for (int i=-1;i<=1;i+=2) {
+							for (int j=-1;j<=1;j+=2) {
+								Point2D lcDest = new Point2D.Double(dest.getX()+i*0.25,dest.getY()+j*0.25);
+								double dist = lcDest.distance(lightPos);
+								if (dist<minDist) {
+									minDist = dist;
+									minLCDest = lcDest;
+								}
+							}
+						}
+					} else {
+						minLCDest = new Point2D.Double(x/2+0.5,y/2+0.5);
+					}
+					
+					double d = 1.0-lightPos.distance(minLCDest)/l.getRange();
 					if (d>0) {
-						List<Point2D> points = Geometry.getLineSamples(l.getX()+0.5, l.getY()+0.5, x+0.5, y+0.5, 0.33);
 						int blockCount = 0;
-						double MAX_BLOCK_COUNT = 3;
-						Tile stopWall = null;
+						final double MAX_BLOCK_COUNT = 2;
+						final double LINECAST_DISTANCE = 0.25; 
+						List<Point2D> points = Geometry.getLineSamples(lightPos,
+								minLCDest, LINECAST_DISTANCE);
 						for (Point2D p:points) {
-							if (!get((int)p.getX(),(int)p.getY()).isClear()) {
-								stopWall = get((int)p.getX(),(int)p.getY());
+							if (p.distance(minLCDest)>0.01 && !get((int)p.getX(),(int)p.getY()).isClear()) {
 								blockCount ++;
 							}
 							if (blockCount>=MAX_BLOCK_COUNT) {
 								break;
 							}
 						}
-						if (stopWall!=get(x,y)) {
-							if (blockCount>=MAX_BLOCK_COUNT) {
-								continue;
-							} else {
-								d = d*(1-blockCount/MAX_BLOCK_COUNT);
-							}
+						if (blockCount>=MAX_BLOCK_COUNT) {
+							continue;
+						}
+						else if (blockCount>0) {
+							d = d*(1-blockCount/MAX_BLOCK_COUNT);
 						}
 						int sRGB = l.getColor();
 						int sR = ((sRGB >> 16) & 0xFF) *(255-INITIAL_LIGHT)/255;
@@ -288,6 +306,14 @@ public class Arena {
 		return get(top.x,top.y);
 	}
 
+	public int getLightAt(Point2D p) {
+		try {
+			return lightMap[(int)(p.getX()*2/Terrain.tileSize)][(int)(p.getY()*2/Terrain.tileSize)];
+		} catch (Exception e){
+			return 0;
+		}
+	}
+	
 	public int[][] getLightmap() {
 		return lightMap;
 	}

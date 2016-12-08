@@ -13,7 +13,7 @@ import shared.network.ProjectileData;
 import shared.network.GameDataPackets.WorldStatePacket;
 import shared.network.event.AnimationEvent;
 import shared.network.event.GameEvent;
-import shared.network.event.GameEvent.GameEventListener;
+import shared.network.event.GameEvent.Listener;
 
 /**
  * The physical world inside a match, which handles everything including characters, projectiles and
@@ -30,7 +30,7 @@ public class World {
 	
 	private List<Trigger> activeTriggers = new LinkedList<Trigger>();
 	
-	private GameEventListener listener;
+	private Listener listener;
 	public static final double DISTANCE_VOLUME_DROP_RATE = 2.5;
 	/**
 	 * To circle the spawn positions
@@ -44,7 +44,7 @@ public class World {
 	 *            The arena used in the game
 	 * @param listener
 	 */
-	public World(Arena arena, GameEventListener listener) {
+	public World(Arena arena, Listener listener) {
 		this.arena = arena;
 		this.listener = listener;
 	}
@@ -224,7 +224,7 @@ public class World {
 	 * 
 	 * @return The even listener associated with this world.
 	 */
-	public GameEventListener getEventListener() {
+	public Listener getEventListener() {
 		return listener;
 	}
 	

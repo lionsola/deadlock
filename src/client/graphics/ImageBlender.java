@@ -139,7 +139,7 @@ public class ImageBlender {
 	public static BufferedImage applyBackgroundEffect(BufferedImage source) {
 		BufferedImage d = ge.createCompatibleImage(source.getWidth(),source.getHeight());
 		GrayscaleFilter gf = new GrayscaleFilter();
-		return darkenImage(gf.filter(source, d),0.7f,0.6f);
+		return darkenImage(gf.filter(source, d),0.7f,0.5f);
 	}
 	
 	public static BufferedImage applyMiddlegroundEffect(BufferedImage source) {
@@ -155,7 +155,7 @@ public class ImageBlender {
 		g2D.drawImage(black,0,0,d.getWidth(),d.getHeight(),null);
 		g2D.dispose();
 		*/
-		return darkenImage(source,0.7f,0.6f);
+		return darkenImage(source,0.7f,0.5f);
 	}
 	
 	public static BufferedImage applyForegroundEffect(BufferedImage source) {

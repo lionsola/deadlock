@@ -4,9 +4,12 @@ package server.ai;
 import java.awt.Point;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-
+import server.ai.InterestPoint.Type;
 import server.ai.PathFinder.Path;
 import server.network.ServerPlayer;
 import server.world.Arena;
@@ -26,7 +29,7 @@ import shared.network.event.SoundEvent;
  * 
  * @author Anh Pham
  */
-public class AIPlayer extends ServerPlayer {
+public class AIPlayer extends ServerPlayer implements GameEvent.Listener {
 	
 	private static enum AIState {
 		IDLING, EXPLORING, ATTACKING, RETREATING, DEFENDING
@@ -43,12 +46,16 @@ public class AIPlayer extends ServerPlayer {
 	private WorldStatePacket wsp;
 	private List<CharData> enemies;
 	private List<CharData> allies;
-	private List<GameEvent> events = new LinkedList<GameEvent>();
-	private Path nextPath;
-	private List<Point2D> curPath;
-	private Point2D curIntr;
+	private volatile List<GameEvent> events = new LinkedList<GameEvent>();
+	private Point2D focus;
+	
 	private Arena arena;
 	private AIState state = AIState.IDLING;
+	
+	private Path nextPath;
+	private List<Point2D> curPath;
+	private List<InterestPoint> ips = new ArrayList<InterestPoint>(20);
+	private InterestPoint curIp;
 	
 	//private float[][] playerProb;
 
@@ -78,7 +85,9 @@ public class AIPlayer extends ServerPlayer {
 	@Override
 	public void sendData(WorldStatePacket wsp) {
 		this.wsp = wsp;
-		events.addAll(wsp.events);
+		synchronized (events) {
+			events.addAll(wsp.events);
+		}
 	}
 
 	/**
@@ -104,7 +113,7 @@ public class AIPlayer extends ServerPlayer {
 			e1.printStackTrace();
 		}
 		
-		WorldStatePacket wsp = this.wsp;
+		//WorldStatePacket wsp = this.wsp;
 		
 		if (character.isDead())
 			return new InputPacket();
@@ -123,14 +132,14 @@ public class AIPlayer extends ServerPlayer {
 				}
 			}
 		}
-		
+		for (GameEvent event:events) {
+			onEventReceived(event);
+		}
 		// if I'm exploring but there's something more important
 		AIState newState = decideAction();
-		if (newState!=state) {
-			state = newState;
-			// well, do it
-			this.execute(state);
-		}
+		state = newState;
+		// well, do it
+		execute(state);
 
 		// if I was calculating a path and a path appeared
 		// take it
@@ -145,7 +154,8 @@ public class AIPlayer extends ServerPlayer {
 
 			// in case of death
 			if (distToCheckPoint > OUTOFRANGE_THRESHOLD) {
-				setNewIntr(self, randomIntr(self.getX(), self.getY(), Math.PI * 2 * server.world.Utils.random().nextDouble(), EXPLORE_DISTANCE));
+				setNewIntr(null,false);
+				//setNewIntr(self, randomIntr(self.getX(), self.getY(), Math.PI * 2 * server.world.Utils.random().nextDouble(), EXPLORE_DISTANCE));
 			} else {
 				// if alr close to one checkpoint, move on
 				if (distToCheckPoint < PATH_THRESHOLD) {
@@ -164,32 +174,11 @@ public class AIPlayer extends ServerPlayer {
 					}
 				}
 			}
-		} else {
-			setNewIntr(self, randomIntr(self.getX(), self.getY(), Math.PI * 2 * server.world.Utils.random().nextDouble(), EXPLORE_DISTANCE));
 		}
 		//wsp = null;
 		events.clear();
 		return input;
 		
-	}
-
-	private Point2D checkForIntr(WorldStatePacket wsp) {
-		Point2D newIntr = null;
-		double min = Double.MAX_VALUE;
-		for (GameEvent event : wsp.events) {
-			// listen for gun shots
-			if (event instanceof SoundEvent) {
-				SoundEvent e = (SoundEvent) event;
-				float eventDist = Geometry.diagonalDistance(e.x, e.y, wsp.player.x, wsp.player.y);
-				// if this one is closer than last one
-				if (eventDist < min && AIPlayer.isGunshotSound(e.id)) {
-					// take this one instead
-					newIntr = new Point2D.Double(e.x, e.y);
-					min = eventDist;
-				}
-			}
-		}
-		return newIntr;
 	}
 
 	/**
@@ -241,11 +230,77 @@ public class AIPlayer extends ServerPlayer {
 		}
 	}
 
+	@Override
+	public void onEventReceived(GameEvent event) {
+		InterestPoint ip = null;
+		if (event instanceof SoundEvent) {
+			SoundEvent e = (SoundEvent) event;
+			//float eventDist = Geometry.diagonalDistance(e.x, e.y, wsp.player.x, wsp.player.y);
+			// if this one is closer than last one
+			if (AIPlayer.isGunshotSound(e.id) || e.id==SoundEvent.FOOTSTEP_SOUND_ID) {
+				// if it's my own footsteps
+				if (Point2D.distance(e.x, e.y, wsp.player.x, wsp.player.y)<0.5) {
+					return;
+				}
+				for (CharData c:allies) {
+					// or if it's an ally
+					if (Point2D.distance(c.x,c.y,e.x,e.y)<0.5) {
+						// no sweat
+						return;
+					}
+				}
+				// else
+				// register the event as an enemy location
+				
+				
+				ip = new InterestPoint();
+				ip.setLocation(new Point2D.Float(e.x,e.y));
+				ip.setTime(wsp.time);
+				ip.setType(Type.ENEMY);
+				
+			} else if (e.id == SoundEvent.PING_SOUND_ID) {
+				ip = new InterestPoint();
+				ip.setLocation(new Point2D.Float(e.x,e.y));
+				ip.setTime(wsp.time);
+				ip.setType(Type.PING);
+			}
+		}
+		// double-check if it can actually get to that point
+		if (ip==null) {
+			return;
+		}
+		Path path = pathFinder.findPath(character.getPosition(),ip.getLocation());
+		final double COMBINE_DISTANCE = 2;
+		if (path.path!=null) {
+			// if it's even better than the current interest point
+			if (comparator.compare(ip, curIp)>1) {
+				// well, investigate it!
+				setNewIntr(ip,true);
+			} else {
+				for (InterestPoint ip0:ips) {
+					// if there is already an interest point closeby
+					if (ip0.getLocation().distance(ip.getLocation())<COMBINE_DISTANCE) {
+						// combine them
+						if (ip.getType().priority>ip0.getType().priority) {
+							ip0.setType(ip.getType());
+						}
+						if (ip.getTime()>ip0.getTime()) {
+							ip0.setLocation(ip.getLocation());
+							ip0.setTime(ip.getTime());
+						}
+						break;
+					}
+				}
+				ips.add(ip);
+			}
+		}
+	}
+	
 	private AIState decideAction() {
 		AIState state = AIState.EXPLORING;
 		// if there is an enemy
 		if (!enemies.isEmpty()) {
-			if (wsp.player.weaponCooldown >= 1 && enemies.size()<=2) {
+			if (character.getWeapon().timeLeft()<400 && enemies.size()<=2) {
 				// ATTACK
 				state = AIState.ATTACKING;
 			} else if (state != AIState.RETREATING) {
@@ -260,31 +315,34 @@ public class AIPlayer extends ServerPlayer {
 	
 	private void execute(AIState state) {
 		Point2D self = new Point2D.Float(wsp.player.x,wsp.player.y);
+		input.alt = false;
+		input.fire1 = false;
+		input.fire2 = false;
 		switch (state) {
 			case ATTACKING:
+				Point2D target = null;
 				// if weapon is ready
 				// decide on target
+				if (character.getWeapon().isReady()) {
 				
-				double minHp = Double.MAX_VALUE;
-				Point2D target = null;
-				for (CharData e:enemies) {
-					// do raycasting first to decide which one can actually be hit
-					Point2D aim = getClearAim(e);
-					
-					// ATM just target the one with lowest hp
-					if (aim!=null) {
-						if (e.healthPoints < minHp) {
-							target = aim;
-							minHp = e.healthPoints;
+					double minHp = Double.MAX_VALUE;
+					for (CharData e:enemies) {
+						// do raycasting first to decide which one can actually be hit
+						Point2D aim = getClearAim(e);
+						
+						// ATM just target the one with lowest hp
+						if (aim!=null) {
+							if (e.healthPoints < minHp) {
+								target = aim;
+								minHp = e.healthPoints;
+							}
 						}
 					}
-				}
-				if (target==null) {
-					System.err.println("AI "+this.id+" trying to attack but can't aim");
-				} else {
-					pointCursorAt(target.getX(),target.getY());
-					input.fire1 = true;
-				}
+					if (target!=null) {
+						pointCursorAt(target.getX(),target.getY());
+						input.fire1 = true;
+					}
+				} 
 				
 				// decide whether to shoot it or wait or run somewhere else
 				// ATM just shoot it
@@ -305,36 +363,33 @@ public class AIPlayer extends ServerPlayer {
 	            }
 	            
 				// calculate the path
-	            setNewIntr(self,randomIntr(self.getX(), self.getY(), evadeDirection, RETREAT_DISTANCE));
+	            // setNewIntr(self,randomIntr(self.getX(), self.getY(), evadeDirection, RETREAT_DISTANCE));
 				// follow the path
 				break;
 			case EXPLORING:
 				input.fire1 = false;
 				
-				// explore locations of interests (only gun shots atm)
-				Point2D newIntr = checkForIntr(wsp);
-
-				if (newIntr != null) {
-					if (curIntr!=null) {
-						float newDist = Geometry.diagonalDistance(newIntr, self);
-						float curDist = Geometry.diagonalDistance(curIntr, self);
-						if (newDist < curDist) {
-							setNewIntr(self, newIntr);
-						}
+				// choose a interest point to explore
+				if (curIp==null || character.getLoS().contains(curIp.getLocation())) {
+					if (!ips.isEmpty()) {
+						Collections.sort(ips, comparator);
+						InterestPoint best = ips.get(ips.size()-1);
+						setNewIntr(best,false);
 					} else {
-						setNewIntr(self, newIntr);
-						state = AIState.EXPLORING;
+						setNewIntr(randomizeExploreDest(),false);
 					}
 				}
-
-				if (curIntr == null || Geometry.diagonalDistance(curIntr, self) < PATH_THRESHOLD) {
-					// generate a random destination to explore
-					setNewIntr(self, randomizeExploreDest());
-				}
-				// decide where to explore
 				break;
 			default:
-				break;	
+				break;
+			
+		}
+		
+		if (!input.fire1 && !input.fire2 && inputReceiver.canPing() && enemies.size()>0){
+			CharData enemy = enemies.get(0);
+			pointCursorAt(enemy.x,enemy.y);
+			input.alt = true;
+			input.fire2 = true;
 		}
 	}
 	
@@ -378,8 +433,13 @@ public class AIPlayer extends ServerPlayer {
 		return null;
 	}
 	
-	private Point2D randomizeExploreDest() {
-		return randomIntr(wsp.player.x, wsp.player.y, Math.PI * 2 * server.world.Utils.random().nextDouble(), EXPLORE_DISTANCE);
+	private InterestPoint randomizeExploreDest() {
+		Point2D p = randomIntr(wsp.player.x, wsp.player.y, Math.PI*2*server.world.Utils.random().nextDouble(), EXPLORE_DISTANCE);
+		InterestPoint ip = new InterestPoint();
+		ip.setLocation(p);
+		ip.setType(Type.RANDOM);
+		ip.setTime(wsp.time);
+		return ip;
 	}
 	
 	/**
@@ -390,13 +450,22 @@ public class AIPlayer extends ServerPlayer {
 	 * @param point2d
 	 *            the new point of interest
 	 */
-	private void setNewIntr(Point2D self, Point2D point2d) {
-		curIntr = point2d;
-		nextPath = pathFinder.findPath(self, point2d);
-		//System.out.println("Set new interest at " + point2d);
+	private void setNewIntr(InterestPoint ip, boolean keepOldIp) {
+		Point2D self = new Point2D.Double(wsp.player.x,wsp.player.y);
+		if (keepOldIp && curIp!=null) {
+			ips.add(curIp);
+		}
+		
+		curIp = ip;
+		ips.remove(ip);
+		if (ip!=null) {
+			nextPath = pathFinder.findPath(self, ip.getLocation());
+			System.out.println("Set new interest at " + ip.getLocation() + ", "+ip.getType());
+		}
+		
 		// world.getEventListener().onEventReceived(new GunShotEvent(newIntr.x,newIntr.y,0,0));
 	}
-
+	
 	/**
 	 * Moves the AI Player from one point to another
 	 * 
@@ -438,4 +507,30 @@ public class AIPlayer extends ServerPlayer {
 		return id>0 && id<30;
 	}
 	
+	private double timeWeight = 0.001;
+	private double typeWeight = 10;
+	private double distanceWeight = 1;
+	public Comparator<InterestPoint> comparator = new Comparator<InterestPoint>() {
+		@Override
+		public int compare(InterestPoint ip0, InterestPoint ip1) {
+			if (ip0.getType()==Type.RANDOM) {
+				if (ip1.getType()==Type.RANDOM) {
+					return 0;
+				} else {
+					return -1;
+				}
+			} else if (ip1.getType()==Type.RANDOM) {
+				return 1;
+			}
+			double dt = ip0.getTime()-ip1.getTime();
+			Path p0 = pathFinder.findPath(character.getPosition(),ip0.getLocation());
+			Path p1 = pathFinder.findPath(character.getPosition(),ip1.getLocation());
+			double distance0 = p0.path!=null?p0.path.size():999999;
+			double distance1 = p1.path!=null?p1.path.size():999999;
+			double dd = distance0 - distance1;
+			double dty = ip0.getType().priority - ip1.getType().priority;
+			
+			return (int)Math.round(timeWeight*dt + distanceWeight*dd + typeWeight*dty);
+		}
+	};
 }

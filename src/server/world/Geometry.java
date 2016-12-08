@@ -107,4 +107,8 @@ public class Geometry {
         float diagonalDist = 1.4f*(Math.max(xdiff,ydiff)-straightDist); 
         return straightDist + diagonalDist;
     }
+
+	public static List<Point2D> getLineSamples(Point2D lightPos, Point2D dest, double LINECAST_DISTANCE) {
+		return getLineSamples(lightPos.getX(),lightPos.getY(),dest.getX(),dest.getY(),LINECAST_DISTANCE);
+	}
 }

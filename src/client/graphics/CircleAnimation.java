@@ -9,7 +9,7 @@ import client.gui.GameWindow;
 /**
  * Represent an animation of an circle expanding until it reaches the max size and stops.
  */
-public class ExpandingCircleAnimation extends BasicAnimation {
+public class CircleAnimation extends BasicAnimation {
 	
 	private double maxRadius;
 	private double x;
@@ -35,7 +35,7 @@ public class ExpandingCircleAnimation extends BasicAnimation {
 	 * @param delay
 	 *            The delay before the animation starts playing.
 	 */
-	public ExpandingCircleAnimation(double x, double y, double d, long life, long delay) {
+	public CircleAnimation(double x, double y, double d, long life, long delay) {
 		this(x, y, d, life, delay, Renderer.DEFAULT_COLOR);
 	}
 
@@ -46,7 +46,7 @@ public class ExpandingCircleAnimation extends BasicAnimation {
 	 *            The x coordinate of the centre of the animation.
 	 * @param y
 	 *            The y coordinate of the centre of the animation.
-	 * @param d
+	 * @param radius
 	 *            The max size that the circle will reach.
 	 * @param life
 	 *            The duration of the animation.
@@ -55,17 +55,17 @@ public class ExpandingCircleAnimation extends BasicAnimation {
 	 * @param color
 	 *            The color of the animation.
 	 */
-	public ExpandingCircleAnimation(double x, double y, double d, long life, long delay, Color color) {
+	public CircleAnimation(double x, double y, double radius, long life, long delay, Color color) {
 		super(life, delay);
-		this.maxRadius = d;
+		this.maxRadius = radius;
 		this.x = x;
 		this.y = y;
 		this.startWidth = Math.max(0.3f,0.25f*maxRadius);
-		double startGrowth = maxRadius / (life * 3 / 4) * GameWindow.MS_PER_UPDATE;
-		this.growth = startGrowth;
+		this.width = startWidth;
+		this.growth = maxRadius / (life * 3 / 4) * GameWindow.MS_PER_UPDATE;
 		this.color = color;
 	}
-
+	
 	@Override
 	public boolean update() {
 		if (super.update())

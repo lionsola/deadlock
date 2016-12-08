@@ -58,6 +58,7 @@ import shared.network.event.GameEvent;
 import shared.network.event.GameEvent.*;
 import shared.network.event.SoundEvent;
 import client.graphics.AnimationSystem;
+import client.graphics.BasicAnimation;
 import client.graphics.Renderer;
 import client.image.SoftHardLightComposite;
 import client.sound.AudioManager;
@@ -246,12 +247,16 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		audioManager.update();
 		if (wsp != null) {
 			this.currentState = wsp;
+			mainCharacter = wsp.player;
 			for (ClientPlayer p : players) {
-				if (p.id!=id) {
+				if (p.id!=mainCharacter.id) {
 					p.active = false;
 				}
 			}
-			Utils.findPlayer(players, id).character = wsp.player;
+			ClientPlayer targetPlayer = Utils.findPlayer(players, mainCharacter.id);
+			targetPlayer.character = wsp.player;
+			targetPlayer.active = true;
+			
 			for (CharData cdata : wsp.characters) {
 				ClientPlayer p = Utils.findPlayer(players, cdata.id);
 				if (p != null) {
@@ -262,8 +267,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			for (ProjectileData data : wsp.projectiles) {
 				visualAnimations.addProjectileTrail(data.x, data.y, data.prevX, data.prevY ,data.size);
 			}
-			mainCharacter = wsp.player;
-			abilityBar.update(mainCharacter);
+			
+			abilityBar.update(mainCharacter,targetPlayer);
 			//mainCharacter.direction = (float) Math.atan2(mainCharacter.y - input.cy, input.cx - mainCharacter.x);
 
 			camera.update(mainCharacter);
@@ -373,38 +378,45 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			}
 		});
 		int wId = 0, aId = 0, pId = 0;
-		switch (Utils.findPlayer(players, id).type) {
-			// grenadier
-			case 0:
-				wId = Weapon.ASSAULT_RIFLE_ID;
-				aId = Ability.FRAG_ID;
-				break;
-				
-			// markman
-			case 1:
-				wId = Weapon.MARKMAN_RIFLE_ID;
-				aId = Ability.SCOPE_ID;
-				break;
-				
-			// scout
-			case 2:
-				wId = Weapon.SHOTGUN_ID;
-				aId = Ability.BINO_ID;
-				break;
-				
-			// shield
-			case 3:
-				wId = Weapon.SHOTGUN_ID;
-				aId = Ability.FLASH_ID;
-				break;
-				
-			// agent
-			case 4:
-				wId = Weapon.SILENT_PISTOL_ID;
-				aId = Ability.AMP_ID;
-				break;
+		for (ClientPlayer cp:players) {
+			switch(cp.type) {
+				// grenadier
+				case 0:
+					wId = Weapon.ASSAULT_RIFLE_ID;
+					aId = Ability.FRAG_ID;
+					break;
+					
+				// markman
+				case 1:
+					wId = Weapon.MARKMAN_RIFLE_ID;
+					aId = Ability.SCOPE_ID;
+					break;
+					
+				// scout
+				case 2:
+					wId = Weapon.SHOTGUN_ID;
+					aId = Ability.BINO_ID;
+					break;
+					
+				// shield
+				case 3:
+					wId = Weapon.MP7_ID;
+					aId = Ability.FLASH_ID;
+					break;
+					
+				// agent
+				case 4:
+					wId = Weapon.SILENT_PISTOL_ID;
+					aId = Ability.AMP_ID;
+					break;
+			}
+			cp.weaponId = wId;
+			cp.abilityId = aId;
+			cp.passiveId = pId;
 		}
-		abilityBar = new AbilityBar(this,wId,aId,pId);
+		
+		ClientPlayer p = Utils.findPlayer(players, id);
+		abilityBar = new AbilityBar(this,p.weaponId,p.abilityId,p.passiveId);
 		GUIFactory.stylizeHUDComponent(abilityBar);
 		abilityBar.setSize(abilityBar.getPreferredSize());
 		abilityBar.setLocation(0, getHeight() - abilityBar.getHeight() - 20);
@@ -448,6 +460,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			}
 		} catch (IOException e) {
 			System.out.println("Timeout when reading data from network");
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return wsp;
 	}
@@ -499,14 +513,13 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 						Renderer.toPixel(r*2),Renderer.toPixel(r*2))));
 			}
 			
-			
 			g2D.setClip(los);
 			//Renderer.drawArenaImage(g2D,renderer.getLightArenaImage(),viewBox);
 			Renderer.drawArenaImage(g2D,renderer.getLightArenaImage(),camera.getDrawArea());
 
 
 			for (ClientPlayer data : players) {
-				if (data.id != id && data.active) {
+				if (data.id != c.id && data.active) {
 					CharData ch = data.character;
 					Renderer.renderOtherCharacter(g2D, ch, data.type);
 				}
@@ -520,8 +533,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			
 			// render the main character
 			//Renderer.renderLOS(g2D, los);
-			ClientPlayer localPlayer = Utils.findPlayer(players, id);
-			Renderer.renderMainCharacter(g2D, c, localPlayer);
+			ClientPlayer currentTarget = Utils.findPlayer(players, c.id);
+			Renderer.renderMainCharacter(g2D, c, currentTarget);
 			
 			// Render lighting & shadow
 			Composite save = g2D.getComposite();
@@ -539,7 +552,9 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		if (arena.get(tileX,tileY).coverType()>0)
 			Renderer.renderProtection(g2D,tileX,tileY,arena.get(tileX,tileY).coverType());
 		renderer.renderCharacterUI(g2D,c);
-		Renderer.renderCrosshair(g2D,input.cx,input.cy,c.crosshairSize);
+		
+		g2D.setColor(Color.WHITE);
+		Renderer.renderCrosshair(g2D,input.cx,input.cy,c.crosshairSize,1.5f);
 		g.translate(transX, transY);
 		g2D.drawString("FPS: "+FPS, 10, 10);
 	}
@@ -663,7 +678,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	};
 
 
-	private GameEventListener listener = new GameEventListener() {
+	private Listener listener = new Listener() {
 		@Override
 		public void onEventReceived(GameEvent event) {
 			if (event instanceof PlayerDieEvent) {
@@ -679,10 +694,18 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				}
 				team1Model.invalidate();
 				team2Model.invalidate();
-			} else if (event instanceof HeadshotEvent) {
-				HeadshotEvent e = (HeadshotEvent) event;
+			} else if (event instanceof Headshot) {
+				final Headshot e = (Headshot) event;
 				ClientPlayer attacker = Utils.findPlayer(players,e.attacker);
 				attacker.headshots++;
+				globalAnimations.addCustomAnimation(new BasicAnimation(1500) {
+					@Override
+					public void render(Graphics2D g2D) {
+						int alpha = (int)Math.min(255,255*2*life/duration);
+						g2D.setColor(new Color(50,100,255,alpha));
+						Renderer.renderCrosshair(g2D, e.x, e.y, 2, 3);
+					}});;
+				audioManager.playSound(SoundEvent.PING_SOUND_ID, SoundEvent.PING_SOUND_VOLUME);
 			} else if (event instanceof ScoreChangedEvent) {
 				final ScoreChangedEvent e = (ScoreChangedEvent) event;
 				SwingUtilities.invokeLater(new Runnable() {

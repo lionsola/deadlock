@@ -22,13 +22,15 @@ import server.world.Terrain;
 import server.world.World;
 import shared.network.GameDataPackets.InputPacket;
 import shared.network.GameDataPackets.WorldStatePacket;
+import shared.network.event.AnimationEvent;
 import shared.network.event.GameEvent;
 import shared.network.event.GameEvent.*;
+import shared.network.event.SoundEvent;
 
 /**
  * Is the game server.
  */
-public class MatchServer implements Runnable, GameEventListener {
+public class MatchServer implements Runnable, Listener {
 	private static final int UNDECIDED = -1;
 	private static final int DRAW = -2;
 	enum State {PAUSING, PLAYING, DELAYING}
@@ -63,7 +65,8 @@ public class MatchServer implements Runnable, GameEventListener {
 		this.players = players;
 		WeaponFactory.initWeapons();
 		ClassStats.initClassStats();
-		for (ServerPlayer p:players) {
+		for (int i=0;i<players.size();i++) {
+			ServerPlayer p = players.get(i);
 			p.inputReceiver = new InputReceiver(this,p);
 			p.inputReceiver.start();
 		}
@@ -93,7 +96,8 @@ public class MatchServer implements Runnable, GameEventListener {
 	
 	protected void setUp(World world, List<ServerPlayer> players) {
 		PathFinder pathFinder = new PathFinder(world.getArena());
-		for (ServerPlayer p : players) {
+		for (int i=0;i<players.size();i++) {
+			ServerPlayer p = players.get(i);
 			if (p.character==null) {
 				PlayerCharacter character = PlayerCharacter.newCharacter(p.id, p.team, p.type);
 				p.setCharacter(character);
@@ -108,6 +112,7 @@ public class MatchServer implements Runnable, GameEventListener {
 			}
 			
 			world.addPlayer(p.character);
+			p.targetIndex = i;
 		}
 	}
 	
@@ -262,15 +267,17 @@ public class MatchServer implements Runnable, GameEventListener {
 	private void sendState() {
 		// Send world data to players
 		for (ServerPlayer p : players) {
-			WorldStatePacket per = p.character.getPerception();
+			ServerPlayer target = players.get(p.targetIndex);
+			WorldStatePacket per = target.character.getPerception();
 			per.chatTexts  = chatTexts;
 			if (events.size()>0) {
 				per.events.addAll(events);
 			}
 			per.time = gameTimeCounter;
-			per.player = p.character.generate();
+			per.player = target.character.generate();
 			p.sendData(per);
-			per.events = new LinkedList<GameEvent>();
+			
+			p.character.getPerception().events = new LinkedList<GameEvent>();
 		}
 		events.clear();
 		chatTexts.clear();
@@ -300,11 +307,17 @@ public class MatchServer implements Runnable, GameEventListener {
 	/**
 	 * Receive & process input data from players in another thread to avoid blockings the server.
 	 */
-	static class InputReceiver extends Thread {
+	public static class InputReceiver extends Thread {
 		private ServerPlayer player;
 		private MatchServer server;
+		private long lastPing;
+		
 		public boolean active = true;
 
+		public boolean canPing() {
+			return System.currentTimeMillis()-lastPing>1000;
+		}
+		
 		public InputReceiver(MatchServer server, ServerPlayer player) {
 			this.server = server;
 			this.player = player;
@@ -313,14 +326,41 @@ public class MatchServer implements Runnable, GameEventListener {
 		@Override
 		public void run() {
 			while (active) {
-				InputPacket input = player.getInput();
-				if (player.character!=null) {
-					player.character.setInput(input);
-				}
-				if (input.chatText != null)
-					synchronized (server.chatTexts) {
-						server.chatTexts.add(player.name + ": " + input.chatText);
+				try {
+					InputPacket input = player.getInput();
+					if (input.chatText != null) {
+						synchronized (server.chatTexts) {
+							server.chatTexts.add(player.name + ": " + input.chatText);
+						}
 					}
+					if (input.alt && input.fire2 && canPing()) {
+						for (ServerPlayer p:server.players) {
+							if (p.team==player.team) {
+								p.character.getPerception().events.add(new SoundEvent(SoundEvent.PING_SOUND_ID,SoundEvent.PING_SOUND_VOLUME,input.cx,input.cy));
+								p.character.getPerception().events.add(new AnimationEvent(AnimationEvent.PING_ANIMATION_ID,input.cx,input.cy,0,true));
+							}
+						}
+						lastPing = System.currentTimeMillis();
+					}
+					
+					if (player.character.isDead() && input.fire1 && !player.character.getInput().fire1) {
+						for (int i=player.targetIndex+1;i!=player.targetIndex;i++) {
+							if (i>=server.players.size()) {
+								i = 0;
+							}
+							if (server.players.get(i).team==player.team) {
+								player.targetIndex = i;
+								break;
+							}
+						}
+					}
+					
+					if (player.character!=null) {
+						player.character.setInput(input);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -339,8 +379,8 @@ public class MatchServer implements Runnable, GameEventListener {
 			} else {
 				killer.kills--;
 			}
-		} else if (event instanceof HeadshotEvent) {
-			HeadshotEvent e = (HeadshotEvent) event;
+		} else if (event instanceof Headshot) {
+			Headshot e = (Headshot) event;
 			ServerPlayer attacker = findPlayer(e.attacker);
 			attacker.headshots++;
 		}

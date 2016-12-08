@@ -36,7 +36,7 @@ public class AnimationSystem {
 	 */
 	public void addNoiseAnimation(double x, double y, float noise) {
 		long duration = 1000 + (int) noise * 5;
-		animations.add(new ExpandingCircleAnimation(x, y, 0.5 + noise / 30, duration, 0));
+		animations.add(new CircleAnimation(x, y, 0.5 + noise / 30, duration, 0));
 	}
 
 	/**
@@ -119,10 +119,10 @@ public class AnimationSystem {
 				addBloodAnimation(e.x,e.y,e.direction);
 				break;
 			case AnimationEvent.ENEMYMARK:
-				addCustomAnimation(new ExpandingCircleAnimation(e.x,e.y,2,1000, 0,Color.RED));
+				addCustomAnimation(new CircleAnimation(e.x,e.y,2,1000, 0,Color.RED));
 				break;
 			case AnimationEvent.PING_ANIMATION_ID:
-				addCustomAnimation(new ExpandingCircleAnimation(e.x,e.y,1.5,1000, 0,Color.RED));
+				addCustomAnimation(new CircleAnimation(e.x,e.y,1.5,1000, 0,Color.RED));
 				break;
 			default:
 				System.err.println("UNKNOWN ANIMATION RECEIVED");

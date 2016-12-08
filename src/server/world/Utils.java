@@ -3,6 +3,7 @@ package server.world;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.List;
 import java.util.Random;
 /**
  * Utility methods used in the server.world package.
@@ -37,5 +38,15 @@ public class Utils {
 
 	public static Rectangle2D getBoundingBox(double cx, double cy, double r) {
 		return new Rectangle2D.Double(cx-r,cy-r,r*2,r*2);
+	}
+	
+	public Point2D castSight(Arena a, Point2D start, Point2D end) {
+		List<Point2D> points = Geometry.getLineSamples(start, end, 0.5);
+		for (Point2D p:points) {
+			if (!a.getTileAt(p.getX(), p.getY()).isClear()) {
+				return p;
+			}
+		}
+		return null;
 	}
 }

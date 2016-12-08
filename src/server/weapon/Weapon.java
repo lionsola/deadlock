@@ -51,7 +51,7 @@ public abstract class Weapon extends Ability {
 				double direction = c.getDirection();
 				
 				fire(w,c,direction);
-				final double RECOIL_DISTANCE = 0.3;
+				final double RECOIL_DISTANCE = 0.2;
 				Point2D p = Geometry.PolarToCartesian(RECOIL_DISTANCE*type.instability,
 						Math.PI+direction);
 				
@@ -60,8 +60,6 @@ public abstract class Weapon extends Ability {
 				ammoLeft -= 1;
 				w.addAnimation(AnimationEvent.GUNSHOT, c.getX(), c.getY(), direction);
 				w.addSound(type.soundId, type.noise, c.getX(), c.getY());
-				
-				c.addDispersion(getInstability());
 				
 				double maxRecoil = PlayerCharacter.MAX_DISPERSION_ANGLE*getInstability();
 				double recoil = maxRecoil*Math.min(1,Math.abs(Utils.random().nextGaussian())); 
@@ -109,6 +107,23 @@ public abstract class Weapon extends Ability {
 	@Override
 	public double getCooldownPercent() {
 		return Math.min(super.getCooldownPercent(), Math.min(1,1.0*reloadTimer/type.reloadTime));
+	}
+	
+	@Override
+	public int timeLeft() {
+		if (ammoLeft>0) {
+			return super.timeLeft();
+		} else {
+			return (int) (type.reloadTime-reloadTimer);
+		}
+	}
+	
+	@Override
+	public void setStatus(boolean enabled) {
+		super.setStatus(enabled);
+		if (!isEnabled()) {
+			reloadTimer = 0;
+		}
 	}
 	
 	@Override

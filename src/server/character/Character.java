@@ -28,7 +28,7 @@ import shared.network.event.SoundEvent;
  * This class will define the base behaviour of every type of Character.
  */
 public class Character {
-	public static final double BASE_SPEED	= 0.003;
+	public static final double BASE_SPEED	= 0.0032;
 	public static final double BASE_HP		= 100;
 	public static final double BASE_RADIUS	= 0.5;
 	public static final double BASE_FOVRANGE= 20;
@@ -64,10 +64,11 @@ public class Character {
 	
 	private final double maxHP;
 	private double healthPoints; // the number of health points the server.character class has
-	private Visibility los = new Visibility();
+	private Visibility visibility = new Visibility();
 	private Armor armor;
 	private List<StatusEffect> statusEffects = new LinkedList<StatusEffect>();
 	private WorldStatePacket perception = new WorldStatePacket();
+	private Area fov = new Area();
 	/**
 	 * Creates a new abstract server.character.
 	 * 
@@ -321,16 +322,22 @@ public class Character {
 		perception.projectiles = new LinkedList<ProjectileData>();
 		Area los = new Area();
 		if (!isDead()) {
-			los = getLoS(w.getArena());
+			try {
+				los = visibility.genLOSAreaMeter(getX(), getY(), getFovRange(), getFovAngle(), getDirection(), w.getArena());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			fov = los;
 			perception.visions.add(getVision());
 		} else {
 			for (Character c : w.getCharacters()) {
 				if (c.team==team) {
-					los.add(c.getLoS(w.getArena()));
+					los.add(c.getLoS());
 					perception.visions.add(c.getVision());
 				}
 			}
 		}
+		
 		// add the characters if they are inside vision
 		for (Character c : w.getCharacters()) {
 			if (c.id!=id && (c.team==team || c.intersects(los))) {
@@ -360,14 +367,10 @@ public class Character {
 	 *            the arena in which to get the los.
 	 * @return the line of sight area.
 	 */
-	public Area getLoS(Arena a) {
-		try {
-			return los.genLOSAreaMeter(getX(), getY(), getFovRange(), getFovAngle(), getDirection(), a);
-		} catch (Exception e) {
-			return new Area();
-		}
+	public Area getLoS() {
+		return fov;
 	}
-
+	
 	/**
 	 * Returns the direction of the server.character.
 	 * 
@@ -459,6 +462,10 @@ public class Character {
 	
 	public double getCurrentSpeed() {
 		return Math.sqrt(realDx*realDx + realDy*realDy);
+	}
+	
+	public Point2D getPosition() {
+		return new Point2D.Double(x, y);
 	}
 	
 	/**
@@ -648,11 +655,13 @@ public class Character {
 	}
 	
 	public void filterSound(int id, double volume, double x, double y) {
-		double distance = Point2D.distance(x, y, getX(), getY());
-		double perceivedVolume = Utils.getVolumeAtDistance(volume, distance, getHearF());
-		if (perceivedVolume >= Character.BASE_HEARING_THRES) {
-			SoundEvent e = new SoundEvent(id,perceivedVolume,x,y);
-			getPerception().events.add(e);
+		if (!isDead()) {
+			double distance = Point2D.distance(x, y, getX(), getY());
+			double perceivedVolume = Utils.getVolumeAtDistance(volume, distance, getHearF());
+			if (perceivedVolume >= Character.BASE_HEARING_THRES) {
+				SoundEvent e = new SoundEvent(id,perceivedVolume,x,y);
+				getPerception().events.add(e);
+			}
 		}
 	}
 	

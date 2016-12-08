@@ -19,11 +19,12 @@ public abstract class Ability {
 	private long cooldownTimer;
 	private PlayerCharacter self;
 	private int id;
+	private boolean enabled = true;
 	
 	public Ability (int id, PlayerCharacter self, long cooldown) {
 		this.cooldown = cooldown;
 		this.self = self;
-		cooldownTimer = cooldown;
+		cooldownTimer = 0;
 	}
 	
 	public int getId() {
@@ -47,11 +48,27 @@ public abstract class Ability {
 		return self;
 	}
 	
+	public int timeLeft() {
+		return (int) Math.max(0,cooldown-cooldownTimer);
+	}
+	
+	public boolean isEnabled() {
+		return enabled;
+	}
+	
+	public void setStatus(boolean enabled) {
+		this.enabled = enabled;
+		if (!enabled) {
+			startCooldown();
+		}
+	}
+	
 	public double getCooldownPercent() {
 		return Math.min(1,1.0*cooldownTimer/cooldown);
 	}
 	
 	public void reset() {
 		cooldownTimer = cooldown;
+		enabled = true;
 	}
 }

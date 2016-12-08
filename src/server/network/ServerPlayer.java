@@ -24,7 +24,7 @@ public class ServerPlayer {
     public int deaths = 0;
     public int headshots = 0;
     
-    public int targetID;
+    public int targetIndex;
     
     public Connection connection;
     public PlayerCharacter character;
@@ -39,6 +39,7 @@ public class ServerPlayer {
      */
     public ServerPlayer (int id, int team, String name, Connection connection) {
         this.id = id;
+        this.targetIndex = id;
         this.team = team;
         this.name = name;
         this.connection = connection;

@@ -11,7 +11,7 @@ public abstract class GameEvent implements Serializable {
 	
 	private static final long serialVersionUID = 5351736924124300703L;
 
-	public static interface GameEventListener {
+	public static interface Listener {
 		public void onEventReceived(GameEvent event);
 	}
 
@@ -26,14 +26,18 @@ public abstract class GameEvent implements Serializable {
 		}
 	}
 	
-	public static class HeadshotEvent extends GameEvent {
+	public static class Headshot extends GameEvent {
 		private static final long serialVersionUID = 8019912159558651525L;
 		public final int victim;
 		public final int attacker;
+		public final float x;
+		public final float y;
 		
-		public HeadshotEvent(int attackerId, int victim) {
+		public Headshot(int attackerId, int victim, double x, double y) {
 			this.attacker = attackerId;
 			this.victim = victim;
+			this.x = (float)x;
+			this.y = (float)y;
 		}
 	}
 	

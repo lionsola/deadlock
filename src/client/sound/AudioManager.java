@@ -14,7 +14,7 @@ import shared.network.event.SoundEvent;
 public class AudioManager implements Runnable {
 	
 	// volume gain in decibel
-	public static final float GAIN_MINVOLUME = -20;
+	public static final float GAIN_MINVOLUME = -25;
 	public static final float GAIN_RANGE = 25;
 
 	/** Upper bound of in-game sounds' volume.
@@ -32,6 +32,8 @@ public class AudioManager implements Runnable {
 	private static final String SOUND_DIR = "resource/audio/sounds/";
 	private static final String MUSIC_DIR = "resource/audio/music/";
 	
+	private static final String FOOTSTEP_DIR = SOUND_DIR + "footstep/";
+	
 	/**
 	 * Creates a new Audio Manager, where the location of all the sounds used for the game are
 	 * located
@@ -44,29 +46,48 @@ public class AudioManager implements Runnable {
 		WeaponFactory.initWeapons();
 
 		// initialize sound files
-		soundMap.put(0, new SingleSound(SOUND_DIR + "gunshot_assault.wav"));
-		soundMap.put(1, new SingleSound(SOUND_DIR + "gunshot_shotgun.wav"));
-		soundMap.put(2, new SingleSound(SOUND_DIR + "gunshot_pistol.wav"));
-		soundMap.put(3, new SingleSound(SOUND_DIR + "gunshot_silent_pistol.wav"));
-		soundMap.put(4, new SingleSound(SOUND_DIR + "gunshot_sniper.wav"));
+		soundMap.put(0, new SingleSound(SOUND_DIR + "weapon/" + "gunshot_assault.wav"));
+		soundMap.put(1, new SingleSound(SOUND_DIR + "weapon/" + "gunshot_shotgun.wav"));
+		soundMap.put(2, new SingleSound(SOUND_DIR + "weapon/" + "gunshot_pistol.wav"));
+		soundMap.put(3, new SingleSound(SOUND_DIR + "weapon/" + "gunshot_silent_pistol.wav"));
+		soundMap.put(4, new SingleSound(SOUND_DIR + "weapon/" + "gunshot_sniper.wav"));
 		
 		
-
-		AlternatingSound footsteps = new AlternatingSound();
-		footsteps.addSound(new SingleSound(SOUND_DIR + "footstep1.wav"));
-		footsteps.addSound(new SingleSound(SOUND_DIR + "footstep2.wav"));
-		footsteps.addSound(new SingleSound(SOUND_DIR + "footstep3.wav"));
-		footsteps.addSound(new SingleSound(SOUND_DIR + "footstep4.wav"));
-		soundMap.put(SoundEvent.FOOTSTEP_SOUND_ID, footsteps);
+		
+		AlternatingSound footstepDirt = new AlternatingSound();
+		footstepDirt.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_dirt0.wav"));
+		footstepDirt.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_dirt1.wav"));
+		footstepDirt.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_dirt2.wav"));
+		footstepDirt.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_dirt3.wav"));
+		soundMap.put(SoundEvent.FOOTSTEP_SOUND_ID, footstepDirt);
+		
+		
+		/*
+		AlternatingSound footstepGrass = new AlternatingSound();
+		footstepGrass.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_grass0.wav"));
+		footstepGrass.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_grass1.wav"));
+		footstepGrass.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_grass2.wav"));
+		footstepGrass.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_grass3.wav"));
+		soundMap.put(SoundEvent.FOOTSTEP_SOUND_ID, footstepGrass);
+		*/
+		
+		/*
+		AlternatingSound footstepDirt = new AlternatingSound();
+		footstepDirt.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_hard0.wav"));
+		footstepDirt.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_hard1.wav"));
+		footstepDirt.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_hard2.wav"));
+		footstepDirt.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_hard3.wav"));
+		soundMap.put(SoundEvent.FOOTSTEP_SOUND_ID, footstepDirt);
+		*/
 		
 		AlternatingSound bulletwall = new AlternatingSound();
-		bulletwall.addSound(new SingleSound(SOUND_DIR + "bulletwall0.wav"));
-		bulletwall.addSound(new SingleSound(SOUND_DIR + "bulletwall1.wav"));
+		bulletwall.addSound(new SingleSound(SOUND_DIR + "environment/" + "bulletwall0.wav"));
+		bulletwall.addSound(new SingleSound(SOUND_DIR + "environment/" + "bulletwall1.wav"));
 		soundMap.put(SoundEvent.BULLET_WALL_SOUND_ID,bulletwall);
 		
-		soundMap.put(SoundEvent.GRENADE_EXPLODE_SOUND_ID,new SingleSound(SOUND_DIR + "grenade_explode.wav"));
+		soundMap.put(SoundEvent.GRENADE_EXPLODE_SOUND_ID,new SingleSound(SOUND_DIR + "weapon/" + "grenade_explode.wav"));
 		
-		soundMap.put(SoundEvent.DOOR_OPEN_ID, new SingleSound(SOUND_DIR + "door_open.wav"));
+		soundMap.put(SoundEvent.DOOR_OPEN_ID, new SingleSound(SOUND_DIR + "environment/" + "door_open.wav"));
 		
 		soundMap.put(SoundEvent.PING_SOUND_ID,new SingleSound(SOUND_DIR + "ping.wav"));
 	}

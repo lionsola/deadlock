@@ -27,7 +27,9 @@ import client.graphics.Renderer;
 import client.gui.Camera;
 import client.gui.ClientPlayer;
 import client.gui.GameWindow;
+import client.image.LightComposite;
 import client.image.SoftHardLightComposite;
+import client.image.SoftLightComposite;
 import server.world.Terrain;
 import shared.network.FullCharacterData;
 import shared.network.GameDataPackets.InputPacket;
@@ -188,6 +190,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 			Composite save = g2D.getComposite();
 			//g2D.setComposite(new MultiplyComposite(0.5f));
 			g2D.setComposite(new SoftHardLightComposite(1f));
+			//g2D.setComposite(new LightComposite(0.5f));
 			//long before = System.currentTimeMillis();
 			Renderer.drawArenaImage(g2D, lightImage, window);
 			//System.out.println(System.currentTimeMillis()-before);
@@ -210,7 +213,8 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		}
 		editor.currentTool.render(g2D);
 		//Renderer.renderMainCharacter(g2D, player, playerInfo);
-		Renderer.renderCrosshair(g2D, player.x, player.y, 1);
+		g2D.setColor(Color.WHITE);
+		Renderer.renderCrosshair(g2D, player.x, player.y, 0.5f, 1.5f);
 		g.translate(transX, transY);
 		g2D.drawString("FPS: "+FPS, 10, 10);
 	}

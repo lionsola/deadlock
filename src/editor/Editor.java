@@ -165,11 +165,15 @@ public class Editor extends JFrame {
     	arenaPanel.addMouseMotionListener(new MouseMotionListener(){
 			@Override
 			public void mouseDragged(MouseEvent arg0) {
-				cursorInfo.setText(currentTool.getPointedTile().toString());
+				mouseMoved(arg0);
 			}
 			@Override
 			public void mouseMoved(MouseEvent arg0) {
-				cursorInfo.setText(currentTool.getPointedTile().toString());
+				if (currentTool!=null) {
+					String info = currentTool.getPointedTile().toString();
+					info += ", illumination: "+ Integer.toHexString(arenaPanel.getArena().getLightAt(currentTool.getPointedCoord()));
+					cursorInfo.setText(info);
+				}
 			}});
     	pack();
     	setTool(new Tool.MoveTool(arenaPanel));

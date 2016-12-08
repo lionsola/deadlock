@@ -159,54 +159,73 @@ public class Visibility {
 		int x2 = Math.min(a.getWidth() - 1, pX + range);
 		int y2 = Math.min(a.getHeight() - 1, pY + range);
 	    
-	    float xa,ya,xb,yb;
+
+	    final float WALL_DIST = (float)(0.2*ts);
 	    Rectangle2D bb = new Rectangle2D.Double((x1 - 1) * ts, (y1 - 1) * ts, (x2 - x1 + 3) * ts, (y2 - y1 + 3) * ts);
 	    for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
 				if (!a.get(x, y).isClear()) {
-					
-					// above player & below that is an empty tile					
-					if (y < pY && (a.get(x, y + 1).isClear() || (x==pX && y+1==pY))) {
-						xa = x * ts;
-						ya = (y + 1) * ts;
-						xb = xa + ts;
-						yb = ya;
-						if ((bb.contains(xa, ya) || bb.contains(xb, yb))) {
-							addSegment(xa, ya, xb, yb);
-						}
+					boolean addHSegment = true;
+					// add horizontal segment					
+					// above player & below that is an empty tile
+					float yr=0;
+					if (y-WALL_DIST/ts < pY && (a.get(x, y + 1).isClear() || (x==pX && y+1==pY))) {
+						yr = (y + 1) * ts - WALL_DIST;
 					}
-
 					// below player & above that is an empty tile
-					else if (y > pY && (a.get(x, y - 1).isClear() || (x==pX && y-1==pY))) {
-						xa = (x + 1) * ts;
-						ya = y * ts;
-						xb = xa - ts;
-						yb = ya;
-						if (bb.contains(xa, ya) || bb.contains(xb, yb))
-							addSegment(xa, ya, xb, yb);
+					else if (y+WALL_DIST/ts > pY && (a.get(x, y - 1).isClear() || (x==pX && y-1==pY))) {
+						yr = y * ts + WALL_DIST;
+					} else {
+						addHSegment = false;
 					}
-
+					
+					if (addHSegment) {
+						float xa = x*ts;
+						if (a.get(x-1,y).isClear()) {
+							xa += WALL_DIST;
+						} else {
+							xa -= WALL_DIST;
+						}
+						float xb = (x+1)*ts;
+						if (a.get(x+1,y).isClear()) {
+							xb -= WALL_DIST;
+						} else {
+							xb += WALL_DIST;
+						}
+						
+						if (bb.contains(xa, yr) || bb.contains(xb, yr))
+							addSegment(xa, yr, xb, yr);
+					}
+					boolean addVSegment = true;
 					// vertical edges
-					// to the left of player && to the right of that is an
-					// empty tile
-					if (x < pX && (a.get(x + 1, y).isClear() || (x+1==pX && y==pY))) {
-						xa = (x + 1) * ts;
-						ya = (y + 1) * ts;
-						xb = xa;
-						yb = ya - ts;
-						if (bb.contains(xa, ya) || bb.contains(xb, yb))
-							addSegment(xa, ya, xb, yb);
+					// to the left of player && to the right of that is an empty tile
+					float xr=0;
+					if (x-WALL_DIST/ts < pX && (a.get(x + 1, y).isClear() || (x+1==pX && y==pY))) {
+						xr = (x+1)*ts-WALL_DIST;
 					}
-
-					// to the right of player && to the left of that is an
-					// empty tile
-					if (x > pX && (a.get(x - 1, y).isClear() || (x-1==pX && y==pY))) {
-						xa = x * ts;
-						ya = y * ts;
-						xb = xa;
-						yb = ya + ts;
-						if (bb.contains(xa, ya) || bb.contains(xb, yb))
-							addSegment(xa, ya, xb, yb);
+					// to the right of player && to the left of that is an empty tile
+					else if (x+WALL_DIST/ts > pX && (a.get(x - 1, y).isClear() || (x-1==pX && y==pY))) {
+						xr = x*ts+WALL_DIST;
+					} else {
+						addVSegment = false;
+					}
+					
+					if (addVSegment) {
+						float ya = y*ts;
+						if (a.get(x,y-1).isClear()) {
+							ya += WALL_DIST;
+						} else {
+							ya -= WALL_DIST;
+						}
+						float yb = (y+1)*ts;
+						if (a.get(x,y+1).isClear()) {
+							yb -= WALL_DIST;
+						} else {
+							yb += WALL_DIST;
+						}
+						
+						if (bb.contains(xr, ya) || bb.contains(xr, yb))
+							addSegment(xr, ya, xr, yb);
 					}
 				}
 			}

@@ -38,12 +38,12 @@ public class Bullet extends Projectile {
 		//w.getEventListener().onEventReceived(new BulletHitPlayerEvent( x, y));
 		if (!ch.isDead()) {
 			double damageRatio;
-			double HEADSHOT_DISTANCE = ch.getRadius()/12;
+			double HEADSHOT_DISTANCE = ch.getRadius()/50;
 			Point2D h = ch.getHead();
 			double bulletDist = Line2D.ptLineDist(getX()-getDx(), getY()-getDy(), x, y, h.getX(), h.getY());
-			if (bulletDist<=HEADSHOT_DISTANCE) {
-				damageRatio = 99999;
-				w.addEvent(new GameEvent.HeadshotEvent(id,ch.id));
+			if (bulletDist-getSize()/1000.0<=HEADSHOT_DISTANCE) {
+				damageRatio = 999999;
+				w.addEvent(new GameEvent.Headshot(id,ch.id,x,y));
 			}
 			else {
 				damageRatio = (1.25-0.75*bulletDist/ch.getRadius());

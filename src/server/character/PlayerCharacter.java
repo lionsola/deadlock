@@ -15,14 +15,10 @@ import server.passive.Shield;
 import server.weapon.Weapon;
 import server.weapon.WeaponFactory;
 import server.world.Geometry;
-import server.world.Utils;
 import server.world.World;
 import shared.network.FullCharacterData;
 import shared.network.GameDataPackets.InputPacket;
-import shared.network.event.AnimationEvent;
 import shared.network.event.GameEvent.*;
-import shared.network.event.SoundEvent;
-
 import java.awt.geom.Point2D;
 
 import client.gui.GameWindow;
@@ -35,8 +31,8 @@ import client.gui.GameWindow;
  */
 public class PlayerCharacter extends Character {
 	
-	public static final double MOVEMENT_DISPERSION_FACTOR = 0.01;
-	public static final double ROTATION_DISPERSION_FACTOR = 0.3;
+	public static final double MOVEMENT_DISPERSION_FACTOR = 0.007;
+	public static final double ROTATION_DISPERSION_FACTOR = 0.05;
 	
 	public static final double MAX_DISPERSION_ANGLE = 0.1;
 	public static final double DISPERSION_DEC = 0.006;
@@ -45,7 +41,6 @@ public class PlayerCharacter extends Character {
 	
 	private int typeID; // the type of the server.character, e.g. Sniper
 
-	private double charDispersion = 0;
 	private double targetDirection = 0;
 
 	private Weapon primary; // the primary server.weapon of the server.character class
@@ -53,8 +48,6 @@ public class PlayerCharacter extends Character {
 	private Passive passive;
 	
 	private InputPacket input = new InputPacket();
-	
-	private int pingTimer;
 
 	/**
 	 * Creating a new controlled server.character
@@ -100,16 +93,16 @@ public class PlayerCharacter extends Character {
 			super.updatePerception(world);
 			
 			// send ping
-			sendPing(world);
-			if (!isDead()) { 
-				if (passive!=null)
-					passive.update(world);
+			if (passive!=null)
+				passive.update(world);
+			
+			if (ability.isEnabled() && ability!=null)
+				ability.update(world);
 				
-				if (ability!=null)
-					ability.update(world);
-				
-				if (primary!=null)
+			if (!isDead()) {
+				if (primary.isEnabled() && primary!=null)
 					primary.update(world, this);
+				
 				
 				super.updateStatusEffects();
 				
@@ -143,10 +136,6 @@ public class PlayerCharacter extends Character {
 		double angle = getWeapon().type.gunDispersion;
 		return Math.tan(angle)*Point2D.distance(getX(),getY(),getInput().cx,getInput().cy);
 	}
-	
-	public double disperseDirection() {
-		return getDirection()+charDispersion*MAX_DISPERSION_ANGLE*Utils.random().nextGaussian()/2;
-	}
 
 	/**
 	 * Returns the primary server.weapon of the server.character
@@ -177,8 +166,7 @@ public class PlayerCharacter extends Character {
 		if (!isDead()) {
 			double newDirection = Math.atan2(getY() - getInput().cy, getInput().cx - getX());
 			double dDirection = Geometry.wrapAngle(newDirection - targetDirection);
-			addDispersion(instaF*ROTATION_DISPERSION_FACTOR*Math.abs(dDirection));
-			direction += dDirection*0.95;
+			direction += dDirection*(1-ROTATION_DISPERSION_FACTOR);
 			targetDirection = newDirection;
 		}
 		if (getInput().down && getInput().up) {
@@ -230,6 +218,7 @@ public class PlayerCharacter extends Character {
 	 */
 	public FullCharacterData generate() {
 		FullCharacterData fc = new FullCharacterData();
+		fc.id = (short) id;
 		fc.healthPoints = (float) getHealthPoints();
 		fc.radius = (float) getRadius();
 		if (primary.isReady())
@@ -258,10 +247,6 @@ public class PlayerCharacter extends Character {
 	public InputPacket getInput() {
 		return input;
 	}
-
-	public void addDispersion(double dispersion) {
-		charDispersion = Math.max(0,Math.min(1,charDispersion+dispersion));
-	}
 	
 	public void setWeapon(Weapon w) {
 		primary = w;
@@ -286,7 +271,6 @@ public class PlayerCharacter extends Character {
 	@Override
 	public void resetStats() {
 		super.resetStats();
-		charDispersion = 0;
 		primary.reset();
 		ability.reset();
 	}
@@ -375,20 +359,6 @@ public class PlayerCharacter extends Character {
 				System.out.println("Error: Wrong type id");
 				System.exit(-1);
 				return null;
-		}
-	}
-
-	private void sendPing(World w) {
-		int PING_COOLDOWN = 500;
-		if (input.alt && input.fire2 && pingTimer>=PING_COOLDOWN) {
-			// send ping
-			for (PlayerCharacter p:w.getCharacters()) {
-				p.getPerception().events.add(new SoundEvent(SoundEvent.PING_SOUND_ID,SoundEvent.PING_SOUND_VOLUME,input.cx,input.cy));
-				p.getPerception().events.add(new AnimationEvent(AnimationEvent.PING_ANIMATION_ID,input.cx,input.cy,0,true));
-			}
-			pingTimer = 0;
-		} else if (pingTimer<PING_COOLDOWN) {
-			pingTimer += GameWindow.MS_PER_UPDATE;
 		}
 	}
 

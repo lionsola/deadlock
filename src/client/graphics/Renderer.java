@@ -51,7 +51,8 @@ public class Renderer {
 	
 	public static final Color DEFAULT_COLOR = new Color(0xb6b6b6);
 	public static final Color BACKGROUND_COLOR = new Color(0x090909);
-	public static final Color[] teamColors = {new Color(0x2eb62e),new Color(0xb62e2e)};
+	public static final Color[] teamColors = {new Color(0x32ff32),new Color(0xff3232)};
+	public static final Color[] teamColors2 = {new Color(0x0a320a),new Color(0x320a0a)};
 	
 	private BufferedImage arenaImage;
 	private BufferedImage darkArenaImage;
@@ -274,7 +275,7 @@ public class Renderer {
 	
 	private static void renderCharacter(Graphics2D g2D, double x, double y, double direction, double r, int typeId, int team) {
 		g2D.setStroke(new BasicStroke(toPixel(CHARACTER_WIDTH)));
-		g2D.setColor(Color.BLACK);
+		g2D.setColor(teamColors2[team]);
 		//fillCircle(g2D,x, y,r);
 		double openArc = 1.5;
 		fillArc(g2D,x,y,r, direction+openArc/2, Math.PI*2 - openArc, Arc2D.CHORD);
@@ -288,11 +289,11 @@ public class Renderer {
 		// draw head
 		Point2D h = Geometry.PolarToCartesian(r*0.35, direction);
 		double hr = r*0.5;
-		g2D.setColor(Color.BLACK);
-		fillCircle(g2D,x+h.getX(),y-h.getY(),hr);
+		//g2D.setColor(Color.BLACK);
+		//fillCircle(g2D,x+h.getX(),y-h.getY(),hr);
 		g2D.setColor(teamColors[team]);
-		g2D.setStroke(new BasicStroke(1.2f*toPixel(CHARACTER_WIDTH)));
-		drawCircle(g2D,x+h.getX(),y-h.getY(),hr);
+		//g2D.setStroke(new BasicStroke(1.2f*toPixel(CHARACTER_WIDTH)));
+		fillCircle(g2D,x+h.getX(),y-h.getY(),hr);
 		
 		
 		g2D.setStroke(new BasicStroke(1));
@@ -320,10 +321,11 @@ public class Renderer {
 		return Toolkit.getDefaultToolkit().createCustomCursor(cursor, center, "cursor");
 	}
 
-	public static void renderCrosshair(Graphics2D g2D, float cxFloat, float cyFloat, float crosshairSize_m) {
+	
+	
+	public static void renderCrosshair(Graphics2D g2D, float cxFloat, float cyFloat, float crosshairSize_m, float width) {
 		int cx = toPixel(cxFloat), cy = toPixel(cyFloat);
-		g2D.setColor(Color.WHITE);
-		g2D.setStroke(new BasicStroke(1.5f));
+		g2D.setStroke(new BasicStroke(width));
 		int chS = (int)Math.ceil(toPixel(crosshairSize_m));
 		if (chS%2!=0) {
 			chS -= 1;
@@ -499,15 +501,17 @@ public class Renderer {
 	
 	public static void renderHardLight(Graphics2D g2D, Arena a, Rectangle2D window) {
 		double ts = Terrain.tileSize;
+		double ts2 = ts/2;
 		int x1 = Math.max(0, (int) (window.getX() / ts));
 		int y1 = Math.max(0, (int) (window.getY() / ts));
 		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (window.getWidth() / ts) + 1);
 		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (window.getHeight() / ts) + 1);
 		
-		for (int x = x1; x <= x2; x++) {
-			for (int y = y1; y <= y2; y++) {
-				g2D.setColor(new Color(a.getLightmap()[x][y],false));
-				fillRect(g2D,x*ts,y*ts, ts, ts);
+		int[][] lightMap = a.getLightmap();
+		for (int x = x1*2; x <= x2*2; x++) {
+			for (int y = y1*2; y <= y2*2; y++) {
+				g2D.setColor(new Color(lightMap[x][y],false));
+				fillRect(g2D,x*ts2,y*ts2, ts2, ts2);
 			}
 		}
 	}
