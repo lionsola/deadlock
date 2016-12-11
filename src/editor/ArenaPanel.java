@@ -27,9 +27,7 @@ import client.graphics.Renderer;
 import client.gui.Camera;
 import client.gui.ClientPlayer;
 import client.gui.GameWindow;
-import client.image.LightComposite;
 import client.image.SoftHardLightComposite;
-import client.image.SoftLightComposite;
 import server.world.Terrain;
 import shared.network.FullCharacterData;
 import shared.network.GameDataPackets.InputPacket;
@@ -44,12 +42,16 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	private EditorArena arena;
 	public BufferedImage lightImage;
 	
+	protected boolean renderLayer[] = {true, true, true, true};
+	
 	protected boolean renderTerrain = true;
-	protected boolean renderThings = true;
+	protected boolean renderThing = true;
+	protected boolean renderMisc = true;
+	
 	protected boolean renderLight = false;
 	protected boolean renderHardLight = false;
 	protected boolean renderLightSource = false;
-	protected boolean renderGrid = true;
+	protected boolean renderGrid = false;
 	protected boolean renderConfig = false;
 	protected boolean renderTileSwitchTrigger = false;
 	
@@ -182,10 +184,11 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2D.setRenderingHints(rh);
 		Rectangle2D window = camera.getDrawArea();
-		if (renderTerrain)
-			Renderer.renderArenaBG(g2D, arena, window);
-		if (renderThings)
-			Renderer.renderArenaObjects(g2D, arena, window);
+		
+		for (int layer=0;layer<=4;layer++) {
+			Renderer.drawArenaLayer(g2D, arena, layer, renderTerrain, renderThing, renderMisc);
+		}
+		
 		if (renderLight) {
 			Composite save = g2D.getComposite();
 			//g2D.setComposite(new MultiplyComposite(0.5f));
@@ -223,6 +226,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
+				arena.generateLightMap();
 				BufferedImage i = ImageBlender.drawLightImage(arena);
 				lightImage = i;
 			}}).start();

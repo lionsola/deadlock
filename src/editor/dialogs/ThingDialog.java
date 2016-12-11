@@ -23,6 +23,7 @@ import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import editor.Editor;
+import server.world.Light;
 import server.world.Thing;
 import server.world.Utils;
 
@@ -41,6 +42,8 @@ public class ThingDialog extends JDialog implements ActionListener {
 	private JLabel imageName;
 	private JButton loadImage;
 	private JButton save;
+	private JCheckBox light;
+	private LightSourceDialog lightDialog;
 	
 	private BufferedImage curTileImage;
 	private JCheckBox border;
@@ -48,9 +51,10 @@ public class ThingDialog extends JDialog implements ActionListener {
 	private JCheckBox clear;
 	private JComboBox<String> cover;
 	private JFormattedTextField spriteSize;
+	private JComboBox<String> layer;
 	
 	public ThingDialog (Editor editor, Thing tile) {
-		super(editor, "Edit tile", true);
+		super(editor, "Edit tile", ModalityType.APPLICATION_MODAL);
 		this.editor = editor;
 		//Create and populate the top panel.
         JPanel topPanel = new JPanel(new GridBagLayout());
@@ -94,6 +98,11 @@ public class ThingDialog extends JDialog implements ActionListener {
         topPanel.add(spriteSize,c);
         
         c.gridy += 1;
+        light = new JCheckBox("Light");
+        light.addActionListener(this);
+        topPanel.add(light,c);
+        
+        c.gridy += 1;
         border = new JCheckBox("Border");
         topPanel.add(border,c);
         
@@ -110,9 +119,16 @@ public class ThingDialog extends JDialog implements ActionListener {
         coverPanel.add(new JLabel("Cover: "));
         String[] coverTypes = {"None","Light","Medium","Heavy"};
         cover = new JComboBox<String>(coverTypes);
-        //cover.setSelectedIndex(tile.getCoverType());
         coverPanel.add(cover);
         topPanel.add(coverPanel,c);
+        
+        c.gridy += 1;
+        JPanel layerPanel = new JPanel();
+        layerPanel.add(new JLabel("Height: "));
+        
+        layer = new JComboBox<String>(editor.layerTypes);
+        layerPanel.add(layer);
+        topPanel.add(layerPanel,c);
         
         c.gridy += 1;
         save = new JButton("Save");
@@ -134,18 +150,25 @@ public class ThingDialog extends JDialog implements ActionListener {
         	imageName.setText(tile.getImageName());
         	curTileImage = tile.getImage();
         	spriteSize.setValue(tile.getSpriteSize());
+        	if (tile.getLight()!=null) {
+        		light.setSelected(true);
+        	}
+        	layer.setSelectedIndex(Math.min(layer.getItemCount()-1,tile.getLayer()));
         } else {
         	int ID = Utils.random().nextInt();
         	//this.tile = new TileBG(ID);
         	id.setValue(ID);
         	spriteSize.setValue(1);
         }
-        
         this.setContentPane(topPanel);
-        this.pack();
         this.setLocationRelativeTo(editor);
+        this.pack();
 	}
 
+	public Thing getThing() {
+		return tile;
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		if (arg0.getSource()==save) {
@@ -162,8 +185,6 @@ public class ThingDialog extends JDialog implements ActionListener {
 					return;				
 				} else {
 					this.tile = new Thing(idNumber);
-					editor.getObjectList().add(tile);
-					editor.getObjectTable().put(tile.getId(), tile);
 				}
 			}
 
@@ -176,8 +197,15 @@ public class ThingDialog extends JDialog implements ActionListener {
 			tile.setClear(clear.isSelected());
 			tile.setWalkable(walkable.isSelected());
 			tile.setSpriteSize(((Number)spriteSize.getValue()).doubleValue());
-			
-			editor.tileDataChanged = true;
+			tile.setLayer(layer.getSelectedIndex());
+			if (light.isSelected()) {
+				if (lightDialog!=null) {
+					tile.setLight(new Light(lightDialog.getColor(), lightDialog.getRange()));
+				}
+			} else {
+				tile.setLight(null);
+			}
+
 			// Close the dialog
 			this.setVisible(false);
 			this.dispose();
@@ -198,6 +226,23 @@ public class ThingDialog extends JDialog implements ActionListener {
 					e.printStackTrace();
 				}
 	        }
+		} else if (arg0.getSource()==light) {
+			if (light.isSelected()) {
+				if (lightDialog==null) {
+					Light l = tile.getLight();
+					if (l!=null) {
+						lightDialog = new LightSourceDialog(this, light,l.getColor(),l.getRange());
+		        	} else {
+		        		lightDialog = new LightSourceDialog(this,light,0xffffff,3);
+		        	}
+				}
+				lightDialog.setModalityType(ModalityType.MODELESS);
+				lightDialog.setVisible(true);
+			} else {
+				if (lightDialog!=null) {
+					lightDialog.setVisible(false);
+				}
+			}
 		}
 	}
 }

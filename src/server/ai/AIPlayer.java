@@ -132,8 +132,10 @@ public class AIPlayer extends ServerPlayer implements GameEvent.Listener {
 				}
 			}
 		}
-		for (GameEvent event:events) {
-			onEventReceived(event);
+		synchronized (events) {
+			for (GameEvent event:events) {
+				onEventReceived(event);
+			}
 		}
 		// if I'm exploring but there's something more important
 		AIState newState = decideAction();
@@ -273,7 +275,7 @@ public class AIPlayer extends ServerPlayer implements GameEvent.Listener {
 		final double COMBINE_DISTANCE = 2;
 		if (path.path!=null) {
 			// if it's even better than the current interest point
-			if (comparator.compare(ip, curIp)>1) {
+			if (curIp==null || comparator.compare(ip, curIp)>1) {
 				// well, investigate it!
 				setNewIntr(ip,true);
 			} else {

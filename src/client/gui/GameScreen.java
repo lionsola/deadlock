@@ -9,7 +9,6 @@ import java.awt.Graphics2D;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.RenderingHints;
-import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -22,7 +21,6 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,10 +40,11 @@ import javax.swing.SwingUtilities;
 import server.ability.Ability;
 import server.weapon.Weapon;
 import server.world.Arena;
+import server.world.Misc;
 import server.world.Thing;
-import server.world.TriggerPreset;
 import server.world.Terrain;
 import server.world.Visibility;
+import server.world.trigger.TileSwitchPreset;
 import shared.network.Connection;
 import shared.network.FullCharacterData;
 import shared.network.CharData;
@@ -103,7 +102,10 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private boolean playing = true;
 	private double zoomLevel = 0;
 	
-	private double FPS = 0;
+	volatile private double UPS = 0;
+	
+	volatile private int frameCount = 0;
+	volatile private double FPS = 0;
 
 	/**
 	 * Creates a new gamescreen where the match will take place
@@ -138,28 +140,21 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		addMouseWheelListener(this);
 		
 		// Loading the arena
-		Collection<Terrain> tileList = (List<Terrain>) DataManager.loadObject(DataManager.FILE_TILES);
-		HashMap<Integer,Terrain> tileTable = DataManager.getTileMap(tileList);
+		HashMap<Integer,Terrain> tileTable = (HashMap<Integer, Terrain>) DataManager.loadObject(DataManager.FILE_TILES);
 		
-		Collection<Thing> objectList = (List<Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
-		objectTable = DataManager.getObjectMap(objectList);
+		objectTable = (HashMap<Integer, Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
 		
-		Collection<TriggerPreset> triggerList = (Collection<TriggerPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
-		HashMap<Integer,TriggerPreset> triggerTable = DataManager.getTriggerMap(triggerList);
-		
-		try {
-			DataManager.loadTileGraphics(tileList);
-		} catch (IOException e) {
-			System.err.println("Error while loading tile images.");
-			e.printStackTrace();
+		HashMap<Integer,TileSwitchPreset> triggerTable = (HashMap<Integer, TileSwitchPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
+		HashMap<Integer,Misc> miscTable = (HashMap<Integer,Misc>) DataManager.loadObject(DataManager.FILE_MISC);
+		if (miscTable==null) {
+			miscTable = new HashMap<Integer,Misc>();
 		}
-		try {
-			DataManager.loadObjectGraphics(objectList);
-		} catch (IOException e) {
-			System.err.println("Error while loading tile images.");
-			e.printStackTrace();
-		}
-		this.arena = new Arena(arenaName, tileTable, objectTable,triggerTable);
+		
+		DataManager.loadImage(tileTable.values());
+		DataManager.loadImage(objectTable.values());
+		DataManager.loadImage(miscTable.values());
+		
+		arena = new Arena(arenaName, tileTable, objectTable,triggerTable,miscTable);
 		renderer.initArenaImages(arena);
 		camera = new Camera(arena, this);
 		
@@ -189,7 +184,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		long previous = System.currentTimeMillis();
 		double lag = 0.0;
 		long totalTime = 0;
-		int frameCount = 0;
+		int updateCount = 0;
 		final int MAX_FRAME_COUNT = 50;
 
 		while (playing) {
@@ -214,10 +209,14 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 
 			totalTime += System.currentTimeMillis() - current;
 
-			frameCount++;
-			if (frameCount == MAX_FRAME_COUNT) {
+			updateCount++;
+			if (updateCount == MAX_FRAME_COUNT) {
+				UPS = (1000.0 * updateCount) / totalTime;
+				updateCount = 0;
+				
 				FPS = (1000.0 * frameCount) / totalTime;
 				frameCount = 0;
+				
 				totalTime = 0;
 			}
 			
@@ -471,16 +470,18 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		super.paintComponent(g);
 		//System.out.println("GameWindow paint");
 		// render background
+		long tick = System.currentTimeMillis();
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, getWidth(), getHeight());
 
 		// render HUD
 		// render world
-		int transX = camera.getTopLeftXPixel();
-		int transY = camera.getTopLeftYPixel();
-		g.translate(-transX, -transY);
+		double transX = camera.getTopLeftXMeter()*Renderer.getPPM();
+		double transY = camera.getTopLeftYMeter()*Renderer.getPPM();
+		
 
 		Graphics2D g2D = (Graphics2D) g;
+		g2D.translate(-transX, -transY);
 		RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2D.setRenderingHints(rh);
 		FullCharacterData c = mainCharacter;
@@ -514,8 +515,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			}
 			
 			g2D.setClip(los);
-			//Renderer.drawArenaImage(g2D,renderer.getLightArenaImage(),viewBox);
-			Renderer.drawArenaImage(g2D,renderer.getLightArenaImage(),camera.getDrawArea());
+			renderer.drawArenaLayer(g2D, 0, camera.getDrawArea());
+			renderer.drawArenaLayer(g2D, 1, camera.getDrawArea());
 
 
 			for (ClientPlayer data : players) {
@@ -536,12 +537,15 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			ClientPlayer currentTarget = Utils.findPlayer(players, c.id);
 			Renderer.renderMainCharacter(g2D, c, currentTarget);
 			
+			renderer.drawArenaLayer(g2D, 2, camera.getDrawArea());
+			renderer.drawArenaLayer(g2D, 3, camera.getDrawArea());
+			
+			
 			// Render lighting & shadow
 			Composite save = g2D.getComposite();
 			g2D.setComposite(new SoftHardLightComposite(1f));
-			
 			Rectangle2D viewBox = getCharacterVisionBox(c.x,c.y,c.viewRange);
-			//Renderer.drawArenaImage(g2D,renderer.getLightMap(),viewBox);
+			Renderer.drawArenaImage(g2D,renderer.getLightMap(),viewBox);
 			g2D.setComposite(save);
 			
 		}
@@ -555,8 +559,11 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		
 		g2D.setColor(Color.WHITE);
 		Renderer.renderCrosshair(g2D,input.cx,input.cy,c.crosshairSize,1.5f);
-		g.translate(transX, transY);
-		g2D.drawString("FPS: "+FPS, 10, 10);
+		g2D.translate(transX, transY);
+		g2D.drawString("UPS: "+UPS +", FPS: "+FPS+", draw time: "+(System.currentTimeMillis()-tick)+"ms", 10, 10);
+		frameCount += 1;
+		
+		
 	}
 
 	private Rectangle2D getCharacterVisionBox(double x, double y, double viewRange) {
@@ -748,7 +755,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				arena.generateLightMap();
 				renderer.redrawLightImage(arena);
 				
-				renderer.redrawArenaImage(arena,e.tx,e.ty);
+				renderer.redrawArenaImage(arena,e.tx,e.ty,arena.get(e.tx,e.ty).getThing().getLayer());
 			} else if (event instanceof RoundEnd) {
 				RoundEnd e = (RoundEnd) event;
 				winnerText.setText("Team "+e.winner+" won!");

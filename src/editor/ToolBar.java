@@ -8,6 +8,7 @@ import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
@@ -26,12 +27,14 @@ import client.graphics.Sprite;
 import client.gui.GUIFactory;
 import editor.Tool.*;
 import editor.dialogs.ListDialog;
+import editor.dialogs.MiscDialog;
 import editor.dialogs.LightSourceDialog;
 import editor.dialogs.TerrainDialog;
 import editor.dialogs.ThingDialog;
-import editor.dialogs.TriggerDialog;
+import editor.dialogs.TileSwitchDialog;
 import server.world.Thing;
-import server.world.TriggerPreset;
+import server.world.trigger.TileSwitchPreset;
+import server.world.Misc;
 import server.world.Terrain;
 
 public class ToolBar extends JPanel {
@@ -74,7 +77,7 @@ public class ToolBar extends JPanel {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange()==ItemEvent.SELECTED) {
 					if (list==null) {
-						final CustomListModel<Terrain> tlm = new CustomListModel<Terrain>(editor.tiles);
+						final CustomListModel<Terrain> tlm = new CustomListModel<Terrain>(new ArrayList<Terrain>(editor.tileTable.values()));
 						JButton add = new JButton("Add");
 						JButton edit = new JButton("Edit");
 						JButton delete = new JButton("Delete");
@@ -85,14 +88,23 @@ public class ToolBar extends JPanel {
 						add.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
-								new TerrainDialog(editor,null).setVisible(true);
-								tlm.invalidate();
+								TerrainDialog dialog = new TerrainDialog(editor,null);
+								dialog.setVisible(true);
+								Terrain t = dialog.getTile();
+								if (t!=null) {
+									editor.getTerrainTable().put(t.getId(), t);
+									editor.tileDataChanged = true;
+									tlm.getList().add(t);
+									tlm.invalidate();
+								}
 							}
 						});
 						edit.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
 								new TerrainDialog(editor,list.getList().getSelectedValue()).setVisible(true);
+								editor.tileDataChanged = true;
+								tlm.invalidate();
 							}
 						});
 						delete.addActionListener(new ActionListener() {
@@ -108,9 +120,10 @@ public class ToolBar extends JPanel {
 											"Just to double check, are you sure?");
 									if (s.equals("yup")) {
 										Terrain t = list.getList().getSelectedValue();
-										editor.tiles.remove(t);
+										//editor.tiles.remove(t);
 										editor.tileTable.remove(t.getId());
 										editor.tileDataChanged = true;
+										tlm.getList().remove(t);
 										tlm.invalidate();
 									}
 								}
@@ -142,7 +155,7 @@ public class ToolBar extends JPanel {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange()==ItemEvent.SELECTED) {
 					if (list==null) {
-						final CustomListModel<Thing> tlm = new CustomListModel<Thing>(editor.objects);
+						final CustomListModel<Thing> tlm = new CustomListModel<Thing>(new ArrayList<Thing>(editor.objectTable.values()));
 						JButton add = new JButton("Add");
 						JButton edit = new JButton("Edit");
 						JButton delete = new JButton("Delete");
@@ -152,14 +165,24 @@ public class ToolBar extends JPanel {
 						add.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
-								new ThingDialog(editor,null).setVisible(true);
-								tlm.invalidate();
+								ThingDialog dialog = new ThingDialog(editor,null);
+								dialog.setVisible(true);
+								
+								Thing t = dialog.getThing();
+								if (t!=null) {
+									editor.getObjectTable().put(t.getId(), t);
+									editor.tileDataChanged = true;
+									tlm.getList().add(t);
+									tlm.invalidate();
+								}
 							}
 						});
 						edit.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
 								new ThingDialog(editor,list.getList().getSelectedValue()).setVisible(true);
+								editor.tileDataChanged = true;
+								tlm.invalidate();
 							}
 						});
 						delete.addActionListener(new ActionListener() {
@@ -175,9 +198,9 @@ public class ToolBar extends JPanel {
 											"Just to double check, are you sure?");
 									if (s.equals("yup")) {
 										Thing t = list.getList().getSelectedValue();
-										editor.objects.remove(t);
 										editor.objectTable.remove(t.getId());
 										editor.tileDataChanged = true;
+										tlm.getList().remove(t);
 										tlm.invalidate();
 									}
 								}
@@ -194,6 +217,83 @@ public class ToolBar extends JPanel {
 		});
 		objectPaint.addItemListener(toggleButtonSwitch);
 		this.add(objectPaint);
+		
+		final JToggleButton miscPaint = new JToggleButton();
+		stylizeToolButton(miscPaint);
+		try {
+			miscPaint.setIcon(new ImageIcon(ImageIO.read(new File("resource/editor/misc.png"))));
+		} catch (IOException e1) {
+			miscPaint.setText("Misc");
+		}
+		miscPaint.setToolTipText("Thing Paint - left to paint, right to remove");
+		miscPaint.addItemListener(new ItemListener() {
+			ListDialog<Misc> list = null;
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange()==ItemEvent.SELECTED) {
+					if (list==null) {
+						final CustomListModel<Misc> tlm = new CustomListModel<Misc>(new ArrayList<Misc>(editor.miscTable.values()));
+						JButton add = new JButton("Add");
+						JButton edit = new JButton("Edit");
+						JButton delete = new JButton("Delete");
+						JButton[] buttons = {edit,add,delete};
+						list = new ListDialog<Misc>(editor, miscPaint, "Misc", buttons, tlm);
+						list.getList().setCellRenderer(cellRenderer);
+						add.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent arg0) {
+								MiscDialog dialog = new MiscDialog(editor,null);
+								dialog.setVisible(true);
+								
+								Misc m = dialog.getItem();
+								if (m!=null) {
+									editor.miscTable.put(m.getId(), m);
+									editor.tileDataChanged = true;
+									tlm.getList().add(m);
+									tlm.invalidate();
+								}
+							}
+						});
+						edit.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent arg0) {
+								new MiscDialog(editor,list.getList().getSelectedValue()).setVisible(true);
+								editor.tileDataChanged = true;
+								tlm.invalidate();
+							}
+						});
+						delete.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								int result = JOptionPane.showConfirmDialog(editor,
+										"Deleting an object will affect all maps that use it."
+										+ "\nRemove this object from those maps first."
+										+ "\nProceed?",
+										"WARNING", JOptionPane.OK_CANCEL_OPTION);
+								if (result==JOptionPane.OK_OPTION) {
+									String s = JOptionPane.showInputDialog(editor,
+											"Just to double check, are you sure?");
+									if (s.equals("yup")) {
+										Misc m = list.getList().getSelectedValue();
+										editor.objectTable.remove(m.getId());
+										editor.tileDataChanged = true;
+										tlm.getList().remove(m);
+										tlm.invalidate();
+									}
+								}
+							}
+						});
+					}
+					list.setVisible(true);
+					editor.setTool(new Tool.MiscPaint(editor.getArenaPanel(), list.getList()));
+				} else if (e.getStateChange()==ItemEvent.DESELECTED) {
+					list.setVisible(false);
+					editor.setTool(new Tool.MoveTool(editor.getArenaPanel()));
+				}
+			}
+		});
+		miscPaint.addItemListener(toggleButtonSwitch);
+		this.add(miscPaint);
 		
 		final JToggleButton editSprite = new JToggleButton();
 		stylizeToolButton(editSprite);
@@ -216,31 +316,18 @@ public class ToolBar extends JPanel {
 		editSprite.addItemListener(toggleButtonSwitch);
 		this.add(editSprite);
 		
-		final JToggleButton light = new JToggleButton();
+		final JButton light = new JButton();
 		stylizeToolButton(light);
 		try {
 			light.setIcon(new ImageIcon(ImageIO.read(new File("resource/editor/light.png"))));
 		} catch (IOException e1) {
 			light.setText("Light");
 		}
-		light.setToolTipText("Light Source - choose light range and color, left to add, right to remove");
+		light.setToolTipText("Update light map");
 		light.addActionListener(new ActionListener() {
-			LightSourceDialog dialog = null;
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if (light.isSelected()) {
-					if (dialog==null) {
-						dialog = new LightSourceDialog(editor,light);
-					}
-					dialog.setVisible(true);
-					editor.getArenaPanel().renderLightSource = true;
-					editor.setTool(new Tool.LightPaint(editor.getArenaPanel(), dialog));
-				} else {
-					editor.getArenaPanel().renderLightSource = false;
-					editor.getArenaPanel().generateLightImage();
-					dialog.setVisible(false);
-					editor.setTool(new Tool.MoveTool(editor.getArenaPanel()));
-				}
+				editor.getArenaPanel().generateLightImage();
 			}
 		});
 		light.addItemListener(toggleButtonSwitch);
@@ -255,29 +342,36 @@ public class ToolBar extends JPanel {
 		}
 		trigger.setToolTipText("Trigger - left to add / select / set target tile, right to remove");
 		trigger.addItemListener(new ItemListener() {
-			ListDialog<TriggerPreset> list = null;
+			ListDialog<TileSwitchPreset> list = null;
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange()==ItemEvent.SELECTED) {
 					if (list==null) {
-						final CustomListModel<TriggerPreset> tlm = new CustomListModel<TriggerPreset>(editor.triggers);
+						final CustomListModel<TileSwitchPreset> tlm = new CustomListModel<TileSwitchPreset>(new ArrayList<TileSwitchPreset>(editor.getTriggerTable().values()));
 						JButton add = new JButton("Add");
 						JButton edit = new JButton("Edit");
 						JButton delete = new JButton("Delete");
 						JButton[] buttons = {edit,add,delete};
-						list = new ListDialog<TriggerPreset>(editor, trigger, "Trigger", buttons, tlm);
+						list = new ListDialog<TileSwitchPreset>(editor, trigger, "Trigger", buttons, tlm);
 						list.getList().setCellRenderer(triggerRenderer);
 						add.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
-								new TriggerDialog(editor,null).setVisible(true);
+								TileSwitchDialog dialog = new TileSwitchDialog(editor,null);
+								dialog.setVisible(true);
+								TileSwitchPreset t = dialog.getTriggerPreset();
+								editor.getTriggerTable().put(t.getId(), t);
+								editor.tileDataChanged = true;
+								tlm.getList().add(t);
 								tlm.invalidate();
 							}
 						});
 						edit.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
-								new TriggerDialog(editor,list.getList().getSelectedValue()).setVisible(true);
+								new TileSwitchDialog(editor,list.getList().getSelectedValue()).setVisible(true);
+								editor.tileDataChanged = true;
+								tlm.invalidate();
 							}
 						});
 						delete.addActionListener(new ActionListener() {
@@ -292,10 +386,10 @@ public class ToolBar extends JPanel {
 									String s = JOptionPane.showInputDialog(editor,
 											"Just to double check, are you sure?");
 									if (s.equals("yup")) {
-										TriggerPreset t = list.getList().getSelectedValue();
-										editor.triggers.remove(t);
+										TileSwitchPreset t = list.getList().getSelectedValue();
 										editor.triggerTable.remove(t.getId());
 										editor.tileDataChanged = true;
+										tlm.getList().remove(t);
 										tlm.invalidate();
 									}
 								}
@@ -370,10 +464,10 @@ public class ToolBar extends JPanel {
 		}
 	};
 	
-	private ListCellRenderer<TriggerPreset> triggerRenderer = new ListCellRenderer<TriggerPreset>() {
+	private ListCellRenderer<TileSwitchPreset> triggerRenderer = new ListCellRenderer<TileSwitchPreset>() {
 		@Override
-		public Component getListCellRendererComponent(JList<? extends TriggerPreset> list,
-				final TriggerPreset value, int index, boolean isSelected, boolean cellHasFocus) {
+		public Component getListCellRendererComponent(JList<? extends TileSwitchPreset> list,
+				final TileSwitchPreset value, int index, boolean isSelected, boolean cellHasFocus) {
 			BufferedImage oriImage = value.getOriginalThing().getImage();
 			
 			if (oriImage.getHeight() > Sprite.TILE_SPRITE_SIZE ||

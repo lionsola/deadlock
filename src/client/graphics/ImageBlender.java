@@ -130,8 +130,10 @@ public class ImageBlender {
 		BufferedImage source = ge.createCompatibleImage(Renderer.toPixelDefault(a.getWidthMeter()),
 				Renderer.toPixelDefault(a.getHeightMeter()));
 		Graphics2D g2D = (Graphics2D)source.getGraphics();
-		Renderer.renderArenaBG(g2D, a, new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
-		Renderer.renderArenaObjects(g2D, a, new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
+		Rectangle2D drawArea = new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter());
+		Renderer.renderArenaBGFlat(g2D, a, drawArea);
+		Renderer.renderArenaObjects(g2D, a, drawArea);
+		Renderer.renderArenaMiscs(g2D, a, drawArea);
 		g2D.dispose();
 		return source;
 	}
@@ -198,6 +200,15 @@ public class ImageBlender {
 		g2D.dispose();
 		//BufferedImage dest = ge.createCompatibleImage(Renderer.toPixel(a.getWidthMeter()),Renderer.toPixel(a.getHeightMeter()));
 		//return blurImage(source,dest,50f);
+		return source;
+	}
+
+	public static BufferedImage drawArena(Arena a, int layer) {
+		BufferedImage source = ge.createCompatibleImage(
+				Renderer.toPixel(a.getWidthMeter()),Renderer.toPixel(a.getHeightMeter()),Transparency.TRANSLUCENT);
+		Graphics2D g2D = (Graphics2D)source.getGraphics();
+		Renderer.drawArenaLayer(g2D, a, layer, true, true, true);
+		
 		return source;
 	}
 }

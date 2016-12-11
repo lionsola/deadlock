@@ -17,7 +17,6 @@ public class ListDialog<T> extends JDialog {
 
 	private static final long serialVersionUID = -2705330003771825132L;
     private JList<T> list;
-    private Editor editor;
  
     /**
      * Set up and show the dialog.  The first Component argument
@@ -28,13 +27,12 @@ public class ListDialog<T> extends JDialog {
      * otherwise, it should be the component on top of which the
      * dialog should appear.
      */
-    public ListDialog(Editor editor,
+    public ListDialog(Window owner,
                        final JToggleButton button,
                        String title,
                        final JButton[] buttons,
                        ListModel<T> lm) {
-        super(editor, title, false);
-        this.editor = editor;
+        super(owner, title, ModalityType.MODELESS);
         if (button!=null) {
 	        this.addWindowListener(new WindowAdapter() {
 	        	@Override
@@ -93,7 +91,7 @@ public class ListDialog<T> extends JDialog {
         	p.x += button.getWidth();
             this.setLocation(p);
         } else {
-        	this.setLocationRelativeTo(editor);
+        	this.setLocationRelativeTo(owner);
         }
     }
     

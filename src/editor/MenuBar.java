@@ -200,13 +200,46 @@ public class MenuBar extends JMenuBar {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-					editor.getArenaPanel().renderThings = true;
+					editor.getArenaPanel().renderThing = true;
 				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
-					editor.getArenaPanel().renderThings = false;
+					editor.getArenaPanel().renderThing = false;
 				}
 			}
 		});
 		view.add(things);
+		
+		JCheckBoxMenuItem misc = new JCheckBoxMenuItem("Misc");
+		misc.setSelected(true);
+		misc.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					editor.getArenaPanel().renderMisc = true;
+				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
+					editor.getArenaPanel().renderMisc = false;
+				}
+			}
+		});
+		view.add(misc);
+		
+		view.addSeparator();
+		for (int layer=0;layer<editor.layerTypes.length;layer++) {
+			JCheckBoxMenuItem viewLayer = new JCheckBoxMenuItem(editor.layerTypes[layer]);
+			viewLayer.setSelected(true);
+			final int l = layer;
+			viewLayer.addItemListener(new ItemListener() {
+				@Override
+				public void itemStateChanged(ItemEvent e) {
+					if (e.getStateChange() == ItemEvent.SELECTED) {
+						editor.getArenaPanel().renderLayer[l] = true;
+					} else if (e.getStateChange() == ItemEvent.DESELECTED) {
+						editor.getArenaPanel().renderLayer[l] = false;
+					}
+				}
+			});
+			view.add(viewLayer);
+		}
+		view.addSeparator();
 		
 		JCheckBoxMenuItem light = new JCheckBoxMenuItem("Soft light (ingame)");
 		light.addItemListener(new ItemListener() {

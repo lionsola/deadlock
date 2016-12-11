@@ -10,7 +10,6 @@ import client.gui.GameWindow;
  * Represent an animation of an circle expanding until it reaches the max size and stops.
  */
 public class CircleAnimation extends BasicAnimation {
-	
 	private double maxRadius;
 	private double x;
 	private double y;
@@ -20,7 +19,7 @@ public class CircleAnimation extends BasicAnimation {
 	
 	private double growth;
 	private Color color;
-
+	
 	/**
 	 * Create an expanding circle animation with the default colour (WHITE).
 	 * 
@@ -38,7 +37,7 @@ public class CircleAnimation extends BasicAnimation {
 	public CircleAnimation(double x, double y, double d, long life, long delay) {
 		this(x, y, d, life, delay, Renderer.DEFAULT_COLOR);
 	}
-
+	
 	/**
 	 * Create an expanding circle animation with a custom colour.
 	 * 
@@ -79,7 +78,7 @@ public class CircleAnimation extends BasicAnimation {
 		}
 		return false;
 	}
-
+	
 	@Override
 	public void render(Graphics2D g2D) {
 		g2D.setColor(new Color(color.getRed(),color.getGreen(), color.getBlue(), (int)Math.max(0,255*this.life/this.duration)));

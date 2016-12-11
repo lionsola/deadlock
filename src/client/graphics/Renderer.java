@@ -24,16 +24,22 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import client.gui.ClientPlayer;
+import client.gui.GUIFactory;
 import client.image.OverlayComposite;
 import editor.EditorArena;
 import server.world.Arena;
 import server.world.Geometry;
 import server.world.Light;
+import server.world.Misc;
 import server.world.SpriteConfig;
 import server.world.Terrain;
 import server.world.Thing;
-import server.world.Trigger;
+import server.world.Tile;
 import server.world.Utils;
+import server.world.trigger.Trigger;
+import server.world.trigger.Trigger.SwitchOnTouch;
+import server.world.trigger.Trigger.SwitchOnTouchSide;
+import server.world.trigger.TriggerEffect;
 import shared.network.FullCharacterData;
 import shared.network.CharData;
 import shared.network.ProjectileData;
@@ -49,6 +55,8 @@ public class Renderer {
 	public static final double CHARACTER_WIDTH = 0.1;
 	public static final double HEALTHBAR_WIDTH = 0.25;
 	
+	public static final double PARALLAX_FACTOR = 0.03;
+	
 	public static final Color DEFAULT_COLOR = new Color(0xb6b6b6);
 	public static final Color BACKGROUND_COLOR = new Color(0x090909);
 	public static final Color[] teamColors = {new Color(0x32ff32),new Color(0xff3232)};
@@ -58,6 +66,7 @@ public class Renderer {
 	private BufferedImage darkArenaImage;
 	private BufferedImage lightArenaImage;
 	private BufferedImage lightMap;
+	private BufferedImage[] layerImages = new BufferedImage[4];
 	public static final double DEFAULT_PPM = 20;
 	private static double ppm = Renderer.DEFAULT_PPM;
 	
@@ -103,7 +112,7 @@ public class Renderer {
 			return;
 		double xS = 0, yS = 0, rot = 0;
 		boolean flip = false;
-		SpriteConfig config = a.get(x, y).getSpriteConfig();
+		SpriteConfig config = a.get(x, y).getThingConfig();
 		BufferedImage image = t.getImage();
 		if (config==null) {
 			int w = image.getWidth()/32;
@@ -159,21 +168,96 @@ public class Renderer {
 			return;
 		
 		double ts = Terrain.tileSize;
-		BufferedImage image = t.getImage();
-		int w = image.getWidth()/32;
-		int h = image.getHeight()/32;
-		double xM = (x%w)*ts;
-		double yM = (y%h)*ts;
-		drawImage(g2D,image, xM, yM, ts, ts, x*ts, y*ts, ts, ts);
+		if (t.getId()==Terrain.BLEND) {
+			Terrain[] results = new Terrain[4];
+			int i = 0;
+			for (int xi=-1;xi<=1;xi+=2) {
+				for (int yi=-1;yi<=1;yi+=2) {
+					Terrain result = blendVote(a.get(x+xi, y).getTerrain(),
+							a.get(x, y+yi).getTerrain(),a.get(x+xi, y+yi).getTerrain());
+					results[i] = result;
+					
+					if (result==null || result.getId()==0)
+						continue;
+					
+					BufferedImage image = result.getImage();
+					int w = image.getWidth()/32;
+					int h = image.getHeight()/32;
+					double xM = (x%w)*ts;
+					double yM = (y%h)*ts;
+					
+					
+					drawImage(g2D,image, xM+ts*(xi+1.0)/4, yM+ts*(yi+1.0)/4, ts/2, ts/2,
+							x*ts+ts*(xi+1)/4, y*ts+ts*(yi+1)/4, ts/2, ts/2);
+					results[i] = result;
+					i++;
+				}
+			}
+			// double-check if there's any useless blend spot
+			if (results[0]==results[1] && results[1]==results[2] && results[2]==results[3]) {
+				g2D.setColor(Color.WHITE);
+				fillRect(g2D,x*ts,y*ts,ts,ts);
+			}
+		} else {
+			BufferedImage image = t.getImage();
+			int w = image.getWidth()/32;
+			int h = image.getHeight()/32;
+			double xM = (x%w)*ts;
+			double yM = (y%h)*ts;
+			
+			drawImage(g2D,image, xM, yM, ts, ts, x*ts, y*ts, ts, ts);
+		}
 	}
 	
+	private static void drawMisc(Graphics2D g2D, Arena a, int x, int y) {
+		Misc m = a.get(x, y).getMisc();
+		if (m==null || m.getId()==0)
+			return;
+		
+		double ts = Terrain.tileSize;
+		double xS = 0, yS = 0, rot = 0;
+		boolean flip = false;
+		SpriteConfig config = a.get(x, y).getMiscConfig();
+		BufferedImage image = m.getImage();
+		if (config==null) {
+			int w = image.getWidth()/32;
+			int h = image.getHeight()/32;
+			xS = (x%w)*ts;
+			yS = (y%h)*ts;
+		} else {
+			xS = config.spriteX*ts;
+			yS = config.spriteY*ts;
+			rot = config.rotation*Math.PI/2;
+			flip = config.flip;
+		}
+		
+		double wD = ts*m.getSpriteSize();
+		double xD = x*ts-(wD-ts)*0.5;
+		double yD = y*ts-(wD-ts)*0.5;
+		g2D.rotate(-rot,toPixel((x+0.5)*ts),toPixel((y+0.5)*ts));
+		if (!flip) {
+			drawImage(g2D,image, xS, yS, ts, ts, xD, yD, wD, wD);
+		}
+		else {
+			drawImage(g2D,image, xS, yS, ts, ts, xD+wD, yD, -wD-1.0/ppm, wD);
+		}
+		g2D.rotate(rot,toPixel((x+0.5)*ts),toPixel((y+0.5)*ts));	}
+	
 	public void initArenaImages(Arena arena) {
+		try {
+			lightArenaImage = ImageIO.read(new FileInputStream("resource/map/"+arena.getName()+"_plain.png"));
+		} catch (IOException e) {
+			System.err.println("Error while reading pre-rendered map image");
+			e.printStackTrace();
+			lightArenaImage = ImageBlender.drawArena(arena);
+		}
+		
 		try {
 			arenaImage = ImageIO.read(new FileInputStream("resource/map/"+arena.getName()+"_mid.png"));
 		} catch (IOException e) {
 			System.err.println("Error while reading pre-rendered map image");
 			e.printStackTrace();
-			arenaImage = ImageBlender.drawArena(arena);
+			arenaImage = ImageBlender.applyMiddlegroundEffect(lightArenaImage);
 		}
 		
 		try {
@@ -184,20 +268,25 @@ public class Renderer {
 			darkArenaImage = ImageBlender.applyBackgroundEffect(arenaImage);
 		}
 		
-		try {
-			lightArenaImage = ImageIO.read(new FileInputStream("resource/map/"+arena.getName()+"_light.png"));
-		} catch (IOException e) {
-			System.err.println("Error while reading pre-rendered map image");
-			e.printStackTrace();
-			lightArenaImage = ImageBlender.applyForegroundEffect(arenaImage);
-		}
+		
 		
 		try {
 			lightMap = ImageIO.read(new FileInputStream("resource/map/"+arena.getName()+"_lightmap.png"));
 		} catch (IOException e) {
 			System.err.println("Error while reading pre-rendered light map");
 			e.printStackTrace();
-			lightArenaImage = ImageBlender.drawLightImage(arena);
+			lightMap = ImageBlender.drawLightImage(arena);
+		}
+
+		for (int layer=0;layer<4;layer++) {
+			try {
+				layerImages[layer] = ImageIO.read(
+						new FileInputStream("resource/map/"+arena.getName()+"_layer"+layer+".png"));
+			} catch (IOException e) {
+				System.err.println("Error while reading pre-rendered light map");
+				e.printStackTrace();
+				layerImages[layer] = ImageBlender.drawArena(arena, layer);
+			}
 		}
 	}
 	
@@ -346,9 +435,9 @@ public class Renderer {
 		g2D.draw(los);
 	}
 	
-	public static void renderArenaBG(Graphics2D g2D, Arena a, Rectangle2D window) {
-		g2D.setColor(new Color(0x090909));
-		fillRect(g2D,0,0, a.getWidthMeter(), a.getHeightMeter());
+	public static void renderArenaBGFlat(Graphics2D g2D, Arena a, Rectangle2D window) {
+		g2D.setColor(BACKGROUND_COLOR);
+		fillRect(g2D,window.getX(),window.getY(), window.getWidth(),window.getHeight());
 		
 		double ts = Terrain.tileSize;
 		int x1 = Math.max(0, (int) (window.getX() / ts));
@@ -359,7 +448,141 @@ public class Renderer {
 		
 		for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
-				drawTerrain(g2D,a,x,y);
+				//drawTerrain(g2D,a,x,y);
+				Terrain t = a.get(x, y).getTerrain();
+				if (t==null || t.getId()==0)
+					continue;
+				
+				if (t.getId()==Terrain.BLEND) {
+					Terrain[] results = new Terrain[4];
+					int i = 0;
+					for (int xi=-1;xi<=1;xi+=2) {
+						for (int yi=-1;yi<=1;yi+=2) {
+							Terrain result = blendVote(a.get(x+xi, y).getTerrain(),
+									a.get(x, y+yi).getTerrain(),a.get(x+xi, y+yi).getTerrain());
+							results[i] = result;
+							
+							if (result==null || result.getId()==0)
+								continue;
+							
+							BufferedImage image = result.getImage();
+							int w = image.getWidth()/32;
+							int h = image.getHeight()/32;
+							double xM = (x%w)*ts;
+							double yM = (y%h)*ts;
+							
+							
+							drawImage(g2D,image, xM+ts*(xi+1.0)/4, yM+ts*(yi+1.0)/4, ts/2, ts/2,
+									x*ts+ts*(xi+1)/4, y*ts+ts*(yi+1)/4, ts/2, ts/2);
+							results[i] = result;
+							i++;
+						}
+					}
+					// double-check if there's any useless blend spot
+					if (results[0]==results[1] && results[1]==results[2] && results[2]==results[3]) {
+						g2D.setColor(Color.WHITE);
+						fillRect(g2D,x*ts,y*ts,ts,ts);
+					}
+				} else {
+					BufferedImage image = t.getImage();
+					int w = image.getWidth()/32;
+					int h = image.getHeight()/32;
+					double xM = (x%w)*ts;
+					double yM = (y%h)*ts;
+					
+					drawImage(g2D,image, xM, yM, ts, ts, x*ts, y*ts, ts, ts);
+				}
+			}
+		}
+	}
+	
+	public static void renderArenaBG(Graphics2D g2D, Arena a, Rectangle2D window) {
+		g2D.setColor(BACKGROUND_COLOR);
+		fillRect(g2D,window.getX(),window.getY(), window.getWidth(),window.getHeight());
+		
+		double cx = window.getX()+window.getWidth()/2;
+		double cy = window.getY()+window.getHeight()/2;
+		
+		double sw = window.getWidth()*(1+PARALLAX_FACTOR);
+		double sh = window.getHeight()*(1+PARALLAX_FACTOR);
+		double sx = window.getX() - window.getWidth()*PARALLAX_FACTOR/2;
+		double sy = window.getY() - window.getHeight()*PARALLAX_FACTOR/2;
+		
+		double ts = Terrain.tileSize;
+		int x1 = Math.max(0, (int) (sx / ts));
+		int y1 = Math.max(0, (int) (sy / ts));
+		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (sw / ts) + 1);
+		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (sh / ts) + 1);
+		
+		
+		for (int x = x1; x <= x2; x++) {
+			for (int y = y1; y <= y2; y++) {
+				//drawTerrain(g2D,a,x,y);
+				Terrain t = a.get(x, y).getTerrain();
+				if (t==null || t.getId()==0)
+					continue;
+				double rw = 1/(1+PARALLAX_FACTOR);
+				double dx = cx+((x+0.5)*ts-cx)*rw - ts*rw/2;
+				double dy = cy+((y+0.5)*ts-cy)*rw - ts*rw/2;
+				
+				if (t.getId()==Terrain.BLEND) {
+					
+					
+					Terrain[] results = new Terrain[4];
+					int i = 0;
+					for (int xi=-1;xi<=1;xi+=2) {
+						for (int yi=-1;yi<=1;yi+=2) {
+							Terrain result = blendVote(a.get(x+xi, y).getTerrain(),
+									a.get(x, y+yi).getTerrain(),a.get(x+xi, y+yi).getTerrain());
+							
+							if (result==null || result.getId()==0)
+								continue;
+							
+							BufferedImage image = result.getImage();
+							int w = image.getWidth()/32;
+							int h = image.getHeight()/32;
+							double xM = (x%w)*ts;
+							double yM = (y%h)*ts;
+							
+							
+							drawImage(g2D,image, xM+ts*(xi+1.0)/4, yM+ts*(yi+1.0)/4, ts/2, ts/2,
+									dx+ts*rw*(xi+1.0)/4, dy+ts*rw*(yi+1.0)/4, rw*ts/2, rw*ts/2);
+							results[i] = result;
+							i++;
+						}
+					}
+					// double-check if there's any useless blend spot
+					if (results[0]==results[1] && results[1]==results[2] && results[2]==results[3]) {
+						g2D.setColor(Color.WHITE);
+						fillRect(g2D,dx,dy,ts*rw,ts*rw);
+					}
+				} else {
+					BufferedImage image = t.getImage();
+					int w = image.getWidth()/32;
+					int h = image.getHeight()/32;
+					double xM = (x%w)*ts;
+					double yM = (y%h)*ts;
+					
+					drawImage(g2D,image, xM, yM, ts, ts, dx, dy, rw*ts, rw*ts);
+				}
+			}
+		}
+	}
+	
+	private static Terrain blendVote(Terrain main1, Terrain main2, Terrain tieBreaker) {
+		if (main1!=null && main1.getId()==Terrain.BLEND) {
+			if (main2!=null && main2.getId()==Terrain.BLEND) {
+				return tieBreaker;
+			} else {
+				return main2;
+			}
+		} else {
+			if (main2!=null && main2.getId()==Terrain.BLEND) {
+				return main1;
+			} else if (tieBreaker==main1 || tieBreaker==main2) {
+				return tieBreaker;
+			} else {
+				return main1;
 			}
 		}
 	}
@@ -377,6 +600,21 @@ public class Renderer {
 			}
 		}
 	}
+	
+	public static void renderArenaMiscs(Graphics2D g2D, Arena a, Rectangle2D window) {
+		double ts = Terrain.tileSize;
+		int x1 = Math.max(0, (int) (window.getX() / ts));
+		int y1 = Math.max(0, (int) (window.getY() / ts));
+		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (window.getWidth() / ts) + 1);
+		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (window.getHeight() / ts) + 1);
+		
+		for (int x = x1; x <= x2; x++) {
+			for (int y = y1; y <= y2; y++) {
+				drawMisc(g2D,a,x,y);
+			}
+		}
+	}
+	
 	
 	public static void renderGrid(Graphics2D g2D, Arena a, Rectangle2D window) {
 		//drawImage(g2D, a.image, window.getX(),window.getY(),window.getWidth(),window.getHeight(),window.getX(),window.getY(),window.getWidth(),window.getHeight());
@@ -410,7 +648,7 @@ public class Renderer {
 		g2D.setStroke(new BasicStroke(1));
 		for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
-				SpriteConfig sc = a.get(x, y).getSpriteConfig();
+				SpriteConfig sc = a.get(x, y).getThingConfig();
 				if (sc!=null) {
 					if (sc.flip) {
 						Renderer.drawLine(g2D, (x+0.8)*ts, (y+0.2)*ts, (x+0.8)*ts, (y+0.8)*ts);
@@ -433,8 +671,7 @@ public class Renderer {
 		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (window.getWidth() / ts) + 1);
 		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (window.getHeight() / ts) + 1);
 		
-		g2D.setStroke(new BasicStroke(1.5f));
-		g2D.setColor(new Color(0x3f3faf));
+		
 		/*
 		if (LOOP_SPRITE==null) {
 			try {
@@ -445,21 +682,33 @@ public class Renderer {
 			}
 		}
 		*/
+		g2D.setStroke(new BasicStroke(1.5f));
 		for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
 				Trigger tr = a.get(x, y).getTrigger();
 				if (tr!=null) {
-					if (tr instanceof Trigger.TileSwitchTrigger) {
-						Trigger.TileSwitchTrigger tst = (Trigger.TileSwitchTrigger) tr;
-						Point p = tst.getTargetTile();
-						if (x != p.x || y != p.y){
-							drawLine(g2D,Utils.tileToMeter(x, y),Utils.tileToMeter(tst.getTargetTile()));
-						} else {
-							Point2D p2d = Utils.tileToMeter(p);
-							drawCircle(g2D,p2d.getX(),p2d.getY(),Terrain.tileSize/4);
-						}
-						if (tst.getSwitchThing()!=null) {
-							drawImage(g2D,tst.getSwitchThing().getImage(),0,0,ts,ts,p.x*ts,p.y*ts,ts/2,ts/2);
+					if (tr instanceof Trigger.SwitchOnTouchSide) {
+						SwitchOnTouchSide sots = (SwitchOnTouchSide) tr;
+						g2D.setColor(GUIFactory.UICOLOR);
+						Point2D p = Geometry.PolarToCartesian(Terrain.tileSize/2, Math.PI*sots.getSide()/2);
+						Point2D c = Utils.tileToMeter(x, y);
+						Renderer.drawLine(g2D, c.getX(), c.getY(), c.getX()+p.getX(),c.getY()+p.getY());
+					}
+					
+					g2D.setColor(GUIFactory.UICOLOR);
+					for (TriggerEffect effect:tr.getEffects()) {
+						if (effect instanceof TriggerEffect.TileSwitch) {
+							TriggerEffect.TileSwitch tileSwitch = (TriggerEffect.TileSwitch) effect;
+							Point p = tileSwitch.getTargetTile();
+							if (x != p.x || y != p.y){
+								drawLine(g2D,Utils.tileToMeter(x, y),Utils.tileToMeter(tileSwitch.getTargetTile()));
+							} else {
+								Point2D p2d = Utils.tileToMeter(p);
+								drawCircle(g2D,p2d.getX(),p2d.getY(),Terrain.tileSize/4);
+							}
+							if (tileSwitch.getSwitchThing()!=null) {
+								drawImage(g2D,tileSwitch.getSwitchThing().getImage(),0,0,ts,ts,p.x*ts,p.y*ts,ts/2,ts/2);
+							}
 						}
 					}
 				}
@@ -647,23 +896,78 @@ public class Renderer {
 		}
 	}
 
-	public void redrawArenaImage(Arena a, int tx, int ty) {
-		Graphics2D g2D = (Graphics2D) lightArenaImage.getGraphics();
+	public void redrawArenaImage(Arena a, int tx, int ty, int layer) {
+		layerImages[layer] = ImageBlender.drawArena(a, layer);
+		/*
+		Graphics2D g2D = (Graphics2D) layerImages[layer].getGraphics();
 		double ts = Terrain.tileSize;
 		
-		g2D.setColor(BACKGROUND_COLOR);
-		fillRect(g2D,tx*ts,ty*ts,ts,ts);
-		drawTerrain(g2D,a,tx,ty);
+		if (layer==0) {
+			g2D.setColor(BACKGROUND_COLOR);
+			fillRect(g2D,tx*ts,ty*ts,ts,ts);
+			drawTerrain(g2D,a,tx,ty);
+		}
 		
 		for (int x=Math.max(tx-1,0);x<=Math.min(tx+1, a.getWidth());x++) {
 			for (int y=Math.max(0, ty-1);y<=Math.min(ty+1,a.getHeight());y++) {
-				drawThing(g2D,a,x,y);
+				Tile t = a.get(x, y);
+				
+				Thing th = t.getThing();
+				if (th!=null && th.getLayer()==layer) {
+					drawThing(g2D,a,x,y);
+				}
+				Misc mi = t.getMisc();
+				if (mi != null) {
+					int tlayer = th==null?0:th.getLayer();
+					int mlayer = mi.getLayer();
+					if (tlayer==mlayer) {
+						mlayer = Math.min(4, mlayer+1);
+					} else {
+						mlayer = Math.max(tlayer, mlayer);
+					}
+					if (mlayer==layer) {
+						drawMisc(g2D,a,x,y);
+					}
+				}
 			}
-		}
+		}*/
 	}
 
 	public void redrawLightImage(Arena arena) {
 		Graphics2D g2D = (Graphics2D) lightMap.getGraphics();
 		Renderer.renderHardLight(g2D, arena, new Rectangle2D.Double(0, 0, arena.getWidthMeter(), arena.getHeightMeter()));
+	}
+
+	public void drawArenaLayer(Graphics2D g2D, int layer, Rectangle2D window) {
+		drawArenaImage(g2D, layerImages[layer], window);
+	}
+	
+	public static void drawArenaLayer(Graphics2D g2D, Arena a, int layer, boolean terrain, boolean thing, boolean misc) {
+		if (terrain && layer==0) {
+			Renderer.renderArenaBGFlat(g2D, a, new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
+		}
+		for (int x=0;x<a.getWidth();x++) {
+			for (int y=0;y<a.getHeight();y++) {
+				Tile t = a.get(x, y);
+				
+				Thing th = t.getThing();
+				if (thing && th!=null && th.getLayer()==layer) {
+					drawThing(g2D,a,x,y);
+				}
+				Misc mi = t.getMisc();
+				if (misc && mi != null) {
+					int tlayer = th==null?0:th.getLayer();
+					int mlayer = mi.getLayer();
+					if (tlayer==mlayer) {
+						mlayer = Math.min(4, mlayer+1);
+					} else {
+						mlayer = Math.max(tlayer, mlayer);
+					}
+					if (mlayer==layer) {
+						drawMisc(g2D,a,x,y);
+					}
+				}
+			}
+		}
 	}
 }

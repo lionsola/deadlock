@@ -1,8 +1,10 @@
-package server.world;
+package server.world.trigger;
 
 import java.io.Serializable;
 
-public class TriggerPreset implements Serializable {
+import server.world.Thing;
+
+public class TileSwitchPreset implements Serializable {
 	private static final long serialVersionUID = 1954603658126830693L;
 	
 	private int presetID;
@@ -11,6 +13,8 @@ public class TriggerPreset implements Serializable {
 	private double soundVolume;
 	private int switchThingID;
 	private int originalThingID;
+	
+	private int triggerType;
 	
 	private transient Thing switchThing;
 	private transient Thing originalThing;
@@ -45,8 +49,8 @@ public class TriggerPreset implements Serializable {
 		this.originalThing = originalThing;
 	}
 
-	public TriggerPreset(int id) {
-		
+	public TileSwitchPreset(int id) {
+		presetID = id;
 	}
 	
 	public int getId() {
@@ -98,5 +102,13 @@ public class TriggerPreset implements Serializable {
 
 	public int getOriginalThingID() {
 		return originalThingID;
+	}
+
+	public int getTriggerType() {
+		return triggerType;
+	}
+	
+	public void setTriggerType(int triggerType) {
+		this.triggerType = triggerType;
 	}
 }

@@ -1,12 +1,21 @@
 package server.world;
 
-public class Tile {
-	private Terrain terrain;
-	private Thing thing;
-	private SpriteConfig config;
+import java.io.Serializable;
+
+import server.world.trigger.Trigger;
+
+public class Tile implements Serializable {
+	private static final long serialVersionUID = 5249052371261483524L;
+
+	transient private Terrain terrain;
+	
+	transient private Thing thing;
+	private SpriteConfig thingConfig;
+	
+	transient private Misc misc;
+	private SpriteConfig miscConfig;
+	
 	private Trigger trigger;
-	private int oldLight;
-	//private boolean active;
 	
 	public boolean isTraversable() {
 		return thing==null || thing.isWalkable();
@@ -31,10 +40,6 @@ public class Tile {
 	public Trigger getTrigger() {
 		return trigger;
 	}
-	
-	public int getLightLevel() {
-		return oldLight;
-	}
 
 	public void setTerrain(Terrain terrain) {
 		this.terrain = terrain;
@@ -44,12 +49,12 @@ public class Tile {
 		this.thing = thing;
 	}
 	
-	public void setSpriteConfig(SpriteConfig config) {
-		this.config = config;
+	public void setThingConfig(SpriteConfig config) {
+		this.thingConfig = config;
 	}
 	
-	public SpriteConfig getSpriteConfig() {
-		return config;
+	public SpriteConfig getThingConfig() {
+		return thingConfig;
 	}
 	
 	@Override
@@ -60,5 +65,21 @@ public class Tile {
 
 	public void setTrigger(Trigger trigger) {
 		this.trigger = trigger;
+	}
+
+	public Misc getMisc() {
+		return misc;
+	}
+
+	public void setMisc(Misc misc) {
+		this.misc = misc;
+	}
+
+	public SpriteConfig getMiscConfig() {
+		return miscConfig;
+	}
+
+	public void setMiscConfig(SpriteConfig miscConfig) {
+		this.miscConfig = miscConfig;
 	}
 }

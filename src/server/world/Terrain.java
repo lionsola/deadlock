@@ -6,6 +6,7 @@ import java.io.Serializable;
 
 import editor.CellRenderable;
 import editor.Identifiable;
+import editor.ImageLoadable;
 
 /**
  * Represent the properties and data of one type of tile. Note that there is only one tile object
@@ -14,14 +15,11 @@ import editor.Identifiable;
  * 
  * @author Anh Pham
  */
-public class Terrain implements CellRenderable, Identifiable, Serializable {
+public class Terrain implements CellRenderable, Identifiable, Serializable, ImageLoadable {
 	private static final long serialVersionUID = 2914169403817715835L;
-	public static final int COVER_NONE = 0;
-	public static final int COVER_LIGHT = 1;
-	public static final int COVER_MEDIUM = 2;
-	public static final int COVER_HEAVY = 3;
 	
 	public static final double tileSize = 1.6; // default
+	public static final int BLEND = 1;
 
 	protected int id;
 	protected String name;

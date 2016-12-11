@@ -5,13 +5,11 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,14 +20,10 @@ import java.util.Scanner;
 import javax.imageio.ImageIO;
 
 import client.graphics.ImageBlender;
-import client.graphics.ParticleEmitter;
 import server.world.Arena;
-import server.world.Light;
-import server.world.SpriteConfig;
+import server.world.Misc;
 import server.world.Thing;
-import server.world.Tile;
-import server.world.Trigger;
-import server.world.TriggerPreset;
+import server.world.trigger.TileSwitchPreset;
 import server.world.Terrain;
 
 public class DataManager {
@@ -39,8 +33,10 @@ public class DataManager {
 	public static final String FILE_OBJECTS_OLD = "resource/tile/objects_old";
 	public static final String DIR_MAP = "resource/map/";
 	public static final String FILE_TRIGGERS = "resource/tile/triggers";
+	public static final String FILE_MISC = "resource/tile/misc";
 	
 	public static void exportImages(Arena a) throws IOException {
+		
 		BufferedImage arenaImage = ImageBlender.drawArena(a);
 		
 		ImageIO.write(arenaImage, "png", new File(DIR_MAP+a.getName()+"_plain.png"));
@@ -51,14 +47,19 @@ public class DataManager {
 		BufferedImage darkImage = ImageBlender.applyBackgroundEffect(arenaImage);
 		ImageIO.write(darkImage, "png", new File(DIR_MAP+a.getName()+"_dark.png"));
 		
-		BufferedImage lightImage = ImageBlender.applyForegroundEffect(arenaImage);
-		ImageIO.write(lightImage, "png", new File(DIR_MAP+a.getName()+"_light.png"));
+		//BufferedImage lightImage = ImageBlender.applyForegroundEffect(arenaImage);
+		//ImageIO.write(lightImage, "png", new File(DIR_MAP+a.getName()+"_light.png"));
 		
 		BufferedImage lightMap = ImageBlender.drawLightImage(a);
 		ImageIO.write(lightMap, "png", new File(DIR_MAP+a.getName()+"_lightmap.png"));
 		
-		BufferedImage wholeMap = ImageBlender.blendLightImage(lightImage, lightMap);
+		BufferedImage wholeMap = ImageBlender.blendLightImage(arenaImage, lightMap);
 		ImageIO.write(wholeMap, "png", new File(DIR_MAP+a.getName()+".png"));
+		
+		for (int layer=0;layer<4;layer++) {
+			BufferedImage layerImage = ImageBlender.drawArena(a,layer);
+			ImageIO.write(layerImage, "png", new File(DIR_MAP+a.getName()+"_layer"+layer+".png"));
+		}
 	}
 	
 	public static void saveObject(Object object, String path) {
@@ -157,15 +158,43 @@ public class DataManager {
 		}
 	}
 	
-	public static void loadTileGraphics(Collection<Terrain> tiles) throws FileNotFoundException, IOException {
-		for (Terrain t:tiles) {
-			t.setImage(ImageIO.read(new FileInputStream("resource/tile/" + t.getImageName())));
+	public static void loadTileGraphics(Collection<Terrain> tiles){
+		try {
+			for (Terrain t:tiles) {
+				t.setImage(ImageIO.read(new FileInputStream("resource/tile/" + t.getImageName())));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
-	public static void loadObjectGraphics(Collection<Thing> tiles) throws FileNotFoundException, IOException {
-		for (Thing t:tiles) {
-			t.setImage(ImageIO.read(new FileInputStream("resource/tile/" + t.getImageName())));
+	public static void loadObjectGraphics(Collection<Thing> tiles) {
+		try {
+			for (Thing t:tiles) {
+				t.setImage(ImageIO.read(new FileInputStream("resource/tile/" + t.getImageName())));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void loadMiscGraphics(Collection<Misc> miscs) {
+		try {
+			for (Misc m:miscs) {
+				m.setImage(ImageIO.read(new FileInputStream("resource/tile/" + m.getImageName())));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void loadImage(Collection<? extends ImageLoadable> items) {
+		try {
+			for (ImageLoadable i:items) {
+				i.setImage(ImageIO.read(new FileInputStream("resource/tile/" + i.getImageName())));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -251,17 +280,12 @@ public class DataManager {
 		return objectMap;
 	}
 	
-	public static HashMap<Integer, TriggerPreset> getTriggerMap(Collection<TriggerPreset> triggers) {
-		HashMap<Integer,TriggerPreset> objectMap = new HashMap<Integer,TriggerPreset>(triggers.size());
-		for (TriggerPreset t:triggers) {
+	public static HashMap<Integer, TileSwitchPreset> getTriggerMap(Collection<TileSwitchPreset> triggers) {
+		HashMap<Integer,TileSwitchPreset> objectMap = new HashMap<Integer,TileSwitchPreset>(triggers.size());
+		for (TileSwitchPreset t:triggers) {
 			objectMap.put(t.getId(),t);
 		}
 		return objectMap;
-	}
-	
-	public static class ArenaGraphicalData implements Serializable {
-		private static final long serialVersionUID = 3645894568926110727L; 
-		public List<ParticleEmitter> particleEmitters;
 	}
 	
 	public static <T> void loadFromTable(int[][] idArray, HashMap<Integer, T> table, T[][] array) {
@@ -296,43 +320,9 @@ public class DataManager {
 			e.printStackTrace();
 		}
 	}
-
-	public static class ArenaData implements Serializable {
-		private static final long serialVersionUID = -5816600310705383411L;
-		public String name;
-		public int[][] tileMap;
-		public int[][] objectMap;
-		public SpriteConfig[][] configMap;
-		public Trigger[][] triggerMap;
-		public List<Light> lights;
-	}
 	
 	public static void exportArenaData(Arena a) {
-		ArenaData ad = new ArenaData();
-		
-		ad.name = a.getName();
-		ad.lights = a.getLightList();
-		ad.tileMap = new int[a.getWidth()][a.getHeight()];
-		ad.objectMap = new int[a.getWidth()][a.getHeight()];
-		ad.configMap = new SpriteConfig[a.getWidth()][a.getHeight()];
-		ad.triggerMap = new Trigger[a.getWidth()][a.getHeight()];
-		
-		for (int x=0;x<a.getWidth();x++) {
-			for (int y=0;y<a.getHeight();y++) {
-				Tile t = a.get(x, y);
-				
-				Terrain te = t.getTerrain();
-				ad.tileMap[x][y] = te!=null?te.getId():0;
-				
-				Thing ti = t.getThing();
-				ad.objectMap[x][y] = ti!=null?ti.getId():0;
-				
-				ad.configMap[x][y] = t.getSpriteConfig();
-				
-				ad.triggerMap[x][y] = t.getTrigger();
-			}
-		}
-		
-		saveObject(ad,"resource/map/"+a.getName()+".arena");
+		saveObject(new Arena.ArenaData(a),"resource/map/"+a.getName()+"_copy.arena");
+		saveObject(new Arena.ArenaData(a),"resource/map/"+a.getName()+".arena");
 	}
 }

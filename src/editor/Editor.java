@@ -6,16 +6,14 @@ import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -23,9 +21,10 @@ import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import server.world.Thing;
-import server.world.TriggerPreset;
+import server.world.Arena.ArenaData;
+import server.world.trigger.TileSwitchPreset;
+import server.world.Misc;
 import server.world.Terrain;
-import editor.DataManager.ArenaData;
 
 /**
  * The master frame that holds the game screens.
@@ -34,7 +33,8 @@ import editor.DataManager.ArenaData;
  * 
  * @author Anh Pham
  */
-public class Editor extends JFrame {
+public class Editor extends JFrame implements KeyListener {
+	public String[] layerTypes = {"Ground - 0m", "Medium - 1m", "High - 2m", "Ceiling - 4m"};
     
     private static final long serialVersionUID = 5913371417037613515L;
 
@@ -53,13 +53,14 @@ public class Editor extends JFrame {
 
 	Tool currentTool;
 
-	List<Terrain> tiles;
-	List<Thing> objects;
-	List<TriggerPreset> triggers;
+	//List<Terrain> tiles;
+	//List<Thing> objects;
+	//List<TriggerPreset> triggers;
 
 	HashMap<Integer,Terrain> tileTable;
 	HashMap<Integer,Thing> objectTable;
-	HashMap<Integer,TriggerPreset> triggerTable;
+	HashMap<Integer,TileSwitchPreset> triggerTable;
+	HashMap<Integer,Misc> miscTable;
 	
 	public boolean tileDataChanged = false;
 	
@@ -80,34 +81,35 @@ public class Editor extends JFrame {
         }
         this.setBackground(Color.BLACK);
 		//tiles = DataManager.loadTileListOld();
-		tiles = (List<Terrain>) DataManager.loadObject(DataManager.FILE_TILES);
-        try {
-			DataManager.loadTileGraphics(tiles);
-		} catch (IOException e) {
-			System.err.println("Error while loading tile images.");
-			e.printStackTrace();
-		}
-		tileTable = DataManager.getTileMap(tiles);
-        
+		//List<Terrain >tiles = (List<Terrain>) DataManager.loadObject(DataManager.FILE_TILES);
+        //tileTable = DataManager.getTileMap(tiles);
+        tileTable = (HashMap<Integer,Terrain>)DataManager.loadObject(DataManager.FILE_TILES);
+		DataManager.loadImage(tileTable.values());
+		
         //objects = DataManager.loadObjectListOld();
-        objects = (List<Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
-        try {
-			DataManager.loadObjectGraphics(objects);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-        objectTable = DataManager.getObjectMap(objects);
+        //objects = (List<Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
+        //objectTable = DataManager.getObjectMap(objects);
         
-        triggers = (List<TriggerPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
-        if (triggers==null) {
-        	triggers = new LinkedList<TriggerPreset>();
+        objectTable = (HashMap<Integer, Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
+        DataManager.loadImage(objectTable.values());
+        
+        
+        //triggers = (List<TriggerPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
+        
+        triggerTable = (HashMap<Integer, TileSwitchPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
+        if (triggerTable==null) {
+        	triggerTable = new HashMap<Integer,TileSwitchPreset>();
         }
-        for (TriggerPreset tp:triggers) {
+        for (TileSwitchPreset tp:triggerTable.values()) {
         	tp.setSwitchThing(objectTable.get(tp.getSwitchThingID()));
         	tp.setOriginalThing(objectTable.get(tp.getOriginalThingID()));
         }
         
-        triggerTable = DataManager.getTriggerMap(triggers);
+        miscTable = (HashMap<Integer, Misc>) DataManager.loadObject(DataManager.FILE_MISC);
+        if (miscTable==null) {
+        	miscTable = new HashMap<Integer,Misc>();
+        }
+        DataManager.loadImage(miscTable.values());
         
         getContentPane().setLayout(new BorderLayout());
         
@@ -120,24 +122,27 @@ public class Editor extends JFrame {
         	@Override
         	public void windowClosing(WindowEvent e) {
         		if (tileDataChanged) {
-	        		DataManager.saveObject(tiles, DataManager.FILE_TILES);
-	        		DataManager.saveObject(objects, DataManager.FILE_OBJECTS);
-	        		DataManager.saveObject(triggers, DataManager.FILE_TRIGGERS);
-	        		DataManager.saveTileListOld(tiles);
-	        		DataManager.saveObjectListOld(objects);
+	        		//DataManager.saveObject(tiles, DataManager.FILE_TILES);
+	        		//DataManager.saveObject(objects, DataManager.FILE_OBJECTS);
+	        		//DataManager.saveObject(triggers, DataManager.FILE_TRIGGERS);
 	        		
+	        		DataManager.saveObject(tileTable, DataManager.FILE_TILES);
+	        		DataManager.saveObject(objectTable, DataManager.FILE_OBJECTS);
+	        		DataManager.saveObject(triggerTable, DataManager.FILE_TRIGGERS);
+	        		DataManager.saveObject(miscTable, DataManager.FILE_MISC);
         		}
         	}
         });
         pack();
         setVisible(true);
         setLocationRelativeTo(null);
+        addKeyListener(this);
         openArena();
     }
 
     public void backupTileList() {
-    	DataManager.saveObject(tiles, DataManager.FILE_TILES+"_backup");
-    	DataManager.saveObject(objects, DataManager.FILE_OBJECTS+"_backup");
+    	DataManager.saveObject(tileTable, DataManager.FILE_TILES+"_backup");
+    	DataManager.saveObject(objectTable, DataManager.FILE_OBJECTS+"_backup");
     }
     
     @Override
@@ -190,7 +195,10 @@ public class Editor extends JFrame {
         EditorArena a = null;
         if (returnVal==JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            a = new EditorArena((ArenaData)DataManager.loadObject(file),tileTable,objectTable,triggerTable);
+            Object o = DataManager.loadObject(file);
+            if (o instanceof ArenaData) {
+            	a = new EditorArena((ArenaData)o,tileTable,objectTable,triggerTable,miscTable);
+            }
         }
         if (a!=null) {
         	setArena(a);
@@ -229,29 +237,42 @@ public class Editor extends JFrame {
 		setArena(new EditorArena(n,w,h));
 	}
 
-	public List<Thing> getObjectList() {
-		return objects;
-	}
-
+	/*
 	public List<Terrain> getTerrainList() {
 		return tiles;
-	}
+	}*/
 
 	/**
 	 * @return the triggerTable
 	 */
-	public HashMap<Integer, TriggerPreset> getTriggerTable() {
+	public HashMap<Integer, TileSwitchPreset> getTriggerTable() {
 		return triggerTable;
 	}
 
 	/**
 	 * @param triggerTable the triggerTable to set
 	 */
-	public void setTriggerTable(HashMap<Integer, TriggerPreset> triggerTable) {
+	public void setTriggerTable(HashMap<Integer, TileSwitchPreset> triggerTable) {
 		this.triggerTable = triggerTable;
 	}
 
-	public List<TriggerPreset> getTriggerList() {
-		return triggers;
+	@Override
+	public void keyPressed(KeyEvent arg0) {
+		if (arg0.getKeyCode()==KeyEvent.VK_ALT && currentTool!=null) {
+			currentTool.setAlternative(true);
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent arg0) {
+		if (arg0.getKeyCode()==KeyEvent.VK_ALT && currentTool!=null) {
+			currentTool.setAlternative(false);
+		}
+	}
+
+	@Override
+	public void keyTyped(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 }

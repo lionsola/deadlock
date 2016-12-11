@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Point;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -17,14 +18,13 @@ import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import editor.Editor;
-
 public class LightSourceDialog extends JDialog {
 	private static final long serialVersionUID = 5917436825785813483L;
 	private JButton color;
-	private int range = 3;
-	public LightSourceDialog (final Editor editor, final JToggleButton button) {
-		super(editor, "Light", false);
+	private int range;
+	public LightSourceDialog (final Window owner, final JToggleButton button, int defaultColor, int defaultRange) {
+		super(owner, "Light");
+		range = defaultRange;
         JPanel panel = new JPanel(new GridBagLayout());
         //editor.setTool(tool);
         addWindowListener(new WindowAdapter(){
@@ -32,7 +32,7 @@ public class LightSourceDialog extends JDialog {
 			public void windowClosing(WindowEvent arg0) {
 				button.doClick();
 			}});
-        JSlider rangePicker = new JSlider(JSlider.HORIZONTAL, 2, 8, range);
+        JSlider rangePicker = new JSlider(JSlider.HORIZONTAL, 1, 8, defaultRange);
         rangePicker.setMajorTickSpacing(1);
         rangePicker.setPaintTicks(true);
         rangePicker.setPaintLabels(true);
@@ -59,7 +59,7 @@ public class LightSourceDialog extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				Color newColor = JColorChooser.showDialog(
-	                     editor,
+	                     LightSourceDialog.this,
 	                     "Choose Background Color",
 	                     color.getBackground());
 				color.setBackground(newColor);
@@ -67,6 +67,7 @@ public class LightSourceDialog extends JDialog {
 			}
         });
         color.setToolTipText("Light color (alpha channel is ignored)");
+        color.setText(Integer.toHexString(defaultColor));
         panel.add(color,c);
         
         

@@ -1,5 +1,6 @@
 package editor;
 
+import java.awt.Component;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
@@ -19,6 +20,10 @@ public class CustomListModel<T> extends AbstractListModel<T> {
 		this.list = team;
 	}
 
+	public void setList(List<T> list) {
+		this.list = list;
+	}
+	
 	@Override
 	public T getElementAt(int index) {
 		return list.get(index);
@@ -34,5 +39,9 @@ public class CustomListModel<T> extends AbstractListModel<T> {
 	 */
 	public void invalidate() {
 		this.fireContentsChanged(this, 0, list.size()-1);
+	}
+
+	public List<T> getList() {
+		return list;
 	}
 }

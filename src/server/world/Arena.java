@@ -5,12 +5,15 @@ import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import editor.DataManager;
-import editor.DataManager.ArenaData;
+import server.world.trigger.Trigger;
+import server.world.trigger.TriggerEffect;
+import server.world.trigger.TileSwitchPreset;
 
 /**
  * Class used to model an Arena - the Arena is what the characters will fight in and what they will
@@ -30,9 +33,9 @@ public class Arena {
 	protected String name; // the name of the map
 	private transient List<Point2D> t1Spawns; // spawn points of team 1
 	private transient List<Point2D> t2Spawns; // spawn points of team 2
-	protected List<Light> lightList;
+	protected transient List<Light> lightList;
 	
-	protected int[][] lightMap;
+	protected transient int[][] lightMap;
 	
 	protected Tile[][] tMap;
 	
@@ -44,14 +47,16 @@ public class Arena {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public Arena(String name, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable, HashMap<Integer,TriggerPreset> triggerTable) {
-		this((ArenaData) DataManager.loadObject("resource/map/"+name+".arena"),tileTable,objectTable,triggerTable);
+	public Arena(String name, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable,
+			HashMap<Integer,TileSwitchPreset> triggerTable, HashMap<Integer,Misc> miscTable) {
+		this((ArenaData) DataManager.loadObject("resource/map/"+name+".arena"),tileTable,objectTable,triggerTable,miscTable);
 	}
 	
-	public Arena(ArenaData ad, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable, HashMap<Integer,TriggerPreset> triggerTable) {
-		initialize(ad,tileTable,objectTable,triggerTable);
+	public Arena(ArenaData ad, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable,
+			HashMap<Integer,TileSwitchPreset> triggerTable, HashMap<Integer,Misc> miscTable) {
+		initialize(ad,tileTable,objectTable,triggerTable,miscTable);
 	}
-
+	
 	public Arena(String name, int width, int height) {
 		this.name = name;
 		this.lightMap = new int[width][height];
@@ -64,42 +69,49 @@ public class Arena {
 		this.lightList = new LinkedList<Light>();
 	}
 	
-	private void initialize(ArenaData ad, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable, HashMap<Integer,TriggerPreset> triggerTable) {
+	private void initialize(ArenaData ad, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable,
+			HashMap<Integer,TileSwitchPreset> triggerTable, HashMap<Integer,Misc> miscTable) {
 		this.name = ad.name;
-		int width = ad.tileMap.length;
-		int height = ad.tileMap[0].length;
-		tMap = new Tile[width][height];
-		Terrain[][] tileMap = new Terrain[width][height];
-		Thing[][] objectMap = new Thing[width][height];
-		DataManager.loadFromTable(ad.tileMap,tileTable,tileMap);
-		DataManager.loadFromTable(ad.objectMap,objectTable,objectMap);
-		
+		int width = ad.tMap.length;
+		int height = ad.tMap[0].length;
+		tMap = ad.tMap;
+		lightList = new LinkedList<Light>();
 		for (int x=0;x<width;x++) {
 			for (int y=0;y<height;y++) {
-				tMap[x][y] = new Tile();
-				tMap[x][y].setTerrain(tileMap[x][y]);
-				tMap[x][y].setThing(objectMap[x][y]);
-				if (ad.configMap!=null) {
-					tMap[x][y].setSpriteConfig(ad.configMap[x][y]);
+				tMap[x][y].setTerrain(tileTable.get(ad.idMap[x][y].terrainId));
+				tMap[x][y].setThing(objectTable.get(ad.idMap[x][y].thingId));
+				tMap[x][y].setMisc(miscTable.get(ad.idMap[x][y].miscId));
+				Thing th = tMap[x][y].getThing();
+				if (th!=null) {
+					Light l = th.getLight();
+					if (l!=null) {
+						lightList.add(new Light(x,y,l.getColor(),l.getRange()));
+					}
 				}
-				if (ad.triggerMap!=null) {
-					Trigger tr = ad.triggerMap[x][y];
-					tMap[x][y].setTrigger(tr);
-					if (tr instanceof Trigger.TileSwitchTrigger) {
-						Trigger.TileSwitchTrigger tst = (Trigger.TileSwitchTrigger)tr;
-						tst.setPreset(triggerTable.get(tst.presetID));
-						if (tst.tp==null) {
-							tMap[x][y].setTrigger(null);
+				Misc mi = tMap[x][y].getMisc();
+				if (mi!=null) {
+					Light lm = mi.getLight();
+					if (lm!=null) {
+						lightList.add(new Light(x,y,lm.getColor(),lm.getRange()));
+					}
+				}
+				
+				Trigger tr = tMap[x][y].getTrigger();
+				if (tr!=null) {
+					for (TriggerEffect effect:tr.getEffects()) {
+						if (effect instanceof TriggerEffect.TileSwitch) {
+							TriggerEffect.TileSwitch tst = (TriggerEffect.TileSwitch)effect;
+							tst.setPreset(triggerTable.get(tst.presetID));
+							if (tst.getPreset()==null) {
+								tMap[x][y].setTrigger(null);
+							}
 						}
 					}
 				}
 			}
 		}
+		
 		generateSpawnPoints();
-		lightList = ad.lights;
-		if (lightList==null) {
-			lightList = new LinkedList<Light>();
-		}
 		generateLightMap();
 	}
 	
@@ -196,6 +208,21 @@ public class Arena {
 		for (int[] lights:lightMap) {
 			Arrays.fill(lights, INITIAL_LIGHT_RGB);
 		}
+		
+		List<Light> newLightList = new LinkedList<Light>();
+		for (int x=0;x<getWidth();x++) {
+			for (int y=0;y<getHeight();y++) {
+				if (get(x,y).getThing()!=null && get(x,y).getThing().getLight()!=null) {
+					Light l = get(x,y).getThing().getLight();
+					newLightList.add(new Light(x,y,l.getColor(),l.getRange()));
+				}
+				if (get(x,y).getMisc()!=null && get(x,y).getMisc().getLight()!=null) {
+					Light l = get(x,y).getMisc().getLight();
+					newLightList.add(new Light(x,y,l.getColor(),l.getRange()));
+				}
+			}
+		}
+		lightList = newLightList;
 		
 		for (Light l:lightList) {
 			int x1 = Math.min(getWidth()-1, Math.max(0,l.getX() - l.getRange()));
@@ -321,12 +348,40 @@ public class Arena {
 	public List<Light> getLightList() {
 		return lightList;
 	}
-	/**
-	 * Render the Arena.
-	 * 
-	 * @param g
-	 * @param window
-	 *            the whole game window.
-	 */
+
+	public static class ArenaData implements Serializable {
+		private static final long serialVersionUID = -3052994148693588749L;
+		public String name;
+		public Tile[][] tMap;
+		public TileData[][] idMap;
+		
+		public ArenaData(Arena a) {
+			name = a.getName();
+			tMap = a.tMap;
+			idMap = new TileData[a.getWidth()][a.getHeight()];
+			
+			for (int x=0;x<a.getWidth();x++) {
+				for (int y=0;y<a.getHeight();y++) {
+					Tile t = a.get(x, y);
+					
+					idMap[x][y] = new TileData();
+					Terrain te = t.getTerrain();
+					idMap[x][y].terrainId = te!=null?te.getId():0;
+					
+					Thing ti = t.getThing();
+					idMap[x][y].thingId = ti!=null?ti.getId():0;
+					
+					Misc mi = t.getMisc();
+					idMap[x][y].miscId = mi!=null?mi.getId():0;
+				}
+			}
+		}
+	}
 	
+	public static class TileData implements Serializable {
+		private static final long serialVersionUID = 5708858620829910396L;
+		int terrainId;
+		int thingId;
+		int miscId;
+	}
 }

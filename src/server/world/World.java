@@ -8,6 +8,7 @@ import java.util.List;
 
 import server.character.Character;
 import server.character.PlayerCharacter;
+import server.world.trigger.Trigger;
 import shared.network.CharData;
 import shared.network.ProjectileData;
 import shared.network.GameDataPackets.WorldStatePacket;

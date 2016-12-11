@@ -2,7 +2,6 @@ package server.network;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,10 +15,11 @@ import server.character.ClassStats;
 import server.character.PlayerCharacter;
 import server.weapon.WeaponFactory;
 import server.world.Arena;
+import server.world.Misc;
 import server.world.Thing;
-import server.world.TriggerPreset;
 import server.world.Terrain;
 import server.world.World;
+import server.world.trigger.TileSwitchPreset;
 import shared.network.GameDataPackets.InputPacket;
 import shared.network.GameDataPackets.WorldStatePacket;
 import shared.network.event.AnimationEvent;
@@ -76,20 +76,20 @@ public class MatchServer implements Runnable, Listener {
 	}
 
 	protected void initializeWorld(String arenaName) {
-		Collection<Terrain> tileList = (List<Terrain>) DataManager.loadObject(DataManager.FILE_TILES);
-		HashMap<Integer,Terrain> tileTable = DataManager.getTileMap(tileList);
+		HashMap<Integer,Terrain> tileTable = (HashMap<Integer, Terrain>) DataManager.loadObject(DataManager.FILE_TILES);
 		
-		Collection<Thing> objectList = (List<Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
-		HashMap<Integer,Thing> objectTable = DataManager.getObjectMap(objectList);
+		HashMap<Integer,Thing> objectTable = (HashMap<Integer, Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
 		
-		Collection<TriggerPreset> triggerList = (Collection<TriggerPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
-		for (TriggerPreset tp:triggerList) {
+		HashMap<Integer,TileSwitchPreset> triggerTable = (HashMap<Integer, TileSwitchPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
+		
+		for (TileSwitchPreset tp:triggerTable.values()) {
         	tp.setSwitchThing(objectTable.get(tp.getSwitchThingID()));
         	tp.setOriginalThing(objectTable.get(tp.getOriginalThingID()));
         }
-		HashMap<Integer,TriggerPreset> triggerTable = DataManager.getTriggerMap(triggerList);
 		
-		Arena arena = new Arena(arenaName, tileTable, objectTable, triggerTable);
+		HashMap<Integer,Misc> miscTable = (HashMap<Integer,Misc>) DataManager.loadObject(DataManager.FILE_MISC);
+		
+		Arena arena = new Arena(arenaName, tileTable, objectTable, triggerTable, miscTable);
 
 		this.world = new World(arena, this);
 	}

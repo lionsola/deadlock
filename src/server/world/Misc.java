@@ -1,6 +1,5 @@
 package server.world;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 
@@ -8,28 +7,23 @@ import editor.CellRenderable;
 import editor.Identifiable;
 import editor.ImageLoadable;
 
-public class Thing implements CellRenderable, Identifiable, Serializable, ImageLoadable {
-	private static final long serialVersionUID = 5048693025792883019L;
+public class Misc implements CellRenderable, Identifiable, Serializable, ImageLoadable {
+	private static final long serialVersionUID = -7507913680913283436L;
 
-	public Thing(int id) {
-		this.id = id;
-	}
-	
 	protected int id;
-	protected boolean walkable;
-	protected boolean transparent;
-	protected int coverType;
-	protected int layer;
-	protected Color color;
-	protected Light light;
+	
 	protected String name;
 	protected String imageName;
 	
-	protected boolean border;
-	
+	protected Light light;
+	protected int layer;
 	protected double spriteSize; // in meters
 	protected transient BufferedImage objectImage;
 	
+	public Misc(int idNumber) {
+		id = idNumber;
+	}
+
 	/**
 	 * @return the imageName
 	 */
@@ -51,42 +45,6 @@ public class Thing implements CellRenderable, Identifiable, Serializable, ImageL
 		return id;
 	}
 
-	/**
-	 * @return the walkable
-	 */
-	public boolean isWalkable() {
-		return walkable;
-	}
-	/**
-	 * @param walkable the walkable to set
-	 */
-	public void setWalkable(boolean walkable) {
-		this.walkable = walkable;
-	}
-	/**
-	 * @return the transparent
-	 */
-	public boolean isClear() {
-		return transparent;
-	}
-	/**
-	 * @param transparent the transparent to set
-	 */
-	public void setClear(boolean transparent) {
-		this.transparent = transparent;
-	}
-	/**
-	 * @return the coverType
-	 */
-	public int getCoverType() {
-		return coverType;
-	}
-	/**
-	 * @param coverType the coverType to set
-	 */
-	public void setCoverType(int coverType) {
-		this.coverType = coverType;
-	}
 	/**
 	 * @return the name
 	 */
@@ -122,19 +80,6 @@ public class Thing implements CellRenderable, Identifiable, Serializable, ImageL
 	 */
 	public void setImage(BufferedImage objectImage) {
 		this.objectImage = objectImage;
-		color = new Color(objectImage.getRGB(0, 0));
-	}
-	
-	public Color getColor() {
-		return color;
-	}
-	
-	public boolean isBorderDrawn() {
-		return border;
-	}
-	
-	public void setBorder(boolean border) {
-		this.border = border;
 	}
 	
 	@Override
@@ -156,10 +101,16 @@ public class Thing implements CellRenderable, Identifiable, Serializable, ImageL
 		this.light = light;
 	}
 
+	/**
+	 * @return the layer
+	 */
 	public int getLayer() {
 		return layer;
 	}
-	
+
+	/**
+	 * @param layer the layer to set
+	 */
 	public void setLayer(int layer) {
 		this.layer = layer;
 	}

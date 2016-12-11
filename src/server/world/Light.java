@@ -17,6 +17,11 @@ public class Light implements Serializable {
 		this.color = color;
 		this.range = range;
 	}
+	
+	public Light(int color, int range) {
+		this.color = color;
+		this.range = range;
+	}
 
 	public int getX() {return x;}
 	
