@@ -448,7 +448,8 @@ public class Renderer {
 		
 		for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
-				//drawTerrain(g2D,a,x,y);
+				drawTerrain(g2D,a,x,y);
+				/*
 				Terrain t = a.get(x, y).getTerrain();
 				if (t==null || t.getId()==0)
 					continue;
@@ -491,7 +492,7 @@ public class Renderer {
 					double yM = (y%h)*ts;
 					
 					drawImage(g2D,image, xM, yM, ts, ts, x*ts, y*ts, ts, ts);
-				}
+				}*/
 			}
 		}
 	}
@@ -706,8 +707,8 @@ public class Renderer {
 								Point2D p2d = Utils.tileToMeter(p);
 								drawCircle(g2D,p2d.getX(),p2d.getY(),Terrain.tileSize/4);
 							}
-							if (tileSwitch.getSwitchThing()!=null) {
-								drawImage(g2D,tileSwitch.getSwitchThing().getImage(),0,0,ts,ts,p.x*ts,p.y*ts,ts/2,ts/2);
+							if (tileSwitch.getPreset().getSwitchThing()!=null) {
+								drawImage(g2D,tileSwitch.getPreset().getSwitchThing().getImage(),0,0,ts,ts,p.x*ts,p.y*ts,ts/2,ts/2);
 							}
 						}
 					}

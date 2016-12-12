@@ -145,7 +145,7 @@ public class MiscDialog extends JDialog implements ActionListener {
 		if (arg0.getSource()==save) {
 			if (this.misc==null) {
 				int idNumber = ((Number)id.getValue()).intValue();
-				if (editor.getObjectTable().containsKey(idNumber)) {
+				if (editor.miscTable.containsKey(idNumber)) {
 					JOptionPane.showMessageDialog(this,"Existing ID");
 					return;
 				} else if (name.getText().equals("")) {

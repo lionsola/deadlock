@@ -2,10 +2,17 @@ package editor.dialogs;
  
 import javax.swing.*;
 
-import editor.Editor;
-
-import java.awt.*;
+import editor.CellRenderable;
+import editor.CustomListModel;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Window;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Collection;
  
 /*
  * ListDialog is meant to be used to display a list of objects.
@@ -14,8 +21,25 @@ import java.awt.event.*;
  */
 
 public class ListDialog<T> extends JDialog {
-
 	private static final long serialVersionUID = -2705330003771825132L;
+	
+	public static <I extends CellRenderable> I selectFromList(Collection<I> items,Window owner) {
+		CustomListModel<I> tlm = new CustomListModel<I>(new ArrayList<I>(items));
+		JButton OK = new JButton("OK");
+		JButton[] buttons = {OK};
+		final ListDialog<I> listDialog = new ListDialog<I>(owner, null, "Tile", buttons, tlm);
+		OK.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				listDialog.setVisible(false);
+			}
+		});
+		listDialog.setModalityType(ModalityType.APPLICATION_MODAL);
+		listDialog.setVisible(true);
+		
+		return listDialog.getList().getSelectedValue();
+	}
+	
     private JList<T> list;
  
     /**

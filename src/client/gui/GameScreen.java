@@ -98,6 +98,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private Visibility visibility = new Visibility();
 	private Renderer renderer = new Renderer();
 	private HashMap<Integer,Thing> objectTable;
+	private HashMap<Integer, Misc> miscTable;
 	
 	private boolean playing = true;
 	private double zoomLevel = 0;
@@ -145,7 +146,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		objectTable = (HashMap<Integer, Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
 		
 		HashMap<Integer,TileSwitchPreset> triggerTable = (HashMap<Integer, TileSwitchPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
-		HashMap<Integer,Misc> miscTable = (HashMap<Integer,Misc>) DataManager.loadObject(DataManager.FILE_MISC);
+		miscTable = (HashMap<Integer,Misc>) DataManager.loadObject(DataManager.FILE_MISC);
 		if (miscTable==null) {
 			miscTable = new HashMap<Integer,Misc>();
 		}
@@ -751,7 +752,12 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				nonvisualAnimations.addAnimation(new AnimationEvent(AnimationEvent.ENEMYMARK,e.x,e.y,0));
 			} else if (event instanceof TileChanged) {
 				TileChanged e = (TileChanged) event;
-				arena.get(e.tx, e.ty).setThing(objectTable.get(e.switchThingID));
+				if (e.itemType==TileSwitchPreset.THING) {
+					arena.get(e.tx, e.ty).setThing(objectTable.get(e.switchThingID));
+				} else if (e.itemType==TileSwitchPreset.MISC) {
+					arena.get(e.tx, e.ty).setMisc(miscTable.get(e.switchThingID));
+				}
+				
 				arena.generateLightMap();
 				renderer.redrawLightImage(arena);
 				

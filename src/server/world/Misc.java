@@ -6,8 +6,9 @@ import java.io.Serializable;
 import editor.CellRenderable;
 import editor.Identifiable;
 import editor.ImageLoadable;
+import server.world.trigger.TileSwitchPreset.Switchable;
 
-public class Misc implements CellRenderable, Identifiable, Serializable, ImageLoadable {
+public class Misc implements Switchable, CellRenderable, Identifiable, Serializable, ImageLoadable {
 	private static final long serialVersionUID = -7507913680913283436L;
 
 	protected int id;

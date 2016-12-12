@@ -70,10 +70,12 @@ public abstract class GameEvent implements Serializable {
 		public final short tx;
 		public final short ty;
 		public final int switchThingID;
-		public TileChanged(int tx, int ty, int switchThingID) {
+		public final byte itemType;
+		public TileChanged(int tx, int ty, int switchThingID, int itemType) {
 			this.tx = (short)tx;
 			this.ty = (short)ty;
 			this.switchThingID = switchThingID;
+			this.itemType = (byte)itemType;
 		}
 	}
 	

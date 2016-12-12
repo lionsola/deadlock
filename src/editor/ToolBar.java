@@ -28,7 +28,6 @@ import client.gui.GUIFactory;
 import editor.Tool.*;
 import editor.dialogs.ListDialog;
 import editor.dialogs.MiscDialog;
-import editor.dialogs.LightSourceDialog;
 import editor.dialogs.TerrainDialog;
 import editor.dialogs.ThingDialog;
 import editor.dialogs.TileSwitchDialog;
@@ -360,10 +359,12 @@ public class ToolBar extends JPanel {
 								TileSwitchDialog dialog = new TileSwitchDialog(editor,null);
 								dialog.setVisible(true);
 								TileSwitchPreset t = dialog.getTriggerPreset();
-								editor.getTriggerTable().put(t.getId(), t);
-								editor.tileDataChanged = true;
-								tlm.getList().add(t);
-								tlm.invalidate();
+								if (t!=null) {
+									editor.getTriggerTable().put(t.getId(), t);
+									editor.tileDataChanged = true;
+									tlm.getList().add(t);
+									tlm.invalidate();
+								}
 							}
 						});
 						edit.addActionListener(new ActionListener() {
@@ -468,51 +469,56 @@ public class ToolBar extends JPanel {
 		@Override
 		public Component getListCellRendererComponent(JList<? extends TileSwitchPreset> list,
 				final TileSwitchPreset value, int index, boolean isSelected, boolean cellHasFocus) {
-			BufferedImage oriImage = value.getOriginalThing().getImage();
-			
-			if (oriImage.getHeight() > Sprite.TILE_SPRITE_SIZE ||
-					oriImage.getWidth() > Sprite.TILE_SPRITE_SIZE) {
-				oriImage = oriImage.getSubimage(0, 0, Sprite.TILE_SPRITE_SIZE, Sprite.TILE_SPRITE_SIZE);
+			try {
+				BufferedImage oriImage = null;
+				oriImage = value.getOriginalThing().getImage();
+				if (oriImage.getHeight() > Sprite.TILE_SPRITE_SIZE ||
+						oriImage.getWidth() > Sprite.TILE_SPRITE_SIZE) {
+					oriImage = oriImage.getSubimage(0, 0, Sprite.TILE_SPRITE_SIZE, Sprite.TILE_SPRITE_SIZE);
+				}
+				BufferedImage switchImage = null;
+				switchImage = value.getSwitchThing().getImage();
+				if (switchImage.getHeight() > Sprite.TILE_SPRITE_SIZE ||
+						switchImage.getWidth() > Sprite.TILE_SPRITE_SIZE) {
+					switchImage = switchImage.getSubimage(0, 0, Sprite.TILE_SPRITE_SIZE, Sprite.TILE_SPRITE_SIZE);
+				}
+				
+				
+				ImageIcon icon = new ImageIcon(oriImage);
+				JLabel tile = new JLabel(icon, SwingConstants.LEFT);
+				tile.setOpaque(true);
+				tile.setFont(GUIFactory.font_s);
+				tile.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+				tile.setToolTipText(value.getOriginalThing().getName());
+				
+				ImageIcon sicon = new ImageIcon(switchImage);
+				JLabel stile = new JLabel(sicon, SwingConstants.LEFT);
+				stile.setOpaque(true);
+				stile.setFont(GUIFactory.font_s);
+				stile.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+				stile.setToolTipText(value.getSwitchThing().getName());
+				
+				JLabel triggerName = new JLabel(value.getName());
+				triggerName.setFont(GUIFactory.font_s);
+				
+				JPanel panel = new JPanel();
+				panel.add(tile);
+				panel.add(stile);
+				panel.add(triggerName);
+				
+				if (isSelected) {
+					panel.setBackground(list.getSelectionBackground());
+					panel.setForeground(list.getSelectionForeground());
+				}
+				else {
+					panel.setBackground(list.getBackground());
+					panel.setForeground(list.getForeground());
+				}
+				return panel;
 			}
-			
-			BufferedImage switchImage = value.getSwitchThing().getImage();
-			if (switchImage.getHeight() > Sprite.TILE_SPRITE_SIZE ||
-					switchImage.getWidth() > Sprite.TILE_SPRITE_SIZE) {
-				switchImage = switchImage.getSubimage(0, 0, Sprite.TILE_SPRITE_SIZE, Sprite.TILE_SPRITE_SIZE);
+			catch (Exception e) {
+				return new JPanel();
 			}
-			
-			JPanel panel = new JPanel();
-			
-			ImageIcon icon = new ImageIcon(oriImage);
-			JLabel tile = new JLabel(icon, SwingConstants.LEFT);
-			tile.setOpaque(true);
-			tile.setFont(GUIFactory.font_s);
-			tile.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-			tile.setToolTipText(value.getOriginalThing().getName());
-			
-			ImageIcon sicon = new ImageIcon(switchImage);
-			JLabel stile = new JLabel(sicon, SwingConstants.LEFT);
-			stile.setOpaque(true);
-			stile.setFont(GUIFactory.font_s);
-			stile.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-			stile.setToolTipText(value.getSwitchThing().getName());
-			
-			JLabel triggerName = new JLabel(value.getName());
-			triggerName.setFont(GUIFactory.font_s);
-			
-			panel.add(tile);
-			panel.add(stile);
-			panel.add(triggerName);
-			
-			if (isSelected) {
-				panel.setBackground(list.getSelectionBackground());
-				panel.setForeground(list.getSelectionForeground());
-			}
-			else {
-				panel.setBackground(list.getBackground());
-				panel.setForeground(list.getForeground());
-			}
-			return panel;
 		}
 	};
 }

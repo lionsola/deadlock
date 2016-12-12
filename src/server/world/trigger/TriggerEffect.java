@@ -3,10 +3,12 @@ package server.world.trigger;
 import java.awt.Point;
 import java.io.Serializable;
 
+import server.world.Misc;
 import server.world.Terrain;
 import server.world.Thing;
 import server.world.Tile;
 import server.world.World;
+import server.world.trigger.TileSwitchPreset.Switchable;
 import shared.network.event.GameEvent;
 
 public interface TriggerEffect extends Serializable {
@@ -26,27 +28,17 @@ public interface TriggerEffect extends Serializable {
 		@Override
 		public void activate(World w) {
 			Tile t = w.getArena().get(tx, ty);
-			if (t.getThing()==tp.getOriginalThing()) {
-				// switch the object
-				t.setThing(tp.getSwitchThing());
-				
-				// tell the clients to switch it too
-				w.addEvent(new GameEvent.TileChanged(tx,ty,tp.getSwitchThingID()));
-				
-				w.addSound(tp.getSoundID(), tp.getSoundVolume(), (tx+0.5)*Terrain.tileSize, (ty+0.5)*Terrain.tileSize);
-			} else if (t.getThing()==tp.getSwitchThing()) {
-				// switch the object
-				t.setThing(tp.getOriginalThing());
-				
-				// tell the clients to switch it too
-				w.addEvent(new GameEvent.TileChanged(tx,ty,tp.getOriginalThingID()));
-				
-				w.addSound(tp.getSoundID(), tp.getSoundVolume(), (tx+0.5)*Terrain.tileSize, (ty+0.5)*Terrain.tileSize);
+			Switchable s = null;
+			if ((tp.getItemType()==TileSwitchPreset.THING && t.getThing()==tp.getOriginalThing()) ||
+					tp.getItemType()==TileSwitchPreset.MISC && t.getMisc()==tp.getOriginalThing()) {
+				s = tp.getSwitchThing();
+			} else if ((tp.getItemType()==TileSwitchPreset.THING && t.getThing()==tp.getSwitchThing()) ||
+					tp.getItemType()==TileSwitchPreset.MISC && t.getMisc()==tp.getSwitchThing()) {
+				s = tp.getOriginalThing();
 			}
-		}
-		
-		public Thing getSwitchThing() {
-			return tp.getSwitchThing();
+			t.setItem(s);
+			w.addEvent(new GameEvent.TileChanged(tx,ty,s.getId(),tp.getItemType()));
+			w.addSound(tp.getSoundID(), tp.getSoundVolume(), (tx+0.5)*Terrain.tileSize, (ty+0.5)*Terrain.tileSize);
 		}
 		
 		public Point getTargetTile() {

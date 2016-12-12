@@ -80,14 +80,21 @@ public class MatchServer implements Runnable, Listener {
 		
 		HashMap<Integer,Thing> objectTable = (HashMap<Integer, Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
 		
+		HashMap<Integer,Misc> miscTable = (HashMap<Integer,Misc>) DataManager.loadObject(DataManager.FILE_MISC);
+		
 		HashMap<Integer,TileSwitchPreset> triggerTable = (HashMap<Integer, TileSwitchPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
 		
 		for (TileSwitchPreset tp:triggerTable.values()) {
-        	tp.setSwitchThing(objectTable.get(tp.getSwitchThingID()));
-        	tp.setOriginalThing(objectTable.get(tp.getOriginalThingID()));
+			if (tp.getItemType()==TileSwitchPreset.THING) {
+	        	tp.setSwitchThing(objectTable.get(tp.getSwitchThingID()));
+	        	tp.setOriginalThing(objectTable.get(tp.getOriginalThingID()));
+			} else if (tp.getItemType()==TileSwitchPreset.MISC) {
+				tp.setSwitchThing(miscTable.get(tp.getSwitchThingID()));
+	        	tp.setOriginalThing(miscTable.get(tp.getOriginalThingID()));
+			}
         }
 		
-		HashMap<Integer,Misc> miscTable = (HashMap<Integer,Misc>) DataManager.loadObject(DataManager.FILE_MISC);
+		
 		
 		Arena arena = new Arena(arenaName, tileTable, objectTable, triggerTable, miscTable);
 

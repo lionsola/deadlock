@@ -4,7 +4,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -15,13 +16,15 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import editor.CustomListModel;
+
+import editor.CellRenderable;
 import editor.Editor;
 import server.world.Thing;
 import server.world.Utils;
 import server.world.trigger.TileSwitchPreset;
+import server.world.trigger.TileSwitchPreset.Switchable;
 
-public class TileSwitchDialog extends JDialog implements ActionListener {
+public class TileSwitchDialog extends JDialog implements ActionListener, ItemListener {
 	private static final long serialVersionUID = 5917436825785813483L;
 	private Editor editor;
 	
@@ -32,15 +35,20 @@ public class TileSwitchDialog extends JDialog implements ActionListener {
 	private JButton chooseSwitchThing;
 	private JButton chooseOriThing;
 	private JComboBox<String> triggerType;
+	private JComboBox<String> itemType;
 	private JButton save;
 	
+	
 	TileSwitchPreset triggerPreset;
-	Thing originalThing;
-	Thing switchThing;
+	
+	Switchable originalThing;
+	Switchable switchThing;
+	
 	private JFormattedTextField soundId;
 	private JFormattedTextField soundVolume;
 	
 	private String[] triggerTypes = {"On while touching", "On/off On Touch", "On/off on touch side"};
+	private String[] itemTypes = {"Thing", "Misc"};
 	public TileSwitchDialog (final Editor editor, TileSwitchPreset triggerPreset) {
 		super(editor, "Trigger", ModalityType.APPLICATION_MODAL);
 		this.editor = editor;
@@ -73,7 +81,7 @@ public class TileSwitchDialog extends JDialog implements ActionListener {
         c.gridy += 1;
         switchThingIcon = new JLabel();
         switchThingIcon.setHorizontalAlignment(JTextField.CENTER);
-        switchThingIcon.setToolTipText("The switch object");
+        switchThingIcon.setToolTipText("The switch item");
         topPanel.add(switchThingIcon,c);
         
         c.gridy += 1;
@@ -85,12 +93,17 @@ public class TileSwitchDialog extends JDialog implements ActionListener {
         c.gridy += 1;
         originalThingIcon = new JLabel();
         originalThingIcon.setHorizontalAlignment(JTextField.CENTER);
-        originalThingIcon.setToolTipText("The original object");
+        originalThingIcon.setToolTipText("The original item");
         topPanel.add(originalThingIcon,c);
         
         c.gridy += 1;
         triggerType = new JComboBox<String>(triggerTypes);
         topPanel.add(triggerType,c);
+        
+        c.gridy += 1;
+        itemType = new JComboBox<String>(itemTypes );
+        itemType.addItemListener(this);
+        topPanel.add(itemType,c);
         
         c.gridy += 1;
         soundId = new JFormattedTextField();
@@ -115,10 +128,15 @@ public class TileSwitchDialog extends JDialog implements ActionListener {
         	id.setEditable(false);
         	this.triggerPreset = triggerPreset;
         	name.setText(triggerPreset.getName());
-        	switchThing = triggerPreset.getSwitchThing();
+        	itemType.setSelectedIndex(triggerPreset.getItemType());
+    		switchThing = triggerPreset.getSwitchThing();
         	originalThing = triggerPreset.getOriginalThing();
-        	switchThingIcon.setIcon(new ImageIcon(editor.getObjectTable().get(triggerPreset.getSwitchThingID()).getImage()));
-        	originalThingIcon.setIcon(new ImageIcon(editor.getObjectTable().get(triggerPreset.getOriginalThingID()).getImage()));
+        	if (switchThing!=null) {
+        		switchThingIcon.setIcon(new ImageIcon(switchThing.getImage()));
+        	}
+        	if (originalThing!=null) {
+        		originalThingIcon.setIcon(new ImageIcon(originalThing.getImage()));
+        	}
         	triggerType.setSelectedIndex(triggerPreset.getTriggerType());
         	soundId.setValue(triggerPreset.getSoundID());
         	soundVolume.setValue(triggerPreset.getSoundVolume());
@@ -126,6 +144,7 @@ public class TileSwitchDialog extends JDialog implements ActionListener {
         	id.setValue(Utils.random().nextInt());
         	soundId.setValue(0);
         	soundVolume.setValue(0.0);
+        	triggerType.setSelectedIndex(0);
         }
         
         this.setContentPane(topPanel);
@@ -137,38 +156,22 @@ public class TileSwitchDialog extends JDialog implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource()==chooseSwitchThing) {
 			// show a list dialog and let the user choose
-			CustomListModel<Thing> tlm = new CustomListModel<Thing>(new ArrayList<Thing>(editor.getObjectTable().values()));
-			JButton OK = new JButton("OK");
-			JButton[] buttons = {OK};
-			final ListDialog<Thing> listDialog = new ListDialog<Thing>(this, null, "Tile", buttons, tlm);
-			OK.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					listDialog.setVisible(false);
-					Thing t  = listDialog.getList().getSelectedValue();
-					switchThing = t;
-					switchThingIcon.setIcon(new ImageIcon(t.getImage()));
-					TileSwitchDialog.this.pack();
-				}
-			});
-			listDialog.setVisible(true);
+			if (itemType.getSelectedIndex()==TileSwitchPreset.THING) {
+				switchThing = ListDialog.selectFromList(editor.getObjectTable().values(), this);
+			} else if (itemType.getSelectedIndex()==TileSwitchPreset.MISC) {
+				switchThing = ListDialog.selectFromList(editor.miscTable.values(), this);
+			}
+			switchThingIcon.setIcon(new ImageIcon(switchThing.getImage()));
+			pack();
 		} else if (e.getSource()==chooseOriThing) {
 			// show a list dialog and let the user choose
-			CustomListModel<Thing> tlm = new CustomListModel<Thing>(new ArrayList<Thing>(editor.getObjectTable().values()));
-			JButton OK = new JButton("OK");
-			JButton[] buttons = {OK};
-			final ListDialog<Thing> listDialog = new ListDialog<Thing>(this, null, "Tile", buttons, tlm);
-			OK.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					listDialog.setVisible(false);
-					Thing t  = listDialog.getList().getSelectedValue();
-					originalThing = t;
-					originalThingIcon.setIcon(new ImageIcon(t.getImage()));
-					TileSwitchDialog.this.pack();
-				}
-			});
-			listDialog.setVisible(true);
+			if (itemType.getSelectedIndex()==TileSwitchPreset.THING) {
+				originalThing = ListDialog.selectFromList(editor.getObjectTable().values(), this);
+			} else if (itemType.getSelectedIndex()==TileSwitchPreset.MISC) {
+				originalThing = ListDialog.selectFromList(editor.miscTable.values(), this);
+			}
+			originalThingIcon.setIcon(new ImageIcon(originalThing.getImage()));
+			pack();
 		}
 		else if (e.getSource()==save) {
 			if (this.triggerPreset==null) {
@@ -186,7 +189,7 @@ public class TileSwitchDialog extends JDialog implements ActionListener {
 					this.triggerPreset = new TileSwitchPreset(idNumber);
 				}
 			}
-
+			triggerPreset.setItemType(itemType.getSelectedIndex());
 			triggerPreset.setName(name.getText());
 			triggerPreset.setOriginalThing(originalThing);
 			triggerPreset.setSwitchThing(switchThing);
@@ -202,5 +205,15 @@ public class TileSwitchDialog extends JDialog implements ActionListener {
 	
 	public TileSwitchPreset getTriggerPreset() {
 		return triggerPreset;
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		if (e.getSource()==itemType) {
+			switchThing = null;
+			originalThing = null;
+			switchThingIcon.setIcon(null);
+			originalThingIcon.setIcon(null);
+		}
 	}
 }

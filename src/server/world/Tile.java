@@ -2,6 +2,7 @@ package server.world;
 
 import java.io.Serializable;
 
+import server.world.trigger.TileSwitchPreset.Switchable;
 import server.world.trigger.Trigger;
 
 public class Tile implements Serializable {
@@ -75,6 +76,14 @@ public class Tile implements Serializable {
 		this.misc = misc;
 	}
 
+	public void setItem(Switchable s) {
+		if (s instanceof Misc) {
+			setMisc((Misc) s);
+		} else if (s instanceof Thing) {
+			setThing((Thing) s);
+		}
+	}
+	
 	public SpriteConfig getMiscConfig() {
 		return miscConfig;
 	}

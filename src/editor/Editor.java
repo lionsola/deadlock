@@ -60,7 +60,7 @@ public class Editor extends JFrame implements KeyListener {
 	HashMap<Integer,Terrain> tileTable;
 	HashMap<Integer,Thing> objectTable;
 	HashMap<Integer,TileSwitchPreset> triggerTable;
-	HashMap<Integer,Misc> miscTable;
+	public HashMap<Integer,Misc> miscTable;
 	
 	public boolean tileDataChanged = false;
 	
@@ -93,7 +93,11 @@ public class Editor extends JFrame implements KeyListener {
         objectTable = (HashMap<Integer, Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
         DataManager.loadImage(objectTable.values());
         
-        
+        miscTable = (HashMap<Integer, Misc>) DataManager.loadObject(DataManager.FILE_MISC);
+        if (miscTable==null) {
+        	miscTable = new HashMap<Integer,Misc>();
+        }
+        DataManager.loadImage(miscTable.values());
         //triggers = (List<TriggerPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
         
         triggerTable = (HashMap<Integer, TileSwitchPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
@@ -101,15 +105,19 @@ public class Editor extends JFrame implements KeyListener {
         	triggerTable = new HashMap<Integer,TileSwitchPreset>();
         }
         for (TileSwitchPreset tp:triggerTable.values()) {
-        	tp.setSwitchThing(objectTable.get(tp.getSwitchThingID()));
-        	tp.setOriginalThing(objectTable.get(tp.getOriginalThingID()));
+        	try {
+	        	if (tp.getItemType()==TileSwitchPreset.THING) {
+		        	tp.setSwitchThing(objectTable.get(tp.getSwitchThingID()));
+		        	tp.setOriginalThing(objectTable.get(tp.getOriginalThingID()));
+	        	} else if (tp.getItemType()==TileSwitchPreset.MISC) {
+	        		tp.setSwitchThing(miscTable.get(tp.getSwitchThingID()));
+	        		tp.setOriginalThing(miscTable.get(tp.getOriginalThingID()));
+	        	}
+        	} catch (Exception e) {
+        		System.err.println("Error while loading tile switch preset "+tp.getName());
+        		e.printStackTrace();
+        	}
         }
-        
-        miscTable = (HashMap<Integer, Misc>) DataManager.loadObject(DataManager.FILE_MISC);
-        if (miscTable==null) {
-        	miscTable = new HashMap<Integer,Misc>();
-        }
-        DataManager.loadImage(miscTable.values());
         
         getContentPane().setLayout(new BorderLayout());
         
