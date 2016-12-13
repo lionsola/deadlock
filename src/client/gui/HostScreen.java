@@ -36,7 +36,7 @@ public class HostScreen extends AbstractScreen implements ActionListener {
 
 	private static final long serialVersionUID = -8617632006677046360L;
 	// available maps
-	private static final String[] MAP_LIST = {"test"};
+	private static final String[] MAP_LIST = {"test","mansion"};
 	
 	private int currentMode;
 	private JLabel modeLabel;

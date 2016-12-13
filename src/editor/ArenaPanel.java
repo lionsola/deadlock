@@ -181,12 +181,14 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		g.translate(-transX, -transY);
 
 		Graphics2D g2D = (Graphics2D) g;
-		RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2D.setRenderingHints(rh);
+		//RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		//g2D.setRenderingHints(rh);
 		Rectangle2D window = camera.getDrawArea();
 		
-		for (int layer=0;layer<=4;layer++) {
-			Renderer.drawArenaLayer(g2D, arena, layer, renderTerrain, renderThing, renderMisc);
+		for (int layer=0;layer<=3;layer++) {
+			if (renderLayer[layer]) {
+				Renderer.drawArenaLayer(g2D, arena, layer, renderTerrain, renderThing, renderMisc);
+			}
 		}
 		
 		if (renderLight) {

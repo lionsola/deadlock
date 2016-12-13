@@ -23,6 +23,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import editor.Editor;
 import server.world.Terrain;
 import server.world.Utils;
+import shared.network.event.SoundEvent;
 
 /**
  * A dialog to edit a Terrain type.
@@ -38,6 +39,8 @@ public class TerrainDialog extends JDialog implements ActionListener {
 	private JButton loadImage;
 	private JButton save;
 	private JLabel tileImage;
+	private JFormattedTextField soundId;
+	private JFormattedTextField soundVolume;
 	private BufferedImage curTileImage;
 	
 	public TerrainDialog (Editor editor, Terrain tile) {
@@ -70,15 +73,23 @@ public class TerrainDialog extends JDialog implements ActionListener {
     	topPanel.add(tileImage,c);
         
     	c.gridy += 1;
+    	c.fill = GridBagConstraints.HORIZONTAL;
         imageName = new JLabel();
         imageName.setToolTipText("Sprite File");
     	topPanel.add(imageName,c);
     	
         c.gridy += 1;
-        c.fill = GridBagConstraints.HORIZONTAL;
         loadImage = new JButton("Load image");
         loadImage.addActionListener(this);
         topPanel.add(loadImage,c);
+        
+        c.gridy += 1;
+        soundId = new JFormattedTextField();
+        topPanel.add(soundId,c);
+        
+        c.gridy += 1;
+        soundVolume = new JFormattedTextField();
+        topPanel.add(soundVolume,c);
         
         c.gridy += 1;
         save = new JButton("Save");
@@ -95,10 +106,14 @@ public class TerrainDialog extends JDialog implements ActionListener {
         	}
         	imageName.setText(tile.getImageName());
         	curTileImage = tile.getImage();
+        	soundId.setValue(tile.getSoundId());
+        	soundVolume.setValue(tile.getVolume());
         } else {
         	int ID = Utils.random().nextInt();
         	//this.tile = new TileBG(ID);
         	id.setValue(ID);
+        	soundId.setValue(SoundEvent.FOOTSTEP_DEFAULT_ID);
+        	soundVolume.setValue(SoundEvent.FOOTSTEP_SOUND_VOLUME);
         }
         
         this.setContentPane(topPanel);
@@ -124,6 +139,9 @@ public class TerrainDialog extends JDialog implements ActionListener {
 				} else if (curTileImage==null || imageName.getText().equals("")) {
 					JOptionPane.showMessageDialog(this,"Pick an image!");
 					return;
+				} else if (!editor.getAudioManager().getSoundMap().containsKey(((Number)soundId.getValue()).intValue())) {
+					JOptionPane.showMessageDialog(this,"Non-existent sound!");
+					return;
 				} else {
 					this.tile = new Terrain(idNumber);
 				}
@@ -131,6 +149,8 @@ public class TerrainDialog extends JDialog implements ActionListener {
 			tile.setName(name.getText());
 			tile.setImage(curTileImage);
 			tile.setImageName(imageName.getText());
+			tile.setSoundId(((Number)soundId.getValue()).intValue());
+			tile.setVolume(((Number)soundVolume.getValue()).doubleValue());
 
 			// Close the dialog
 			this.setVisible(false);

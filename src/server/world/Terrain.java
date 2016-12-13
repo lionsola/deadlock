@@ -25,9 +25,13 @@ public class Terrain implements CellRenderable, Identifiable, Serializable, Imag
 	protected String name;
 	protected Color color;
 	protected transient BufferedImage tileImage;
+	
+	protected int soundId;
+	protected double volume;
 
 	protected String imageName;
 
+	
 	/**
 	 * Constructor. Note that this constructor should only be used for the client, since the network
 	 * does not need the image resources and would waste memory keeping them in the tile.
@@ -43,6 +47,7 @@ public class Terrain implements CellRenderable, Identifiable, Serializable, Imag
 		this.id = id;
 		this.color = color;
 		this.tileImage = tileImage;
+		//Terrain.class.getDeclaredFields()[0];
 	}
 
 	/**
@@ -98,6 +103,34 @@ public class Terrain implements CellRenderable, Identifiable, Serializable, Imag
 		return id;
 	}
 	
+	/**
+	 * @return the soundId
+	 */
+	public int getSoundId() {
+		return soundId;
+	}
+
+	/**
+	 * @param soundId the soundId to set
+	 */
+	public void setSoundId(int soundId) {
+		this.soundId = soundId;
+	}
+
+	/**
+	 * @return the volume
+	 */
+	public double getVolume() {
+		return volume;
+	}
+
+	/**
+	 * @param volume the volume to set
+	 */
+	public void setVolume(double volume) {
+		this.volume = volume;
+	}
+
 	public String toString() {
 		return getName();
 	}

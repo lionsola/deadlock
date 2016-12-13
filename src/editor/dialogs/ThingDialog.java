@@ -22,8 +22,10 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import client.sound.Sound;
 import editor.Editor;
 import server.world.Light;
+import server.world.SoundSource;
 import server.world.Thing;
 import server.world.Utils;
 
@@ -52,6 +54,8 @@ public class ThingDialog extends JDialog implements ActionListener {
 	private JComboBox<String> cover;
 	private JFormattedTextField spriteSize;
 	private JComboBox<String> layer;
+	private JCheckBox sound;
+	private SoundSourceDialog soundDialog;
 	
 	public ThingDialog (Editor editor, Thing tile) {
 		super(editor, "Edit tile", ModalityType.APPLICATION_MODAL);
@@ -103,6 +107,11 @@ public class ThingDialog extends JDialog implements ActionListener {
         topPanel.add(light,c);
         
         c.gridy += 1;
+        sound = new JCheckBox("Sound");
+        sound.addActionListener(this);
+        topPanel.add(sound,c);
+        
+        c.gridy += 1;
         border = new JCheckBox("Border");
         topPanel.add(border,c);
         
@@ -152,6 +161,9 @@ public class ThingDialog extends JDialog implements ActionListener {
         	spriteSize.setValue(tile.getSpriteSize());
         	if (tile.getLight()!=null) {
         		light.setSelected(true);
+        	}
+        	if (tile.getSound()!=null) {
+        		sound.setSelected(true);
         	}
         	layer.setSelectedIndex(Math.min(layer.getItemCount()-1,tile.getLayer()));
         } else {
@@ -205,6 +217,17 @@ public class ThingDialog extends JDialog implements ActionListener {
 			} else {
 				tile.setLight(null);
 			}
+			
+			if (sound.isSelected()) {
+				if (soundDialog!=null) {
+					SoundSource ss = new SoundSource(soundDialog.getSoundID(),soundDialog.getSoundVolume());
+					ss.setFrequency(soundDialog.getFrequency());
+					ss.setRandom(soundDialog.isRandom());
+					tile.setSound(ss);
+				}
+			} else {
+				tile.setSound(null);
+			}
 
 			// Close the dialog
 			this.setVisible(false);
@@ -242,6 +265,17 @@ public class ThingDialog extends JDialog implements ActionListener {
 				if (lightDialog!=null) {
 					lightDialog.setVisible(false);
 				}
+			}
+		} else if (arg0.getSource()==sound) {
+			if (sound.isSelected()) {
+				if (soundDialog==null) {
+					SoundSource ss = tile.getSound();
+					soundDialog = new SoundSourceDialog(this, editor,sound,ss);
+				}
+				soundDialog.setModalityType(ModalityType.MODELESS);
+				soundDialog.setVisible(true);
+			} else if (soundDialog!=null) {
+				soundDialog.setVisible(false);				
 			}
 		}
 	}

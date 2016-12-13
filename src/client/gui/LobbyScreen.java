@@ -1,6 +1,5 @@
 package client.gui;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -49,6 +48,7 @@ import shared.network.LobbyRequest.SwitchTeamRequest;
 import shared.network.LobbyRequest.ToggleReadyRequest;
 import client.data.Class;
 import client.sound.AudioManager;
+import client.sound.MusicPlayer;
 
 /**
  * GUI view to show the lobby screen where the player waits before launching the game.
@@ -447,9 +447,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 						team1Model.invalidate();
 						team2Model.invalidate();
 					} else if (message instanceof StartGameRequest) {
-						AudioManager.stopMusic();
 						game.setScreen(new GameScreen(game, clientPlayer.id, connection, arenaName, team1, team2));
-						//AudioManager.playMusic("menumusic.wav", MusicPlayer.DEFAULT_VOLUME - 15);
 						break;
 					} else if (message instanceof SwitchTeamRequest) {
 						SwitchTeamRequest request = ((SwitchTeamRequest) message);

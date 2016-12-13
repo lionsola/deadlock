@@ -52,7 +52,7 @@ public class Bullet extends Projectile {
 			System.out.println("Damage ratio: "+damageRatio);
 			ch.onHit(w,damageRatio*getDamage(),id);
 		}
-		w.addGlobalAnimation(AnimationEvent.BLOOD,x,y,this.getDirection());
+		w.addGlobalAnimation(new AnimationEvent(AnimationEvent.BLOOD,ch.id,x,y,this.getDirection()));
 	}
 
 	protected void onHitWall(World w, double x, double y, Thing t) {

@@ -17,9 +17,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import editor.CellRenderable;
 import editor.Editor;
-import server.world.Thing;
 import server.world.Utils;
 import server.world.trigger.TileSwitchPreset;
 import server.world.trigger.TileSwitchPreset.Switchable;

@@ -21,10 +21,9 @@ import javax.swing.event.ChangeListener;
 public class LightSourceDialog extends JDialog {
 	private static final long serialVersionUID = 5917436825785813483L;
 	private JButton color;
-	private int range;
+	private JSlider rangePicker;
 	public LightSourceDialog (final Window owner, final JToggleButton button, int defaultColor, int defaultRange) {
 		super(owner, "Light");
-		range = defaultRange;
         JPanel panel = new JPanel(new GridBagLayout());
         //editor.setTool(tool);
         addWindowListener(new WindowAdapter(){
@@ -32,19 +31,11 @@ public class LightSourceDialog extends JDialog {
 			public void windowClosing(WindowEvent arg0) {
 				button.doClick();
 			}});
-        JSlider rangePicker = new JSlider(JSlider.HORIZONTAL, 1, 8, defaultRange);
+        rangePicker = new JSlider(JSlider.HORIZONTAL, 1, 8, defaultRange);
         rangePicker.setMajorTickSpacing(1);
         rangePicker.setPaintTicks(true);
         rangePicker.setPaintLabels(true);
         rangePicker.setToolTipText("Light range (in tiles)");
-        rangePicker.addChangeListener(new ChangeListener(){
-			@Override
-			public void stateChanged(ChangeEvent e) {
-			    JSlider source = (JSlider)e.getSource();
-			    if (!source.getValueIsAdjusting()) {
-			        range = source.getValue();
-			    }
-			}});
         
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -80,7 +71,7 @@ public class LightSourceDialog extends JDialog {
 	}
 
 	public int getRange() {
-		return range;
+		return rangePicker.getValue();
 	}
 	
 	public int getColor() {

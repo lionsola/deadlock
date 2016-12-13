@@ -61,6 +61,7 @@ import client.graphics.BasicAnimation;
 import client.graphics.Renderer;
 import client.image.SoftHardLightComposite;
 import client.sound.AudioManager;
+import client.sound.MusicPlayer;
 import editor.DataManager;
 
 /**
@@ -81,6 +82,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private AnimationSystem nonvisualAnimations = new AnimationSystem();
 	private AnimationSystem visualAnimations = new AnimationSystem();
 	private AnimationSystem globalAnimations = new AnimationSystem();
+	private AnimationSystem persistentAnimations = new AnimationSystem();
 	
 	private AudioManager audioManager = new AudioManager();
 	private List<ClientPlayer> team1;
@@ -129,7 +131,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	public GameScreen(GameWindow game, int id, Connection connection, String arenaName, List<ClientPlayer> team1, List<ClientPlayer> team2) throws IOException {
 		super();
 		
-		
+		AudioManager.stopMusic();
+		AudioManager.playMusic("winds.wav", MusicPlayer.DEFAULT_VOLUME - 20);
 		setSize(game.getContentPane().getWidth(), game.getContentPane().getHeight());
 		this.setFocusable(true);
 		this.requestFocusInWindow();
@@ -175,114 +178,6 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 
 		initUI();
 		new Thread(this).start();
-	}
-
-	/**
-	 * The main game loop.
-	 */
-	@Override
-	public void run() {
-		long previous = System.currentTimeMillis();
-		double lag = 0.0;
-		long totalTime = 0;
-		int updateCount = 0;
-		final int MAX_FRAME_COUNT = 50;
-
-		while (playing) {
-
-			long current = System.currentTimeMillis();
-			long elapsed = current - previous;
-			previous = current;
-			lag += elapsed;
-
-			while (lag >= GameWindow.MS_PER_UPDATE) {
-				update();
-				lag -= GameWindow.MS_PER_UPDATE;
-			}
-			
-			repaint();
-
-			long waitTime = GameWindow.MS_PER_UPDATE - (System.currentTimeMillis() - current);
-			
-			try {
-				Thread.sleep(waitTime);
-			} catch (Exception e) {}
-
-			totalTime += System.currentTimeMillis() - current;
-
-			updateCount++;
-			if (updateCount == MAX_FRAME_COUNT) {
-				UPS = (1000.0 * updateCount) / totalTime;
-				updateCount = 0;
-				
-				FPS = (1000.0 * frameCount) / totalTime;
-				frameCount = 0;
-				
-				totalTime = 0;
-			}
-			
-		}
-	}
-
-	/**
-	 * Update the game
-	 */
-	public void update() {
-		//System.out.println("GameWindow update");
-		sendInput();
-		input.chatText = null;
-		WorldStatePacket wsp = receiveState();
-
-		// update state
-		// TODO NETWORK this queue should be used for interpolation
-		// at the moment it's just a placeholder and keeps exactly 5 past states
-		// (around 100ms delay)
-		// while (wsps.size() > 0) {
-		// wsp = wsps.poll();
-		// }
-		updateCursor();
-		nonvisualAnimations.update();
-		visualAnimations.update();
-		globalAnimations.update();
-		audioManager.update();
-		if (wsp != null) {
-			this.currentState = wsp;
-			mainCharacter = wsp.player;
-			for (ClientPlayer p : players) {
-				if (p.id!=mainCharacter.id) {
-					p.active = false;
-				}
-			}
-			ClientPlayer targetPlayer = Utils.findPlayer(players, mainCharacter.id);
-			targetPlayer.character = wsp.player;
-			targetPlayer.active = true;
-			
-			for (CharData cdata : wsp.characters) {
-				ClientPlayer p = Utils.findPlayer(players, cdata.id);
-				if (p != null) {
-					p.character = cdata;
-					p.active = true;
-				}
-			}
-			for (ProjectileData data : wsp.projectiles) {
-				visualAnimations.addProjectileTrail(data.x, data.y, data.prevX, data.prevY ,data.size);
-			}
-			
-			abilityBar.update(mainCharacter,targetPlayer);
-			//mainCharacter.direction = (float) Math.atan2(mainCharacter.y - input.cy, input.cx - mainCharacter.x);
-
-			camera.update(mainCharacter);
-			synchronized (events) {
-				for (GameEvent e : events) {
-					listener.onEventReceived(e);
-				}
-				events.clear();
-			}
-			for (String s : wsp.chatTexts) {
-				chatPanel.addLine(s);
-			}
-		}
-
 	}
 
 	/**
@@ -423,6 +318,118 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		add(abilityBar);
 		Utils.alignCenterHorizontally(abilityBar, this);
 	}
+	
+	/**
+	 * The main game loop.
+	 */
+	@Override
+	public void run() {
+		long previous = System.currentTimeMillis();
+		double lag = 0.0;
+		long totalTime = 0;
+		int updateCount = 0;
+		final int MAX_FRAME_COUNT = 50;
+
+		while (playing) {
+
+			long current = System.currentTimeMillis();
+			long elapsed = current - previous;
+			previous = current;
+			lag += elapsed;
+
+			while (lag >= GameWindow.MS_PER_UPDATE) {
+				update();
+				lag -= GameWindow.MS_PER_UPDATE;
+			}
+			
+			repaint();
+
+			long waitTime = GameWindow.MS_PER_UPDATE - (System.currentTimeMillis() - current);
+			
+			try {
+				Thread.sleep(waitTime);
+			} catch (Exception e) {}
+
+			totalTime += System.currentTimeMillis() - current;
+
+			updateCount++;
+			if (updateCount == MAX_FRAME_COUNT) {
+				UPS = (1000.0 * updateCount) / totalTime;
+				updateCount = 0;
+				
+				FPS = (1000.0 * frameCount) / totalTime;
+				frameCount = 0;
+				
+				totalTime = 0;
+			}
+			
+		}
+	}
+
+	/**
+	 * Update the game
+	 */
+	public void update() {
+		//System.out.println("GameWindow update");
+		sendInput();
+		input.chatText = null;
+		WorldStatePacket wsp = receiveState();
+
+		// update state
+		// TODO NETWORK this queue should be used for interpolation
+		// at the moment it's just a placeholder and keeps exactly 5 past states
+		// (around 100ms delay)
+		// while (wsps.size() > 0) {
+		// wsp = wsps.poll();
+		// }
+		updateCursor();
+		nonvisualAnimations.update();
+		visualAnimations.update();
+		globalAnimations.update();
+		persistentAnimations.update();
+		persistentAnimations.render(renderer.bloodImage.createGraphics());
+		audioManager.update();
+		if (wsp != null) {
+			this.currentState = wsp;
+			mainCharacter = wsp.player;
+			for (ClientPlayer p : players) {
+				if (p.id!=mainCharacter.id) {
+					p.active = false;
+				}
+			}
+			ClientPlayer targetPlayer = Utils.findPlayer(players, mainCharacter.id);
+			targetPlayer.character = wsp.player;
+			targetPlayer.active = true;
+			
+			for (CharData cdata : wsp.characters) {
+				ClientPlayer p = Utils.findPlayer(players, cdata.id);
+				if (p != null) {
+					p.character = cdata;
+					p.active = true;
+				}
+			}
+			for (ProjectileData data : wsp.projectiles) {
+				visualAnimations.addProjectileTrail(data.x, data.y, data.prevX, data.prevY ,data.size);
+			}
+			
+			abilityBar.update(mainCharacter,targetPlayer);
+			//mainCharacter.direction = (float) Math.atan2(mainCharacter.y - input.cy, input.cx - mainCharacter.x);
+
+			camera.update(mainCharacter);
+			synchronized (events) {
+				for (GameEvent e : events) {
+					listener.onEventReceived(e);
+				}
+				events.clear();
+			}
+			for (String s : wsp.chatTexts) {
+				chatPanel.addLine(s);
+			}
+		}
+
+	}
+
+	
 
 	/**
 	 * Updates the cursor
@@ -480,7 +487,6 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		double transX = camera.getTopLeftXMeter()*Renderer.getPPM();
 		double transY = camera.getTopLeftYMeter()*Renderer.getPPM();
 		
-
 		Graphics2D g2D = (Graphics2D) g;
 		g2D.translate(-transX, -transY);
 		RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -516,9 +522,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			}
 			
 			g2D.setClip(los);
-			renderer.drawArenaLayer(g2D, 0, camera.getDrawArea());
-			renderer.drawArenaLayer(g2D, 1, camera.getDrawArea());
-
+			Renderer.drawArenaImage(g2D, renderer.lowImage, camera.getDrawArea());
+			Renderer.drawArenaImage(g2D, renderer.bloodImage, camera.getDrawArea());
 
 			for (ClientPlayer data : players) {
 				if (data.id != c.id && data.active) {
@@ -538,8 +543,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			ClientPlayer currentTarget = Utils.findPlayer(players, c.id);
 			Renderer.renderMainCharacter(g2D, c, currentTarget);
 			
-			renderer.drawArenaLayer(g2D, 2, camera.getDrawArea());
-			renderer.drawArenaLayer(g2D, 3, camera.getDrawArea());
+			Renderer.drawArenaImage(g2D, renderer.highImage, camera.getDrawArea());
 			
 			
 			// Render lighting & shadow
@@ -671,7 +675,6 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	}
 	
 	private ListCellRenderer<ClientPlayer> playerRenderer = new ListCellRenderer<ClientPlayer>() {
-
 		@Override
 		public Component getListCellRendererComponent(JList<? extends ClientPlayer> list, ClientPlayer value, int index, boolean isSelected,
 				boolean cellHasFocus) {
@@ -730,14 +733,15 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 					nonvisualAnimations.addNoiseAnimation(e.x, e.y, e.volume);
 			} else if (event instanceof AnimationEvent) {
 				AnimationEvent e = (AnimationEvent) event;
-				if (!e.global) {
+				if (e.id==AnimationEvent.BLOOD) {
+					persistentAnimations.addBloodAnimation(e.x, e.y, e.direction, Utils.findPlayer(players, e.charId).team);
+				}
+				else if (!e.global) {
 					visualAnimations.addAnimation(e);
 				} else {
 					globalAnimations.addAnimation(e);
 				}
-				if (e.id==AnimationEvent.BLOOD) {
-					renderer.addBloodToArena(e.x, e.y, e.direction);
-				}
+				
 			} else if (event instanceof GameEndEvent) {
 				playing = false;
 				try {

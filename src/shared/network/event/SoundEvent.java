@@ -3,7 +3,13 @@ package shared.network.event;
 public class SoundEvent extends GameEvent {
 	private static final long serialVersionUID = 4014556827130454737L;
 
-	public static final int FOOTSTEP_SOUND_ID = 30;
+	public static final int FOOTSTEP_GRASS_ID = 101;
+	public static final int FOOTSTEP_DIRT_ID = 102;
+	public static final int FOOTSTEP_WATER_ID = 103;
+	public static final int FOOTSTEP_CARPET_ID = 104;
+	public static final int FOOTSTEP_HARD_ID = 105;
+	public static final int FOOTSTEP_DEFAULT_ID = 100;
+	
 	public static final int BULLET_WALL_SOUND_ID = 31;
 	public static final int GRENADE_EXPLODE_SOUND_ID = 32;
 	public static final int PING_SOUND_ID = 34;

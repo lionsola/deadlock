@@ -344,7 +344,7 @@ public class MatchServer implements Runnable, Listener {
 						for (ServerPlayer p:server.players) {
 							if (p.team==player.team) {
 								p.character.getPerception().events.add(new SoundEvent(SoundEvent.PING_SOUND_ID,SoundEvent.PING_SOUND_VOLUME,input.cx,input.cy));
-								p.character.getPerception().events.add(new AnimationEvent(AnimationEvent.PING_ANIMATION_ID,input.cx,input.cy,0,true));
+								p.character.getPerception().events.add(new AnimationEvent(AnimationEvent.PING_ANIMATION_ID,player.id,input.cx,input.cy,0,true));
 							}
 						}
 						lastPing = System.currentTimeMillis();

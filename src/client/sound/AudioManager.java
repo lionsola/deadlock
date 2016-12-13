@@ -59,26 +59,38 @@ public class AudioManager implements Runnable {
 		footstepDirt.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_dirt1.wav"));
 		footstepDirt.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_dirt2.wav"));
 		footstepDirt.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_dirt3.wav"));
-		soundMap.put(SoundEvent.FOOTSTEP_SOUND_ID, footstepDirt);
+		soundMap.put(SoundEvent.FOOTSTEP_DIRT_ID, footstepDirt);
+		soundMap.put(SoundEvent.FOOTSTEP_DEFAULT_ID, footstepDirt);
 		
 		
-		/*
+		
 		AlternatingSound footstepGrass = new AlternatingSound();
 		footstepGrass.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_grass0.wav"));
 		footstepGrass.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_grass1.wav"));
 		footstepGrass.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_grass2.wav"));
 		footstepGrass.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_grass3.wav"));
-		soundMap.put(SoundEvent.FOOTSTEP_SOUND_ID, footstepGrass);
-		*/
+		soundMap.put(SoundEvent.FOOTSTEP_GRASS_ID, footstepGrass);
 		
-		/*
-		AlternatingSound footstepDirt = new AlternatingSound();
-		footstepDirt.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_hard0.wav"));
-		footstepDirt.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_hard1.wav"));
-		footstepDirt.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_hard2.wav"));
-		footstepDirt.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_hard3.wav"));
-		soundMap.put(SoundEvent.FOOTSTEP_SOUND_ID, footstepDirt);
-		*/
+		AlternatingSound footstepHard = new AlternatingSound();
+		footstepHard.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_hard0.wav"));
+		footstepHard.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_hard1.wav"));
+		footstepHard.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_hard2.wav"));
+		footstepHard.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_hard3.wav"));
+		soundMap.put(SoundEvent.FOOTSTEP_HARD_ID, footstepHard);
+		
+		AlternatingSound footstepWater = new AlternatingSound();
+		footstepWater.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_water0.wav"));
+		footstepWater.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_water1.wav"));
+		footstepWater.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_water2.wav"));
+		footstepWater.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_water3.wav"));
+		soundMap.put(SoundEvent.FOOTSTEP_WATER_ID, footstepWater);
+		
+		AlternatingSound footstepCarpet = new AlternatingSound();
+		footstepCarpet.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_carpet0.wav"));
+		footstepCarpet.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_carpet1.wav"));
+		footstepCarpet.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_carpet2.wav"));
+		footstepCarpet.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_carpet3.wav"));
+		soundMap.put(SoundEvent.FOOTSTEP_CARPET_ID, footstepCarpet);
 		
 		AlternatingSound bulletwall = new AlternatingSound();
 		bulletwall.addSound(new SingleSound(SOUND_DIR + "environment/" + "bulletwall0.wav"));
@@ -172,6 +184,10 @@ public class AudioManager implements Runnable {
 		}
 	}
 
+	public HashMap<Integer,Sound> getSoundMap() {
+		return soundMap;
+	}
+	
 	/**
 	 * Main function of the AudioManager.
 	 * 

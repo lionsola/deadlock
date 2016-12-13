@@ -211,4 +211,8 @@ public class ImageBlender {
 		
 		return source;
 	}
+
+	public static BufferedImage createImage(int width, int height, int transparency) {
+		return ge.createCompatibleImage(width,height,Transparency.TRANSLUCENT);
+	}
 }

@@ -20,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import client.sound.AudioManager;
 import server.world.Thing;
 import server.world.Arena.ArenaData;
 import server.world.trigger.TileSwitchPreset;
@@ -61,6 +62,7 @@ public class Editor extends JFrame implements KeyListener {
 	HashMap<Integer,Thing> objectTable;
 	HashMap<Integer,TileSwitchPreset> triggerTable;
 	public HashMap<Integer,Misc> miscTable;
+	private AudioManager audioManager;
 	
 	public boolean tileDataChanged = false;
 	
@@ -80,15 +82,8 @@ public class Editor extends JFrame implements KeyListener {
             //setUndecorated(true);
         }
         this.setBackground(Color.BLACK);
-		//tiles = DataManager.loadTileListOld();
-		//List<Terrain >tiles = (List<Terrain>) DataManager.loadObject(DataManager.FILE_TILES);
-        //tileTable = DataManager.getTileMap(tiles);
         tileTable = (HashMap<Integer,Terrain>)DataManager.loadObject(DataManager.FILE_TILES);
 		DataManager.loadImage(tileTable.values());
-		
-        //objects = DataManager.loadObjectListOld();
-        //objects = (List<Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
-        //objectTable = DataManager.getObjectMap(objects);
         
         objectTable = (HashMap<Integer, Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
         DataManager.loadImage(objectTable.values());
@@ -98,8 +93,7 @@ public class Editor extends JFrame implements KeyListener {
         	miscTable = new HashMap<Integer,Misc>();
         }
         DataManager.loadImage(miscTable.values());
-        //triggers = (List<TriggerPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
-        
+
         triggerTable = (HashMap<Integer, TileSwitchPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
         if (triggerTable==null) {
         	triggerTable = new HashMap<Integer,TileSwitchPreset>();
@@ -118,6 +112,7 @@ public class Editor extends JFrame implements KeyListener {
         		e.printStackTrace();
         	}
         }
+        audioManager = new AudioManager();
         
         getContentPane().setLayout(new BorderLayout());
         
@@ -282,5 +277,9 @@ public class Editor extends JFrame implements KeyListener {
 	public void keyTyped(KeyEvent arg0) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public AudioManager getAudioManager() {
+		return audioManager;
 	}
 }

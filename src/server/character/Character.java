@@ -307,7 +307,12 @@ public class Character {
 		noise = Math.max(0, noise + inc);
 		double noiseThres = 30;
 		if (noise > noiseThres) {
-			world.addSound(SoundEvent.FOOTSTEP_SOUND_ID,SoundEvent.FOOTSTEP_SOUND_VOLUME*inc,getX(),getY());
+			Terrain te = world.getArena().getTileAt(x, y).getTerrain();
+			if (te!=null) {
+				world.addSound(te.getSoundId(),te.getVolume()*SoundEvent.FOOTSTEP_SOUND_VOLUME*inc,getX(),getY());
+			} else {
+				world.addSound(SoundEvent.FOOTSTEP_DEFAULT_ID,SoundEvent.FOOTSTEP_SOUND_VOLUME*inc,getX(),getY());
+			}
 			noise -= noiseThres;
 			sway *= -1;
 		}

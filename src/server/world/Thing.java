@@ -23,6 +23,7 @@ public class Thing implements Switchable, CellRenderable, Identifiable, Serializ
 	protected int layer;
 	protected Color color;
 	protected Light light;
+	protected SoundSource sound;
 	protected String name;
 	protected String imageName;
 	
@@ -155,6 +156,20 @@ public class Thing implements Switchable, CellRenderable, Identifiable, Serializ
 	 */
 	public void setLight(Light light) {
 		this.light = light;
+	}
+
+	/**
+	 * @return the sound
+	 */
+	public SoundSource getSound() {
+		return sound;
+	}
+
+	/**
+	 * @param sound the sound to set
+	 */
+	public void setSound(SoundSource sound) {
+		this.sound = sound;
 	}
 
 	public int getLayer() {

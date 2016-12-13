@@ -239,7 +239,7 @@ public class AIPlayer extends ServerPlayer implements GameEvent.Listener {
 			SoundEvent e = (SoundEvent) event;
 			//float eventDist = Geometry.diagonalDistance(e.x, e.y, wsp.player.x, wsp.player.y);
 			// if this one is closer than last one
-			if (AIPlayer.isGunshotSound(e.id) || e.id==SoundEvent.FOOTSTEP_SOUND_ID) {
+			if (AIPlayer.isGunshotSound(e.id) || e.id==SoundEvent.FOOTSTEP_DEFAULT_ID) {
 				// if it's my own footsteps
 				if (Point2D.distance(e.x, e.y, wsp.player.x, wsp.player.y)<0.5) {
 					return;

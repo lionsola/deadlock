@@ -111,6 +111,12 @@ public class World {
 		}
 	}
 	
+	public void addGlobalAnimation(AnimationEvent e) {
+		for (Character ch:characters) {
+			ch.getPerception().events.add(e);
+		}
+	}
+	
 	public void addEvent(GameEvent event) {
 		for (Character ch:characters) {
 			ch.getPerception().events.add(event);

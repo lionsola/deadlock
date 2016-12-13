@@ -66,10 +66,11 @@ public class AnimationSystem {
 	 * @param y
 	 *            The y coordinate of the animation.
 	 */
-	public void addBloodAnimation(double x, double y, double direction) {
-		for (int i = 0; i < 10; i++) {
+	public void addBloodAnimation(double x, double y, double direction, int team) {
+		for (int i = 0; i < 15; i++) {
 			double randomDirection = direction + (Math.PI/2) * Utils.random().nextGaussian()/2;
-			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.005, 0.2, 1000, Color.RED);
+			double d = 1-0.5*Math.abs(randomDirection - direction)/(Math.PI/2);
+			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.005, 0.2*d, 1000, Renderer.teamColors[team]);
 			p.setGrowth(-0.0005, -0.0005);
 			p.setSizeDefault(true);
 			animations.add(p);
@@ -114,9 +115,6 @@ public class AnimationSystem {
 				break;
 			case AnimationEvent.BULLETWALL:
 				addBulletWallAnimation(e.x,e.y);
-				break;
-			case AnimationEvent.BLOOD:
-				addBloodAnimation(e.x,e.y,e.direction);
 				break;
 			case AnimationEvent.ENEMYMARK:
 				addCustomAnimation(new CircleAnimation(e.x,e.y,2,1000, 0,Color.RED));

@@ -11,6 +11,7 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.Toolkit;
+import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Ellipse2D;
@@ -37,7 +38,6 @@ import server.world.Thing;
 import server.world.Tile;
 import server.world.Utils;
 import server.world.trigger.Trigger;
-import server.world.trigger.Trigger.SwitchOnTouch;
 import server.world.trigger.Trigger.SwitchOnTouchSide;
 import server.world.trigger.TriggerEffect;
 import shared.network.FullCharacterData;
@@ -66,7 +66,11 @@ public class Renderer {
 	private BufferedImage darkArenaImage;
 	private BufferedImage lightArenaImage;
 	private BufferedImage lightMap;
-	private BufferedImage[] layerImages = new BufferedImage[4];
+	
+	public BufferedImage lowImage;
+	public BufferedImage highImage;
+	public BufferedImage bloodImage;
+	
 	public static final double DEFAULT_PPM = 20;
 	private static double ppm = Renderer.DEFAULT_PPM;
 	
@@ -244,6 +248,7 @@ public class Renderer {
 		g2D.rotate(rot,toPixel((x+0.5)*ts),toPixel((y+0.5)*ts));	}
 	
 	public void initArenaImages(Arena arena) {
+		BufferedImage lightArenaImage;
 		try {
 			lightArenaImage = ImageIO.read(new FileInputStream("resource/map/"+arena.getName()+"_plain.png"));
 		} catch (IOException e) {
@@ -265,7 +270,7 @@ public class Renderer {
 		} catch (IOException e) {
 			System.err.println("Error while reading pre-rendered dark image");
 			e.printStackTrace();
-			darkArenaImage = ImageBlender.applyBackgroundEffect(arenaImage);
+			darkArenaImage = ImageBlender.applyBackgroundEffect(lightArenaImage);
 		}
 		
 		
@@ -278,6 +283,7 @@ public class Renderer {
 			lightMap = ImageBlender.drawLightImage(arena);
 		}
 
+		BufferedImage[] layerImages = new BufferedImage[4];
 		for (int layer=0;layer<4;layer++) {
 			try {
 				layerImages[layer] = ImageIO.read(
@@ -288,15 +294,12 @@ public class Renderer {
 				layerImages[layer] = ImageBlender.drawArena(arena, layer);
 			}
 		}
-	}
-	
-	public void addBloodToArena(double x, double y, double direction) {
-		Graphics2D g2D = (Graphics2D) lightArenaImage.getGraphics();
-		g2D.rotate(-direction,toPixel(x),toPixel(y));
-		double bw = 2;
-		drawImage(g2D,Sprite.getBloodImage(),x+bw/4,y-bw/2,bw,bw);
-		g2D.rotate(direction,toPixel(x),toPixel(y));
-		g2D.dispose();
+		
+		layerImages[0].getGraphics().drawImage(layerImages[1],0,0,null);
+		layerImages[2].getGraphics().drawImage(layerImages[3],0,0,null);
+		lowImage = layerImages[0];
+		highImage = layerImages[2];
+		bloodImage = ImageBlender.ge.createCompatibleImage(lowImage.getWidth(),lowImage.getHeight(),Transparency.TRANSLUCENT);
 	}
 	
 	public void dispose() {
@@ -898,49 +901,20 @@ public class Renderer {
 	}
 
 	public void redrawArenaImage(Arena a, int tx, int ty, int layer) {
-		layerImages[layer] = ImageBlender.drawArena(a, layer);
-		/*
-		Graphics2D g2D = (Graphics2D) layerImages[layer].getGraphics();
-		double ts = Terrain.tileSize;
-		
-		if (layer==0) {
-			g2D.setColor(BACKGROUND_COLOR);
-			fillRect(g2D,tx*ts,ty*ts,ts,ts);
-			drawTerrain(g2D,a,tx,ty);
+		if (layer<2) {
+			BufferedImage newLowImage = ImageBlender.drawArena(a,0);
+			Renderer.drawArenaLayer(newLowImage.createGraphics(), a, 1, true, true, true);
+			lowImage = newLowImage;
+		} else {
+			BufferedImage newHighImage = ImageBlender.drawArena(a,2);
+			Renderer.drawArenaLayer(newHighImage.createGraphics(), a, 3, true, true, true);
+			highImage = newHighImage;
 		}
-		
-		for (int x=Math.max(tx-1,0);x<=Math.min(tx+1, a.getWidth());x++) {
-			for (int y=Math.max(0, ty-1);y<=Math.min(ty+1,a.getHeight());y++) {
-				Tile t = a.get(x, y);
-				
-				Thing th = t.getThing();
-				if (th!=null && th.getLayer()==layer) {
-					drawThing(g2D,a,x,y);
-				}
-				Misc mi = t.getMisc();
-				if (mi != null) {
-					int tlayer = th==null?0:th.getLayer();
-					int mlayer = mi.getLayer();
-					if (tlayer==mlayer) {
-						mlayer = Math.min(4, mlayer+1);
-					} else {
-						mlayer = Math.max(tlayer, mlayer);
-					}
-					if (mlayer==layer) {
-						drawMisc(g2D,a,x,y);
-					}
-				}
-			}
-		}*/
 	}
 
 	public void redrawLightImage(Arena arena) {
 		Graphics2D g2D = (Graphics2D) lightMap.getGraphics();
 		Renderer.renderHardLight(g2D, arena, new Rectangle2D.Double(0, 0, arena.getWidthMeter(), arena.getHeightMeter()));
-	}
-
-	public void drawArenaLayer(Graphics2D g2D, int layer, Rectangle2D window) {
-		drawArenaImage(g2D, layerImages[layer], window);
 	}
 	
 	public static void drawArenaLayer(Graphics2D g2D, Arena a, int layer, boolean terrain, boolean thing, boolean misc) {
