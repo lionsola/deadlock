@@ -123,7 +123,7 @@ public abstract class Projectile {
 			int tileY = (int) (y / Terrain.tileSize);
 			Tile t = w.getArena().get(tileX, tileY);
 			if (!t.isTraversable() || t.coverType()>0) {
-				onHitWall(w,x,y,t.getThing());	
+				onHitWall(w,x,y,t.getThing());
 			}
 		}
 	}

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import client.gui.GameWindow;
 import server.character.Character;
 import server.character.PlayerCharacter;
 import server.world.trigger.Trigger;
@@ -21,8 +22,8 @@ import shared.network.event.GameEvent.Listener;
  * collision.
  */
 public class World {
+	public static final double DISTANCE_VOLUME_DROP_RATE = 2.5;
 	
-	private Arena arena;
 	private List<PlayerCharacter> characters = new ArrayList<PlayerCharacter>();
 	private List<Character> npcs = new LinkedList<Character>();
 	
@@ -31,12 +32,15 @@ public class World {
 	
 	private List<Trigger> activeTriggers = new LinkedList<Trigger>();
 	
+	private long timeCounter = 0;
+	
+	private Arena arena;
 	private Listener listener;
-	public static final double DISTANCE_VOLUME_DROP_RATE = 2.5;
+	
 	/**
 	 * To circle the spawn positions
 	 */
-	static int[] curSpawn = new int[2];
+	int[] curSpawn = new int[2];
 
 	/**
 	 * Creates the World which is used in GameScreen to play the actual game
@@ -128,13 +132,11 @@ public class World {
 	 * frame.
 	 */
 	public void update() {
-		
-		
 		// update characters
 		for (PlayerCharacter p : characters) {
 			p.update(this);
 		}
-
+		
 		// update npcs
 		List<Character> expired = new LinkedList<Character>();
 		for (Character npc : npcs) {
@@ -153,6 +155,7 @@ public class World {
 				p.update(this);
 			}
 		}
+		
 		projectiles.removeAll(consumed);
 		
 		projectiles.addAll(newProjectiles);
@@ -168,6 +171,31 @@ public class World {
 			}
 		}
 		activeTriggers.removeAll(inactive);
+		
+		for (int x=0;x<arena.getWidth();x++) {
+			for (int y=0;y<arena.getHeight();y++) {
+				Thing th = arena.get(x, y).getThing();
+				if (th!=null) {
+					SoundSource ss = th.getSound();
+					if (ss!=null) {
+						if (ss.isRandom()) {
+							double chance = 1.0*GameWindow.MS_PER_UPDATE/ss.getFrequency();
+							if (Utils.random().nextDouble()<chance) {
+								Point2D p = Utils.tileToMeter(x,y);
+								addSound(ss.getSoundId(), ss.getSoundVolume(),p.getX(),p.getY());
+							}
+						} else {
+							if (timeCounter%ss.getFrequency()<GameWindow.MS_PER_UPDATE) {
+								Point2D p = Utils.tileToMeter(x,y);
+								addSound(ss.getSoundId(), ss.getSoundVolume(),p.getX(),p.getY());
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		timeCounter += GameWindow.MS_PER_UPDATE;
 	}
 	
 	/**

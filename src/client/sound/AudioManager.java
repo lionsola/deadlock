@@ -14,8 +14,8 @@ import shared.network.event.SoundEvent;
 public class AudioManager implements Runnable {
 	
 	// volume gain in decibel
-	public static final float GAIN_MINVOLUME = -25;
-	public static final float GAIN_RANGE = 25;
+	public static final float GAIN_MINVOLUME = -35;
+	public static final float GAIN_RANGE = 45;
 
 	/** Upper bound of in-game sounds' volume.
 	 * Sounds will be from 170db (flash-bang grenade) to 0db (silence).
@@ -62,8 +62,6 @@ public class AudioManager implements Runnable {
 		soundMap.put(SoundEvent.FOOTSTEP_DIRT_ID, footstepDirt);
 		soundMap.put(SoundEvent.FOOTSTEP_DEFAULT_ID, footstepDirt);
 		
-		
-		
 		AlternatingSound footstepGrass = new AlternatingSound();
 		footstepGrass.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_grass0.wav"));
 		footstepGrass.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_grass1.wav"));
@@ -97,11 +95,48 @@ public class AudioManager implements Runnable {
 		bulletwall.addSound(new SingleSound(SOUND_DIR + "environment/" + "bulletwall1.wav"));
 		soundMap.put(SoundEvent.BULLET_WALL_SOUND_ID,bulletwall);
 		
+		AlternatingSound cricket = new AlternatingSound();
+		cricket.addSound(new SingleSound(SOUND_DIR + "environment/" + "cricket0.wav"));
+		cricket.addSound(new SingleSound(SOUND_DIR + "environment/" + "cricket1.wav"));
+		cricket.addSound(new SingleSound(SOUND_DIR + "environment/" + "cricket2.wav"));
+		cricket.addSound(new SingleSound(SOUND_DIR + "environment/" + "cricket3.wav"));
+		cricket.addSound(new SingleSound(SOUND_DIR + "environment/" + "cricket4.wav"));
+		cricket.addSound(new SingleSound(SOUND_DIR + "environment/" + "cricket5.wav"));
+		
+		AlternatingSound critter = new AlternatingSound();
+		critter.addSound(cricket);
+		critter.addSound(new SingleSound(SOUND_DIR + "environment/" + "scuttling.wav"));
+		soundMap.put(SoundEvent.CRITTER_NOISE_ID,critter);
+		
 		soundMap.put(SoundEvent.GRENADE_EXPLODE_SOUND_ID,new SingleSound(SOUND_DIR + "weapon/" + "grenade_explode.wav"));
 		
 		soundMap.put(SoundEvent.DOOR_OPEN_ID, new SingleSound(SOUND_DIR + "environment/" + "door_open.wav"));
 		
-		soundMap.put(SoundEvent.PING_SOUND_ID,new SingleSound(SOUND_DIR + "ping.wav"));
+		Sound ping = new SingleSound(SOUND_DIR + "ping.wav");
+		soundMap.put(SoundEvent.PING_SOUND_ID,ping);
+		Sound staticNoise = new SingleSound(SOUND_DIR + "environment/" + "tv_static.wav");
+		soundMap.put(SoundEvent.STATIC_NOISE_ID,staticNoise);
+		
+		AlternatingSound swi = new AlternatingSound();
+		swi.addSound(new SingleSound(SOUND_DIR + "environment/" + "switch0.wav"));
+		swi.addSound(new SingleSound(SOUND_DIR + "environment/" + "switch1.wav"));
+		soundMap.put(SoundEvent.SWITCH_ID,swi);
+		
+		AlternatingSound tick = new AlternatingSound();
+		tick.addSound(new SingleSound(SOUND_DIR + "environment/" + "tick0.wav"));
+		tick.addSound(new SingleSound(SOUND_DIR + "environment/" + "tick1.wav"));
+		soundMap.put(SoundEvent.TICK_ID,tick);
+		
+		AlternatingSound tv = new AlternatingSound();
+		tv.addSound(footstepHard);
+		tv.addSound(footstepHard);
+		tv.addSound(footstepHard);
+		tv.addSound(staticNoise);
+		tv.addSound(soundMap.get(SoundEvent.DOOR_OPEN_ID));
+		tv.addSound(soundMap.get(3));
+		tv.addSound(soundMap.get(3));
+		
+		soundMap.put(SoundEvent.TV_NOISE_ID, tv);
 	}
 
 	/**
@@ -113,17 +148,15 @@ public class AudioManager implements Runnable {
 	 *            The volume of the client.sound to be played
 	 */
 	private void playSound(Sound sound, float volume) {
-		if (volume >= 0) {
-			// normalize from real-life decibel scale to in-game gain scale
-			volume = GAIN_RANGE * Math.min(GAME_RANGE, volume) / GAME_RANGE + GAIN_MINVOLUME;
-			for (PlayMessage pm : pending) {
-				if (pm.sound == sound) {
-					pm.volume = Math.max(pm.volume, volume);
-					return;
-				}
+		// normalize from real-life decibel scale to in-game gain scale
+		volume = GAIN_RANGE * Math.min(GAME_RANGE, volume) / GAME_RANGE + GAIN_MINVOLUME;
+		for (PlayMessage pm : pending) {
+			if (pm.sound == sound) {
+				pm.volume = Math.max(pm.volume, volume);
+				return;
 			}
-			pending.add(new PlayMessage(sound, volume));
 		}
+		pending.add(new PlayMessage(sound, volume));
 	}
 
 	public void playSound(int id, float volume) {
@@ -157,7 +190,8 @@ public class AudioManager implements Runnable {
 	 * Update the thread
 	 */
 	public void update() {
-		threadPool.execute(this);
+		//threadPool.execute(this);
+		run();
 	}
 
     @Override

@@ -22,9 +22,6 @@ import server.world.trigger.TileSwitchPreset;
  * The class uses 3 files in order to generate a map, the map.bmp file, the map_x.bmp file (spawn
  * points) and the map.map file which contains the information for mapping pixel colours to specific
  * textures from the map.bmp file.
- * 
- * @author Team D1
- * @author Anh D Pham
  */
 public class Arena {
 	public static final int T1_COLOR = 0x00ff00; // red spawn colour
@@ -33,8 +30,8 @@ public class Arena {
 	protected String name; // the name of the map
 	private transient List<Point2D> t1Spawns; // spawn points of team 1
 	private transient List<Point2D> t2Spawns; // spawn points of team 2
-	protected transient List<Light> lightList;
 	
+	protected transient List<Light> lightList;
 	protected transient int[][] lightMap;
 	
 	protected Tile[][] tMap;
@@ -258,7 +255,8 @@ public class Arena {
 						List<Point2D> points = Geometry.getLineSamples(lightPos,
 								minLCDest, LINECAST_DISTANCE);
 						for (Point2D p:points) {
-							if (p.distance(minLCDest)>0.01 && !get((int)p.getX(),(int)p.getY()).isClear()) {
+							if (((int)p.getX()!=l.getX() || (int)p.getY()!=l.getY()) &&
+									p.distance(minLCDest)>0.01 && !get((int)p.getX(),(int)p.getY()).isClear()) {
 								blockCount ++;
 							}
 							if (blockCount>=MAX_BLOCK_COUNT) {

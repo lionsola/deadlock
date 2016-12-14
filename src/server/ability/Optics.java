@@ -16,10 +16,11 @@ public class Optics extends ToggleAbility {
 	private final double rangeInc;
 	private final double angleInc;
 	private final double speedInc;
+	private final boolean allowWeapon;
 	
 	public Optics(int id, PlayerCharacter self, double rangeMod, double angleMod, double speedMod, boolean allowWeapon) {
 		super(id,self,COOLDOWN);
-		
+		this.allowWeapon = allowWeapon;
 		RANGE = rangeMod;
 		ANGLE = angleMod;
 		SPEED = speedMod;
@@ -31,11 +32,17 @@ public class Optics extends ToggleAbility {
 
 	@Override
 	protected void onActivate(World w, PlayerCharacter c) {
+		if (!allowWeapon) {
+			self().getWeapon().setStatus(false);
+		}
 		transElapsed = 0;
 	}
 
 	@Override
 	protected void onDeactivate(World w, PlayerCharacter c) {
+		if (!allowWeapon) {
+			self().getWeapon().setStatus(true);
+		}
 		transElapsed = 0;
 	}
 	

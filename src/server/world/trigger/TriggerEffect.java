@@ -16,6 +16,7 @@ public interface TriggerEffect extends Serializable {
 	
 	public static class TileSwitch implements TriggerEffect {
 		private static final long serialVersionUID = -544862884053974706L;
+		Point triggerLocation;
 		int tx,ty;
 		public final int presetID;
 		
@@ -43,6 +44,10 @@ public interface TriggerEffect extends Serializable {
 		
 		public Point getTargetTile() {
 			return new Point(tx,ty);
+		}
+		
+		public void setTriggerTile(Point p) {
+			triggerLocation = p;
 		}
 		
 		public void setTargetTile(Point p) {

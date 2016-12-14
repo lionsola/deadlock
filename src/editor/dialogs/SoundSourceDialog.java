@@ -33,7 +33,6 @@ public class SoundSourceDialog extends JDialog {
 				button.doClick();
 			}});
         
-        
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
         c.weightx = 1;
@@ -73,6 +72,10 @@ public class SoundSourceDialog extends JDialog {
         	volume.setValue(ss.getSoundVolume());
         	frequency.setValue(ss.getFrequency());
         	random.setSelected(ss.isRandom());
+        } else {
+        	soundId.setValue(0);
+        	volume.setValue(0);
+        	frequency.setValue(1000);
         }
         
         this.pack();

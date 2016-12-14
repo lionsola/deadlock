@@ -381,11 +381,11 @@ public class Renderer {
 		// draw head
 		Point2D h = Geometry.PolarToCartesian(r*0.35, direction);
 		double hr = r*0.5;
-		//g2D.setColor(Color.BLACK);
-		//fillCircle(g2D,x+h.getX(),y-h.getY(),hr);
-		g2D.setColor(teamColors[team]);
-		//g2D.setStroke(new BasicStroke(1.2f*toPixel(CHARACTER_WIDTH)));
+		g2D.setColor(teamColors2[team]);
 		fillCircle(g2D,x+h.getX(),y-h.getY(),hr);
+		g2D.setColor(teamColors[team]);
+		g2D.setStroke(new BasicStroke(1.1f*toPixel(CHARACTER_WIDTH)));
+		drawCircle(g2D,x+h.getX(),y-h.getY(),hr);
 		
 		
 		g2D.setStroke(new BasicStroke(1));
@@ -934,7 +934,7 @@ public class Renderer {
 					int tlayer = th==null?0:th.getLayer();
 					int mlayer = mi.getLayer();
 					if (tlayer==mlayer) {
-						mlayer = Math.min(4, mlayer+1);
+						mlayer = Math.min(3, mlayer+1);
 					} else {
 						mlayer = Math.max(tlayer, mlayer);
 					}

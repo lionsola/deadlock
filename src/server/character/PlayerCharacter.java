@@ -32,10 +32,9 @@ import client.gui.GameWindow;
 public class PlayerCharacter extends Character {
 	
 	public static final double MOVEMENT_DISPERSION_FACTOR = 0.007;
-	public static final double ROTATION_DISPERSION_FACTOR = 0.05;
+	public static final double ROTATION_DISPERSION_FACTOR = 0.03;
 	
 	public static final double MAX_DISPERSION_ANGLE = 0.1;
-	public static final double DISPERSION_DEC = 0.006;
 	
 	private double instaF = 1;
 	
@@ -123,7 +122,7 @@ public class PlayerCharacter extends Character {
 		//addDispersion(-DISPERSION_DEC*(0.5+charDispersion));
 		double delta = Geometry.wrapAngle(targetDirection - direction);
 		double stabFactor = (0.5+Math.abs(delta)/MAX_DISPERSION_ANGLE);
-		direction += Math.copySign(0.01*MAX_DISPERSION_ANGLE*stabFactor,delta);
+		direction += Math.copySign(0.012*MAX_DISPERSION_ANGLE*stabFactor,delta);
 		
 		// limit the difference
 		if (Math.abs(delta)>MAX_DISPERSION_ANGLE) {

@@ -1,6 +1,10 @@
 package server.world;
 
-public class SoundSource {
+import java.io.Serializable;
+
+public class SoundSource implements Serializable {
+	private static final long serialVersionUID = 7234827501082028797L;
+	
 	private int x, y;
 	private int soundId;
 	private double soundVolume;

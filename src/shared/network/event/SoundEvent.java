@@ -15,9 +15,19 @@ public class SoundEvent extends GameEvent {
 	public static final int PING_SOUND_ID = 34;
 	public static final int DOOR_OPEN_ID = 36;
 	
+	public static final int STATIC_NOISE_ID = 50;
+	public static final int CRITTER_NOISE_ID = 51;
+	public static final int TV_NOISE_ID = 52;
+	public static final int SWITCH_ID = 53;
+	public static final int TICK_ID = 54;
+	
 	public static final float BULLET_WALL_SOUND_VOLUME = 25;
 	public static final float PING_SOUND_VOLUME = 30;
 	public static final float FOOTSTEP_SOUND_VOLUME = 15;
+
+	
+	
+	
 	
 	public final float x;
 	public final float y;

@@ -34,7 +34,7 @@ public class Character {
 	public static final double BASE_FOVRANGE= 20;
 	public static final double BASE_FOVANGLE= Math.toRadians(120);
 	
-	public static final double BASE_HEARING_THRES = 0;
+	public static final double BASE_HEARING_THRES = -10;
 	
 	private double x = 0;
 	private double y = 0;

@@ -24,6 +24,7 @@ public class SoundPlayer implements Runnable {
 
 	private InputStream inputStream;
 	private float volume;
+	private SingleSound singleSound;
 
 	/**
 	 * 
@@ -39,11 +40,11 @@ public class SoundPlayer implements Runnable {
 	 * @param threadPool
 	 */
 	public SoundPlayer(Sound sound, float volume, ExecutorService threadPool) {
-
-		format = sound.getFormat();
+		this.singleSound = sound.getSound();
+		this.format = singleSound.getFormat();
 		this.volume = volume;
 		this.threadPool = threadPool;
-		this.inputStream = new ByteArrayInputStream(sound.getSamples());
+		this.inputStream = new ByteArrayInputStream(singleSound.getSamples());
 	}
 
 	/**
@@ -93,8 +94,12 @@ public class SoundPlayer implements Runnable {
 			}
 		} catch (IOException ex) {
 			ex.printStackTrace();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Error while playing sound "+singleSound);
 		}
-
+		
 		// wait until all data is played, then close the line
 		line.drain();
 		line.close();

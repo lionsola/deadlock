@@ -252,8 +252,8 @@ public class ThingDialog extends JDialog implements ActionListener {
 		} else if (arg0.getSource()==light) {
 			if (light.isSelected()) {
 				if (lightDialog==null) {
-					Light l = tile.getLight();
-					if (l!=null) {
+					if (tile!=null && tile.getLight()!=null) {
+						Light l = tile.getLight();
 						lightDialog = new LightSourceDialog(this, light,l.getColor(),l.getRange());
 		        	} else {
 		        		lightDialog = new LightSourceDialog(this,light,0xffffff,3);
@@ -269,8 +269,12 @@ public class ThingDialog extends JDialog implements ActionListener {
 		} else if (arg0.getSource()==sound) {
 			if (sound.isSelected()) {
 				if (soundDialog==null) {
-					SoundSource ss = tile.getSound();
-					soundDialog = new SoundSourceDialog(this, editor,sound,ss);
+					if (tile!=null) {
+						SoundSource ss = tile.getSound();
+						soundDialog = new SoundSourceDialog(this, editor,sound,ss);
+					} else {
+						soundDialog = new SoundSourceDialog(this,editor,sound,null);
+					}
 				}
 				soundDialog.setModalityType(ModalityType.MODELESS);
 				soundDialog.setVisible(true);

@@ -15,6 +15,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 public class SingleSound implements Sound {
 	private AudioFormat format;
 	private byte[] samples;
+	public final String file;
 
 	// a pointer points to the sample
 	/**
@@ -24,7 +25,7 @@ public class SingleSound implements Sound {
 	 *            The filepath of the client.sound
 	 */
 	public SingleSound(String fileName) {
-
+		file = fileName;
 		try {
 			AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(fileName));
 			this.format = audioInputStream.getFormat();
@@ -74,5 +75,10 @@ public class SingleSound implements Sound {
 
 		// return the samples
 		return samples;
+	}
+
+	@Override
+	public SingleSound getSound() {
+		return this;
 	}
 }

@@ -66,9 +66,8 @@ public class CircleAnimation extends BasicAnimation {
 	}
 	
 	@Override
-	public boolean update() {
-		if (super.update())
-			return true;
+	public void update() {
+		super.update();
 		if (delay <= 0) {
 			radius = Math.min(maxRadius, radius + growth);
 			if (radius >= maxRadius * 0.8)
@@ -76,7 +75,6 @@ public class CircleAnimation extends BasicAnimation {
 
 			width = (maxRadius-radius)/(maxRadius-startWidth)*startWidth;
 		}
-		return false;
 	}
 	
 	@Override

@@ -38,19 +38,14 @@ public abstract class BasicAnimation {
 	 * 
 	 * @return
 	 */
-	public boolean update() {
+	public void update() {
 		long elapsed = System.currentTimeMillis() - lastTick;
 		if (delay > 0) {
 			delay -= elapsed;
 		} else {
 			life -= elapsed;
 		}
-		if (life < 0)
-			return true;
-		else {
-			lastTick = System.currentTimeMillis();
-			return false;
-		}
+		lastTick = System.currentTimeMillis();
 	}
 
 	/**
@@ -61,4 +56,7 @@ public abstract class BasicAnimation {
 	 */
 	abstract public void render(Graphics2D g2D);
 
+	public boolean isExpired() {
+		return life < 0;
+	}
 }

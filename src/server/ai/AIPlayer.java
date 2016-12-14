@@ -16,6 +16,7 @@ import server.world.Arena;
 import server.world.Geometry;
 import server.world.Terrain;
 import server.world.Thing;
+import server.world.Tile;
 import server.world.Utils;
 import shared.network.CharData;
 import shared.core.Vector2D;
@@ -420,8 +421,8 @@ public class AIPlayer extends ServerPlayer implements GameEvent.Listener {
 			if (!blocked) {
 				List<Point2D> samples = Geometry.getLineSamples(wsp.player.x,wsp.player.y,target.x,target.y, 0.5);
 				for (Point2D point:samples) {
-					Thing t = arena.getTileAt(point.getX(),point.getY()).getThing();
-					if (t!=null && t.getCoverType()>1) {
+					Tile t = arena.getTileAt(point.getX(),point.getY());
+					if (t.coverType()>1) {
 						blocked = true;
 						break;
 					}

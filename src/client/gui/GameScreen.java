@@ -461,7 +461,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 
 		try {
 			InputStream in = connection.getSocket().getInputStream();
-			while (in.available() > 1000) {
+			while (in.available() > 2000) {
 				wsp = (WorldStatePacket) connection.receive();
 				events.addAll(wsp.events);
 			}
@@ -729,8 +729,9 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				SoundEvent e = (SoundEvent) event;
 				audioManager.playSound(e.id,e.volume);
 				
-				if (e.id!=SoundEvent.PING_SOUND_ID)
+				if (e.id!=SoundEvent.PING_SOUND_ID && e.volume>0) {
 					nonvisualAnimations.addNoiseAnimation(e.x, e.y, e.volume);
+				}
 			} else if (event instanceof AnimationEvent) {
 				AnimationEvent e = (AnimationEvent) event;
 				if (e.id==AnimationEvent.BLOOD) {

@@ -69,9 +69,8 @@ public class ParticleAnimation extends BasicAnimation {
 	 * @return boolean indicates whether a particle has finished updating itself.
 	 */
 	@Override
-	public boolean update() {
-		if (super.update())
-			return true;
+	public void update() {
+		super.update();
 		vel.add(acc);
 		loc.add(vel);
 		size.add(growth);
@@ -79,21 +78,16 @@ public class ParticleAnimation extends BasicAnimation {
 		
 		if (defaultSize) {
 			if (size.x >= maxSize.x) {
-				if (size.y >= maxSize.y)
-					return true;
-				else
-					size.x = maxSize.x;
+				size.x = maxSize.x;
 			}
 			if (size.y >= maxSize.y)
 				size.y = maxSize.y;
-			if (size.x <= 0)
-				if (size.y <= 0)
-					return true;
-				else
-					size.x = 1;
-			if (size.y <= 0)
+			if (size.x <= 0) {
+				size.x = 1;
+			}
+			if (size.y <= 0) {
 				size.y = 1;
-			return false;
+			}
 		}
 
 		if (ultSize) {
@@ -123,7 +117,6 @@ public class ParticleAnimation extends BasicAnimation {
 			if (size.y <= 0)
 				size.y = 1;
 		}
-		return false;
 	}
 
 	/**

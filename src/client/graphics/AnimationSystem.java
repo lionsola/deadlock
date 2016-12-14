@@ -67,12 +67,10 @@ public class AnimationSystem {
 	 *            The y coordinate of the animation.
 	 */
 	public void addBloodAnimation(double x, double y, double direction, int team) {
-		for (int i = 0; i < 15; i++) {
+		for (int i = 0; i < 5; i++) {
 			double randomDirection = direction + (Math.PI/2) * Utils.random().nextGaussian()/2;
 			double d = 1-0.5*Math.abs(randomDirection - direction)/(Math.PI/2);
-			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.005, 0.2*d, 1000, Renderer.teamColors[team]);
-			p.setGrowth(-0.0005, -0.0005);
-			p.setSizeDefault(true);
+			BloodAnimation p = new BloodAnimation(x, y, randomDirection, 0.15*d, Renderer.teamColors[team],300, 0);
 			animations.add(p);
 		}
 	}
@@ -142,7 +140,8 @@ public class AnimationSystem {
 	public void update() {
 		List<BasicAnimation> removed = new LinkedList<BasicAnimation>();
 		for (BasicAnimation a : animations) {
-			if (a.update())
+			a.update();
+			if (a.isExpired())
 				removed.add(a);
 		}
 		animations.removeAll(removed);

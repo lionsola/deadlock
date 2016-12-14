@@ -244,6 +244,7 @@ public abstract class Tool extends MouseInputAdapter {
 						TriggerEffect.TileSwitch ts = new TriggerEffect.TileSwitch(tp.getId());
 						ts.setPreset(tp);
 						ts.setTargetTile(p);
+						ts.setTriggerTile(tr.getLocation());
 						tr.addEffect(ts);
 						
 						this.tr = null;
