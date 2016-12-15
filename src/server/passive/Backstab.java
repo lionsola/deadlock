@@ -6,7 +6,7 @@ import server.world.World;
 import shared.network.CharData;
 
 public class Backstab extends Passive {
-	public static final double BS_MIN_ANGLE = 135;
+	public static final double BS_MIN_ANGLE = Math.PI/10;
 	public static final double BS_RECOIL = -0.5;
 	public static final double BS_NOISE = -0.3;
 
@@ -27,13 +27,15 @@ public class Backstab extends Passive {
 	}
 
 	@Override
-	protected boolean trigger() {
+	protected double calculateActivationLevel(World w) {
+		double max = 0;
 		for (CharData c:self().getPerception().characters) {
-			double dir = Geometry.wrapAngle(c.direction - Math.atan2(c.y-self().getY(),c.x-self().getX()));
-			if (Math.abs(dir)<BS_MIN_ANGLE) {
-				return true;
+			double dir = Math.abs(Geometry.wrapAngle(c.direction - Math.atan2(c.y-self().getY(),c.x-self().getX())));
+			double activation = (BS_MIN_ANGLE - dir)/BS_MIN_ANGLE;
+			if (activation > max) {
+				max = activation;
 			}
 		}
-		return false;
+		return max;
 	}
 }

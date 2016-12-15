@@ -20,7 +20,7 @@ public class Overwatch extends Passive {
 	
 	@Override
 	protected void onUpdate(World w) {
-		if (isActive()) {
+		if (!self().isMoving()) {
 			if (rangeIncreased<OW_RANGE) {
 				self().addFovRangeMod(+ rangeInc);
 				rangeIncreased += rangeInc;
@@ -44,7 +44,8 @@ public class Overwatch extends Passive {
 	}
 
 	@Override
-	protected boolean trigger() {
-		return !self().isMoving();
+	protected double calculateActivationLevel(World w) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

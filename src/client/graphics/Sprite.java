@@ -8,6 +8,7 @@ import java.util.HashMap;
 import javax.imageio.ImageIO;
 
 import server.ability.Ability;
+import server.passive.Passive;
 import server.weapon.Weapon;
 import server.world.Utils;
 
@@ -97,6 +98,13 @@ public class Sprite {
 			ability.put(Ability.SCOPE_ID, ABILITY_ICON_DIR+"ability_scope.png");
 			ability.put(Ability.FLASH_ID, ABILITY_ICON_DIR+"ability_flash.png");
 			ability.put(Ability.FRAG_ID, ABILITY_ICON_DIR+"ability_frag.png");
+			
+			ability.put(Passive.ASSAULT_ID, ABILITY_ICON_DIR+"ability_bino.png");
+			ability.put(Passive.BACKSTAB_ID, ABILITY_ICON_DIR+"ability_bino.png");
+			ability.put(Passive.MARK_ID, ABILITY_ICON_DIR+"ability_bino.png");
+			ability.put(Passive.OVERWATCH_ID, ABILITY_ICON_DIR+"ability_bino.png");
+			ability.put(Passive.SHIELD_ID, ABILITY_ICON_DIR+"ability_bino.png");
+			
 		} catch (Exception e) {
 			System.out.println("Error while loading server.character images");
 			System.out.println(e.getMessage());

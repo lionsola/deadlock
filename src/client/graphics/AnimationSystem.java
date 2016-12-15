@@ -70,7 +70,7 @@ public class AnimationSystem {
 		for (int i = 0; i < 5; i++) {
 			double randomDirection = direction + (Math.PI/2) * Utils.random().nextGaussian()/2;
 			double d = 1-0.5*Math.abs(randomDirection - direction)/(Math.PI/2);
-			BloodAnimation p = new BloodAnimation(x, y, randomDirection, 0.15*d, Renderer.teamColors[team],300, 0);
+			BloodAnimation p = new BloodAnimation(x, y, randomDirection, 0.15*d, Renderer.teamColors[team],500, 0);
 			animations.add(p);
 		}
 	}

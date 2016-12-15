@@ -11,6 +11,9 @@ public class FullCharacterData extends CharData {
 	
 	public float weaponCooldown;
 	public float abilityCooldown;
+	
+	public float passiveLevel;
+	
 	public float viewRange;
 	public float viewAngle;
 	

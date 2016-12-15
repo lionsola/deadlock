@@ -15,8 +15,8 @@ public class Mark extends Passive {
 	}
 
 	@Override
-	protected boolean trigger() {
-		return !self().getPerception().characters.isEmpty();
+	protected double calculateActivationLevel(World w) {
+		return !self().getPerception().characters.isEmpty()?1:0;
 	}
 	
 	@Override

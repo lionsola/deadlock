@@ -252,8 +252,10 @@ public class MatchServer implements Runnable, Listener {
 		sendState();
 		events.add(new GameEndEvent(getWinningTeam()));
 		sendState();
+		events.add(new GameEndEvent(getWinningTeam()));
+		sendState();
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(2000);
 		} catch (InterruptedException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

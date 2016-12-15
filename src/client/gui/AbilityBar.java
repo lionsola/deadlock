@@ -22,31 +22,24 @@ public class AbilityBar extends JPanel {
 	private int passiveId = -1;
 	final int SIZE = 40;
 	
-	public AbilityBar(GameScreen parent) {
-		super();
-		
-		weapon = new AbilityIcon();
-		add(weapon);
-		ability = new AbilityIcon();
-		add(ability);
-		setOpaque(false);
-		
-		//ability = new AbilityIcon();
-		//add(ability);
-	}
-	
 	public AbilityBar(GameScreen parent, int weaponId, int abilityId, int passiveId) {
 		super();
 		this.weaponId = weaponId;
 		this.abilityId = abilityId;
 		this.passiveId = passiveId;
 		
-		weapon = new AbilityIcon();
+		weapon = new AbilityIcon(true);
 		weapon.setAbility(weaponId);;
 		add(weapon);
-		ability = new AbilityIcon();
+		
+		ability = new AbilityIcon(true);
 		ability.setAbility(abilityId);
 		add(ability);
+		
+		passive = new AbilityIcon(false);
+		passive.setAbility(passiveId);
+		add(passive);
+		
 		setOpaque(false);
 		
 		//ability = new AbilityIcon();
@@ -64,18 +57,25 @@ public class AbilityBar extends JPanel {
 			ability.setAbility(cp.abilityId);
 			this.invalidate();
 		}
+		if (passiveId!=cp.passiveId) {
+			this.passiveId = cp.passiveId;
+			passive.setAbility(cp.passiveId);
+			this.invalidate();
+		}
 		weapon.update(p.weaponCooldown);
 		ability.update(p.abilityCooldown);
+		passive.update(p.passiveLevel);
 	}
 	
 	public class AbilityIcon extends JLabel {
 		private static final long serialVersionUID = 8228610117418905743L;
 		volatile private float fill = 0;
+		private final boolean active;
 		
-		public AbilityIcon() {
+		public AbilityIcon(boolean active) {
+			this.active = active;
 			int BORDER = 2;
-			setBackground(GUIFactory.TRANSBLACK);
-			setOpaque(true);
+			setOpaque(false);
 			setBorder(BorderFactory.createLineBorder(GUIFactory.UICOLOR,2,true));
 			int w = SIZE+BORDER*2;
 			setPreferredSize(new Dimension(w,w));
@@ -92,9 +92,21 @@ public class AbilityBar extends JPanel {
 		
 		@Override
 		public void paintComponent(Graphics g) {
-			super.paintComponent(g);
-			g.setColor(new Color(255,255,255,0x3f));
-			g.fillRect(0,(int)(fill*getHeight()+0.5),getWidth(),getHeight());
+			g.setColor(Color.BLACK);
+			g.fillRect(0,0,getWidth(),getHeight());
+			if (active) {
+				g.setColor(GUIFactory.UICOLOR_BG);
+				g.fillRect(0,(int)((1-fill)*getHeight()+0.5),getWidth(),getHeight());
+				super.paintComponent(g);
+				if (fill<1) {
+					g.setColor(new Color(0,0,0,0x8f));
+					g.fillRect(0, 0, getWidth(), getHeight());
+				}
+			} else {
+				g.setColor(GUIFactory.UICOLOR_BG);
+				g.fillRect(0,(int)((1-fill)*getHeight()+0.5),getWidth(),getHeight());
+				super.paintComponent(g);
+			}
 		}
 	}
 }

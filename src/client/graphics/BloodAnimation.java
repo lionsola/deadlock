@@ -7,11 +7,12 @@ import server.world.Terrain;
 import shared.core.Vector2D;
 
 public class BloodAnimation extends BasicAnimation {
-	static final int BASE_ALPHA = 2;
+	static final float BASE_ALPHA = 1.5f;
 	
 	private Color color;
 	private Vector2D loc;
 	private Vector2D vel;
+	private double carryAlpha;
 	
 	public BloodAnimation(double x, double y, double direction, double speed, Color color, long life, long delay) {
 		super(life, delay);
@@ -33,8 +34,11 @@ public class BloodAnimation extends BasicAnimation {
 		double ts = Terrain.tileSize;
 		int tx = (int) (loc.x/ts);
 		int ty = (int) (loc.y/ts);
-		int alpha = (int) Math.min(255,Math.max(1,(BASE_ALPHA+1)*life/duration));;
-		g2D.setColor(new Color(color.getRed(),color.getGreen(),color.getBlue(),alpha));;
-		Renderer.fillRect(g2D, tx*ts, ty*ts, ts, ts);
+		double alpha = Math.min(255,Math.max(0,1.0*BASE_ALPHA*life/duration));
+		if (alpha + carryAlpha>1) {
+			g2D.setColor(new Color(color.getRed(),color.getGreen(),color.getBlue(),(int)(alpha+carryAlpha)));
+			Renderer.fillRect(g2D, tx*ts, ty*ts, ts, ts);
+		}
+		carryAlpha = (alpha + carryAlpha)%1;
 	}
 }

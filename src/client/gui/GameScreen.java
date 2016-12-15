@@ -38,6 +38,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import server.ability.Ability;
+import server.passive.Passive;
 import server.weapon.Weapon;
 import server.world.Arena;
 import server.world.Misc;
@@ -279,30 +280,35 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				case 0:
 					wId = Weapon.ASSAULT_RIFLE_ID;
 					aId = Ability.FRAG_ID;
+					pId = Passive.ASSAULT_ID;
 					break;
 					
 				// markman
 				case 1:
 					wId = Weapon.MARKMAN_RIFLE_ID;
 					aId = Ability.SCOPE_ID;
+					pId = Passive.OVERWATCH_ID;
 					break;
 					
 				// scout
 				case 2:
 					wId = Weapon.SHOTGUN_ID;
 					aId = Ability.BINO_ID;
+					pId = Passive.MARK_ID;
 					break;
 					
 				// shield
 				case 3:
 					wId = Weapon.MP7_ID;
 					aId = Ability.FLASH_ID;
+					pId = Passive.SHIELD_ID;
 					break;
 					
 				// agent
 				case 4:
 					wId = Weapon.SILENT_PISTOL_ID;
 					aId = Ability.AMP_ID;
+					pId = Passive.BACKSTAB_ID;
 					break;
 			}
 			cp.weaponId = wId;

@@ -387,7 +387,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 			}
 		} else if (arg0.getSource() == team2Button) {
 			if (lobbyServer != null) {
-				lobbyServer.addAIPlayer(1, clientPlayer.type);
+				lobbyServer.addDummyPlayer(1, clientPlayer.type);
 			}
 		}
 	}

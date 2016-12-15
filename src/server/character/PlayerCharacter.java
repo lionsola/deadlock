@@ -240,6 +240,7 @@ public class PlayerCharacter extends Character {
 			fc.armorAngle = (float) getArmor().getAngle();
 			fc.armorStart = (float) getArmor().getStart();
 		}
+		fc.passiveLevel = (float) passive.getActivationLevel();
 		return fc;
 	}
 

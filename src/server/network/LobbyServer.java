@@ -8,6 +8,7 @@ import java.util.List;
 
 import client.gui.ClientPlayer;
 import server.ai.AIPlayer;
+import server.ai.DummyPlayer;
 import shared.network.Connection;
 import shared.network.LobbyRequest;
 import shared.network.LobbyRequest.ChangeCharacterRequest;
@@ -106,6 +107,20 @@ public class LobbyServer implements Runnable {
 	public void addAIPlayer (int team, int type) {
 	    ServerPlayer p = new AIPlayer(count, team);
 		//ServerPlayer p = new DummyPlayer(count, team);
+	    p.type = type;
+	    p.active = true;
+	    count++;
+	    sendRequest(new LobbyRequest.NewPlayerRequest(generateClientPlayer(p)));
+        players.add(p);
+	}
+	
+	/**
+	 * Add a dummy player to the lobby for testing purpose (called by the host).
+	 * @param team The team to create the AI player in.
+	 * @param type The type of the AI player.
+	 */
+	public void addDummyPlayer (int team, int type) {
+		ServerPlayer p = new DummyPlayer(count, team);
 	    p.type = type;
 	    p.active = true;
 	    count++;

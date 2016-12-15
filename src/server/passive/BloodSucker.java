@@ -12,11 +12,6 @@ public class BloodSucker extends Passive {
 	public BloodSucker(PlayerCharacter self) {
 		super(self);
 	}
-
-	@Override
-	protected boolean trigger() {
-		return !self().getPerception().characters.isEmpty();
-	}
 	
 	@Override
 	protected void onUpdate(World w) {
@@ -28,5 +23,10 @@ public class BloodSucker extends Passive {
 				self().onHit(w, -damage, self().id);
 			}
 		}
+	}
+
+	@Override
+	protected double calculateActivationLevel(World w) {
+		return !self().getPerception().characters.isEmpty()?1:0;
 	}
 }

@@ -4,22 +4,26 @@ import server.character.PlayerCharacter;
 import server.world.World;
 
 public abstract class Passive {
+	public static final int ASSAULT_ID = 200;
+	public static final int BACKSTAB_ID = 201;
+	public static final int MARK_ID = 202;
+	public static final int OVERWATCH_ID = 203;
+	public static final int SHIELD_ID = 204;
+	
 	private PlayerCharacter self;
-	private boolean isActive;
+	private double level;
 	public Passive(PlayerCharacter self) {
 		this.self = self;
 	}
 	
 	public void update(World w) {
 		if (!self().isDead()) {
-			if (!isActive && trigger()) {
+			double oldTrigger = level;
+			level = calculateActivationLevel(w);
+			if (oldTrigger<=0 && level>0) {
 				onActivate(w);
-				isActive = true;
-			} else if (isActive) {
-				if (!trigger()) {
-					onDeactivate(w);
-					isActive = false;
-				}
+			} else if (oldTrigger>0 && level<=0) {
+				onDeactivate(w);
 			}
 			onUpdate(w);
 		}
@@ -29,16 +33,11 @@ public abstract class Passive {
 
 	protected void onActivate(World w) {};
 
-	protected PlayerCharacter self() {
-		return self;
-	}
+	protected PlayerCharacter self() {return self;}
 	
-	protected abstract boolean trigger();
+	public double getActivationLevel() {return level;}
 	
+	protected abstract double calculateActivationLevel(World w);
 	
 	protected void onUpdate(World w) {};
-	
-	public boolean isActive () {
-		return isActive;
-	}
 }
