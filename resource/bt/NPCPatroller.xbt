@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Tree>
+  <Node id="Node_0" name="NPCPatroller" type="Root">
+    <Children>
+      <Node id="Node_2" type="Repeat">
+        <Children>
+          <Node id="Node_3" type="DynamicPriorityList">
+            <Children>
+              <Node id="Node_4" type="SubtreeLookup">
+                <Guard>
+                  <Node id="Node_6" name="EnemyInSight" type="Condition" />
+                </Guard>
+                <Parameters>
+                  <Parameter name="subtreeName" fromcontext="false">Fire</Parameter>
+                </Parameters>
+              </Node>
+              <Node id="Node_5" type="SubtreeLookup">
+                <Parameters>
+                  <Parameter name="subtreeName" fromcontext="false">Patrol</Parameter>
+                </Parameters>
+              </Node>
+            </Children>
+          </Node>
+        </Children>
+      </Node>
+    </Children>
+  </Node>
+</Tree>
+

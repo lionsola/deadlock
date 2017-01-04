@@ -1,6 +1,6 @@
 package server.passive;
 
-import server.character.PlayerCharacter;
+import server.character.InputControlledEntity;
 import server.world.World;
 
 public abstract class Passive {
@@ -10,9 +10,9 @@ public abstract class Passive {
 	public static final int OVERWATCH_ID = 203;
 	public static final int SHIELD_ID = 204;
 	
-	private PlayerCharacter self;
+	private InputControlledEntity self;
 	private double level;
-	public Passive(PlayerCharacter self) {
+	public Passive(InputControlledEntity self) {
 		this.self = self;
 	}
 	
@@ -33,7 +33,7 @@ public abstract class Passive {
 
 	protected void onActivate(World w) {};
 
-	protected PlayerCharacter self() {return self;}
+	protected InputControlledEntity self() {return self;}
 	
 	public double getActivationLevel() {return level;}
 	

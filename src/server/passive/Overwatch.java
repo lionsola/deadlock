@@ -1,7 +1,7 @@
 package server.passive;
 
 import client.gui.GameWindow;
-import server.character.PlayerCharacter;
+import server.character.InputControlledEntity;
 import server.world.World;
 
 public class Overwatch extends Passive {
@@ -13,7 +13,7 @@ public class Overwatch extends Passive {
 	
 	private double rangeIncreased = 0;
 	
-	public Overwatch(PlayerCharacter self) {
+	public Overwatch(InputControlledEntity self) {
 		super(self);
 		rangeInc = OW_RANGE*GameWindow.MS_PER_UPDATE/OW_TRANS;
 	}

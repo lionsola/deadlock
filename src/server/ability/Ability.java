@@ -1,7 +1,7 @@
 package server.ability;
 
 import client.gui.GameWindow;
-import server.character.PlayerCharacter;
+import server.character.InputControlledEntity;
 import server.world.World;
 
 /**
@@ -17,11 +17,12 @@ public abstract class Ability {
 	
 	public final long cooldown;
 	private long cooldownTimer;
-	private PlayerCharacter self;
+	private InputControlledEntity self;
 	private int id;
 	private boolean enabled = true;
 	
-	public Ability (int id, PlayerCharacter self, long cooldown) {
+	public Ability (int id, InputControlledEntity self, long cooldown) {
+		this.id = id;
 		this.cooldown = cooldown;
 		this.self = self;
 		cooldownTimer = 0;
@@ -44,7 +45,7 @@ public abstract class Ability {
 		return cooldownTimer>=cooldown;
 	}
 	
-	protected PlayerCharacter self() {
+	protected InputControlledEntity self() {
 		return self;
 	}
 	

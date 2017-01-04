@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import editor.DataManager;
+import editor.EditorArena;
+import editor.SpawnPoint;
 import server.world.trigger.Trigger;
 import server.world.trigger.TriggerEffect;
 import server.world.trigger.TileSwitchPreset;
@@ -27,6 +29,7 @@ public class Arena {
 	public static final int T1_COLOR = 0x00ff00; // red spawn colour
 	public static final int T2_COLOR = 0xff0000; // green spawn colour
 
+	private ArenaData ad;
 	protected String name; // the name of the map
 	private transient List<Point2D> t1Spawns; // spawn points of team 1
 	private transient List<Point2D> t2Spawns; // spawn points of team 2
@@ -68,6 +71,7 @@ public class Arena {
 	
 	private void initialize(ArenaData ad, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable,
 			HashMap<Integer,TileSwitchPreset> triggerTable, HashMap<Integer,Misc> miscTable) {
+		this.ad = ad;
 		this.name = ad.name;
 		int width = ad.tMap.length;
 		int height = ad.tMap[0].length;
@@ -107,8 +111,6 @@ public class Arena {
 				}
 			}
 		}
-		
-		generateSpawnPoints();
 		generateLightMap();
 	}
 	
@@ -117,6 +119,7 @@ public class Arena {
 	 * @param team The team to get the spawn list for.
 	 */
 	public List<Point2D> getSpawn(int team) {
+		//List<Point2D> teamSpawn = new ArrayList<Point2D>();
 		return (team == 0 ? t1Spawns : t2Spawns);
 	}
 
@@ -291,23 +294,6 @@ public class Arena {
 		this.lightMap = lightMap;
 	}
 	
-	synchronized private void generateSpawnPoints() {
-		t1Spawns = new LinkedList<Point2D>();
-		t2Spawns = new LinkedList<Point2D>();
-		for (int x=0;x<getWidth();x++) {
-			for (int y=0;y<getWidth();y++) {
-				Thing t = get(x,y).getThing();
-				if (t!=null) {
-					if (t.getId()==T1_COLOR) {
-						t1Spawns.add(new Point2D.Double((x+0.5)*Terrain.tileSize, (y+0.5)*Terrain.tileSize));
-					} else if (t.getId()==T2_COLOR) {
-						t2Spawns.add(new Point2D.Double((x+0.5)*Terrain.tileSize, (y+0.5)*Terrain.tileSize));
-					}
-				}
-			}
-		}
-	}
-	
 	public void setTerrain(int x, int y, Terrain t) {
 		if (x>=0 && x<getWidth() && y>=0 && y<getHeight())
 			tMap[x][y].setTerrain(t);
@@ -339,6 +325,11 @@ public class Arena {
 		}
 	}
 	
+	public List<SpawnPoint> getSpawns() {
+		return ad.spawns;
+	}
+	
+	
 	public int[][] getLightmap() {
 		return lightMap;
 	}
@@ -352,8 +343,9 @@ public class Arena {
 		public String name;
 		public Tile[][] tMap;
 		public TileData[][] idMap;
+		public List<SpawnPoint> spawns = new LinkedList<SpawnPoint>();
 		
-		public ArenaData(Arena a) {
+		public ArenaData(EditorArena a) {
 			name = a.getName();
 			tMap = a.tMap;
 			idMap = new TileData[a.getWidth()][a.getHeight()];
@@ -371,6 +363,10 @@ public class Arena {
 					
 					Misc mi = t.getMisc();
 					idMap[x][y].miscId = mi!=null?mi.getId():0;
+					
+					if (a.spawns[x][y]!=null) {
+						spawns.add(a.spawns[x][y]);
+					}
 				}
 			}
 		}

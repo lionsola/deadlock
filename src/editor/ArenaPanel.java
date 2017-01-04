@@ -6,20 +6,12 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.MouseInfo;
 import java.awt.Point;
-import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.BufferedOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.Collection;
-import java.util.HashMap;
 import javax.swing.JPanel;
 
 import client.graphics.ImageBlender;
@@ -28,7 +20,6 @@ import client.gui.Camera;
 import client.gui.ClientPlayer;
 import client.gui.GameWindow;
 import client.image.SoftHardLightComposite;
-import server.world.Terrain;
 import shared.network.FullCharacterData;
 import shared.network.GameDataPackets.InputPacket;
 
@@ -54,11 +45,12 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	protected boolean renderGrid = false;
 	protected boolean renderConfig = false;
 	protected boolean renderTileSwitchTrigger = false;
+	protected boolean renderSpawns = true;
 	
 	private Camera camera;
 	//private double zoomLevel;
 	private ClientPlayer playerInfo = new ClientPlayer();
-	FullCharacterData player = new FullCharacterData();
+	public final FullCharacterData player = new FullCharacterData();
 	private InputPacket input = new InputPacket();
 	private double FPS;
 	private volatile boolean running = true;
@@ -216,6 +208,9 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		if (renderTileSwitchTrigger) {
 			Renderer.renderTrigger(g2D, arena, window);
 		}
+		if (renderSpawns) {
+			Renderer.renderSpawnLocations(g2D, arena, window);
+		}
 		editor.currentTool.render(g2D);
 		//Renderer.renderMainCharacter(g2D, player, playerInfo);
 		g2D.setColor(Color.WHITE);
@@ -233,16 +228,6 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 				lightImage = i;
 			}}).start();
 	}
-	
-	// TILE
-	public void saveTiles(HashMap<Integer,Terrain> tileTable) throws FileNotFoundException, IOException {
-		Collection<Terrain> tileList = tileTable.values();
-		ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream("resource/tile/tiles")));
-		out.writeObject(tileList);
-		out.close();
-	}
-	
-	
 
 	@Override
 	public void keyPressed(KeyEvent e) {

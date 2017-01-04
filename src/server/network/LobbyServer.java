@@ -4,14 +4,22 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import client.gui.ClientPlayer;
+import editor.DataManager;
+import editor.SpawnPoint;
+import editor.SpawnPoint.CharType;
+import editor.SpawnPoint.SpawnType;
 import server.ai.AIPlayer;
 import server.ai.DummyPlayer;
+import server.world.Arena.ArenaData;
 import shared.network.Connection;
 import shared.network.LobbyRequest;
 import shared.network.LobbyRequest.ChangeCharacterRequest;
+import shared.network.LobbyRequest.ChangeSpawnRequest;
 import shared.network.LobbyRequest.ChatRequest;
 import shared.network.LobbyRequest.LobbyInformationPacket;
 import shared.network.LobbyRequest.PlayerLeaveRequest;
@@ -31,10 +39,20 @@ public class LobbyServer implements Runnable {
 	private volatile boolean running = true;
 
 	private ServerSocket serverSocket;
-	private List<ServerPlayer> players;
+	//private List<ServerPlayer> players = new ArrayList<ServerPlayer>(10);
+	private HashMap<Integer,ServerPlayer> playerMap = new HashMap<Integer,ServerPlayer>();
 	private int count = 0;
 	// private String arena = "test40";
 	private String arena;
+	private List<ChangeSpawnRequest> pendingRequests = new LinkedList<ChangeSpawnRequest>();
+	private List<SpawnPoint> spawns;
+	private HashMap<Integer,SpawnPoint> spawnMap = new HashMap<Integer,SpawnPoint>();
+	private SpawnPoint idle = new SpawnPoint() {
+		@Override
+		public int getId() {
+			return -1;
+		}
+	};
 
 	/**
 	 * Constructor
@@ -44,8 +62,11 @@ public class LobbyServer implements Runnable {
 	public LobbyServer(int port, String arena) throws IOException {
 		serverSocket = new ServerSocket(port);
 		this.arena = arena;
-		players = new ArrayList<ServerPlayer>(10);
-
+		ArenaData ad = (ArenaData) DataManager.loadObject("resource/map/"+arena+".arena");
+		spawns = ad.spawns;
+		for (SpawnPoint sp:spawns) {
+			spawnMap.put(sp.getId(), sp);
+		}
 		// START LISTENING FOR CONNECTIONS
 		new Thread(this).start();
 	}
@@ -54,7 +75,7 @@ public class LobbyServer implements Runnable {
 	 * Start the game with the current players in this lobby (called by the host).
 	 */
 	public void startGame() throws IOException {
-		for (ServerPlayer p : players) {
+		for (ServerPlayer p : playerMap.values()) {
 			if (!p.active)
 				return;
 		}
@@ -62,7 +83,8 @@ public class LobbyServer implements Runnable {
 		serverSocket.close();
 		
 		sendRequest(new StartGameRequest());
-		new MatchServer(players, arena);
+		//new MatchServer(players, arena);
+		new MissionServer(new ArrayList<ServerPlayer>(playerMap.values()), arena);
 	}
 
 	/**
@@ -77,7 +99,7 @@ public class LobbyServer implements Runnable {
 	 * @param request The request to be sent.
 	 */
 	private void sendRequest(LobbyRequest request) {
-		for (ServerPlayer p : players) {
+		for (ServerPlayer p : playerMap.values()) {
 			if (p.connection!=null)
 				p.connection.send(request);
 		}
@@ -88,7 +110,7 @@ public class LobbyServer implements Runnable {
 	 */
 	public void end() {
 		running = false;
-		for (ServerPlayer p : players) {
+		for (ServerPlayer p : playerMap.values()) {
 			sendRequest(new PlayerLeaveRequest(p.id));
 		}
 
@@ -104,14 +126,14 @@ public class LobbyServer implements Runnable {
 	 * @param team The team to create the AI player in.
 	 * @param type The type of the AI player.
 	 */
-	public void addAIPlayer (int team, int type) {
+	public void addAIPlayer (int team, CharType type) {
 	    ServerPlayer p = new AIPlayer(count, team);
 		//ServerPlayer p = new DummyPlayer(count, team);
 	    p.type = type;
 	    p.active = true;
 	    count++;
 	    sendRequest(new LobbyRequest.NewPlayerRequest(generateClientPlayer(p)));
-        players.add(p);
+        playerMap.put(p.id,p);
 	}
 	
 	/**
@@ -119,13 +141,13 @@ public class LobbyServer implements Runnable {
 	 * @param team The team to create the AI player in.
 	 * @param type The type of the AI player.
 	 */
-	public void addDummyPlayer (int team, int type) {
+	public void addDummyPlayer (int team, CharType type) {
 		ServerPlayer p = new DummyPlayer(count, team);
 	    p.type = type;
 	    p.active = true;
 	    count++;
 	    sendRequest(new LobbyRequest.NewPlayerRequest(generateClientPlayer(p)));
-        players.add(p);
+        playerMap.put(p.id,p);
 	}
 	
 	/**
@@ -133,17 +155,11 @@ public class LobbyServer implements Runnable {
 	 * @param id The ID of the player to be kicked.
 	 */
 	public void removePlayer (int id) {
-	    ServerPlayer p = null;
-	    for (ServerPlayer sp:players) {
-	        if (sp.id == id) {
-	            p=sp;
-	            break;
-	        }
-	    }
+	    ServerPlayer p = playerMap.get(id);
 	    if (p==null)
 	        return;
 	    sendRequest(new PlayerLeaveRequest(id));
-	    players.remove(p);
+	    playerMap.remove(id);
 	    try {
             p.connection.getSocket().close();
         } catch (IOException e) {
@@ -163,12 +179,13 @@ public class LobbyServer implements Runnable {
 
 				// generate an ID for a player
 				int id = count;
-				int team = getTeamWithLeastPlayer();
+				int team = -1;
 				count++;
 				ServerPlayer p = new ServerPlayer(id, team, name, connection);
+				p.spawnPoint = idle;
 				// tell other clients about the newly connected player
 				sendRequest(new LobbyRequest.NewPlayerRequest(generateClientPlayer(p)));
-				players.add(p);
+				playerMap.put(p.id, p);
 				
 				// send the lobby information back to them
 				connection.send(generateInformationPacket(p.id));
@@ -191,7 +208,7 @@ public class LobbyServer implements Runnable {
 	 */
 	private int getTeamWithLeastPlayer () {
 	    int team1Cnt = 0,team2Cnt = 0;
-        for (ServerPlayer p:players) {
+        for (ServerPlayer p:playerMap.values()) {
             if (p.team==0)
                 team1Cnt ++;
             else if (p.team==1)
@@ -200,6 +217,11 @@ public class LobbyServer implements Runnable {
         return team1Cnt<=team2Cnt?0:1;
 	}
 
+	private void addPending(ChangeSpawnRequest request) {
+		
+		pendingRequests.add(request);
+	}
+	
 	/**
 	 * Used to receive lobby requests in another thread to avoid blocking other operations.
 	 */
@@ -235,7 +257,68 @@ public class LobbyServer implements Runnable {
                 } else if (message instanceof ChatRequest) {
                 	ChatRequest request = ((ChatRequest)message);
                 	server.sendRequest(request);
-                } else {
+                } else if (message instanceof ChangeSpawnRequest) {
+                	ChangeSpawnRequest request = ((ChangeSpawnRequest)message);
+                	// remove previous requests from the same player
+                	ChangeSpawnRequest dup = null;
+            		for (ChangeSpawnRequest pending:pendingRequests) {
+            			if (pending.playerId==request.playerId) {
+            				dup = pending;
+            				break;
+            			}
+            		}
+            		if (dup!=null) {
+            			pendingRequests.remove(dup);
+            		}
+                	
+                	ServerPlayer requestingPlayer = playerMap.get(request.playerId);
+                	// if he's leaving the spot and becoming idle
+            		// well, let him
+            		if (request.spawnId==-1) {
+            			requestingPlayer.spawnPoint = idle;
+            		} else {
+            			boolean occupied = false;
+            			for (ServerPlayer player:playerMap.values()) {
+            				if (player.spawnPoint.getId()==request.spawnId) {
+            					occupied = true;
+            					break;
+            				}
+            			}
+            			if (!occupied) {
+            				// let him
+            				request.successful = true;
+            				requestingPlayer.spawnPoint = spawnMap.get(request.spawnId);
+            				requestingPlayer.type = requestingPlayer.spawnPoint.setups.get(0); 
+            				sendRequest(request);
+            			}
+            			else {
+	            			for (ChangeSpawnRequest prev:pendingRequests) {
+	            				// if someone requested this spot before
+	            				if (prev.spawnId==requestingPlayer.spawnPoint.getId()) {
+	            					ServerPlayer pendingPlayer = playerMap.get(prev.playerId);
+	            					// and he has the spot I'm wanting
+	            					if (request.spawnId==pendingPlayer.spawnPoint.getId()) {
+	            						// switch the two
+	            						SpawnPoint temp = requestingPlayer.spawnPoint; 
+	            						requestingPlayer.spawnPoint = pendingPlayer.spawnPoint;
+	            						pendingPlayer.spawnPoint = temp;
+	            						
+	            						// tell the world about it
+	            						request.successful = true;
+	            						prev.successful = true;
+	            						sendRequest(request);
+	            						sendRequest(prev);
+	            					}
+	            				}
+	            			}
+	            			
+	            			if (!request.successful) {
+	            				pendingRequests.add(request);
+	            			}
+            			}
+            		}
+                }
+                else {
                 	System.err.println("Invalid request received!");
                 	System.err.println(message);
                 }
@@ -254,18 +337,25 @@ public class LobbyServer implements Runnable {
         lobbyPlayer.active = p.active;
         lobbyPlayer.team = p.team;
         lobbyPlayer.type = p.type;
+        lobbyPlayer.spawnId = p.spawnPoint!=null?p.spawnPoint.getId():-1;
         return lobbyPlayer;
 	}
 
 	private LobbyInformationPacket generateInformationPacket(int destinationId) {
 		LobbyInformationPacket lip = new LobbyInformationPacket();
-		ClientPlayer[] players = new ClientPlayer[this.players.size()];
-		for (int i = 0; i < players.length; i++) {
-			ServerPlayer p = this.players.get(i);
-			players[i] = generateClientPlayer(p);
+		ArrayList<ClientPlayer> players = new ArrayList<ClientPlayer>(playerMap.size());
+		for (ServerPlayer p:playerMap.values()) {
+			players.add(generateClientPlayer(p));
 		}
 		LobbyRequest.GameConfig config = new LobbyRequest.GameConfig();
 		config.arena = arena;
+		config.playableSpawns = new LinkedList<SpawnPoint>();
+		for (SpawnPoint sp:spawns) {
+			if (sp.type!=SpawnType.NPCOnly) {
+				config.playableSpawns.add(sp);
+			}
+		}
+		
 		lip.id = destinationId;
 		lip.clientPlayers = players;
 		lip.gameConfig = config;

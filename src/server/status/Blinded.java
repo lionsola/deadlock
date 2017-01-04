@@ -1,7 +1,7 @@
 package server.status;
 
 import client.gui.GameWindow;
-import server.character.Character;
+import server.character.Entity;
 
 public class Blinded extends StatusEffect {
 	public static final double RECOVER_TIME = 0.5;
@@ -9,7 +9,7 @@ public class Blinded extends StatusEffect {
 	double originalFovRange;
 	double fovRangeInc;
 	double fovRangeIncreased;
-	public Blinded(Character self, long duration) {
+	public Blinded(Entity self, long duration) {
 		super(self, duration);
 		originalFovRange = getSelf().getFovRangeF();
 		fovRangeIncreased = 0;

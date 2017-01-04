@@ -1,7 +1,7 @@
 package server.ability;
 
 import client.gui.GameWindow;
-import server.character.PlayerCharacter;
+import server.character.InputControlledEntity;
 import server.world.World;
 
 public class Optics extends ToggleAbility {
@@ -18,7 +18,7 @@ public class Optics extends ToggleAbility {
 	private final double speedInc;
 	private final boolean allowWeapon;
 	
-	public Optics(int id, PlayerCharacter self, double rangeMod, double angleMod, double speedMod, boolean allowWeapon) {
+	public Optics(int id, InputControlledEntity self, double rangeMod, double angleMod, double speedMod, boolean allowWeapon) {
 		super(id,self,COOLDOWN);
 		this.allowWeapon = allowWeapon;
 		RANGE = rangeMod;
@@ -31,7 +31,7 @@ public class Optics extends ToggleAbility {
 	}
 
 	@Override
-	protected void onActivate(World w, PlayerCharacter c) {
+	protected void onActivate(World w, InputControlledEntity c) {
 		if (!allowWeapon) {
 			self().getWeapon().setStatus(false);
 		}
@@ -39,7 +39,7 @@ public class Optics extends ToggleAbility {
 	}
 
 	@Override
-	protected void onDeactivate(World w, PlayerCharacter c) {
+	protected void onDeactivate(World w, InputControlledEntity c) {
 		if (!allowWeapon) {
 			self().getWeapon().setStatus(true);
 		}
@@ -47,7 +47,7 @@ public class Optics extends ToggleAbility {
 	}
 	
 	@Override
-	protected void onUpdate(World w, PlayerCharacter c) {
+	protected void onUpdate(World w, InputControlledEntity c) {
 		if (transElapsed<TRANS) {
 			if (isActive()) {
 				self().addFovRangeMod(+rangeInc);
@@ -67,7 +67,7 @@ public class Optics extends ToggleAbility {
 		public static final double SCOPE_ANGLE = -0.75;
 		public static final double SCOPE_SPEED = -0.25;
 		
-		public Scope(PlayerCharacter self) {
+		public Scope(InputControlledEntity self) {
 			super(SCOPE_ID,self, SCOPE_RANGE, SCOPE_ANGLE, SCOPE_SPEED, true);
 		}
 	}
@@ -77,7 +77,7 @@ public class Optics extends ToggleAbility {
 		public static final double BINO_ANGLE = -0.5;
 		public static final double BINO_SPEED = -0.5;
 		
-		public Binocular(PlayerCharacter self) {
+		public Binocular(InputControlledEntity self) {
 			super(BINO_ID,self, BINO_RANGE, BINO_ANGLE, BINO_SPEED, false);
 		}
 	}

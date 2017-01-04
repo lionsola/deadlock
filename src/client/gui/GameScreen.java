@@ -53,6 +53,7 @@ import shared.network.ProjectileData;
 import shared.network.Vision;
 import shared.network.GameDataPackets.InputPacket;
 import shared.network.GameDataPackets.WorldStatePacket;
+import shared.network.NPCData;
 import shared.network.event.AnimationEvent;
 import shared.network.event.GameEvent;
 import shared.network.event.GameEvent.*;
@@ -64,6 +65,7 @@ import client.image.SoftHardLightComposite;
 import client.sound.AudioManager;
 import client.sound.MusicPlayer;
 import editor.DataManager;
+import editor.SpawnPoint.CharType;
 
 /**
  * The GUI where the match takes place, i.e. the arena with players.
@@ -71,7 +73,7 @@ import editor.DataManager;
 public class GameScreen extends JLayeredPane implements KeyListener, MouseListener, Runnable, MouseWheelListener {
 	private static final long serialVersionUID = 1383374303503610168L;
 
-	private FullCharacterData mainCharacter = new FullCharacterData();
+	private FullCharacterData mainCharacter = null;
 	private GameWindow game;
 	private Arena arena;
 	private Camera camera;
@@ -86,12 +88,9 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private AnimationSystem persistentAnimations = new AnimationSystem();
 	
 	private AudioManager audioManager = new AudioManager();
-	private List<ClientPlayer> team1;
-	private List<ClientPlayer> team2;
 	private List<ClientPlayer> players;
 	
 	private TeamListModel team1Model;
-	private TeamListModel team2Model;
 	private JPanel scoreboard;
 	private JLabel teamScore;
 	private JLabel winnerText;
@@ -124,12 +123,10 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	 *            The name of the arena for this game
 	 * @param team1
 	 *            The list of players on team 1
-	 * @param team2
-	 *            The list of players on team 2
 	 * @throws IOException
 	 *             Exception thrown on gamescreen
 	 */
-	public GameScreen(GameWindow game, int id, Connection connection, String arenaName, List<ClientPlayer> team1, List<ClientPlayer> team2) throws IOException {
+	public GameScreen(GameWindow game, int id, Connection connection, String arenaName, List<ClientPlayer> players) throws IOException {
 		super();
 		
 		AudioManager.stopMusic();
@@ -167,11 +164,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		this.id = id;
 		this.connection = connection;
 		this.game = game;
-		this.team1 = team1;
-		this.team2 = team2;
-		players = new LinkedList<ClientPlayer>();
-		players.addAll(team1);
-		players.addAll(team2);
+		this.players = players;
 		
 		for (ClientPlayer p : players) {
 			p.character = new CharData();
@@ -203,15 +196,11 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		
 		
 		JPanel teamPanel = GUIFactory.getTransparentPanel();
-		team1Model = new TeamListModel(team1);
-		team2Model = new TeamListModel(team2);
+		team1Model = new TeamListModel(players);
 
 		JList<ClientPlayer> team1List = new JList<ClientPlayer>(team1Model);
-		JList<ClientPlayer> team2List = new JList<ClientPlayer>(team2Model);
 		team1List.setCellRenderer(playerRenderer);
-		team2List.setCellRenderer(playerRenderer);
 		team1List.setOpaque(false);
-		team2List.setOpaque(false);
 
 		teamPanel.add(team1List);
 		JSeparator line = new JSeparator();
@@ -219,7 +208,6 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		GUIFactory.stylizeHUDComponent(line);
 		teamPanel.add(line);
 		line.setPreferredSize(new Dimension(5, scoreboard.getPreferredSize().height));
-		teamPanel.add(team2List);
 		
 		scoreboard.add(teamPanel);
 		scoreboard.setSize(scoreboard.getPreferredSize());
@@ -277,38 +265,40 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		for (ClientPlayer cp:players) {
 			switch(cp.type) {
 				// grenadier
-				case 0:
+				case Alpha:
 					wId = Weapon.ASSAULT_RIFLE_ID;
 					aId = Ability.FRAG_ID;
 					pId = Passive.ASSAULT_ID;
 					break;
 					
 				// markman
-				case 1:
+				case Gamma:
 					wId = Weapon.MARKMAN_RIFLE_ID;
 					aId = Ability.SCOPE_ID;
 					pId = Passive.OVERWATCH_ID;
 					break;
 					
 				// scout
-				case 2:
+				case Pi:
 					wId = Weapon.SHOTGUN_ID;
 					aId = Ability.BINO_ID;
 					pId = Passive.MARK_ID;
 					break;
 					
 				// shield
-				case 3:
+				case Beta:
 					wId = Weapon.MP7_ID;
 					aId = Ability.FLASH_ID;
 					pId = Passive.SHIELD_ID;
 					break;
 					
 				// agent
-				case 4:
+				case Ju:
 					wId = Weapon.SILENT_PISTOL_ID;
 					aId = Ability.AMP_ID;
 					pId = Passive.BACKSTAB_ID;
+					break;
+				default:
 					break;
 			}
 			cp.weaponId = wId;
@@ -451,6 +441,18 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	 * Send an input of a player to gamescreen
 	 */
 	private void sendInput() {
+		if (input.alt && input.fire1) {
+			input.reload = true;
+			input.fire1 = false;
+		} else {
+			input.reload = false;
+		}
+		if (input.alt && input.fire2) {
+			input.ping = true;
+			input.fire2 = false;
+		} else {
+			input.ping = false;
+		}
 		if (!connection.getSocket().isClosed()) {
 			connection.send(input);
 		}
@@ -498,6 +500,9 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2D.setRenderingHints(rh);
 		FullCharacterData c = mainCharacter;
+		if (c==null) {
+			return;
+		}
 		if (currentState != null) {
 			// render the region outside of both vision and hearing
 			Renderer.drawArenaImage(g2D, renderer.getDarkArenaImage(),camera.getDrawArea());
@@ -536,6 +541,10 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 					CharData ch = data.character;
 					Renderer.renderOtherCharacter(g2D, ch, data.type);
 				}
+			}
+			
+			for (NPCData data : currentState.npcs) {
+				Renderer.renderNPC(g2D, data, CharType.Officer);
 			}
 
 			// render projectiles
@@ -577,7 +586,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		
 	}
 
-	private Rectangle2D getCharacterVisionBox(double x, double y, double viewRange) {
+	private static Rectangle2D getCharacterVisionBox(double x, double y, double viewRange) {
 		return new Rectangle2D.Double(x - viewRange, y - viewRange, viewRange * 2, viewRange * 2);
 	}
 
@@ -701,20 +710,24 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			if (event instanceof PlayerDieEvent) {
 				PlayerDieEvent e = (PlayerDieEvent) event;
 				ClientPlayer killer = Utils.findPlayer(players, e.killerId);
-				ClientPlayer killed = Utils.findPlayer(players, e.killedId);
+				ClientPlayer victim = Utils.findPlayer(players, e.killedId);
 
-				killed.deaths++;
-				if (killer.team != killed.team) {
-					killer.kills++;
-				} else {
-					killer.kills--;
+				if (victim!=null) {
+					victim.deaths++;
+				}
+				if (killer!=null) {
+					if (victim!=null && killer.team == victim.team) {
+						killer.kills--;
+					} else {
+						killer.kills++;
+					}
 				}
 				team1Model.invalidate();
-				team2Model.invalidate();
 			} else if (event instanceof Headshot) {
 				final Headshot e = (Headshot) event;
 				ClientPlayer attacker = Utils.findPlayer(players,e.attacker);
-				attacker.headshots++;
+				if (attacker!=null)
+					attacker.headshots++;
 				globalAnimations.addCustomAnimation(new BasicAnimation(1500) {
 					@Override
 					public void render(Graphics2D g2D) {
@@ -741,7 +754,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			} else if (event instanceof AnimationEvent) {
 				AnimationEvent e = (AnimationEvent) event;
 				if (e.id==AnimationEvent.BLOOD) {
-					persistentAnimations.addBloodAnimation(e.x, e.y, e.direction, Utils.findPlayer(players, e.charId).team);
+					persistentAnimations.addBloodAnimation(e.x, e.y, e.direction, e.team);
 				}
 				else if (!e.global) {
 					visualAnimations.addAnimation(e);

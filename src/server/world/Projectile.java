@@ -3,7 +3,7 @@ package server.world;
 import java.awt.geom.Point2D;
 
 import client.gui.GameWindow;
-import server.character.PlayerCharacter;
+import server.character.InputControlledEntity;
 import shared.network.ProjectileData;
 
 /**
@@ -45,7 +45,7 @@ public abstract class Projectile {
 	 * @param size
 	 *            radius of the projectile
 	 */
-	public Projectile(PlayerCharacter source, double direction, double speed, double size) {
+	public Projectile(InputControlledEntity source, double direction, double speed, double size) {
 		id = source.id;
 		x = source.getX();
 		y = source.getY();
@@ -105,7 +105,7 @@ public abstract class Projectile {
 			y = y + dy*GameWindow.MS_PER_UPDATE/checks;
 			
 			// check projectile vs character
-			for (PlayerCharacter ch : w.getCharacters()) {
+			for (InputControlledEntity ch : w.getCharacters()) {
 				// HIT
 				if (ch.id!=lastHitId && Point2D.distance(x,y, ch.getX(),ch.getY()) < ch.getRadius()) {
 					lastHitId = ch.id;
@@ -140,7 +140,7 @@ public abstract class Projectile {
 	
 	protected abstract void onHitWall(World w, double x, double y, Thing t);
 
-	protected abstract void onHitCharacter(World w, PlayerCharacter ch, double x, double y);
+	protected abstract void onHitCharacter(World w, InputControlledEntity ch, double x, double y);
 	
 	public abstract boolean isConsumed();
 

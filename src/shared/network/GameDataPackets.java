@@ -28,7 +28,9 @@ public class GameDataPackets {
 		public boolean sneaking;
 
 		public boolean fire1;
+		public boolean reload;
 		public boolean fire2;
+		public boolean ping;
 	}
 
 	/**
@@ -41,6 +43,7 @@ public class GameDataPackets {
 		public long time;
 		public FullCharacterData player;
 		public List<CharData> characters = new LinkedList<CharData>();
+		public List<NPCData> npcs = new LinkedList<NPCData>();
 		public List<ProjectileData> projectiles = new LinkedList<ProjectileData>();
 		public List<GameEvent> events = new LinkedList<GameEvent>();
 		public List<Vision> visions = new LinkedList<Vision>();

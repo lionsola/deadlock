@@ -169,11 +169,13 @@ public class Visibility {
 					// add horizontal segment					
 					// above player & below that is an empty tile
 					float yr=0;
-					if (y-WALL_DIST/ts < pY && (a.get(x, y + 1).isClear() || (x==pX && y+1==pY))) {
-						yr = (y + 1) * ts - WALL_DIST;
+					float aboveWallY = (y+1)*ts-WALL_DIST;
+					float belowWallY = y*ts+WALL_DIST;
+					if (aboveWallY < py && (a.get(x, y + 1).isClear() || (x==pX && y+1==pY))) {
+						yr = aboveWallY;
 					}
 					// below player & above that is an empty tile
-					else if (y+WALL_DIST/ts > pY && (a.get(x, y - 1).isClear() || (x==pX && y-1==pY))) {
+					else if (belowWallY > py && (a.get(x, y - 1).isClear() || (x==pX && y-1==pY))) {
 						yr = y * ts + WALL_DIST;
 					} else {
 						addHSegment = false;
@@ -200,11 +202,13 @@ public class Visibility {
 					// vertical edges
 					// to the left of player && to the right of that is an empty tile
 					float xr=0;
-					if (x-WALL_DIST/ts < pX && (a.get(x + 1, y).isClear() || (x+1==pX && y==pY))) {
+					float leftWallX = (x+1)*ts - WALL_DIST;
+					float rightWallX = x*ts + WALL_DIST;
+					if (leftWallX < px && (a.get(x + 1, y).isClear() || (x+1==pX && y==pY))) {
 						xr = (x+1)*ts-WALL_DIST;
 					}
 					// to the right of player && to the left of that is an empty tile
-					else if (x+WALL_DIST/ts > pX && (a.get(x - 1, y).isClear() || (x-1==pX && y==pY))) {
+					else if (rightWallX > px && (a.get(x - 1, y).isClear() || (x-1==pX && y==pY))) {
 						xr = x*ts+WALL_DIST;
 					} else {
 						addVSegment = false;

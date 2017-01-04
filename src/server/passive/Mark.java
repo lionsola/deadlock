@@ -1,7 +1,7 @@
 package server.passive;
 
 import client.gui.GameWindow;
-import server.character.PlayerCharacter;
+import server.character.InputControlledEntity;
 import server.world.World;
 import shared.network.CharData;
 import shared.network.event.GameEvent.EnemyInfoEvent;
@@ -10,7 +10,7 @@ public class Mark extends Passive {
 	public static final double MARK_SPEED = 0.1;
 	public static final long MARK_COOLDOWN = 1000;
 	private long lastBroadcast;
-	public Mark(PlayerCharacter self) {
+	public Mark(InputControlledEntity self) {
 		super(self);
 	}
 
@@ -24,7 +24,7 @@ public class Mark extends Passive {
 		if (lastBroadcast<=0) {
 			for (CharData c:self().getPerception().characters) {
 				if (c.team!=self().team && c.healthPoints>0) {
-					for (PlayerCharacter pc:w.getCharacters()) {
+					for (InputControlledEntity pc:w.getCharacters()) {
 						if (pc.team==self().team) {
 							pc.getPerception().events.add(new EnemyInfoEvent(c.x, c.y, c.id));
 						}

@@ -1,6 +1,6 @@
 package server.ability;
 
-import server.character.PlayerCharacter;
+import server.character.InputControlledEntity;
 import server.world.World;
 
 /**
@@ -9,7 +9,7 @@ import server.world.World;
  */
 public abstract class ToggleAbility extends Ability {
 	private boolean isActive = false;
-	public ToggleAbility(int id, PlayerCharacter self, long cooldown) {
+	public ToggleAbility(int id, InputControlledEntity self, long cooldown) {
 		super(id,self,cooldown);
 	}
 
@@ -36,7 +36,7 @@ public abstract class ToggleAbility extends Ability {
 		return isActive;
 	}
 	
-	protected abstract void onUpdate(World w, PlayerCharacter c);
-	protected abstract void onActivate(World w, PlayerCharacter c);
-	protected abstract void onDeactivate(World w, PlayerCharacter c);
+	protected abstract void onUpdate(World w, InputControlledEntity c);
+	protected abstract void onActivate(World w, InputControlledEntity c);
+	protected abstract void onDeactivate(World w, InputControlledEntity c);
 }

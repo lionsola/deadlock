@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Tree>
+  <Node id="Node_0" name="Fire" type="Root">
+    <Children>
+      <Node id="Node_18" type="Sequence">
+        <Children>
+          <Node id="Node_19" name="ComputeAttackPoint" type="Action" />
+          <Node id="Node_20" name="PointCursor" type="Action">
+            <Parameters>
+              <Parameter name="cursorTarget" fromcontext="true">Aim</Parameter>
+            </Parameters>
+          </Node>
+          <Node id="Node_21" name="FireWeapon" type="Action" />
+        </Children>
+      </Node>
+    </Children>
+  </Node>
+</Tree>
+

@@ -1,8 +1,11 @@
 package shared.network;
 
 import java.io.Serializable;
+import java.util.List;
 
 import client.gui.ClientPlayer;
+import editor.SpawnPoint;
+import editor.SpawnPoint.CharType;
 
 /**
  * Models a request from lobby.
@@ -27,14 +30,28 @@ public class LobbyRequest implements Serializable {
 	public static class ChangeCharacterRequest extends LobbyRequest {
 		private static final long serialVersionUID = -3235244044264803979L;
 		public final int playerId;
-		public final int typeId;
+		public final CharType typeId;
 
-		public ChangeCharacterRequest(int playerId, int typeId) {
+		public ChangeCharacterRequest(int playerId, CharType typeId) {
 			this.playerId = playerId;
 			this.typeId = typeId;
 		}
 	}
 
+	public static class ChangeSpawnRequest extends LobbyRequest {
+		private static final long serialVersionUID = -3829252414743333322L;
+		
+		public final int playerId;
+		public final int spawnId;
+		public boolean successful;
+		
+		public ChangeSpawnRequest(int playerId, int spawnId, boolean successful) {
+			this.playerId = playerId;
+			this.spawnId = spawnId;
+			this.successful = successful;
+		}
+	}
+	
 	/**
 	 * Every time a client connects, the network sends this packet to it to initialize the lobby
 	 * client.gui.
@@ -42,7 +59,7 @@ public class LobbyRequest implements Serializable {
 	public static class LobbyInformationPacket extends LobbyRequest {
 		private static final long serialVersionUID = 4996573810361822207L;
 		public int id;
-		public ClientPlayer[] clientPlayers;
+		public List<ClientPlayer> clientPlayers;
 		public GameConfig gameConfig;
 	}
 
@@ -81,7 +98,7 @@ public class LobbyRequest implements Serializable {
 	public static class GameConfig implements Serializable {
 		private static final long serialVersionUID = 3557083906903628498L;
 		public String arena;
-		// other information about the game mode
+		public List<SpawnPoint> playableSpawns;
 	}
 
 	public static class ToggleReadyRequest extends LobbyRequest {

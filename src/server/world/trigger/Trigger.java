@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
-import server.character.Character;
+import server.character.Entity;
 import server.world.Terrain;
 import server.world.World;
 
@@ -22,10 +22,10 @@ public abstract class Trigger implements Serializable {
 	}
 	
 	public void update(World w) {};
-	public void onCharacterEnter(Character character, World w) {}
-	public void onCharacterTouch(Character character, World w) {}
-	public void onCharacterUntouch(Character character, World w) {}
-	public void onCharacterLeave(Character character, World w) {}
+	public void onCharacterEnter(Entity character, World w) {}
+	public void onCharacterTouch(Entity character, World w) {}
+	public void onCharacterUntouch(Entity character, World w) {}
+	public void onCharacterLeave(Entity character, World w) {}
 	public boolean isActive() {return false;}
 	
 
@@ -47,10 +47,10 @@ public abstract class Trigger implements Serializable {
 		private static final long serialVersionUID = 7898439365371577468L;
 		
 		
-		List<Character> characters = new LinkedList<Character>();
+		List<Entity> characters = new LinkedList<Entity>();
 
 		@Override
-		public void onCharacterTouch(Character c, World w) {
+		public void onCharacterTouch(Entity c, World w) {
 			// register the character
 			if (!characters.contains(c)) {
 				characters.add(c);
@@ -64,7 +64,7 @@ public abstract class Trigger implements Serializable {
 			}
 		}
 		
-		public void onCharacterUntouch(Character character, World w) {
+		public void onCharacterUntouch(Entity character, World w) {
 			characters.remove(character);
 		
 			if (characters.isEmpty()) {
@@ -79,7 +79,7 @@ public abstract class Trigger implements Serializable {
 		private static final long serialVersionUID = 5063983553970728297L;
 		
 		@Override
-		public void onCharacterTouch(Character c, World w) {
+		public void onCharacterTouch(Entity c, World w) {
 			for (TriggerEffect te:effects) {
 				te.activate(w);
 			}
@@ -91,7 +91,7 @@ public abstract class Trigger implements Serializable {
 		private int side;
 		
 		@Override
-		public void onCharacterTouch(Character c, World w) {
+		public void onCharacterTouch(Entity c, World w) {
 			int cx = (int) (c.getX()/Terrain.tileSize);
 			int cy = (int) (c.getY()/Terrain.tileSize);
 			Point p = getLocation();

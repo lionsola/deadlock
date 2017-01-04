@@ -3,7 +3,8 @@ package server.ai;
 import java.awt.geom.Point2D;
 
 public class InterestPoint {
-	public enum Type {RANDOM(0), PING(1),ENEMY(2);
+	public enum Type {RANDOM(0), PATROL(0), PING(1),ENEMY(2);
+		
 		public final int priority;
 		Type(int priority) {
 			this.priority = priority;

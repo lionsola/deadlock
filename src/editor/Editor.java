@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -21,6 +22,7 @@ import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import client.sound.AudioManager;
+import editor.tools.Tool;
 import server.world.Thing;
 import server.world.Arena.ArenaData;
 import server.world.trigger.TileSwitchPreset;
@@ -180,6 +182,7 @@ public class Editor extends JFrame implements KeyListener {
 				if (currentTool!=null) {
 					String info = currentTool.getPointedTile().toString();
 					info += ", illumination: "+ Integer.toHexString(arenaPanel.getArena().getLightAt(currentTool.getPointedCoord()));
+					
 					cursorInfo.setText(info);
 				}
 			}});

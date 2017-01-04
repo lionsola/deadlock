@@ -6,8 +6,9 @@ public class AnimationEvent extends GameEvent {
 	public final float y;
 	public final float direction;
 	public final byte id;
-	public final byte charId;
+	public final byte team;
 	public final boolean global;
+	
 	public static final byte GUNSHOT = 0;
 	public static final byte BLOOD = 1;
 	public static final byte BULLETWALL = 2;
@@ -19,16 +20,16 @@ public class AnimationEvent extends GameEvent {
 		this(id,-1,x,y,rotation,false);
 	}
 	
-	public AnimationEvent(int id, int charId, double x, double y, double rotation) {
-		this(id,charId,x,y,rotation,false);
+	public AnimationEvent(int id, int team, double x, double y, double rotation) {
+		this(id,team,x,y,rotation,false);
 	}
 	
-	public AnimationEvent(int id, int charId, double x, double y, double rotation, boolean global) {
+	public AnimationEvent(int id, int team, double x, double y, double rotation, boolean global) {
 		this.x = (float)x;
 		this.y = (float)y;
 		this.direction = (float)rotation;
 		this.id = (byte) id;
 		this.global = global;
-		this.charId = (byte) charId;
+		this.team = (byte) team;
 	} 
 }

@@ -4,7 +4,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 import client.gui.GameWindow;
-import server.character.PlayerCharacter;
+import server.character.InputControlledEntity;
 import server.world.Projectile;
 import server.world.Thing;
 import server.world.World;
@@ -21,7 +21,7 @@ public class Bullet extends Projectile {
 	private final double baseSpeed;
 	Thing lastHit;
 	
-	public Bullet(PlayerCharacter source, double direction, double speed, double size, double damage) {
+	public Bullet(InputControlledEntity source, double direction, double speed, double size, double damage) {
 		super(source, direction, speed, size);
 		baseDamage = damage;
 		baseSpeed = speed;
@@ -34,7 +34,7 @@ public class Bullet extends Projectile {
 	}
 	
 	@Override
-	public void onHitCharacter(World w, PlayerCharacter ch, double x, double y) {
+	public void onHitCharacter(World w, InputControlledEntity ch, double x, double y) {
 		//w.getEventListener().onEventReceived(new BulletHitPlayerEvent( x, y));
 		if (!ch.isDead()) {
 			double damageRatio;
@@ -52,7 +52,7 @@ public class Bullet extends Projectile {
 			System.out.println("Damage ratio: "+damageRatio);
 			ch.onHit(w,damageRatio*getDamage(),id);
 		}
-		w.addGlobalAnimation(new AnimationEvent(AnimationEvent.BLOOD,ch.id,x,y,this.getDirection()));
+		w.addGlobalAnimation(new AnimationEvent(AnimationEvent.BLOOD,ch.team,x,y,this.getDirection()));
 	}
 
 	protected void onHitWall(World w, double x, double y, Thing t) {

@@ -12,7 +12,7 @@ import editor.DataManager;
 import server.ai.AIPlayer;
 import server.ai.PathFinder;
 import server.character.ClassStats;
-import server.character.PlayerCharacter;
+import server.character.InputControlledEntity;
 import server.weapon.WeaponFactory;
 import server.world.Arena;
 import server.world.Misc;
@@ -31,8 +31,8 @@ import shared.network.event.SoundEvent;
  * Is the game server.
  */
 public class MatchServer implements Runnable, Listener {
-	private static final int UNDECIDED = -1;
-	private static final int DRAW = -2;
+	public static final int UNDECIDED = -1;
+	public static final int DRAW = -2;
 	enum State {PAUSING, PLAYING, DELAYING}
 	private State state = State.DELAYING;
 	
@@ -94,8 +94,6 @@ public class MatchServer implements Runnable, Listener {
 			}
         }
 		
-		
-		
 		Arena arena = new Arena(arenaName, tileTable, objectTable, triggerTable, miscTable);
 
 		this.world = new World(arena, this);
@@ -106,19 +104,19 @@ public class MatchServer implements Runnable, Listener {
 		for (int i=0;i<players.size();i++) {
 			ServerPlayer p = players.get(i);
 			if (p.character==null) {
-				PlayerCharacter character = PlayerCharacter.newCharacter(p.id, p.team, p.type);
+				InputControlledEntity character = InputControlledEntity.newCharacter(p.id, p.spawnPoint.team, p.type);
 				p.setCharacter(character);
 			}  else {
 				//p.character.resetStats();
 				// At the moment, just create everything new
-				PlayerCharacter character = PlayerCharacter.newCharacter(p.id, p.team, p.type);
+				InputControlledEntity character = InputControlledEntity.newCharacter(p.id, p.team, p.type);
 				p.setCharacter(character);
 			}
 			if (p instanceof AIPlayer) {
-				((AIPlayer) p).init(world.getArena(), pathFinder);
+				((AIPlayer) p).init(world.getArena(), p.character, pathFinder);
 			}
 			
-			world.addPlayer(p.character);
+			world.addCharacter(p.character,p.spawnPoint);
 			p.targetIndex = i;
 		}
 	}
@@ -342,7 +340,7 @@ public class MatchServer implements Runnable, Listener {
 							server.chatTexts.add(player.name + ": " + input.chatText);
 						}
 					}
-					if (input.alt && input.fire2 && canPing()) {
+					if (input.ping && canPing()) {
 						for (ServerPlayer p:server.players) {
 							if (p.team==player.team) {
 								p.character.getPerception().events.add(new SoundEvent(SoundEvent.PING_SOUND_ID,SoundEvent.PING_SOUND_VOLUME,input.cx,input.cy));
@@ -374,19 +372,21 @@ public class MatchServer implements Runnable, Listener {
 		}
 	}
 	
-	
-	
 	public void onEventReceived(GameEvent event) {
 		if (event instanceof PlayerDieEvent) {
 			PlayerDieEvent e = (PlayerDieEvent) event;
 			ServerPlayer killer = findPlayer(e.killerId);
 			ServerPlayer victim = findPlayer(e.killedId);
-
-			victim.deaths++;
-			if (killer.team != victim.team) {
-				killer.kills++;
-			} else {
-				killer.kills--;
+			
+			if (victim!=null) {
+				victim.deaths++;
+			}
+			if (killer!=null) {
+				if (victim!=null && killer.team == victim.team) {
+					killer.kills--;
+				} else {
+					killer.kills++;
+				}
 			}
 		} else if (event instanceof Headshot) {
 			Headshot e = (Headshot) event;

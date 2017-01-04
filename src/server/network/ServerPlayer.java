@@ -2,7 +2,9 @@ package server.network;
 
 import java.io.IOException;
 import client.gui.GameWindow;
-import server.character.PlayerCharacter;
+import editor.SpawnPoint;
+import editor.SpawnPoint.CharType;
+import server.character.InputControlledEntity;
 import shared.network.Connection;
 import shared.network.GameDataPackets.InputPacket;
 import shared.network.GameDataPackets.WorldStatePacket;
@@ -19,15 +21,16 @@ public class ServerPlayer {
     public int team;
     public String name;
     public boolean active = false;
-    public int type = 0;
+    public CharType type;
     public int kills = 0;
     public int deaths = 0;
     public int headshots = 0;
     
     public int targetIndex;
     
+    public SpawnPoint spawnPoint;
     public Connection connection;
-    public PlayerCharacter character;
+    public InputControlledEntity character;
 	public MatchServer.InputReceiver inputReceiver;
     
     /**
@@ -77,7 +80,7 @@ public class ServerPlayer {
         connection.send(wsp);
     }
     
-    public void setCharacter(PlayerCharacter c) {
+    public void setCharacter(InputControlledEntity c) {
     	this.character = c;
     }
 }

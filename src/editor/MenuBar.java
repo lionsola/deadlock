@@ -294,5 +294,20 @@ public class MenuBar extends JMenuBar {
 			}
 		});
 		view.add(config);
+		
+		view.addSeparator();
+		JCheckBoxMenuItem spawns = new JCheckBoxMenuItem("Spawn locations");
+		spawns.setSelected(false);
+		spawns.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					editor.getArenaPanel().renderSpawns = true;
+				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
+					editor.getArenaPanel().renderSpawns = false;
+				}
+			}
+		});
+		view.add(spawns);
 	}
 }

@@ -16,9 +16,9 @@ public class Armor {
 	private double startAngle;
 	private double extend;
 	//private double width;
-	private Character self;
+	private Entity self;
 	
-	public Armor (Character c, double start, double angle) {
+	public Armor (Entity c, double start, double angle) {
 		self = c;
 		startAngle = start;
 		extend = angle;
@@ -60,7 +60,7 @@ public class Armor {
 		this.extend = angle;
 	}
 	
-	protected Character self() {
+	protected Entity self() {
 		return self;
 	}
 }

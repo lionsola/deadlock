@@ -25,12 +25,14 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import client.graphics.Sprite;
 import client.gui.GUIFactory;
-import editor.Tool.*;
 import editor.dialogs.ListDialog;
 import editor.dialogs.MiscDialog;
+import editor.dialogs.SpawnDialog;
 import editor.dialogs.TerrainDialog;
 import editor.dialogs.ThingDialog;
 import editor.dialogs.TileSwitchDialog;
+import editor.tools.Tool;
+import editor.tools.Tool.*;
 import server.world.Thing;
 import server.world.trigger.TileSwitchPreset;
 import server.world.Misc;
@@ -274,7 +276,7 @@ public class ToolBar extends JPanel {
 											"Just to double check, are you sure?");
 									if (s.equals("yup")) {
 										Misc m = list.getList().getSelectedValue();
-										editor.objectTable.remove(m.getId());
+										editor.miscTable.remove(m.getId());
 										editor.tileDataChanged = true;
 										tlm.getList().remove(m);
 										tlm.invalidate();
@@ -409,6 +411,34 @@ public class ToolBar extends JPanel {
 		});
 		trigger.addItemListener(toggleButtonSwitch);
 		this.add(trigger);
+		
+		final JToggleButton spawn = new JToggleButton();
+		stylizeToolButton(spawn);
+		try {
+			spawn.setIcon(new ImageIcon(ImageIO.read(new File("resource/editor/light.png"))));
+		} catch (IOException e1) {
+			spawn.setText("NPC");
+		}
+		spawn.setToolTipText("Add spawn points");
+		spawn.addItemListener(new ItemListener() {
+			SpawnDialog dialog = null;
+			
+			@Override
+			public void itemStateChanged(ItemEvent arg0) {
+				if (arg0.getStateChange()==ItemEvent.SELECTED) {
+					if (dialog==null) {
+						dialog = new SpawnDialog(editor,spawn);
+						dialog.setVisible(true);
+					}
+					editor.setTool(new Tool.SpawnPaint(editor.getArenaPanel(), dialog));
+				} else if (arg0.getStateChange()==ItemEvent.DESELECTED) {
+					dialog.setVisible(false);
+					editor.setTool(new Tool.MoveTool(editor.getArenaPanel()));
+				}
+			}
+		});
+		spawn.addItemListener(toggleButtonSwitch);
+		this.add(spawn);
 	}
 	
 	private static void stylizeToolButton(AbstractButton button) {

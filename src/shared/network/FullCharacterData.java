@@ -1,12 +1,14 @@
 package shared.network;
 
+import server.character.InputControlledEntity;
+
 /**
- * Full Character data.
+ * Full Character data, used to send data of the main character to
+ * his respective client.
  * 
- * @author Anh Pham
  */
 public class FullCharacterData extends CharData {
-	
+
 	private static final long serialVersionUID = 6568364547122850939L;
 	
 	public float weaponCooldown;
@@ -18,4 +20,21 @@ public class FullCharacterData extends CharData {
 	public float viewAngle;
 	
 	public float crosshairSize;
+	
+	public FullCharacterData(InputControlledEntity e) {
+		super(e);
+		if (e.getWeapon()!=null)
+			weaponCooldown = (float) e.getWeapon().getCooldownPercent();
+		if (e.getAbility()!=null)
+			abilityCooldown = (float) e.getAbility().getCooldownPercent();
+		if (e.getPassive()!=null)
+			passiveLevel = (float) e.getPassive().getActivationLevel();
+		
+		viewRange = (float) e.getVision().range;
+		viewAngle = (float) e.getVision().angle;
+		
+		crosshairSize = (float) e.getCrosshairSize();
+	}
+	
+	public FullCharacterData() {}
 }

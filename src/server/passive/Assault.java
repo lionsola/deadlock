@@ -1,6 +1,6 @@
 package server.passive;
 
-import server.character.PlayerCharacter;
+import server.character.InputControlledEntity;
 import server.world.Geometry;
 import server.world.World;
 
@@ -16,7 +16,7 @@ public class Assault extends Passive {
 	private double increasedSpeed;
 	private double increasedInsta;
 	
-	public Assault(PlayerCharacter self) {
+	public Assault(InputControlledEntity self) {
 		super(self);
 	}
 
@@ -36,9 +36,7 @@ public class Assault extends Passive {
 	protected double calculateActivationLevel(World w) {
 		if (self().isMoving()) {
 			double diffAngle = Math.abs(Geometry.wrapAngle(self().getMovingDirection()-self().getDirection()));
-			System.out.println("moving:"+self().getMovingDirection()+", facing:"+self().getDirection()+", diff: "+diffAngle);
 			double level = Math.max(0,(AS_MAXANGLE - diffAngle)/AS_MAXANGLE);
-			System.out.println("activation: "+level);
 			return level;
 		} else {
 			return 0;

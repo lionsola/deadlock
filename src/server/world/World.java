@@ -7,8 +7,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import client.gui.GameWindow;
-import server.character.Character;
-import server.character.PlayerCharacter;
+import editor.SpawnPoint;
+import server.character.Entity;
+import server.character.InputControlledEntity;
+import server.character.NPC;
 import server.world.trigger.Trigger;
 import shared.network.CharData;
 import shared.network.ProjectileData;
@@ -24,8 +26,7 @@ import shared.network.event.GameEvent.Listener;
 public class World {
 	public static final double DISTANCE_VOLUME_DROP_RATE = 2.5;
 	
-	private List<PlayerCharacter> characters = new ArrayList<PlayerCharacter>();
-	private List<Character> npcs = new LinkedList<Character>();
+	private List<InputControlledEntity> characters = new ArrayList<InputControlledEntity>();
 	
 	private List<Projectile> projectiles = new LinkedList<Projectile>();
 	private List<Projectile> newProjectiles = new LinkedList<Projectile>();
@@ -59,16 +60,12 @@ public class World {
 	 * 
 	 * @param p
 	 *            the player to be added
+	 * @param spawnPoint 
 	 */
-	public void addPlayer(PlayerCharacter p) {
-		Point2D spawn = arena.getSpawn(p.team).get(curSpawn[p.team]);
-		curSpawn[p.team] = (curSpawn[p.team]+1)%arena.getSpawn(p.team).size();
+	public void addCharacter(InputControlledEntity p, SpawnPoint spawnPoint) {
+		Point2D spawn = Utils.tileToMeter(spawnPoint.x,spawnPoint.y);
 		p.setPosition(this,spawn.getX(),spawn.getY());
 		characters.add(p);
-	}
-
-	public void addNPC(Character npc) {
-		npcs.add(npc);
 	}
 
 	/**
@@ -98,31 +95,31 @@ public class World {
 	}
 
 	public void addSound(int id, double volume, double x, double y) {
-		for (Character ch:characters) {
+		for (Entity ch:characters) {
 			ch.filterSound(id, volume, x, y);
 		}
 	}
 	
 	public void addAnimation(int id, double x, double y, double direction) {
-		for (Character ch:characters) {
+		for (Entity ch:characters) {
 			ch.filterVisualAnimation(id, x, y, direction);
 		}
 	}
 	
 	public void addGlobalAnimation(int id, double x, double y, double rot) {
-		for (Character ch:characters) {
+		for (Entity ch:characters) {
 			ch.getPerception().events.add(new AnimationEvent(id,x,y,rot));
 		}
 	}
 	
 	public void addGlobalAnimation(AnimationEvent e) {
-		for (Character ch:characters) {
+		for (Entity ch:characters) {
 			ch.getPerception().events.add(e);
 		}
 	}
 	
 	public void addEvent(GameEvent event) {
-		for (Character ch:characters) {
+		for (Entity ch:characters) {
 			ch.getPerception().events.add(event);
 		}
 	}
@@ -133,17 +130,9 @@ public class World {
 	 */
 	public void update() {
 		// update characters
-		for (PlayerCharacter p : characters) {
+		for (InputControlledEntity p : characters) {
 			p.update(this);
 		}
-		
-		// update npcs
-		List<Character> expired = new LinkedList<Character>();
-		for (Character npc : npcs) {
-			//if (npc.)
-			npc.update(this);
-		}
-		npcs.removeAll(expired);
 		
 		// update projectiles
 		List<Projectile> consumed = new LinkedList<Projectile>();
@@ -216,7 +205,7 @@ public class World {
 		WorldStatePacket wsp = new WorldStatePacket();
 
 		wsp.characters = new LinkedList<CharData>();
-		for (PlayerCharacter character : characters) {
+		for (InputControlledEntity character : characters) {
 			wsp.characters.add(character.generatePartial());
 		}
 		
@@ -238,11 +227,11 @@ public class World {
 	 *            The server.character that will get the resulting list.
 	 * @return A list of characters in the vision field of the given server.character.
 	 */
-	public List<Character> generateVisibleCharacters(Character ch) {
+	public List<Entity> generateVisibleCharacters(Entity ch) {
 		// Shape los = LineOfSight.generateLoS(ch.getIntX(),ch.getIntY(),
 		// ch.getViewRange(),ch.getViewAngle(),ch.getDirection(), arena);
-		List<Character> list = new LinkedList<Character>();
-		for (PlayerCharacter p : characters) {
+		List<Entity> list = new LinkedList<Entity>();
+		for (InputControlledEntity p : characters) {
 			double x0 = p.getX() - p.getRadius();
 			double y0 = p.getY() - p.getRadius();
 			// double radius = p.getRadius();
@@ -263,8 +252,8 @@ public class World {
 		return listener;
 	}
 	
-	public List<PlayerCharacter> getCharacters() {
-		return new LinkedList<PlayerCharacter>(characters);
+	public List<InputControlledEntity> getCharacters() {
+		return new LinkedList<InputControlledEntity>(characters);
 	}
 
 	public List<Projectile> getProjectiles() {

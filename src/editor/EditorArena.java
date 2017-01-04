@@ -13,34 +13,21 @@ import server.world.Tile;
 import server.world.trigger.TileSwitchPreset;
 
 public class EditorArena extends Arena {
-	Light[][] lights;
+	public SpawnPoint[][] spawns;
+	
 	public EditorArena(ArenaData ad, HashMap<Integer, Terrain> tileTable, HashMap<Integer, Thing> objectTable,
 			HashMap<Integer,TileSwitchPreset> triggerTable, HashMap<Integer,Misc> miscTable) {
 		super(ad, tileTable, objectTable, triggerTable, miscTable);
-		lights = new Light[getWidth()][getHeight()];
-		for (Light l:lightList) {
-			lights[l.getX()][l.getY()] = l;
+		spawns = new SpawnPoint[ad.tMap.length][ad.tMap[0].length];
+		if (ad.spawns!=null) {
+			for (SpawnPoint sp:ad.spawns) {
+				spawns[sp.x][sp.y] = sp;
+			}
 		}
 	}
 
 	public EditorArena(String n, int w, int h) {
 		super(n,w,h);
-		lights = new Light[getWidth()][getHeight()];
-	}
-
-	public void addLight(Light l) {
-		if (lights[l.getX()][l.getY()]!=null) {
-			super.lightList.remove(lights[l.getX()][l.getY()]);
-		}
-		lights[l.getX()][l.getY()] = l;
-		super.lightList.add(l);
-		super.generateLightMap();
-	}
-	
-	public void clearLight(int x, int y) {
-		lightList.remove(lights[x][y]);
-		lights[x][y] = null;
-		super.generateLightMap();
 	}
 	
 	synchronized public void changeSize(int newWidth, int newHeight, int hDir, int vDir) {

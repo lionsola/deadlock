@@ -1,6 +1,6 @@
 package server.ability;
 
-import server.character.PlayerCharacter;
+import server.character.InputControlledEntity;
 import server.world.World;
 
 public class ChangeForm extends ToggleAbility {
@@ -12,17 +12,17 @@ public class ChangeForm extends ToggleAbility {
 	public static final int CF_BAT_WEAPON = 100;
 	public static final int CF_HUMAN_WEAPON = 101;
 	
-	public ChangeForm(PlayerCharacter self) {
+	public ChangeForm(InputControlledEntity self) {
 		super(10,self, CF_COOLDOWN);
 	}
 
 	@Override
-	protected void onUpdate(World w, PlayerCharacter c) {
+	protected void onUpdate(World w, InputControlledEntity c) {
 		
 	}
 
 	@Override
-	protected void onActivate(World w, PlayerCharacter c) {
+	protected void onActivate(World w, InputControlledEntity c) {
 		// RELEASE BATS!!!
 		
 		// MORPH INTO A BAT TOO!!
@@ -36,7 +36,7 @@ public class ChangeForm extends ToggleAbility {
 	}
 
 	@Override
-	protected void onDeactivate(World w, PlayerCharacter c) {
+	protected void onDeactivate(World w, InputControlledEntity c) {
 		
 		
 		// MORPH BACK INTO VAMPIRE

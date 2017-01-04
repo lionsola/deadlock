@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Domain package="server.ai.jbt">
+	<ActionSet>
+	<!-- Orders the current unit to attack another unit -->
+	   
+		<Action name="FireWeapon"/>
+		<Action name="UseAbility"/>
+		<Action name="Sneak">
+            <Parameter name="sneakTarget" type="COORDINATE"/>
+        </Action>
+		
+		<Action name="Ping"/>
+		<Action name="PointCursor">
+			<Parameter name="cursorTarget" type="COORDINATE"/>
+		</Action>
+		<!-- Orders the current unit to go to a target position -->
+		<Action name="Move">
+			<Parameter name="moveTarget" type="COORDINATE"/>
+		</Action>
+		<!-- Orders the current unit to go to a target position -->
+        <Action name="Wait">
+            <Parameter name="milisecs" type="INTEGER"/>
+        </Action>
+        
+		<!-- Orders the current unit to go to a target position. If
+		an enemy is found along the way, the unit will combat him -->
+		
+		<!-- Orders the position of the base that is closest to the
+		current unit -->
+		<Action name="ComputeClosestSafePosition">
+        </Action>
+		<!-- Works out where to point the cursor at when firing -->
+		<Action name="ComputeAttackPoint">
+		</Action>
+		<!-- Randomise a sensible direction to turn to -->
+		<Action name="ComputeWatchPoint">
+		</Action>
+		<!-- Given a target, works out where to point the cursor at when firing -->
+		<Action name="ComputeNextPatrolPoint">
+		      <Parameter name="patrolLocations" type="OBJECT"/>
+		</Action>
+	</ActionSet>
+	
+	<SensorSet>
+		<!-- Checks if the current unit's weapon is low on ammo and needs reloading -->
+		<Sensor name="LowAmmo" type="BOOLEAN"/>
+		<!-- Checks if the current unit's hit points is low -->
+		<Sensor name="LowHp" type="BOOLEAN"/>
+		<!-- Checks if the current unit is in enemies' sight -->
+        <Sensor name="InEnemySight" type="BOOLEAN"/>
+        <!-- Checks if the current unit is in enemies' sight -->
+        <Sensor name="EnemyInSight" type="BOOLEAN"/>
+        <!-- Checks if there are allies nearby -->
+        <Sensor name="AllyNearby" type="BOOLEAN"/>
+        <!-- Checks if there are allies nearby -->
+        <Sensor name="WeaponReady" type="BOOLEAN"/>
+	</SensorSet>
+	
+	<EntitySet>
+	</EntitySet>
+	
+	<GoalSet>
+	</GoalSet>
+</Domain>

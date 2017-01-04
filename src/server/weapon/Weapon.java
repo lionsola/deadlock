@@ -4,7 +4,7 @@ import java.awt.geom.Point2D;
 
 import client.gui.GameWindow;
 import server.ability.Ability;
-import server.character.PlayerCharacter;
+import server.character.InputControlledEntity;
 import server.world.Geometry;
 import server.world.Utils;
 import server.world.World;
@@ -17,7 +17,7 @@ import shared.network.event.AnimationEvent;
  * 
  * A specific set of <code>Weapons</code> are used by each <code>ControlledCharacter<code>.
  * 
- * @see PlayerCharacter
+ * @see InputControlledEntity
  * @see PrimaryWeapon
  * @see SecondaryWeapon
  * @author Team D1
@@ -36,16 +36,16 @@ public abstract class Weapon extends Ability {
 	private int ammoLeft;
 	private long reloadTimer;
 
-	public Weapon(PlayerCharacter self, WeaponType type) {
+	public Weapon(InputControlledEntity self, WeaponType type) {
 		super(type.weaponId,self,type.cooldown);
 		this.type = type;
 		reset();
 	}
 
-	public void update(World w, PlayerCharacter c) {
+	public void update(World w, InputControlledEntity c) {
 		super.update(w);
 		if (!self().isDead()) {
-			if (c.getInput().fire1 && !c.getInput().alt && isReady()) {
+			if (c.getInput().fire1 && isReady()) {
 				//double direction = c.disperseDirection();
 				
 				double direction = c.getDirection();
@@ -61,7 +61,7 @@ public abstract class Weapon extends Ability {
 				w.addAnimation(AnimationEvent.GUNSHOT, c.getX(), c.getY(), direction);
 				w.addSound(type.soundId, type.noise, c.getX(), c.getY());
 				
-				double maxRecoil = PlayerCharacter.MAX_DISPERSION_ANGLE*getInstability();
+				double maxRecoil = InputControlledEntity.MAX_DISPERSION_ANGLE*getInstability();
 				double recoil = maxRecoil*Math.min(1,Math.abs(Utils.random().nextGaussian())); 
 				recoil = Math.copySign(recoil,(c.getDirection()-c.getTargetDirection())*(Utils.random().nextDouble()<0.8?1:-1));
 				c.setDirection(c.getDirection()+recoil);
@@ -70,7 +70,7 @@ public abstract class Weapon extends Ability {
 				if (ammoLeft<=0) {
 					reloadTimer = 0;
 				}
-			} else if (c.getInput().fire1 && c.getInput().alt) {
+			} else if (c.getInput().reload) {
 				ammoLeft = 0;
 				reloadTimer = 0;
 			}
@@ -85,7 +85,7 @@ public abstract class Weapon extends Ability {
 		}
 	}
 
-	protected abstract void fire(World w, PlayerCharacter c, double direction);
+	protected abstract void fire(World w, InputControlledEntity c, double direction);
 	
 	protected double disperseDirection(double gunDirection) {
 		return gunDirection + type.gunDispersion*Utils.random().nextGaussian()/2;
@@ -95,7 +95,7 @@ public abstract class Weapon extends Ability {
 		return stat*(1+limit*Utils.random().nextGaussian()/2);
 	}
 	
-	protected void fireOneBullet (World w, PlayerCharacter c, double direction, double speed) {
+	protected void fireOneBullet (World w, InputControlledEntity c, double direction, double speed) {
 		w.addProjectile(new Bullet(c, direction, speed, type.size, type.damage));
 	}
 	
@@ -124,6 +124,10 @@ public abstract class Weapon extends Ability {
 		if (!isEnabled()) {
 			reloadTimer = 0;
 		}
+	}
+	
+	public int getAmmo() {
+		return ammoLeft;
 	}
 	
 	@Override

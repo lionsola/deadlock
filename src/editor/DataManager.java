@@ -321,7 +321,7 @@ public class DataManager {
 		}
 	}
 	
-	public static void exportArenaData(Arena a) {
+	public static void exportArenaData(EditorArena a) {
 		saveObject(new Arena.ArenaData(a),"resource/map/"+a.getName()+"_copy.arena");
 		saveObject(new Arena.ArenaData(a),"resource/map/"+a.getName()+".arena");
 	}

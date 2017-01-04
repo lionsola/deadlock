@@ -28,6 +28,8 @@ import client.gui.ClientPlayer;
 import client.gui.GUIFactory;
 import client.image.OverlayComposite;
 import editor.EditorArena;
+import editor.SpawnPoint;
+import editor.SpawnPoint.CharType;
 import server.world.Arena;
 import server.world.Geometry;
 import server.world.Light;
@@ -41,6 +43,7 @@ import server.world.trigger.Trigger;
 import server.world.trigger.Trigger.SwitchOnTouchSide;
 import server.world.trigger.TriggerEffect;
 import shared.network.FullCharacterData;
+import shared.network.NPCData;
 import shared.network.CharData;
 import shared.network.ProjectileData;
 
@@ -310,7 +313,7 @@ public class Renderer {
 	
 	public static void renderMainCharacter(Graphics2D g2D, FullCharacterData player, ClientPlayer playerInfo) {
 		// render the character
-		renderGun(g2D,player.x,player.y,player.radius,player.direction,playerInfo.type,playerInfo.team);
+		renderGun(g2D,player.x,player.y,player.radius,player.direction,playerInfo.weaponId,playerInfo.team);
 		renderCharacter(g2D, player.x, player.y, player.direction, player.radius, playerInfo.type,playerInfo.team);
 		renderArmor(g2D,player.x, player.y, player.radius,player.direction+player.armorStart,player.armorAngle,playerInfo.team);
 		
@@ -325,6 +328,7 @@ public class Renderer {
 		drawLine(g2D, p.x - length / 2, topy, p.x + length / 2, topy);
 
 		// render direction line
+		/*
 		if (p.viewRange>p.radius*5) {
 			g2D.setColor(new Color(200, 200, 200));
 			g2D.setStroke(dashed);
@@ -332,12 +336,22 @@ public class Renderer {
 			Point2D p1 = Geometry.PolarToCartesian(p.radius*5, p.direction);
 			drawLine(g2D,p.x+p3.getX(),p.y-p3.getY(),p.x+p1.getX(),p.y-p1.getY());
 		}
+		*/
 	}
 	
-	public static void renderOtherCharacter(Graphics2D g2D, CharData c, int typeId) {
-		renderGun(g2D,c.x,c.y,c.radius,c.direction,typeId,c.team);
-		renderCharacter(g2D,c.x,c.y,c.direction,c.radius,typeId,c.team);
+	public static void renderOtherCharacter(Graphics2D g2D, CharData c, CharType type) {
+		renderGun(g2D,c.x,c.y,c.radius,c.direction,c.weapon,c.team);
+		renderCharacter(g2D,c.x,c.y,c.direction,c.radius,type,c.team);
 		renderArmor(g2D,c.x,c.y,c.radius,c.direction+c.armorStart,c.armorAngle,c.team);
+	}
+	
+	public static void renderNPC(Graphics2D g2D, NPCData npc, CharType typeId) {
+		renderOtherCharacter(g2D,npc,typeId);
+		g2D.setStroke(new BasicStroke(toPixel(HEALTHBAR_WIDTH)));
+		g2D.setColor(new Color(255, 50, 50));
+		double length = (npc.radius*npc.alertness);
+		double topy = (npc.y - npc.radius - HEALTHBAR_WIDTH*2);
+		drawLine(g2D, npc.x - length / 2, topy, npc.x + length / 2, topy);
 	}
 	
 	private static void renderArmor(Graphics2D g2D, double cx, double cy, double cr, double start, double extent,int team) {
@@ -365,7 +379,7 @@ public class Renderer {
 	}
 	
 	
-	private static void renderCharacter(Graphics2D g2D, double x, double y, double direction, double r, int typeId, int team) {
+	private static void renderCharacter(Graphics2D g2D, double x, double y, double direction, double r, CharType type, int team) {
 		g2D.setStroke(new BasicStroke(toPixel(CHARACTER_WIDTH)));
 		g2D.setColor(teamColors2[team]);
 		//fillCircle(g2D,x, y,r);
@@ -675,17 +689,6 @@ public class Renderer {
 		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (window.getWidth() / ts) + 1);
 		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (window.getHeight() / ts) + 1);
 		
-		
-		/*
-		if (LOOP_SPRITE==null) {
-			try {
-				LOOP_SPRITE = ImageIO.read(new File("resource/editor/loop.png"));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		*/
 		g2D.setStroke(new BasicStroke(1.5f));
 		for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
@@ -720,6 +723,24 @@ public class Renderer {
 		}
 	}
 
+	public static void renderSpawnLocations(Graphics2D g2D, EditorArena a, Rectangle2D window) {
+		double ts = Terrain.tileSize;
+		int x1 = Math.max(0, (int) (window.getX() / ts));
+		int y1 = Math.max(0, (int) (window.getY() / ts));
+		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (window.getWidth() / ts) + 1);
+		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (window.getHeight() / ts) + 1);
+		
+		for (int x = x1; x <= x2; x++) {
+			for (int y = y1; y <= y2; y++) {
+				SpawnPoint sp = a.spawns[x][y];
+				if (sp != null) {
+					Point2D p = Utils.tileToMeter(sp.x, sp.y);
+					Renderer.renderCharacter(g2D, p.getX(), p.getY(),sp.direction, 0.3, sp.setups.get(0), sp.team);
+				}
+			}
+		}
+	}
+	
 	public static void renderEditorLightSource(Graphics2D g2D, EditorArena a, Rectangle2D window) {
 		double ts = Terrain.tileSize;
 		for (Light l:a.getLightList()) {

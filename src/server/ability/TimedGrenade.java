@@ -3,7 +3,7 @@ package server.ability;
 import java.awt.geom.Area;
 
 import client.gui.GameWindow;
-import server.character.PlayerCharacter;
+import server.character.InputControlledEntity;
 import server.status.Blinded;
 import server.weapon.Bullet;
 import server.world.Geometry;
@@ -17,7 +17,7 @@ import shared.network.event.SoundEvent;
 public abstract class TimedGrenade extends Projectile {
 	private static final double RESIST_CONSTANT = 0.000000013;
 	private long timeLeft;
-	public TimedGrenade(PlayerCharacter source, double direction, double speed, long timeLeft) {
+	public TimedGrenade(InputControlledEntity source, double direction, double speed, long timeLeft) {
 		super(source, direction, speed,200);
 		this.timeLeft = timeLeft;
 	}
@@ -47,7 +47,7 @@ public abstract class TimedGrenade extends Projectile {
 	}
 
 	@Override
-	protected void onHitCharacter(World w, PlayerCharacter ch, double x, double y) {
+	protected void onHitCharacter(World w, InputControlledEntity ch, double x, double y) {
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public abstract class TimedGrenade extends Projectile {
 	
 	public static class FragGrenade extends TimedGrenade {
 		public static final double FRAG_EXPLODE_SOUND_VOLUME = 120;
-		public FragGrenade(PlayerCharacter source, double direction, double speed, long timeLeft) {
+		public FragGrenade(InputControlledEntity source, double direction, double speed, long timeLeft) {
 			super(source, direction, speed, timeLeft);
 		}
 
@@ -101,7 +101,7 @@ public abstract class TimedGrenade extends Projectile {
 		public static final double RANGE = 20;
 		public static final long duration = 8000;
 		public static final double FLASH_EXPLODE_SOUND_VOLUME = 170;
-		public FlashGrenade(PlayerCharacter source, double direction, double speed, long timeLeft) {
+		public FlashGrenade(InputControlledEntity source, double direction, double speed, long timeLeft) {
 			super(source, direction, speed, timeLeft);
 		}
 
@@ -110,7 +110,7 @@ public abstract class TimedGrenade extends Projectile {
 			w.addSound(SoundEvent.GRENADE_EXPLODE_SOUND_ID, FLASH_EXPLODE_SOUND_VOLUME, getX(), getY());
 			LineOfSight los = new LineOfSight();
 			Area a = los.genLOSAreaMeter(getX(), getY(), RANGE, Math.PI*2, 0, w.getArena());
-			for (PlayerCharacter c:w.getCharacters()) {
+			for (InputControlledEntity c:w.getCharacters()) {
 				
 				if (a.contains(c.getX(), c.getY())) {
 					double angle = Math.abs(Geometry.wrapAngle(c.getDirection() - Math.atan2(c.getY()-getY(), getX()-c.getX())));

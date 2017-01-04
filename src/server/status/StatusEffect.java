@@ -1,14 +1,14 @@
 package server.status;
 
 import client.gui.GameWindow;
-import server.character.Character;
+import server.character.Entity;
 
 public abstract class StatusEffect {
     private long duration = 0;
     private long elapsedTime = 0;
-    private Character self;
+    private Entity self;
     
-    public StatusEffect (Character self, long duration) {
+    public StatusEffect (Entity self, long duration) {
         this.duration = duration;
         this.self = self;
     }
@@ -28,7 +28,7 @@ public abstract class StatusEffect {
         }
     }
     
-    protected Character getSelf() {
+    protected Entity getSelf() {
         return self;
     }
 

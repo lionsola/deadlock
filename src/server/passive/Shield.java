@@ -1,7 +1,7 @@
 package server.passive;
 
 import server.character.Armor;
-import server.character.PlayerCharacter;
+import server.character.InputControlledEntity;
 import server.world.Geometry;
 import server.world.Projectile;
 import server.world.World;
@@ -17,7 +17,7 @@ public class Shield extends Passive {
 	
 	private final double CHANGE_RATE = 0.012;
 	private final Armor shield;
-	public Shield(PlayerCharacter self) {
+	public Shield(InputControlledEntity self) {
 		super(self);
 		shield = new Armor(self,DEFAULT_START,DEFAULT_ANGLE) {
 			@Override

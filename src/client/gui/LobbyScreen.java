@@ -1,5 +1,6 @@
 package client.gui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -16,7 +17,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.SocketException;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -30,8 +32,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
-import javax.swing.ListCellRenderer;
-import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import server.network.LobbyServer;
@@ -39,16 +39,17 @@ import shared.network.Connection;
 import shared.network.LobbyRequest;
 import shared.network.LobbyRequest.ChangeArenaRequest;
 import shared.network.LobbyRequest.ChangeCharacterRequest;
+import shared.network.LobbyRequest.ChangeSpawnRequest;
 import shared.network.LobbyRequest.ChatRequest;
+import shared.network.LobbyRequest.GameConfig;
 import shared.network.LobbyRequest.LobbyInformationPacket;
 import shared.network.LobbyRequest.NewPlayerRequest;
 import shared.network.LobbyRequest.PlayerLeaveRequest;
 import shared.network.LobbyRequest.StartGameRequest;
 import shared.network.LobbyRequest.SwitchTeamRequest;
 import shared.network.LobbyRequest.ToggleReadyRequest;
-import client.data.Class;
-import client.sound.AudioManager;
-import client.sound.MusicPlayer;
+import editor.SpawnPoint;
+import editor.SpawnPoint.CharType;
 
 /**
  * GUI view to show the lobby screen where the player waits before launching the game.
@@ -64,28 +65,24 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 	private JButton playButton;
 	private JButton readyButton;
 
-	private JButton team1Button;
-	private JButton team2Button;
-
-	private String arenaName;
+	private GameConfig config;
+	private List<ClientPlayer> players;
 	private JLabel typeIcon;
 	private JLabel typeName;
 	private JButton left;
 	private JButton right;
 	private JButton switchTeam;
 
-	private TeamListModel team1Model;
-	private TeamListModel team2Model;
-
 	// place holder, use each type's icon later
 	private final ClientPlayer clientPlayer;
-	private List<ClientPlayer> team1;
-	private List<ClientPlayer> team2;
 	//private String config = "";//"Settings shown here\nSetting1\nSetting2\nSetting3"; 
 
 	private int currentType = 0;
 
 	private ChatPanel chatPanel;
+	private HashMap<Integer,SpawnPanel> spawnPanels = new HashMap<Integer,SpawnPanel>();
+	private List<ClientPlayer> idlePlayers = new LinkedList<ClientPlayer>();
+	private TeamListModel idlePlayersModel;
 
 	/**
 	 * Creates a new LobbyScreen used in the game loop
@@ -115,14 +112,11 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 	 *            The lobby information packet of the lobby
 	 */
 	private void initLobbyInfo(LobbyInformationPacket lip) {
-		team1 = new ArrayList<ClientPlayer>();
-		team2 = new ArrayList<ClientPlayer>();
-		arenaName = lip.gameConfig.arena;
-		for (ClientPlayer p : lip.clientPlayers) {
-			if (p.team == 0) {
-				team1.add(p);
-			} else {
-				team2.add(p);
+		config = lip.gameConfig;
+		players = lip.clientPlayers;
+		for (ClientPlayer p:players) {
+			if (p.spawnId==-1) {
+				idlePlayers.add(p);
 			}
 		}
 	}
@@ -146,35 +140,33 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		c.insets = new Insets(5, 5, 5, 5);
 
 		c.weightx = 1;
-		team1Button = GUIFactory.getStyledFunctionButton("  Team 1");
-		team1Button.addActionListener(this);
-		teamPanel.add(team1Button, c);
-		c.gridx = 1;
-		team2Button = GUIFactory.getStyledFunctionButton("  Team 2");
-		team2Button.addActionListener(this);
-		teamPanel.add(team2Button, c);
+		
+		idlePlayersModel = new TeamListModel(idlePlayers);
+		JList<ClientPlayer> idlePlayersList = new JList<ClientPlayer>(idlePlayersModel);
+		idlePlayersList.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				sendRequest(new LobbyRequest.ChangeSpawnRequest(clientPlayer.id, -1, false));
+			}
+		});
+		teamPanel.add(idlePlayersList, c);
 		c.gridy = 1;
 		c.gridx = 0;
 		c.gridwidth = 2;
 		teamPanel.add(GUIFactory.getStyledSeparator(), c);
 		c.gridy++;
-		c.gridwidth = 1;
+		c.gridwidth = 2;
 		c.weighty = 1;
 
-		team1Model = new TeamListModel(team1);
-		final JList<ClientPlayer> team1List = new JList<ClientPlayer>(team1Model);
-
-		team1List.setOpaque(false);
-		team1List.setCellRenderer(playerRenderer);
-		c.anchor = GridBagConstraints.NORTH;
-		teamPanel.add(team1List, c);
-
-		c.gridx = 1;
-		team2Model = new TeamListModel(team2);
-		final JList<ClientPlayer> team2List = new JList<ClientPlayer>(team2Model);
-		team2List.setOpaque(false);
-		team2List.setCellRenderer(playerRenderer);
-		teamPanel.add(team2List, c);
+		JPanel playerList = GUIFactory.getTransparentPanel();
+		playerList.setLayout(new BoxLayout(playerList, BoxLayout.Y_AXIS));
+		for(SpawnPoint sp:config.playableSpawns) {
+			SpawnPanel panel = new SpawnPanel(sp);
+			GUIFactory.stylizeMenuComponent(panel);
+			spawnPanels.put(sp.getId(), panel);
+			playerList.add(panel);
+		}
+		teamPanel.add(playerList, c);
 
 		c.gridx = 0;
 		c.weighty = 0;
@@ -198,7 +190,6 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		selectedCharacter.add(typeIcon);
 		typeName = GUIFactory.getStyledLabel("");
 		selectedCharacter.add(typeName);
-		setTypeSelection(0);
 		characterPanel.add(selectedCharacter);
 		characterPanel.add(right);
 
@@ -208,7 +199,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		// place holder for map
 		JLabel map = null;
 		try {
-			BufferedImage mapImage = ImageIO.read(new FileInputStream("resource/map/" + arenaName + ".png"));
+			BufferedImage mapImage = ImageIO.read(new FileInputStream("resource/map/" + config.arena + ".png"));
 			float ratio = 150f/Math.max(mapImage.getWidth(),mapImage.getHeight());
 			map = new JLabel(new ImageIcon(mapImage.getScaledInstance((int)(mapImage.getWidth()*ratio),(int)(mapImage.getHeight()*ratio), Image.SCALE_SMOOTH)),JLabel.CENTER);
 		} catch (IOException e) {
@@ -245,9 +236,6 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		c.gridy++;
 
 		JPanel buttonPanel = GUIFactory.getTransparentPanel();
-		switchTeam = GUIFactory.getStyledFunctionButton("Switch team");
-		switchTeam.addActionListener(this);
-		buttonPanel.add(switchTeam);
 		if (isHost) {
 			// THE HOST CAN START GAME AND CHANGE SETTINGS
 			playButton = GUIFactory.getStyledFunctionButton("Play");
@@ -277,24 +265,6 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
     			}
 	        }
 	    });
-	    
-	    // add the server.ability to kick other players
-	    if (isHost) {
-    	    team1List.addMouseListener(new MouseAdapter(){
-                @Override
-                public void mouseClicked(MouseEvent event) {
-                    int index = team1List.locationToIndex(event.getPoint());
-                    lobbyServer.removePlayer(team1List.getModel().getElementAt(index).id);
-                }
-            });
-    	    team2List.addMouseListener(new MouseAdapter(){
-                @Override
-                public void mouseClicked(MouseEvent event) {
-                    int index = team2List.locationToIndex(event.getPoint());
-                    lobbyServer.removePlayer(team2List.getModel().getElementAt(index).id);
-                }
-            });
-	    }
 	}
 
 	@Override
@@ -311,7 +281,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 	 *            The name of the arena
 	 */
 	private void loadArena(String name) {
-		arenaName = name;
+		config.arena = name;
 	}
 
 	/**
@@ -320,10 +290,10 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 	 * @param type
 	 *            The type
 	 */
-	private void setTypeSelection(int type) {
+	private void setTypeSelection(CharType type) {
 		//typeIcon.setIcon(new ImageIcon(Sprite.getImage(type, clientPlayer.team)));
-		typeName.setText(Class.get(type).getName());
-		sendRequest(new ChangeCharacterRequest(clientPlayer.id, currentType));
+		typeName.setText(type.toString());
+		sendRequest(new ChangeCharacterRequest(clientPlayer.id, type));
 	}
 
 	/**
@@ -334,22 +304,12 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 	 * @return Returns the ClientPlayer of the player to be found
 	 */
 	private ClientPlayer findPlayer(int i) {
-		ClientPlayer p = null;
-		for (ClientPlayer p2 : team1) {
-			if (p2.id == i) {
-				p = p2;
-				break;
+		for (ClientPlayer p : players) {
+			if (p.id == i) {
+				return p;
 			}
 		}
-		if (p == null) {
-			for (ClientPlayer p2 : team2) {
-				if (p2.id == i) {
-					p = p2;
-					break;
-				}
-			}
-		}
-		return p;
+		return null;
 	}
 
 	@Override
@@ -371,24 +331,18 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 			sendRequest(new SwitchTeamRequest(clientPlayer.id, to));
 		} else if (arg0.getSource() == readyButton) {
 			sendRequest(new ToggleReadyRequest(clientPlayer.id, !clientPlayer.active));
-		} else if (arg0.getSource() == left) {
+		} else if (arg0.getSource() == left && clientPlayer.spawnId!=-1) {
+			List<CharType> setups = spawnPanels.get(clientPlayer.spawnId).spawn.setups;
 			currentType--;
 			if (currentType < 0)
-				currentType = Class.getClassNo()-1;
-			setTypeSelection(currentType);
+				currentType = setups.size()-1;
+			setTypeSelection(setups.get(currentType));
 		} else if (arg0.getSource() == right) {
+			List<CharType> setups = spawnPanels.get(clientPlayer.spawnId).spawn.setups;
 			currentType++;
-			if (currentType >= Class.getClassNo())
+			if (currentType >= setups.size())
 				currentType = 0;
-			setTypeSelection(currentType);
-		} else if (arg0.getSource() == team1Button) {
-			if (lobbyServer != null) {
-				lobbyServer.addAIPlayer(0, clientPlayer.type);
-			}
-		} else if (arg0.getSource() == team2Button) {
-			if (lobbyServer != null) {
-				lobbyServer.addDummyPlayer(1, clientPlayer.type);
-			}
+			setTypeSelection(setups.get(currentType));
 		}
 	}
 
@@ -427,14 +381,9 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 						loadArena(((ChangeArenaRequest) message).arenaName);
 					} else if (message instanceof NewPlayerRequest) {
 						NewPlayerRequest request = ((NewPlayerRequest) message);
-						ClientPlayer p = request.newPlayer;
-						if (p.team == 0) {
-							team1.add(p);
-							team1Model.invalidate();
-						} else {
-							team2.add(p);
-							team2Model.invalidate();
-						}
+						players.add(request.newPlayer);
+						idlePlayers.add(request.newPlayer);
+						idlePlayersModel.invalidate();
 					} else if (message instanceof PlayerLeaveRequest) {
 						PlayerLeaveRequest request = ((PlayerLeaveRequest) message);
 						if (request.id == clientPlayer.id) {
@@ -442,33 +391,51 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 							break;
 						}
 						ClientPlayer p = findPlayer(request.id);
-						team1.remove(p);
-						team2.remove(p);
-						team1Model.invalidate();
-						team2Model.invalidate();
+						players.remove(p);
 					} else if (message instanceof StartGameRequest) {
-						game.setScreen(new GameScreen(game, clientPlayer.id, connection, arenaName, team1, team2));
+						game.setScreen(new GameScreen(game, clientPlayer.id, connection, config.arena, players));
 						break;
-					} else if (message instanceof SwitchTeamRequest) {
-						SwitchTeamRequest request = ((SwitchTeamRequest) message);
-						List<ClientPlayer> to = request.desTeam == 0 ? team1 : team2;
-						List<ClientPlayer> from = request.desTeam == 0 ? team2 : team1;
+					} else if (message instanceof ChangeSpawnRequest) {
+						ChangeSpawnRequest request = ((ChangeSpawnRequest) message);
 						ClientPlayer p = findPlayer(request.playerId);
-						p.team = request.desTeam;
-						from.remove(p);
-						to.add(p);
-						team1Model.invalidate();
-						team2Model.invalidate();
+						
+						if (request.successful) {
+							// update the source
+							if (p.spawnId==-1) {
+								idlePlayers.remove(p);
+							} else {
+								SpawnPanel source = spawnPanels.get(p.spawnId);
+								if (source.clientPlayer==p) {
+									source.setPlayer(null);
+								}
+							}
+							
+							// update the destination
+							if (request.spawnId==-1) {
+								idlePlayers.add(p);
+								p.team = -1;
+							} else {
+								SpawnPanel target = spawnPanels.get(request.spawnId);
+								target.setPlayer(p);
+								p.team = target.spawn.team;
+								p.type = target.spawn.setups.get(0);
+							}
+							p.spawnId = request.spawnId;
+							
+						} else if (request.spawnId!=-1){
+							chatPanel.addLine(p.name + " wants to switch place with " +
+									spawnPanels.get(request.spawnId).clientPlayer.name);
+						}
 					} else if (message instanceof ToggleReadyRequest) {
 						ToggleReadyRequest request = ((ToggleReadyRequest) message);
 						ClientPlayer p = findPlayer(request.id);
 						p.active = request.ready;
-						(p.team == 0 ? team1Model : team2Model).invalidate();
+						// INVALIDATE
 					} else if (message instanceof ChangeCharacterRequest) {
 						ChangeCharacterRequest request = ((ChangeCharacterRequest) message);
 						ClientPlayer p = findPlayer(request.playerId);
 						p.type = request.typeId;
-						(p.team == 0 ? team1Model : team2Model).invalidate();
+						// INVALIDATE
 					} else if (message instanceof ChatRequest) {
 						ChatRequest request = ((ChatRequest) message);
 						ClientPlayer p = findPlayer(request.id);
@@ -485,21 +452,55 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		}
 	};
 
-	private ListCellRenderer<ClientPlayer> playerRenderer = new ListCellRenderer<ClientPlayer>() {
+	class SpawnPanel extends JPanel {
+		private static final long serialVersionUID = -7928714079976455722L;
+		JLabel type;
+		JLabel player;
+		ClientPlayer clientPlayer;
+		SpawnPoint spawn;
 
-		@Override
-		public Component getListCellRendererComponent(JList<? extends ClientPlayer> list, final ClientPlayer value, int index, boolean isSelected,
-				boolean cellHasFocus) {
-			//ImageIcon icon = new ImageIcon(Sprite.getImage(value.type, value.team));
-			//JLabel player = new JLabel(value.name, icon, SwingConstants.LEFT);
-			JLabel player = new JLabel(value.name, SwingConstants.LEFT);
-			GUIFactory.stylizeMenuComponent(player);
-			if (value.active)
-				player.setForeground(player.getForeground().brighter());
-			else
-				player.setForeground(player.getForeground().darker());
-			return player;
+		public SpawnPanel(SpawnPoint sp) {
+			spawn = sp;
+			
+			type = new JLabel("?");
+			player = new JLabel();
+			
+			add(type);
+			add(player);
+			
+			if (sp.setups.size()==1) {
+				setType(sp.setups.get(0));
+			}
+			addMouseListener(new MouseAdapter() {
+				@Override
+				public void mousePressed(MouseEvent e) {
+					ClientPlayer p = LobbyScreen.this.clientPlayer;
+					if (p != clientPlayer) {
+						sendRequest(new LobbyRequest.ChangeSpawnRequest(p.id, spawn.getId(), false));
+					}
+				}
+			});
 		}
-	};
-
+		
+		public void setType(CharType ct) {
+			type.setText(String.valueOf((char)ct.id));
+		}
+		
+		public void setPlayer(ClientPlayer p) {
+			clientPlayer = p;
+			if (p!=null) {
+				player.setText(p.name);
+			} else {
+				player.setText("");
+			}
+		}
+		
+		public void update() {
+			if (clientPlayer.active) {
+				player.setForeground(Color.LIGHT_GRAY);
+			} else {
+				player.setForeground(Color.DARK_GRAY);
+			}
+		}
+	}
 }

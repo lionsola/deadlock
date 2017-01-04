@@ -5,16 +5,18 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import editor.SpawnPoint.CharType;
+
 public class ClassStats {
-	public static HashMap<Integer,ClassStats> classStats = null;
+	public static HashMap<CharType,ClassStats> classStats = null;
 	
 	private double sizeF, speedF, maxHP, noiseF;
 	
-	private int classID;
+	private CharType classID;
 	/**
 	 * @return the classID
 	 */
-	public int getClassID() {
+	public CharType getClassID() {
 		return classID;
 	}
 	/**
@@ -45,13 +47,13 @@ public class ClassStats {
 	
 	public static void initClassStats() {
 		if (classStats==null){
-			classStats = new HashMap<Integer,ClassStats>();
+			classStats = new HashMap<CharType,ClassStats>();
 			Scanner sc = null;
 			try {
 				sc = new Scanner(new File("resource/character/classStats"));
 				while(sc.hasNext()) {
 					ClassStats cs = new ClassStats();
-					cs.classID = sc.nextInt();
+					cs.classID = CharType.valueOf(sc.next());
 					cs.sizeF = sc.nextDouble();
 					cs.speedF = sc.nextDouble();
 					cs.maxHP = sc.nextDouble();

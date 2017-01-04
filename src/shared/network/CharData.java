@@ -2,6 +2,9 @@ package shared.network;
 
 import java.io.Serializable;
 
+import server.character.Entity;
+import server.character.InputControlledEntity;
+
 /**
  * Partial Character Data
  * 
@@ -12,6 +15,7 @@ public class CharData implements Serializable {
 	private static final long serialVersionUID = 951232578889372942L;
 	public short id;
 	public byte team;
+	public byte weapon;
 	
 	public float x;
 	public float y;
@@ -22,4 +26,46 @@ public class CharData implements Serializable {
 	public float radius;
 	public float healthPoints;
 	public float direction;
+	public float exposure;
+	
+	public CharData(InputControlledEntity e) {
+		id = (short) e.id;
+		team = (byte) e.team;
+		weapon = (byte) e.getWeapon().getId();
+		
+		x = (float) e.getX();
+		y = (float) e.getY();
+		
+		if (e.getArmor()!=null) {
+			armorStart = (float) e.getArmor().getStart();
+			armorAngle = (float) e.getArmor().getAngle();
+		}
+		
+		radius = (float) e.getRadius();
+		healthPoints = (float) e.getHealthPoints();
+		direction = (float) e.getDirection();
+		exposure = (float) e.getExposure();
+	}
+	
+	public CharData(Entity e) {
+		id = (short) e.id;
+		team = (byte) e.team;
+		
+		x = (float) e.getX();
+		y = (float) e.getY();
+		
+		if (e.getArmor()!=null) {
+			armorStart = (float) e.getArmor().getStart();
+			armorAngle = (float) e.getArmor().getAngle();
+		}
+		
+		radius = (float) e.getRadius();
+		healthPoints = (float) e.getHealthPoints();
+		direction = (float) e.getDirection();
+		exposure = (float) e.getExposure();
+	}
+	
+	public CharData() {
+		
+	}
 }
