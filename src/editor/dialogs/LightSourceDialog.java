@@ -15,8 +15,6 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 public class LightSourceDialog extends JDialog {
 	private static final long serialVersionUID = 5917436825785813483L;
@@ -46,6 +44,7 @@ public class LightSourceDialog extends JDialog {
         
         c.gridy += 1;
         color = new JButton("0xffffffff");
+        color.setBackground(new Color(defaultColor));
         color.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -53,12 +52,14 @@ public class LightSourceDialog extends JDialog {
 	                     LightSourceDialog.this,
 	                     "Choose Background Color",
 	                     color.getBackground());
-				color.setBackground(newColor);
-				color.setText(Integer.toHexString(newColor.getRGB()));
+				if (newColor!=null) {
+					color.setBackground(newColor);
+					color.setText(Integer.toHexString(newColor.getRGB()));
+				}
 			}
         });
         color.setToolTipText("Light color (alpha channel is ignored)");
-        color.setText(Integer.toHexString(defaultColor));
+        color.setText(Integer.toHexString(defaultColor));        
         panel.add(color,c);
         
         

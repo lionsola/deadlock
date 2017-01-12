@@ -109,6 +109,41 @@ public class ImageBlender {
 		return dest;
 	}
 	
+	/**
+	 * Change the image's brightness and contrast according to given parameters. 1 means not
+	 * changing that property.
+	 * 
+	 * @param source
+	 *            The source image to edit.
+	 * @param darkenFactor
+	 *            The factor with which the image will be darken.
+	 * @param contrast
+	 *            The factor with which the image's contrast will be increased.
+	 * @return The resulting image after processing.
+	 */
+	public static BufferedImage replaceDarkPixels(BufferedImage source, int threshold, int newColor) {
+		int width = source.getWidth();
+		int height = source.getHeight();
+		BufferedImage dest = ge.createCompatibleImage(width, height);
+		// change contrast and brightness of each pixel
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int sRGB = source.getRGB(x, y);
+				int sR = (sRGB >> 16) & 0xFF;
+				int sG = (sRGB >> 8) & 0xFF;
+				int sB = (sRGB) & 0xFF;
+
+				if ((sR+sG+sB)/3<threshold) {
+					dest.setRGB(x, y, newColor);
+				}
+				else {
+					dest.setRGB(x, y, sRGB);
+				}
+			}
+		}
+		return dest;
+	}
+	
 	public static BufferedImage glowImage(BufferedImage source, BufferedImage dest, float radius, float amount) {
 		if (dest==null)
 			dest = ge.createCompatibleImage(source.getWidth(),source.getHeight());
@@ -141,7 +176,10 @@ public class ImageBlender {
 	public static BufferedImage applyBackgroundEffect(BufferedImage source) {
 		BufferedImage d = ge.createCompatibleImage(source.getWidth(),source.getHeight());
 		GrayscaleFilter gf = new GrayscaleFilter();
-		return darkenImage(gf.filter(source, d),0.7f,0.5f);
+		//return darkenImage(gf.filter(source, d),0.7f,0.5f);
+		d = gf.filter(source, d);
+		//return replaceDarkPixels(d,0x4f,0x1f1f3f);
+		return replaceDarkPixels(d,0x4f,0x1f1f3f);
 	}
 	
 	public static BufferedImage applyMiddlegroundEffect(BufferedImage source) {
@@ -157,7 +195,7 @@ public class ImageBlender {
 		g2D.drawImage(black,0,0,d.getWidth(),d.getHeight(),null);
 		g2D.dispose();
 		*/
-		return darkenImage(source,0.7f,0.5f);
+		return new GrayscaleFilter().filter(source, null);
 	}
 	
 	public static BufferedImage applyForegroundEffect(BufferedImage source) {
@@ -183,7 +221,7 @@ public class ImageBlender {
 	public static BufferedImage drawLightImage(Arena a) {
 		BufferedImage source = ge.createCompatibleImage(Renderer.toPixelDefault(a.getWidthMeter()),Renderer.toPixelDefault(a.getHeightMeter()));
 		Graphics2D g2D = (Graphics2D)source.getGraphics();
-		Renderer.renderHardLight(g2D, a, new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
+		Renderer.renderHardLight(g2D, a.getLightmap(), new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
 		g2D.dispose();
 		return source;//blurImage(source,null,32f);
 	}

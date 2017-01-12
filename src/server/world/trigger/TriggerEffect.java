@@ -3,12 +3,10 @@ package server.world.trigger;
 import java.awt.Point;
 import java.io.Serializable;
 
-import server.world.Misc;
 import server.world.Terrain;
 import server.world.Thing;
 import server.world.Tile;
 import server.world.World;
-import server.world.trigger.TileSwitchPreset.Switchable;
 import shared.network.event.GameEvent;
 
 public interface TriggerEffect extends Serializable {
@@ -29,7 +27,7 @@ public interface TriggerEffect extends Serializable {
 		@Override
 		public void activate(World w) {
 			Tile t = w.getArena().get(tx, ty);
-			Switchable s = null;
+			Thing s = null;
 			if ((tp.getItemType()==TileSwitchPreset.THING && t.getThing()==tp.getOriginalThing()) ||
 					tp.getItemType()==TileSwitchPreset.MISC && t.getMisc()==tp.getOriginalThing()) {
 				s = tp.getSwitchThing();
@@ -37,7 +35,12 @@ public interface TriggerEffect extends Serializable {
 					tp.getItemType()==TileSwitchPreset.MISC && t.getMisc()==tp.getSwitchThing()) {
 				s = tp.getOriginalThing();
 			}
-			t.setItem(s);
+			if (tp.getItemType()==TileSwitchPreset.THING) {
+				t.setThing(s);
+			} else if (tp.getItemType()==TileSwitchPreset.MISC) {
+				t.setMisc(s);
+			}
+			w.getArena().recalculateStaticLights();
 			w.addEvent(new GameEvent.TileChanged(tx,ty,s.getId(),tp.getItemType()));
 			w.addSound(tp.getSoundID(), tp.getSoundVolume(), (tx+0.5)*Terrain.tileSize, (ty+0.5)*Terrain.tileSize);
 		}

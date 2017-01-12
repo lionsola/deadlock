@@ -1,13 +1,12 @@
 package server.character;
 
 import server.ability.Ability;
-import server.ability.ChangeForm;
 import server.ability.ChargedAbility;
+import server.ability.Flashlight;
 import server.ability.HearingAmplifier;
 import server.ability.Optics;
 import server.passive.Assault;
 import server.passive.Backstab;
-import server.passive.BloodSucker;
 import server.passive.Mark;
 import server.passive.Overwatch;
 import server.passive.Passive;
@@ -16,13 +15,11 @@ import server.weapon.Weapon;
 import server.weapon.WeaponFactory;
 import server.world.Geometry;
 import server.world.World;
-import shared.network.FullCharacterData;
 import shared.network.GameDataPackets.InputPacket;
 import shared.network.event.GameEvent.*;
 import java.awt.geom.Point2D;
 
 import client.gui.GameWindow;
-import editor.SpawnPoint;
 import editor.SpawnPoint.CharType;
 
 /**
@@ -125,7 +122,7 @@ public class InputControlledEntity extends Entity {
 		//addDispersion(-DISPERSION_DEC*(0.5+charDispersion));
 		double delta = Geometry.wrapAngle(targetDirection - direction);
 		double stabFactor = (0.5+Math.abs(delta)/MAX_DISPERSION_ANGLE);
-		direction += Math.copySign(0.012*MAX_DISPERSION_ANGLE*stabFactor,delta);
+		direction += Math.copySign(0.01*MAX_DISPERSION_ANGLE*stabFactor,delta);
 		
 		// limit the difference
 		if (Math.abs(delta)>MAX_DISPERSION_ANGLE) {
@@ -211,42 +208,6 @@ public class InputControlledEntity extends Entity {
 	
 	public void setInput(InputPacket input) {
 		this.input = input;
-	}
-	
-	/**
-	 * Return the full server.character data.
-	 * 
-	 * @return the full server.character data.
-	 */
-	public FullCharacterData generate() {
-		FullCharacterData fc = new FullCharacterData(this);
-		fc.id = (short) id;
-		fc.team = (byte) team;
-		fc.weapon = (byte) primary.type.weaponId;
-		fc.healthPoints = (float) getHealthPoints();
-		fc.radius = (float) getRadius();
-		if (primary.isReady())
-			fc.weaponCooldown = 1;
-		else {
-			fc.weaponCooldown = (float)primary.getCooldownPercent();
-		}
-		if (ability.isReady())
-			fc.abilityCooldown = 1;
-		else {
-			fc.abilityCooldown = (float)ability.getCooldownPercent();
-		}
-		fc.direction = (float) getDirection();
-		fc.viewAngle = (float) getFovAngle();
-		fc.viewRange = (float) getFovRange();
-		fc.x = (float) getX();
-		fc.y = (float) getY();
-		fc.crosshairSize = (float) getCrosshairSize();
-		if (getArmor()!=null) {
-			fc.armorAngle = (float) getArmor().getAngle();
-			fc.armorStart = (float) getArmor().getStart();
-		}
-		fc.passiveLevel = (float) passive.getActivationLevel();
-		return fc;
 	}
 
 	public InputPacket getInput() {
@@ -347,8 +308,9 @@ public class InputControlledEntity extends Entity {
 			case Officer:
 				InputControlledEntity officer = new InputControlledEntity(id, team, ClassStats.classStats.get(CharType.Alpha));
 				officer.setWeapon(WeaponFactory.createGun(4,officer));
-				
-				//officer.setPassive(new Assault(officer));
+				officer.setAbilty(new Flashlight(officer));
+				officer.setPassive(new Assault(officer));
+				return officer;
 			default:
 				System.out.println("Error: Wrong type id");
 				System.exit(-1);

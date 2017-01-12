@@ -10,10 +10,7 @@ package server.ai.jbt.conditions.execution;
 
 import java.util.List;
 
-import server.character.Entity;
-import server.character.InputControlledEntity;
 import shared.network.CharData;
-import shared.network.GameDataPackets.WorldStatePacket;
 
 /** ExecutionCondition class created from MMPM condition EnemyInSight. */
 public class EnemyInSight extends

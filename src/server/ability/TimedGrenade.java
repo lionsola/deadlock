@@ -87,12 +87,12 @@ public abstract class TimedGrenade extends Projectile {
 			for (int i=0;i<FRAGS*0.9;i++) {
 				double direction = getDirection() + Math.PI*2*i/(FRAGS*0.8);
 				double sizeF = Math.max(1,1 + 0.8*Utils.random().nextGaussian()/2);
-				w.addDelayedProjectile(new Bullet(this, direction, BASE_SPEED/Math.sqrt(sizeF), BASE_SIZE*sizeF, DAMAGE));
+				w.addProjectile(new Bullet(this, direction, BASE_SPEED/Math.sqrt(sizeF), BASE_SIZE*sizeF, DAMAGE));
 			}
 			for (int i=0;i<FRAGS*0.1;i++) {
 				double direction = Utils.random().nextDouble()*Math.PI*2;
 				double sizeF = Math.max(1,1 + 0.8*Utils.random().nextGaussian()/2);
-				w.addDelayedProjectile(new Bullet(this, direction, BASE_SPEED/Math.sqrt(sizeF), BASE_SIZE*sizeF, DAMAGE));
+				w.addProjectile(new Bullet(this, direction, BASE_SPEED/Math.sqrt(sizeF), BASE_SIZE*sizeF, DAMAGE));
 			}
 		}
 	}

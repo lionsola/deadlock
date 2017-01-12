@@ -46,7 +46,7 @@ public class Utils {
 	 */
 	public static ClientPlayer findPlayer(List<ClientPlayer> players, int id) {
 		for (ClientPlayer player : players) {
-			if (player.id == id)
+			if (player.spawnId == id)
 				return player;
 		}
 		return null;

@@ -14,12 +14,13 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 
+import client.graphics.AnimationSystem;
 import client.graphics.ImageBlender;
 import client.graphics.Renderer;
 import client.gui.Camera;
 import client.gui.ClientPlayer;
 import client.gui.GameWindow;
-import client.image.SoftHardLightComposite;
+import client.image.MultiplyComposite;
 import shared.network.FullCharacterData;
 import shared.network.GameDataPackets.InputPacket;
 
@@ -31,7 +32,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	private static final long serialVersionUID = 2649458143637701147L;
 	//private Renderer renderer = new Renderer();
 	private EditorArena arena;
-	public BufferedImage lightImage;
+	private BufferedImage lightImage;
 	
 	protected boolean renderLayer[] = {true, true, true, true};
 	
@@ -56,13 +57,13 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	private volatile boolean running = true;
 	private Thread thread;
 	private Editor editor;
-	
+	private AnimationSystem particles = new AnimationSystem();
+	public boolean lightImageChanged = true;
 	
 	public ArenaPanel (Editor editor, EditorArena arena) {
 		super();
 		this.editor = editor;
 		this.arena = arena;
-		generateLightImage();
 		camera = new Camera(arena,this);
 		this.setFocusable(true);
 		this.requestFocusInWindow();
@@ -130,8 +131,17 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	}
 	
 	public void update() {
-		updateCursor();
+		//updateCursor();
 		camera.update(player);
+		
+		particles.addParticles(arena.getParticleSources());
+		particles.update();
+		if (lightImageChanged) {
+			arena.recalculateStaticLights();
+			arena.updateLightMap(null);
+			lightImageChanged = false;
+			lightImage = ImageBlender.drawLightImage(arena);
+		}
 	}
 	
 	/**
@@ -163,7 +173,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 			return;
 		//System.out.println("GameWindow paint");
 		// render background
-		g.setColor(Color.BLACK);
+		g.setColor(Renderer.BACKGROUND_COLOR);
 		g.fillRect(0, 0, getWidth(), getHeight());
 
 		// render HUD
@@ -183,10 +193,12 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 			}
 		}
 		
+		particles.render(g2D);
+		
 		if (renderLight) {
 			Composite save = g2D.getComposite();
-			//g2D.setComposite(new MultiplyComposite(0.5f));
-			g2D.setComposite(new SoftHardLightComposite(1f));
+			g2D.setComposite(new MultiplyComposite(1f));
+			//g2D.setComposite(new SoftHardLightComposite(1f));
 			//g2D.setComposite(new LightComposite(0.5f));
 			//long before = System.currentTimeMillis();
 			Renderer.drawArenaImage(g2D, lightImage, window);
@@ -217,16 +229,6 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		Renderer.renderCrosshair(g2D, player.x, player.y, 0.5f, 1.5f);
 		g.translate(transX, transY);
 		g2D.drawString("FPS: "+FPS, 10, 10);
-	}
-	
-	public void generateLightImage( ) {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				arena.generateLightMap();
-				BufferedImage i = ImageBlender.drawLightImage(arena);
-				lightImage = i;
-			}}).start();
 	}
 
 	@Override

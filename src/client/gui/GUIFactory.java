@@ -3,8 +3,6 @@ package client.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.TextComponent;
-
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -17,8 +15,6 @@ import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.border.BevelBorder;
-import javax.swing.text.JTextComponent;
 
 /**
  * A factory class to provide a unified look-and-feel to the game's GUI elements.

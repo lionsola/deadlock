@@ -10,11 +10,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+
+import client.graphics.ParticleSource;
 import editor.DataManager;
 import editor.EditorArena;
 import editor.SpawnPoint;
 import server.world.trigger.Trigger;
 import server.world.trigger.TriggerEffect;
+import server.network.MissionVar;
 import server.world.trigger.TileSwitchPreset;
 
 /**
@@ -34,7 +37,7 @@ public class Arena {
 	private transient List<Point2D> t1Spawns; // spawn points of team 1
 	private transient List<Point2D> t2Spawns; // spawn points of team 2
 	
-	protected transient List<Light> lightList;
+	protected transient List<Light> staticLights;
 	protected transient int[][] lightMap;
 	
 	protected Tile[][] tMap;
@@ -48,13 +51,13 @@ public class Arena {
 	 * @throws IOException
 	 */
 	public Arena(String name, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable,
-			HashMap<Integer,TileSwitchPreset> triggerTable, HashMap<Integer,Misc> miscTable) {
-		this((ArenaData) DataManager.loadObject("resource/map/"+name+".arena"),tileTable,objectTable,triggerTable,miscTable);
+			HashMap<Integer,TileSwitchPreset> triggerTable) {
+		this((ArenaData) DataManager.loadObject("resource/map/"+name+".arena"),tileTable,objectTable,triggerTable);
 	}
 	
 	public Arena(ArenaData ad, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable,
-			HashMap<Integer,TileSwitchPreset> triggerTable, HashMap<Integer,Misc> miscTable) {
-		initialize(ad,tileTable,objectTable,triggerTable,miscTable);
+			HashMap<Integer,TileSwitchPreset> triggerTable) {
+		initialize(ad,tileTable,objectTable,triggerTable);
 	}
 	
 	public Arena(String name, int width, int height) {
@@ -66,36 +69,22 @@ public class Arena {
 				tMap[x][y] = new Tile();
 			}
 		}
-		this.lightList = new LinkedList<Light>();
+		this.staticLights = new LinkedList<Light>();
 	}
 	
 	private void initialize(ArenaData ad, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable,
-			HashMap<Integer,TileSwitchPreset> triggerTable, HashMap<Integer,Misc> miscTable) {
+			HashMap<Integer,TileSwitchPreset> triggerTable) {
 		this.ad = ad;
 		this.name = ad.name;
 		int width = ad.tMap.length;
 		int height = ad.tMap[0].length;
 		tMap = ad.tMap;
-		lightList = new LinkedList<Light>();
+		staticLights = new LinkedList<Light>();
 		for (int x=0;x<width;x++) {
 			for (int y=0;y<height;y++) {
 				tMap[x][y].setTerrain(tileTable.get(ad.idMap[x][y].terrainId));
 				tMap[x][y].setThing(objectTable.get(ad.idMap[x][y].thingId));
-				tMap[x][y].setMisc(miscTable.get(ad.idMap[x][y].miscId));
-				Thing th = tMap[x][y].getThing();
-				if (th!=null) {
-					Light l = th.getLight();
-					if (l!=null) {
-						lightList.add(new Light(x,y,l.getColor(),l.getRange()));
-					}
-				}
-				Misc mi = tMap[x][y].getMisc();
-				if (mi!=null) {
-					Light lm = mi.getLight();
-					if (lm!=null) {
-						lightList.add(new Light(x,y,lm.getColor(),lm.getRange()));
-					}
-				}
+				tMap[x][y].setMisc(objectTable.get(ad.idMap[x][y].miscId));
 				
 				Trigger tr = tMap[x][y].getTrigger();
 				if (tr!=null) {
@@ -111,7 +100,20 @@ public class Arena {
 				}
 			}
 		}
-		generateLightMap();
+		List<ParticleSource> newPss = new LinkedList<ParticleSource>();
+		for (ParticleSource ps:ad.pss) {
+			ParticleSource preset = ParticleSource.presets.get(ps.name);
+			if (preset!=null) {
+				ParticleSource dup = preset.clone();
+				dup.setLocation(ps.getTx(), ps.getTy());
+				newPss.add(dup);
+			} else {
+				newPss.add(ps);
+			}
+		}
+		ad.pss = newPss;
+		recalculateStaticLights();
+		updateLightMap(null);
 	}
 	
 	/**
@@ -200,42 +202,57 @@ public class Arena {
 		return getHeight() * Terrain.tileSize;
 	}
 
-	public void generateLightMap() {
-		int INITIAL_LIGHT = 0x0f;
-		int INITIAL_LIGHT_RGB = new Color(INITIAL_LIGHT,INITIAL_LIGHT,INITIAL_LIGHT).getRGB();
-		
-		int[][] lightMap = new int[getWidth()*2][getHeight()*2];
-		for (int[] lights:lightMap) {
-			Arrays.fill(lights, INITIAL_LIGHT_RGB);
-		}
-		
+	public void recalculateStaticLights() {
 		List<Light> newLightList = new LinkedList<Light>();
+		//double ts = Terrain.tileSize;
 		for (int x=0;x<getWidth();x++) {
 			for (int y=0;y<getHeight();y++) {
-				if (get(x,y).getThing()!=null && get(x,y).getThing().getLight()!=null) {
+				if (get(x,y).getThing()!=null) {
 					Light l = get(x,y).getThing().getLight();
-					newLightList.add(new Light(x,y,l.getColor(),l.getRange()));
+					if (l!=null) {
+						newLightList.add(new Light(Utils.tileToMeter(x, y),l.getColor(),l.getRange()));
+					}
 				}
-				if (get(x,y).getMisc()!=null && get(x,y).getMisc().getLight()!=null) {
+				if (get(x,y).getMisc()!=null) {
 					Light l = get(x,y).getMisc().getLight();
-					newLightList.add(new Light(x,y,l.getColor(),l.getRange()));
+					if (l!=null) {
+						newLightList.add(new Light(Utils.tileToMeter(x, y),l.getColor(),l.getRange()));
+					}
 				}
 			}
 		}
-		lightList = newLightList;
+		staticLights = newLightList;
+	}
+	
+	public void updateLightMap(List<Light> dynamicLights) {
+		//int INITIAL_LIGHT = 0x00;
+		//int INITIAL_LIGHT_RGB = 0x000000;
 		
-		for (Light l:lightList) {
-			int x1 = Math.min(getWidth()-1, Math.max(0,l.getX() - l.getRange()));
-			int x2 = Math.min(getWidth()-1, Math.max(0,l.getX() + l.getRange()));
-			int y1 = Math.min(getHeight()-1, Math.max(0, l.getY() - l.getRange()));
-			int y2 = Math.min(getHeight()-1, Math.max(0, l.getY() + l.getRange()));
-			Point2D lightPos = new Point2D.Double(l.getX()+0.5,l.getY()+0.5);
+		int[][] lightMap = new int[getWidth()*2][getHeight()*2];
+		for (int[] lights:lightMap) {
+			Arrays.fill(lights, 0);
+		}
+		
+		List<Light> lights = new LinkedList<Light>();
+		lights.addAll(staticLights);
+		if (dynamicLights!=null) {
+			lights.addAll(dynamicLights);
+		}
+		double ts = Terrain.tileSize;
+		for (Light l:lights) {
+			int tx = (int)(l.getX()/ts);
+			int ty = (int)(l.getY()/ts);
+			int x1 = Math.min(getWidth()-1, Math.max(0,tx - l.getRange() - 1));
+			int x2 = Math.min(getWidth()-1, Math.max(0,tx + l.getRange() + 1));
+			int y1 = Math.min(getHeight()-1, Math.max(0, ty - l.getRange() - 1));
+			int y2 = Math.min(getHeight()-1, Math.max(0, ty + l.getRange() + 1));
+			Point2D lightPos = new Point2D.Double(l.getX()/ts,l.getY()/ts);
 			for (int x=x1*2;x<=x2*2;x++) {
 				for (int y=y1*2;y<=y2*2;y++) {
 					Point2D dest = new Point2D.Double((x+0.5)/2.0, (y+0.5)/2.0);
 					Point2D minLCDest = null;
 					double minDist = Double.MAX_VALUE;
-					if (!get(x/2,y/2).isClear()) {
+					//if (!get(x/2,y/2).isClear()) {
 						for (int i=-1;i<=1;i+=2) {
 							for (int j=-1;j<=1;j+=2) {
 								Point2D lcDest = new Point2D.Double(dest.getX()+i*0.25,dest.getY()+j*0.25);
@@ -246,9 +263,9 @@ public class Arena {
 								}
 							}
 						}
-					} else {
-						minLCDest = new Point2D.Double(x/2+0.5,y/2+0.5);
-					}
+					//} else {
+					//	minLCDest = new Point2D.Double(x/2+0.5,y/2+0.5);
+					//}
 					
 					double d = 1.0-lightPos.distance(minLCDest)/l.getRange();
 					if (d>0) {
@@ -258,7 +275,7 @@ public class Arena {
 						List<Point2D> points = Geometry.getLineSamples(lightPos,
 								minLCDest, LINECAST_DISTANCE);
 						for (Point2D p:points) {
-							if (((int)p.getX()!=l.getX() || (int)p.getY()!=l.getY()) &&
+							if (((int)p.getX()!=tx || (int)p.getY()!=ty) &&
 									p.distance(minLCDest)>0.01 && !get((int)p.getX(),(int)p.getY()).isClear()) {
 								blockCount ++;
 							}
@@ -273,9 +290,9 @@ public class Arena {
 							d = d*(1-blockCount/MAX_BLOCK_COUNT);
 						}
 						int sRGB = l.getColor();
-						int sR = ((sRGB >> 16) & 0xFF) *(255-INITIAL_LIGHT)/255;
-						int sG = ((sRGB >> 8) & 0xFF) *(255-INITIAL_LIGHT)/255;
-						int sB = ((sRGB) & 0xFF) *(255-INITIAL_LIGHT)/255;
+						int sR = ((sRGB >> 16) & 0xFF) ;
+						int sG = ((sRGB >> 8) & 0xFF) ;
+						int sB = ((sRGB) & 0xFF) ;
 						
 						int dRGB = lightMap[x][y];
 						int dR = (dRGB >> 16) & 0xFF;
@@ -291,7 +308,29 @@ public class Arena {
 				}
 			}
 		}
+		
+		final int LEVELS = 2;
+		final float INTERVAL = 255/LEVELS;
+		for (int x=0;x<lightMap.length;x++) {
+			for (int y=0;y<lightMap[0].length;y++) {
+				Color c = new Color(lightMap[x][y]);
+				int l = Math.max(c.getRed(), Math.max(c.getGreen(), c.getBlue()));
+				int level = (int)Math.ceil(l/INTERVAL);
+				
+				float ratio = l==0?0:(level*INTERVAL/l);
+				
+				int r = clampLight(c.getRed()*ratio);
+				int g = clampLight(c.getGreen()*ratio);
+				int b = clampLight(c.getBlue()*ratio);
+
+				lightMap[x][y] = r << 16 | g << 8 | b; 
+			}
+		}
 		this.lightMap = lightMap;
+	}
+	
+	private int clampLight(double light) {
+		return (int) Math.round(Math.max(0x1f, Math.min(255, light)));
 	}
 	
 	public void setTerrain(int x, int y, Terrain t) {
@@ -335,7 +374,7 @@ public class Arena {
 	}
 	
 	public List<Light> getLightList() {
-		return lightList;
+		return staticLights;
 	}
 
 	public static class ArenaData implements Serializable {
@@ -343,7 +382,12 @@ public class Arena {
 		public String name;
 		public Tile[][] tMap;
 		public TileData[][] idMap;
+		
 		public List<SpawnPoint> spawns = new LinkedList<SpawnPoint>();
+		public List<ParticleSource> pss = new LinkedList<ParticleSource>();
+		
+		public String objectiveType = "ReachTarget";
+		public List<MissionVar> objectiveData;
 		
 		public ArenaData(EditorArena a) {
 			name = a.getName();
@@ -361,14 +405,20 @@ public class Arena {
 					Thing ti = t.getThing();
 					idMap[x][y].thingId = ti!=null?ti.getId():0;
 					
-					Misc mi = t.getMisc();
+					Thing mi = t.getMisc();
 					idMap[x][y].miscId = mi!=null?mi.getId():0;
 					
 					if (a.spawns[x][y]!=null) {
 						spawns.add(a.spawns[x][y]);
 					}
+					
+					if (a.pss[x][y]!=null) {
+						pss.add(a.pss[x][y]);
+					}
 				}
 			}
+			objectiveType = a.objectiveType;
+			objectiveData = a.objectiveData;
 		}
 	}
 	
@@ -377,5 +427,30 @@ public class Arena {
 		int terrainId;
 		int thingId;
 		int miscId;
+	}
+
+	public List<ParticleSource> getParticleSources() {
+		List<ParticleSource> pss = new LinkedList<ParticleSource>();
+		if (ad.pss!=null) {
+			pss.addAll(ad.pss);
+		}
+		for (int x=0;x<tMap.length;x++) {
+			for (int y=0;y<tMap[0].length;y++) {
+				Tile tile = get(x,y);
+				Thing t = tile.getThing();
+				if (t!=null && t.getParticleSource()!=null) {
+					ParticleSource ps = t.getParticleSource().clone();
+					ps.setLocation(x, y);
+					pss.add(ps);
+				}
+				Thing m = tile.getMisc();
+				if (m!=null && m.getParticleSource()!=null) {
+					ParticleSource ps = m.getParticleSource().clone();
+					ps.setLocation(x, y);
+					pss.add(ps);
+				}
+			}
+		}
+		return pss;
 	}
 }

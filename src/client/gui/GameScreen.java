@@ -41,7 +41,6 @@ import server.ability.Ability;
 import server.passive.Passive;
 import server.weapon.Weapon;
 import server.world.Arena;
-import server.world.Misc;
 import server.world.Thing;
 import server.world.Terrain;
 import server.world.Visibility;
@@ -60,6 +59,7 @@ import shared.network.event.GameEvent.*;
 import shared.network.event.SoundEvent;
 import client.graphics.AnimationSystem;
 import client.graphics.BasicAnimation;
+import client.graphics.ParticleSource;
 import client.graphics.Renderer;
 import client.image.SoftHardLightComposite;
 import client.sound.AudioManager;
@@ -77,7 +77,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private GameWindow game;
 	private Arena arena;
 	private Camera camera;
-	private final int id;
+	private final ClientPlayer player;
 	private Connection connection;
 	private InputPacket input = new InputPacket();
 	private List<GameEvent> events = new LinkedList<GameEvent>();
@@ -100,8 +100,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private Visibility visibility = new Visibility();
 	private Renderer renderer = new Renderer();
 	private HashMap<Integer,Thing> objectTable;
-	private HashMap<Integer, Misc> miscTable;
 	
+	private boolean lightImageChanged = false;
 	private boolean playing = true;
 	private double zoomLevel = 0;
 	
@@ -126,7 +126,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	 * @throws IOException
 	 *             Exception thrown on gamescreen
 	 */
-	public GameScreen(GameWindow game, int id, Connection connection, String arenaName, List<ClientPlayer> players) throws IOException {
+	public GameScreen(GameWindow game, ClientPlayer player, Connection connection, String arenaName, List<ClientPlayer> players) throws IOException {
 		super();
 		
 		AudioManager.stopMusic();
@@ -147,21 +147,17 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		objectTable = (HashMap<Integer, Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
 		
 		HashMap<Integer,TileSwitchPreset> triggerTable = (HashMap<Integer, TileSwitchPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
-		miscTable = (HashMap<Integer,Misc>) DataManager.loadObject(DataManager.FILE_MISC);
-		if (miscTable==null) {
-			miscTable = new HashMap<Integer,Misc>();
-		}
 		
 		DataManager.loadImage(tileTable.values());
 		DataManager.loadImage(objectTable.values());
-		DataManager.loadImage(miscTable.values());
+		DataManager.updateParticleSource(objectTable.values());
 		
-		arena = new Arena(arenaName, tileTable, objectTable,triggerTable,miscTable);
+		arena = new Arena(arenaName, tileTable, objectTable,triggerTable);
 		renderer.initArenaImages(arena);
 		camera = new Camera(arena, this);
 		
 		// Initialise fields
-		this.id = id;
+		this.player = player;
 		this.connection = connection;
 		this.game = game;
 		this.players = players;
@@ -228,7 +224,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		Utils.alignCenterHorizontally(winnerText, this);
 		add(winnerText);
 		
-		minimap = new Minimap(arena, id, players);
+		minimap = new Minimap(arena, player.spawnId, players);
 		GUIFactory.stylizeHUDComponent(minimap);
 		add(minimap);
 		minimap.setLocation(20, getHeight()-20-minimap.getHeight());
@@ -238,7 +234,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		chatPanel.setVisible(false);
 		//chatPanel.getTextArea().setRows(15);
 		chatPanel.setMaximumSize(new Dimension(800, 300));
-		chatPanel.getInputLabel().setText(Utils.findPlayer(players, id).name + ": ");
+		chatPanel.getInputLabel().setText(player.name + ": ");
 		chatPanel.setSize(chatPanel.getMaximumSize());
 		this.add(chatPanel);
 		Utils.setLocationCenterOf(chatPanel, this);
@@ -306,8 +302,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			cp.passiveId = pId;
 		}
 		
-		ClientPlayer p = Utils.findPlayer(players, id);
-		abilityBar = new AbilityBar(this,p.weaponId,p.abilityId,p.passiveId);
+		abilityBar = new AbilityBar(this,player.weaponId,player.abilityId,player.passiveId);
 		GUIFactory.stylizeHUDComponent(abilityBar);
 		abilityBar.setSize(abilityBar.getPreferredSize());
 		abilityBar.setLocation(0, getHeight() - abilityBar.getHeight() - 20);
@@ -379,23 +374,33 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		// wsp = wsps.poll();
 		// }
 		updateCursor();
+		
+		// update particle sources
+		for (ParticleSource ps:arena.getParticleSources()) {
+			ps.update(visualAnimations);
+		}
+		//
 		nonvisualAnimations.update();
 		visualAnimations.update();
 		globalAnimations.update();
 		persistentAnimations.update();
 		persistentAnimations.render(renderer.bloodImage.createGraphics());
 		audioManager.update();
+		
+		
 		if (wsp != null) {
 			this.currentState = wsp;
 			mainCharacter = wsp.player;
 			for (ClientPlayer p : players) {
-				if (p.id!=mainCharacter.id) {
+				if (p.spawnId!=mainCharacter.id) {
 					p.active = false;
 				}
 			}
 			ClientPlayer targetPlayer = Utils.findPlayer(players, mainCharacter.id);
-			targetPlayer.character = wsp.player;
-			targetPlayer.active = true;
+			if (targetPlayer!=null) {
+				targetPlayer.character = wsp.player;
+				targetPlayer.active = true;
+			}
 			
 			for (CharData cdata : wsp.characters) {
 				ClientPlayer p = Utils.findPlayer(players, cdata.id);
@@ -414,13 +419,20 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			camera.update(mainCharacter);
 			synchronized (events) {
 				for (GameEvent e : events) {
-					listener.onEventReceived(e);
+					onEventReceived(e,wsp);
 				}
 				events.clear();
 			}
 			for (String s : wsp.chatTexts) {
 				chatPanel.addLine(s);
 			}
+			//if (!wsp.dynamicLights.isEmpty()) {
+			
+			if (!wsp.dynamicLights.isEmpty() || lightImageChanged) {
+				arena.updateLightMap(wsp.dynamicLights);
+				lightImageChanged = true;
+			}
+			//}
 		}
 
 	}
@@ -507,6 +519,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			// render the region outside of both vision and hearing
 			Renderer.drawArenaImage(g2D, renderer.getDarkArenaImage(),camera.getDrawArea());
 			
+			/*
 			// render the hearing region
 			Area a = new Area();
 			for (Vision v:currentState.visions) {
@@ -517,7 +530,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			}
 			g2D.setClip(a);
 			Renderer.drawArenaImage(g2D, renderer.getArenaImage(),camera.getDrawArea());
-			
+			*/
 			
 			g2D.setClip(null);
 			nonvisualAnimations.render(g2D);
@@ -562,6 +575,11 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			
 			
 			// Render lighting & shadow
+			if (lightImageChanged) {
+				renderer.redrawLightImage(arena);
+				lightImageChanged = false;
+			}
+			
 			Composite save = g2D.getComposite();
 			g2D.setComposite(new SoftHardLightComposite(1f));
 			Rectangle2D viewBox = getCharacterVisionBox(c.x,c.y,c.viewRange);
@@ -703,100 +721,96 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		}
 	};
 
+	public void onEventReceived(GameEvent event, WorldStatePacket wsp) {
+		if (event instanceof PlayerDieEvent) {
+			PlayerDieEvent e = (PlayerDieEvent) event;
+			ClientPlayer killer = Utils.findPlayer(players, e.killerId);
+			ClientPlayer victim = Utils.findPlayer(players, e.killedId);
 
-	private Listener listener = new Listener() {
-		@Override
-		public void onEventReceived(GameEvent event) {
-			if (event instanceof PlayerDieEvent) {
-				PlayerDieEvent e = (PlayerDieEvent) event;
-				ClientPlayer killer = Utils.findPlayer(players, e.killerId);
-				ClientPlayer victim = Utils.findPlayer(players, e.killedId);
-
-				if (victim!=null) {
-					victim.deaths++;
-				}
-				if (killer!=null) {
-					if (victim!=null && killer.team == victim.team) {
-						killer.kills--;
-					} else {
-						killer.kills++;
-					}
-				}
-				team1Model.invalidate();
-			} else if (event instanceof Headshot) {
-				final Headshot e = (Headshot) event;
-				ClientPlayer attacker = Utils.findPlayer(players,e.attacker);
-				if (attacker!=null)
-					attacker.headshots++;
-				globalAnimations.addCustomAnimation(new BasicAnimation(1500) {
-					@Override
-					public void render(Graphics2D g2D) {
-						int alpha = (int)Math.min(255,255*2*life/duration);
-						g2D.setColor(new Color(50,100,255,alpha));
-						Renderer.renderCrosshair(g2D, e.x, e.y, 2, 3);
-					}});;
-				audioManager.playSound(SoundEvent.PING_SOUND_ID, SoundEvent.PING_SOUND_VOLUME);
-			} else if (event instanceof ScoreChangedEvent) {
-				final ScoreChangedEvent e = (ScoreChangedEvent) event;
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						teamScore.setText(e.team1Score + " - " + e.team2Score);
-					}
-				});
-			} else if (event instanceof SoundEvent) {
-				SoundEvent e = (SoundEvent) event;
-				audioManager.playSound(e.id,e.volume);
-				
-				if (e.id!=SoundEvent.PING_SOUND_ID && e.volume>0) {
-					nonvisualAnimations.addNoiseAnimation(e.x, e.y, e.volume);
-				}
-			} else if (event instanceof AnimationEvent) {
-				AnimationEvent e = (AnimationEvent) event;
-				if (e.id==AnimationEvent.BLOOD) {
-					persistentAnimations.addBloodAnimation(e.x, e.y, e.direction, e.team);
-				}
-				else if (!e.global) {
-					visualAnimations.addAnimation(e);
-				} else {
-					globalAnimations.addAnimation(e);
-				}
-				
-			} else if (event instanceof GameEndEvent) {
-				playing = false;
-				try {
-					connection.getSocket().close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				// delay a bit, need another even to change back to lobby screen
-				game.setScreen(new MainMenuScreen(game));
-			} else if (event instanceof EnemyInfoEvent) {
-				EnemyInfoEvent e = (EnemyInfoEvent) event;
-				nonvisualAnimations.addAnimation(new AnimationEvent(AnimationEvent.ENEMYMARK,e.x,e.y,0));
-			} else if (event instanceof TileChanged) {
-				TileChanged e = (TileChanged) event;
-				if (e.itemType==TileSwitchPreset.THING) {
-					arena.get(e.tx, e.ty).setThing(objectTable.get(e.switchThingID));
-				} else if (e.itemType==TileSwitchPreset.MISC) {
-					arena.get(e.tx, e.ty).setMisc(miscTable.get(e.switchThingID));
-				}
-				
-				arena.generateLightMap();
-				renderer.redrawLightImage(arena);
-				
-				renderer.redrawArenaImage(arena,e.tx,e.ty,arena.get(e.tx,e.ty).getThing().getLayer());
-			} else if (event instanceof RoundEnd) {
-				RoundEnd e = (RoundEnd) event;
-				winnerText.setText("Team "+e.winner+" won!");
-				winnerText.setVisible(true);
-				scoreboard.setVisible(true);
-			} else if (event instanceof RoundStart) {
-				scoreboard.setVisible(false);
-				winnerText.setVisible(false);
+			if (victim!=null) {
+				victim.deaths++;
 			}
+			if (killer!=null) {
+				if (victim!=null && killer.team == victim.team) {
+					killer.kills--;
+				} else {
+					killer.kills++;
+				}
+			}
+			team1Model.invalidate();
+		} else if (event instanceof Headshot) {
+			final Headshot e = (Headshot) event;
+			ClientPlayer attacker = Utils.findPlayer(players,e.attacker);
+			if (attacker!=null)
+				attacker.headshots++;
+			globalAnimations.addCustomAnimation(new BasicAnimation(1500) {
+				@Override
+				public void render(Graphics2D g2D) {
+					int alpha = (int)Math.min(255,255*2*life/duration);
+					g2D.setColor(new Color(50,100,255,alpha));
+					Renderer.renderCrosshair(g2D, e.x, e.y, 2, 3);
+				}});;
+			audioManager.playSound(SoundEvent.PING_SOUND_ID, SoundEvent.PING_SOUND_VOLUME);
+		} else if (event instanceof ScoreChangedEvent) {
+			final ScoreChangedEvent e = (ScoreChangedEvent) event;
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					teamScore.setText(e.team1Score + " - " + e.team2Score);
+				}
+			});
+		} else if (event instanceof SoundEvent) {
+			SoundEvent e = (SoundEvent) event;
+			audioManager.playSound(e.id,e.volume);
+			
+			if (e.id!=SoundEvent.PING_SOUND_ID && e.volume>0) {
+				nonvisualAnimations.addNoiseAnimation(e.x, e.y, e.volume);
+				visualAnimations.addVisualNoiseAnimation(e.x, e.y);
+			}
+		} else if (event instanceof AnimationEvent) {
+			AnimationEvent e = (AnimationEvent) event;
+			if (e.id==AnimationEvent.BLOOD) {
+				persistentAnimations.addBloodAnimation(e.x, e.y, e.direction, e.team);
+			}
+			else if (!e.global) {
+				visualAnimations.addAnimation(e);
+			} else {
+				globalAnimations.addAnimation(e);
+			}
+			
+		} else if (event instanceof GameEndEvent) {
+			playing = false;
+			try {
+				connection.getSocket().close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			// delay a bit, need another even to change back to lobby screen
+			game.setScreen(new MainMenuScreen(game));
+		} else if (event instanceof EnemyInfoEvent) {
+			EnemyInfoEvent e = (EnemyInfoEvent) event;
+			nonvisualAnimations.addAnimation(new AnimationEvent(AnimationEvent.ENEMYMARK,e.x,e.y,0));
+		} else if (event instanceof TileChanged) {
+			TileChanged e = (TileChanged) event;
+			if (e.itemType==TileSwitchPreset.THING) {
+				arena.get(e.tx, e.ty).setThing(objectTable.get(e.switchThingID));
+			} else if (e.itemType==TileSwitchPreset.MISC) {
+				arena.get(e.tx, e.ty).setMisc(objectTable.get(e.switchThingID));
+			}
+			arena.recalculateStaticLights();
+			lightImageChanged = true;
+			
+			renderer.redrawArenaImage(arena,e.tx,e.ty,arena.get(e.tx,e.ty).getThing().getLayer());
+		} else if (event instanceof RoundEnd) {
+			RoundEnd e = (RoundEnd) event;
+			winnerText.setText("Team "+e.winner+" won!");
+			winnerText.setVisible(true);
+			scoreboard.setVisible(true);
+		} else if (event instanceof RoundStart) {
+			scoreboard.setVisible(false);
+			winnerText.setVisible(false);
 		}
-	};
+	}
 	
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {

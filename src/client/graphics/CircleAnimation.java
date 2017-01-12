@@ -10,6 +10,7 @@ import client.gui.GameWindow;
  * Represent an animation of an circle expanding until it reaches the max size and stops.
  */
 public class CircleAnimation extends BasicAnimation {
+	private static final long serialVersionUID = -7037935330702338643L;
 	private double maxRadius;
 	private double x;
 	private double y;
@@ -66,8 +67,8 @@ public class CircleAnimation extends BasicAnimation {
 	}
 	
 	@Override
-	public void update() {
-		super.update();
+	public void update(AnimationSystem as) {
+		super.update(as);
 		if (delay <= 0) {
 			radius = Math.min(maxRadius, radius + growth);
 			if (radius >= maxRadius * 0.8)

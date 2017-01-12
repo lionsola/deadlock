@@ -33,7 +33,6 @@ import editor.SpawnPoint.CharType;
 import server.world.Arena;
 import server.world.Geometry;
 import server.world.Light;
-import server.world.Misc;
 import server.world.SpriteConfig;
 import server.world.Terrain;
 import server.world.Thing;
@@ -55,15 +54,13 @@ import shared.network.ProjectileData;
 public class Renderer {
 	public static final int CURSOR_BMP_SIZE = 33;
 	public static final int CURSOR_SIZE = 5;
-	public static final double CHARACTER_WIDTH = 0.1;
-	public static final double HEALTHBAR_WIDTH = 0.25;
-	
-	public static final double PARALLAX_FACTOR = 0.03;
+	public static final float CHARACTER_WIDTH = 0.12f;
+	public static final float HEALTHBAR_WIDTH = 0.25f;
 	
 	public static final Color DEFAULT_COLOR = new Color(0xb6b6b6);
-	public static final Color BACKGROUND_COLOR = new Color(0x090909);
+	public static final Color BACKGROUND_COLOR = new Color(0x1a1a1a);
 	public static final Color[] teamColors = {new Color(0x32ff32),new Color(0xff3232)};
-	public static final Color[] teamColors2 = {new Color(0x0a320a),new Color(0x320a0a)};
+	public static final Color[] teamColors2 = {new Color(0x0f4d0f),new Color(0x4d0f0f)};
 	
 	private BufferedImage arenaImage;
 	private BufferedImage darkArenaImage;
@@ -74,8 +71,8 @@ public class Renderer {
 	public BufferedImage highImage;
 	public BufferedImage bloodImage;
 	
-	public static final double DEFAULT_PPM = 20;
-	private static double ppm = Renderer.DEFAULT_PPM;
+	public static final float DEFAULT_PPM = 20f;
+	private static float ppm = Renderer.DEFAULT_PPM;
 	
 	final float dash1[] = {10.0f,30.0f};
     final BasicStroke dashed =
@@ -152,6 +149,8 @@ public class Renderer {
 			double xb = (x+1)*ts;
 			double yb = (y+1)*ts;
 			double ww = 0.15;
+			//g2D.setStroke(new WobbleStroke(1f, 0.5f, new BasicStroke(toPixel(ww))));
+			//g2D.setStroke(new BrushStroke(toPixel(ww), 1,Utils.random().nextLong()));
 			g2D.setStroke(new BasicStroke(toPixel(ww)));
 			g2D.setColor(t.getColor());
 			if (a.get(x-1,y).getThing()!=t) {
@@ -217,7 +216,7 @@ public class Renderer {
 	}
 	
 	private static void drawMisc(Graphics2D g2D, Arena a, int x, int y) {
-		Misc m = a.get(x, y).getMisc();
+		Thing m = a.get(x, y).getMisc();
 		if (m==null || m.getId()==0)
 			return;
 		
@@ -340,9 +339,13 @@ public class Renderer {
 	}
 	
 	public static void renderOtherCharacter(Graphics2D g2D, CharData c, CharType type) {
-		renderGun(g2D,c.x,c.y,c.radius,c.direction,c.weapon,c.team);
-		renderCharacter(g2D,c.x,c.y,c.direction,c.radius,type,c.team);
-		renderArmor(g2D,c.x,c.y,c.radius,c.direction+c.armorStart,c.armorAngle,c.team);
+		if (c.healthPoints>0) {
+			renderGun(g2D,c.x,c.y,c.radius,c.direction,c.weapon,c.team);
+			renderCharacter(g2D,c.x,c.y,c.direction,c.radius,type,c.team);
+			renderArmor(g2D,c.x,c.y,c.radius,c.direction+c.armorStart,c.armorAngle,c.team);
+		} else {
+			renderDeadCharacter(g2D,c.x,c.y,c.direction,c.radius,type,c.team);
+		}
 	}
 	
 	public static void renderNPC(Graphics2D g2D, NPCData npc, CharType typeId) {
@@ -355,7 +358,7 @@ public class Renderer {
 	}
 	
 	private static void renderArmor(Graphics2D g2D, double cx, double cy, double cr, double start, double extent,int team) {
-		g2D.setStroke(new BasicStroke(toPixel(CHARACTER_WIDTH*2)));
+		g2D.setStroke(new BasicStroke((float) (CHARACTER_WIDTH*2*ppm)));
 		
 		g2D.setColor(teamColors[team].brighter());
 		drawArc(g2D,cx,cy,cr,start,extent,Arc2D.OPEN);
@@ -380,31 +383,43 @@ public class Renderer {
 	
 	
 	private static void renderCharacter(Graphics2D g2D, double x, double y, double direction, double r, CharType type, int team) {
-		g2D.setStroke(new BasicStroke(toPixel(CHARACTER_WIDTH)));
+		g2D.setStroke(new BasicStroke(CHARACTER_WIDTH*ppm));
 		g2D.setColor(teamColors2[team]);
 		//fillCircle(g2D,x, y,r);
 		double openArc = 1.5;
+		
 		fillArc(g2D,x,y,r, direction+openArc/2, Math.PI*2 - openArc, Arc2D.CHORD);
-		
 		g2D.setColor(teamColors[team]);
-		
-		//fillCircle(g2D,x,y,r);
-		//drawCircle(g2D,x,y,r);
-		drawArc(g2D,x,y,r, direction+Math.PI/6, Math.PI*(2-2.0/6), Arc2D.OPEN);
+		drawArc(g2D,x,y,r, direction+openArc/2, Math.PI*2 - openArc, Arc2D.OPEN);
 		
 		// draw head
 		Point2D h = Geometry.PolarToCartesian(r*0.35, direction);
-		double hr = r*0.5;
+		double hr = r*0.55;
 		g2D.setColor(teamColors2[team]);
-		fillCircle(g2D,x+h.getX(),y-h.getY(),hr);
 		g2D.setColor(teamColors[team]);
-		g2D.setStroke(new BasicStroke(1.1f*toPixel(CHARACTER_WIDTH)));
-		drawCircle(g2D,x+h.getX(),y-h.getY(),hr);
+		fillCircle(g2D,x+h.getX(),y-h.getY(),hr);
 		
+		g2D.setStroke(new BasicStroke(1.1f*CHARACTER_WIDTH*ppm));
+		//drawCircle(g2D,x+h.getX(),y-h.getY(),hr);
 		
 		g2D.setStroke(new BasicStroke(1));
 	}
 
+	private static void renderDeadCharacter(Graphics2D g2D, double x, double y, double direction, double r, CharType type, int team) {
+		g2D.setStroke(new BasicStroke(CHARACTER_WIDTH*ppm));
+		g2D.setColor(teamColors2[team]);
+		fillCircle(g2D,x,y,r);
+		g2D.setColor(teamColors[team]);
+		drawCircle(g2D,x,y,r);
+		
+		// draw head
+		g2D.setColor(teamColors[team]);
+		drawLine(g2D,x-r/3,y-r/5,x+r/3,y-r/5);
+		drawLine(g2D,x,y-r/2,x,y+r/2);
+		
+		g2D.setStroke(new BasicStroke(1));
+	}
+	
 	public static void renderProjectile(Graphics2D g2D, ProjectileData pd) {
 		g2D.setColor(Color.WHITE);
 		if (pd.size < 50) {
@@ -510,79 +525,6 @@ public class Renderer {
 					
 					drawImage(g2D,image, xM, yM, ts, ts, x*ts, y*ts, ts, ts);
 				}*/
-			}
-		}
-	}
-	
-	public static void renderArenaBG(Graphics2D g2D, Arena a, Rectangle2D window) {
-		g2D.setColor(BACKGROUND_COLOR);
-		fillRect(g2D,window.getX(),window.getY(), window.getWidth(),window.getHeight());
-		
-		double cx = window.getX()+window.getWidth()/2;
-		double cy = window.getY()+window.getHeight()/2;
-		
-		double sw = window.getWidth()*(1+PARALLAX_FACTOR);
-		double sh = window.getHeight()*(1+PARALLAX_FACTOR);
-		double sx = window.getX() - window.getWidth()*PARALLAX_FACTOR/2;
-		double sy = window.getY() - window.getHeight()*PARALLAX_FACTOR/2;
-		
-		double ts = Terrain.tileSize;
-		int x1 = Math.max(0, (int) (sx / ts));
-		int y1 = Math.max(0, (int) (sy / ts));
-		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (sw / ts) + 1);
-		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (sh / ts) + 1);
-		
-		
-		for (int x = x1; x <= x2; x++) {
-			for (int y = y1; y <= y2; y++) {
-				//drawTerrain(g2D,a,x,y);
-				Terrain t = a.get(x, y).getTerrain();
-				if (t==null || t.getId()==0)
-					continue;
-				double rw = 1/(1+PARALLAX_FACTOR);
-				double dx = cx+((x+0.5)*ts-cx)*rw - ts*rw/2;
-				double dy = cy+((y+0.5)*ts-cy)*rw - ts*rw/2;
-				
-				if (t.getId()==Terrain.BLEND) {
-					
-					
-					Terrain[] results = new Terrain[4];
-					int i = 0;
-					for (int xi=-1;xi<=1;xi+=2) {
-						for (int yi=-1;yi<=1;yi+=2) {
-							Terrain result = blendVote(a.get(x+xi, y).getTerrain(),
-									a.get(x, y+yi).getTerrain(),a.get(x+xi, y+yi).getTerrain());
-							
-							if (result==null || result.getId()==0)
-								continue;
-							
-							BufferedImage image = result.getImage();
-							int w = image.getWidth()/32;
-							int h = image.getHeight()/32;
-							double xM = (x%w)*ts;
-							double yM = (y%h)*ts;
-							
-							
-							drawImage(g2D,image, xM+ts*(xi+1.0)/4, yM+ts*(yi+1.0)/4, ts/2, ts/2,
-									dx+ts*rw*(xi+1.0)/4, dy+ts*rw*(yi+1.0)/4, rw*ts/2, rw*ts/2);
-							results[i] = result;
-							i++;
-						}
-					}
-					// double-check if there's any useless blend spot
-					if (results[0]==results[1] && results[1]==results[2] && results[2]==results[3]) {
-						g2D.setColor(Color.WHITE);
-						fillRect(g2D,dx,dy,ts*rw,ts*rw);
-					}
-				} else {
-					BufferedImage image = t.getImage();
-					int w = image.getWidth()/32;
-					int h = image.getHeight()/32;
-					double xM = (x%w)*ts;
-					double yM = (y%h)*ts;
-					
-					drawImage(g2D,image, xM, yM, ts, ts, dx, dy, rw*ts, rw*ts);
-				}
 			}
 		}
 	}
@@ -773,15 +715,13 @@ public class Renderer {
 		}			
 	}
 	
-	public static void renderHardLight(Graphics2D g2D, Arena a, Rectangle2D window) {
+	public static void renderHardLight(Graphics2D g2D, int[][] lightMap, Rectangle2D window) {
 		double ts = Terrain.tileSize;
 		double ts2 = ts/2;
 		int x1 = Math.max(0, (int) (window.getX() / ts));
 		int y1 = Math.max(0, (int) (window.getY() / ts));
-		int x2 = Math.min(a.getWidth() - 1, x1 + (int) (window.getWidth() / ts) + 1);
-		int y2 = Math.min(a.getHeight() - 1, y1 + (int) (window.getHeight() / ts) + 1);
-		
-		int[][] lightMap = a.getLightmap();
+		int x2 = Math.min(lightMap.length/2 - 1, x1 + (int) (window.getWidth() / ts) + 1);
+		int y2 = Math.min(lightMap[0].length/2 - 1, y1 + (int) (window.getHeight() / ts) + 1);
 		for (int x = x1*2; x <= x2*2; x++) {
 			for (int y = y1*2; y <= y2*2; y++) {
 				g2D.setColor(new Color(lightMap[x][y],false));
@@ -892,10 +832,10 @@ public class Renderer {
 	}
 	
 	public static void setPPM(double ppm) {
-		Renderer.ppm = ppm;
+		Renderer.ppm = (float)ppm;
 	}
 	
-	public static double getPPM() {
+	public static float getPPM() {
 		return Renderer.ppm;
 	}
 	
@@ -907,7 +847,7 @@ public class Renderer {
 		return (int)(value*Renderer.DEFAULT_PPM+0.5);
 	}
 	
-	public static double toMeter(int pixel) {
+	public static float toMeter(int pixel) {
 		return pixel/Renderer.ppm;
 	}
 	
@@ -935,7 +875,7 @@ public class Renderer {
 
 	public void redrawLightImage(Arena arena) {
 		Graphics2D g2D = (Graphics2D) lightMap.getGraphics();
-		Renderer.renderHardLight(g2D, arena, new Rectangle2D.Double(0, 0, arena.getWidthMeter(), arena.getHeightMeter()));
+		Renderer.renderHardLight(g2D, arena.getLightmap(), new Rectangle2D.Double(0, 0, arena.getWidthMeter(), arena.getHeightMeter()));
 	}
 	
 	public static void drawArenaLayer(Graphics2D g2D, Arena a, int layer, boolean terrain, boolean thing, boolean misc) {
@@ -950,7 +890,7 @@ public class Renderer {
 				if (thing && th!=null && th.getLayer()==layer) {
 					drawThing(g2D,a,x,y);
 				}
-				Misc mi = t.getMisc();
+				Thing mi = t.getMisc();
 				if (misc && mi != null) {
 					int tlayer = th==null?0:th.getLayer();
 					int mlayer = mi.getLayer();

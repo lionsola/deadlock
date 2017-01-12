@@ -10,7 +10,6 @@ import client.gui.GameWindow;
 import editor.SpawnPoint;
 import server.character.Entity;
 import server.character.InputControlledEntity;
-import server.character.NPC;
 import server.world.trigger.Trigger;
 import shared.network.CharData;
 import shared.network.ProjectileData;
@@ -26,12 +25,14 @@ import shared.network.event.GameEvent.Listener;
 public class World {
 	public static final double DISTANCE_VOLUME_DROP_RATE = 2.5;
 	
-	private List<InputControlledEntity> characters = new ArrayList<InputControlledEntity>();
+	private final List<InputControlledEntity> characters = new ArrayList<InputControlledEntity>();
 	
-	private List<Projectile> projectiles = new LinkedList<Projectile>();
-	private List<Projectile> newProjectiles = new LinkedList<Projectile>();
+	private final List<Projectile> projectiles = new LinkedList<Projectile>();
+	private final List<Projectile> newProjectiles = new LinkedList<Projectile>();
 	
-	private List<Trigger> activeTriggers = new LinkedList<Trigger>();
+	private final List<Light> dynamicLights = new LinkedList<Light>();
+	
+	private final List<Trigger> activeTriggers = new LinkedList<Trigger>();
 	
 	private long timeCounter = 0;
 	
@@ -69,29 +70,13 @@ public class World {
 	}
 
 	/**
-	 * Randomize the spawn points of a given team
-	 * 
-	 * @param team
-	 *            the team id of the team that wishes its spawn points randomized
-	 * @return
-	 */
-	private Point2D randomizeSpawnPoint(int team) {
-		int spawnIndex = server.world.Utils.random().nextInt(arena.getSpawn(team).size());
-		return arena.getSpawn(team).get(spawnIndex);
-	}
-
-	/**
 	 * Add a projectile to the world
 	 * 
 	 * @param p
 	 *            the projectile to be added
 	 */
-	public void addDelayedProjectile(Projectile p) {
-		newProjectiles.add(p);
-	}
-	
 	public void addProjectile(Projectile p) {
-		projectiles.add(p);
+		newProjectiles.add(p);
 	}
 
 	public void addSound(int id, double volume, double x, double y) {
@@ -135,6 +120,9 @@ public class World {
 		}
 		
 		// update projectiles
+		projectiles.addAll(newProjectiles);
+		newProjectiles.clear();
+		
 		List<Projectile> consumed = new LinkedList<Projectile>();
 		for (Projectile p : projectiles) {
 			if (p.isConsumed()) {
@@ -146,9 +134,6 @@ public class World {
 		}
 		
 		projectiles.removeAll(consumed);
-		
-		projectiles.addAll(newProjectiles);
-		newProjectiles.clear();
 		
 		// update triggers and remove the inactive ones
 		List<Trigger> inactive = new LinkedList<Trigger>();
@@ -182,6 +167,10 @@ public class World {
 					}
 				}
 			}
+		}
+		
+		if (!dynamicLights.isEmpty()) {
+			arena.updateLightMap(dynamicLights);
 		}
 		
 		timeCounter += GameWindow.MS_PER_UPDATE;
@@ -260,6 +249,18 @@ public class World {
 		return projectiles;
 	}
 
+	public List<Light> getDynamicLights() {
+		return dynamicLights;
+	}
+	
+	public void addDynamicLight(Light light) {
+		dynamicLights.add(light);
+	}
+	
+	public void removeLight(Light light) {
+		dynamicLights.remove(light);
+	}
+	
 	public void addActiveTrigger(Trigger t) {
 		if (!activeTriggers.contains(t)) {
 			activeTriggers.add(t);

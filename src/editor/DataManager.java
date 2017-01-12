@@ -9,19 +9,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
-
 import javax.imageio.ImageIO;
 
 import client.graphics.ImageBlender;
+import client.graphics.ParticleSource;
 import server.world.Arena;
-import server.world.Misc;
 import server.world.Thing;
 import server.world.trigger.TileSwitchPreset;
 import server.world.Terrain;
@@ -29,11 +23,8 @@ import server.world.Terrain;
 public class DataManager {
 	public static final String FILE_TILES = "resource/tile/tiles";
 	public static final String FILE_OBJECTS = "resource/tile/objects";
-	public static final String FILE_TILES_OLD = "resource/tile/tiles_old";
-	public static final String FILE_OBJECTS_OLD = "resource/tile/objects_old";
 	public static final String DIR_MAP = "resource/map/";
-	public static final String FILE_TRIGGERS = "resource/tile/triggers";
-	public static final String FILE_MISC = "resource/tile/misc";
+	public static final String FILE_TRIGGERS = "resource/tile/triggers";	
 	
 	public static void exportImages(Arena a) throws IOException {
 		
@@ -107,86 +98,6 @@ public class DataManager {
 		return loadObject(new File(path));
 	}
 	
-	public static Collection<Terrain> loadTileListOld() {
-		List<Terrain> tiles = new LinkedList<Terrain>();
-		try {
-			FileInputStream fileInputStream = new FileInputStream(FILE_TILES_OLD);
-			Scanner fileSc = new Scanner(fileInputStream);
-			// load tile information
-			while (fileSc.hasNext()) {
-				String line = fileSc.nextLine();
-				Scanner sc = new Scanner(line);
-				int id = sc.nextInt(16); // reads the hex image
-				String tileName = sc.next(); // reads the light tile image
-				String filename = sc.next(); // reads the light tile image
-				sc.close();
-				Terrain t = new Terrain(id);
-				t.setName(tileName);
-				t.setImageName(filename);
-				tiles.add(t);
-			}
-
-			fileSc.close(); // after all tiles are read, close the scanner
-		} catch (Exception e) {
-			System.err.println("Error while reading map");
-			e.printStackTrace();
-		}
-		return tiles;
-	}
-	
-	public static void saveTileListOld(Collection<Terrain> tileList) {
-		try {
-			FileOutputStream fileOutputStream = new FileOutputStream(FILE_TILES_OLD);
-			PrintWriter wr = new PrintWriter(fileOutputStream);
-			
-			// save tile information
-			Iterator<Terrain> i = tileList.iterator();
-			while (i.hasNext()) {
-				Terrain tile = i.next();
-				wr.print(Integer.toHexString(tile.getId())+" ");
-				wr.print(tile.getName()+" ");
-				wr.print(tile.getImageName());
-				if (i.hasNext()) {
-					wr.println();
-				}
-			}
-			
-			wr.close();
-		} catch (Exception e) {
-			System.err.println("Error while reading map");
-			e.printStackTrace();
-		}
-	}
-	
-	public static void loadTileGraphics(Collection<Terrain> tiles){
-		try {
-			for (Terrain t:tiles) {
-				t.setImage(ImageIO.read(new FileInputStream("resource/tile/" + t.getImageName())));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public static void loadObjectGraphics(Collection<Thing> tiles) {
-		try {
-			for (Thing t:tiles) {
-				t.setImage(ImageIO.read(new FileInputStream("resource/tile/" + t.getImageName())));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public static void loadMiscGraphics(Collection<Misc> miscs) {
-		try {
-			for (Misc m:miscs) {
-				m.setImage(ImageIO.read(new FileInputStream("resource/tile/" + m.getImageName())));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 	
 	public static void loadImage(Collection<? extends ImageLoadable> items) {
 		try {
@@ -204,72 +115,6 @@ public class DataManager {
 			tileMap.put(t.getId(),t);
 		}
 		return tileMap;
-	}
-
-	public static Collection<Thing> loadObjectListOld() {
-		List<Thing> objects = new LinkedList<Thing>();
-		try {
-			FileInputStream fileInputStream = new FileInputStream(FILE_OBJECTS_OLD);
-			Scanner fileSc = new Scanner(fileInputStream);
-			// load tile information
-			while (fileSc.hasNext()) {
-				String line = fileSc.nextLine();
-				Scanner sc = new Scanner(line);
-				int id = sc.nextInt(16); // reads the hex image
-				String objectName = sc.next(); // reads the light tile image
-				String filename = sc.next(); // reads the light tile image
-				boolean walkable = sc.nextBoolean();
-				boolean transparent = sc.nextBoolean();
-				int coverType = sc.nextInt();
-				double spriteSize = sc.nextDouble();
-				sc.close();
-				
-				Thing o = new Thing(id);
-				o.setWalkable(walkable);
-				o.setClear(transparent);
-				o.setCoverType(coverType);
-				o.setName(objectName);
-				o.setImageName(filename);
-				o.setSpriteSize(spriteSize);
-				objects.add(o);
-			}
-
-			fileSc.close(); // after all tiles are read, close the scanner
-		} catch (Exception e) {
-			System.err.println("Error while loading object list");
-			e.printStackTrace();
-		}
-		return objects;
-	}
-
-	public static void saveObjectListOld(Collection<Thing> tileList) {
-		try {
-			FileOutputStream fileOutputStream = new FileOutputStream(FILE_OBJECTS_OLD);
-			PrintWriter wr = new PrintWriter(fileOutputStream);
-			
-			// save tile information
-			Iterator<Thing> i = tileList.iterator();
-			while (i.hasNext()) {
-				Thing tile = i.next();
-				wr.print(Integer.toHexString(tile.getId())+" ");
-				wr.print(tile.getName()+" ");
-				wr.print(tile.getImageName()+" ");
-				
-				wr.print(tile.isWalkable()+" ");
-				wr.print(tile.isClear()+" ");
-				wr.print(tile.getCoverType()+" ");
-				wr.print(tile.getSpriteSize());
-				
-				if (i.hasNext()) {
-					wr.println();
-				}
-			}
-			
-			wr.close();
-		} catch (Exception e) {
-			System.err.println("Error while reading map");
-			e.printStackTrace();
-		}
 	}
 	
 	public static HashMap<Integer, Thing> getObjectMap(Collection<Thing> objects) {
@@ -324,5 +169,17 @@ public class DataManager {
 	public static void exportArenaData(EditorArena a) {
 		saveObject(new Arena.ArenaData(a),"resource/map/"+a.getName()+"_copy.arena");
 		saveObject(new Arena.ArenaData(a),"resource/map/"+a.getName()+".arena");
+	}
+
+	public static void updateParticleSource(Collection<Thing> values) {
+		for (Thing thing:values) {
+			ParticleSource ps = thing.getParticleSource();
+			if (ps!=null) {
+				ParticleSource preset = ParticleSource.presets.get(ps.name);
+				if (preset!=null) {
+					thing.setParticleSource(preset);
+				}
+			}
+		}
 	}
 }

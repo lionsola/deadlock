@@ -11,6 +11,7 @@ import java.util.List;
 import client.gui.GameWindow;
 import server.status.StatusEffect;
 import server.world.Arena;
+import server.world.Light;
 import server.world.Projectile;
 import server.world.Terrain;
 import server.world.Utils;
@@ -29,7 +30,7 @@ import shared.network.event.SoundEvent;
  * This class will define the base behaviour of every type of Character.
  */
 public class Entity {
-	public static final double BASE_SPEED	= 0.0032;
+	public static final double BASE_SPEED	= 0.0033;
 	public static final double BASE_HP		= 100;
 	public static final double BASE_RADIUS	= 0.5;
 	public static final double BASE_FOVRANGE= 20;
@@ -331,20 +332,20 @@ public class Entity {
 		perception.characters = new LinkedList<CharData>();
 		perception.projectiles = new LinkedList<ProjectileData>();
 		Area los = new Area();
-		if (!isDead()) {
-			try {
-				los = visibility.genLOSAreaMeter(getX(), getY(), getFovRange(), getFovAngle(), getDirection(), w.getArena());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			fov = los;
-			perception.visions.add(getVision());
-		} else {
-			for (Entity c : w.getCharacters()) {
-				if (c.team==team) {
-					los.add(c.getLoS());
-					perception.visions.add(c.getVision());
-				}
+		try {
+			los = visibility.genLOSAreaMeter(getX(), getY(), getFovRange(), getFovAngle(), getDirection(), w.getArena());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		fov = los;
+		perception.visions.add(getVision());
+		
+		double ts = Terrain.tileSize;
+		
+		for (Light l:w.getDynamicLights()) {
+			double r = l.getRange()*ts;
+			if (getLoS().intersects(l.getX()-r, l.getY()-r, r*2, r*2)) {
+				perception.dynamicLights.add(l);
 			}
 		}
 		
@@ -369,7 +370,6 @@ public class Entity {
 			}
 		}
 	}
-	
 	
 	public WorldStatePacket getPerception() {
 		return perception;
@@ -737,6 +737,22 @@ public class Entity {
 		checkPoints.add(new Point2D.Double(x-getRadius(), y));
 		checkPoints.add(new Point2D.Double(x, y+getRadius()));
 		checkPoints.add(new Point2D.Double(x+getRadius(), y));
+		// TODO gun
+		return checkPoints;
+	}
+	
+	public static List<Point2D> getCheckPoints(double x, double y, double radius, double dir, double l) {
+		List<Point2D> checkPoints = new LinkedList<Point2D>();
+		double r = radius*0.7;
+		checkPoints.add(new Point2D.Double(x, y));
+		checkPoints.add(new Point2D.Double(x-r, y-r));
+		checkPoints.add(new Point2D.Double(x-r, y+r));
+		checkPoints.add(new Point2D.Double(x+r, y+r));
+		checkPoints.add(new Point2D.Double(x+r, y-r));
+		checkPoints.add(new Point2D.Double(x+radius, y));
+		checkPoints.add(new Point2D.Double(x-radius, y));
+		checkPoints.add(new Point2D.Double(x, y+radius));
+		checkPoints.add(new Point2D.Double(x+radius, y));
 		// TODO gun
 		return checkPoints;
 	}

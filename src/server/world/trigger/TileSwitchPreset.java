@@ -2,8 +2,7 @@ package server.world.trigger;
 
 import java.io.Serializable;
 
-import editor.CellRenderable;
-import editor.Identifiable;
+import server.world.Thing;
 
 public class TileSwitchPreset implements Serializable {
 	private static final long serialVersionUID = 1954603658126830693L;
@@ -20,20 +19,20 @@ public class TileSwitchPreset implements Serializable {
 	private int triggerType;
 	private int itemType;
 	
-	private transient Switchable switchThing;
-	private transient Switchable originalThing;
+	private transient Thing switchThing;
+	private transient Thing originalThing;
 	
 	/**
 	 * @return the switchThing
 	 */
-	public Switchable getSwitchThing() {
+	public Thing getSwitchThing() {
 		return switchThing;
 	}
 
 	/**
 	 * @param switchThing the switchThing to set
 	 */
-	public void setSwitchThing(Switchable switchThing) {
+	public void setSwitchThing(Thing switchThing) {
 		this.switchThingID = switchThing.getId();
 		this.switchThing = switchThing;
 	}
@@ -41,14 +40,14 @@ public class TileSwitchPreset implements Serializable {
 	/**
 	 * @return the originalThing
 	 */
-	public Switchable getOriginalThing() {
+	public Thing getOriginalThing() {
 		return originalThing;
 	}
 
 	/**
 	 * @param originalThing the originalThing to set
 	 */
-	public void setOriginalThing(Switchable originalThing) {
+	public void setOriginalThing(Thing originalThing) {
 		this.originalThingID = originalThing.getId();
 		this.originalThing = originalThing;
 	}
@@ -128,9 +127,5 @@ public class TileSwitchPreset implements Serializable {
 	 */
 	public void setItemType(int itemType) {
 		this.itemType = itemType;
-	}
-	
-	public static interface Switchable extends Identifiable, CellRenderable {
-		
 	}
 }

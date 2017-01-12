@@ -24,8 +24,8 @@ public class BloodAnimation extends BasicAnimation {
 	}
 	
 	@Override
-	public void update() {
-		super.update();
+	public void update(AnimationSystem as) {
+		super.update(as);
 		loc.add(vel);
 	}
 

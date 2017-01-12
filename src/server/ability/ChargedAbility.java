@@ -46,7 +46,7 @@ public abstract class ChargedAbility extends Ability {
 		
 		@Override
 		protected void activate(World w, long chargeTime) {
-			w.addDelayedProjectile(new TimedGrenade.FragGrenade(self(), self().getDirection(), THROWFRAG_SPEED, THROWFRAG_FUSE-chargeTime));
+			w.addProjectile(new TimedGrenade.FragGrenade(self(), self().getDirection(), THROWFRAG_SPEED, THROWFRAG_FUSE-chargeTime));
 		}
 	}
 	
@@ -61,7 +61,7 @@ public abstract class ChargedAbility extends Ability {
 		
 		@Override
 		protected void activate(World w, long chargeTime) {
-			w.addDelayedProjectile(new TimedGrenade.FlashGrenade(self(), self().getDirection(), THROWFLASH_SPEED, THROWFLASH_FUSE-chargeTime));
+			w.addProjectile(new TimedGrenade.FlashGrenade(self(), self().getDirection(), THROWFLASH_SPEED, THROWFLASH_FUSE-chargeTime));
 		}
 	}
 }

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Domain package="server.ai.jbt">
+	<ActionSet>
+	<!-- Orders the current unit to attack another unit -->
+	</ActionSet>
+	
+	<SensorSet>
+		<!-- Checks if the current unit's weapon is low on ammo and needs reloading -->
+		<Sensor name="ReachTarget" type="BOOLEAN">
+            <Parameter name="targetLocation" type="COORDINATE"/>
+		</Sensor>
+		
+		<Sensor name="EliminateAll" type="BOOLEAN"/>
+		
+		<Sensor name="Survive" type="BOOLEAN"/>
+		
+		<Sensor name="InTime" type="BOOLEAN">
+		    <Parameter name="time" type="INTEGER"/>
+		</Sensor>
+		
+		<Sensor name="StayAt" type="BOOLEAN">
+		    <Parameter name="location" type="COORDINATE"/>
+		</Sensor>
+		
+	</SensorSet>
+	
+	<EntitySet>
+	</EntitySet>
+	
+	<GoalSet>
+	</GoalSet>
+</Domain>

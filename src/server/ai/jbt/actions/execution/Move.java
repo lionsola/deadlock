@@ -92,6 +92,9 @@ public class Move extends jbt.execution.task.leaf.action.ExecutionAction {
 		 * No other values are allowed.
 		 */
 		InputControlledEntity character = (InputControlledEntity)getContext().getVariable("Character");
+		if (path==null) {
+			return Status.FAILURE;
+		}
 		double distToCheckPoint = path.get(0).distance(character.getPosition());
 		// if alr close to one checkpoint, move on
 		if (distToCheckPoint < PATH_THRESHOLD) {

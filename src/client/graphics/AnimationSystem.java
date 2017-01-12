@@ -17,11 +17,13 @@ import shared.network.event.AnimationEvent;
 public class AnimationSystem {
 	//private ConcurrentLinkedQueue<ParticleEmitter> particleEmitters;
 	private ConcurrentLinkedQueue<BasicAnimation> animations;
+	private ConcurrentLinkedQueue<BasicAnimation> pending;
 	/**
 	 * Constructor. Create a new animation system.
 	 */
 	public AnimationSystem() {
 		animations = new ConcurrentLinkedQueue<BasicAnimation>();
+		pending = new ConcurrentLinkedQueue<BasicAnimation>();
 	}
 
 	/**
@@ -36,9 +38,15 @@ public class AnimationSystem {
 	 */
 	public void addNoiseAnimation(double x, double y, float noise) {
 		long duration = 1000 + (int) noise * 5;
-		animations.add(new CircleAnimation(x, y, 0.5 + noise / 30, duration, 0));
+		pending.add(new CircleAnimation(x, y, 0.5 + noise / 30, duration, 0));
 	}
 
+	public void addParticles(List<ParticleSource> sources) {
+		for (ParticleSource ps:sources) {
+			ps.update(this);
+		}
+	}
+	
 	/**
 	 * Create particle effect when a gun shot happens.
 	 * 
@@ -51,10 +59,12 @@ public class AnimationSystem {
 	public void addShotAnimation(double x, double y, double direction) {
 		for (int i = 0; i < 5; i++) {
 			double randomDirection = direction -(Math.PI/4) + (Math.PI/2)*i/4;
-			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.012, 0.12, 100, Color.WHITE);
-			p.setGrowth(-0.0007, -0.0007);
-			p.setSizeDefault(true);
-			animations.add(p);
+			ParticleAnimation p = new ParticleAnimation(100);
+			p.setLoc(x, y, 1);
+			p.setDirection(randomDirection, 0.2);
+			p.setColor(Color.LIGHT_GRAY);
+			p.setSize(0.1);
+			pending.add(p);
 		}
 	}
 
@@ -71,7 +81,7 @@ public class AnimationSystem {
 			double randomDirection = direction + (Math.PI/2) * Utils.random().nextGaussian()/2;
 			double d = 1-0.5*Math.abs(randomDirection - direction)/(Math.PI/2);
 			BloodAnimation p = new BloodAnimation(x, y, randomDirection, 0.15*d, Renderer.teamColors[team],500, 0);
-			animations.add(p);
+			pending.add(p);
 		}
 	}
 
@@ -89,12 +99,26 @@ public class AnimationSystem {
 			//double randomDirection = Math.PI*2*Utils.random().nextDouble();
 			double randomDirection = Math.PI*2.0*i/(n-1);
 			ParticleAnimation p = new ParticleAnimation(x, y, randomDirection, 0.01, 0.1, 100, Color.WHITE);
-			p.setGrowth(-0.0006, -0.0006);
-			p.setSizeDefault(true);
-			animations.add(p);
+			//p.setGrowth(-0.0006);
+			pending.add(p);
 		}
 	}
 
+	public void addVisualNoiseAnimation(double x, double y) {
+		int n = 5;
+		double offset = Utils.random().nextDouble()*Math.PI*2/n;
+		for (int i = 0; i < n; i++) {
+			//double randomDirection = Math.PI*2*Utils.random().nextDouble();
+			double direction = offset + Math.PI*2.0*i/n;
+			ParticleAnimation p = new ParticleAnimation(250);
+			p.setLoc(x, y, 1);
+			p.setDirection(direction, 0.06);
+			p.setColor(Color.LIGHT_GRAY);
+			p.setSize(0.07);
+			pending.add(p);
+		}
+	}
+	
 	/**
 	 * Create a trailing effect for a projectile (bullet, grenade, etc.).
 	 */
@@ -131,16 +155,19 @@ public class AnimationSystem {
 	 * methods, or write a new one if what you want doesn't exist yet.
 	 */
 	public void addCustomAnimation(BasicAnimation animation) {
-		animations.add(animation);
+		pending.add(animation);
 	}
 
 	/**
 	 * Update the animation system.
 	 */
 	public void update() {
+		animations.addAll(pending);
+		pending.clear();
+		
 		List<BasicAnimation> removed = new LinkedList<BasicAnimation>();
 		for (BasicAnimation a : animations) {
-			a.update();
+			a.update(this);
 			if (a.isExpired())
 				removed.add(a);
 		}

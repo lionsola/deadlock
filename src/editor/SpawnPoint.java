@@ -23,7 +23,7 @@ public class SpawnPoint implements Serializable {
 	public int team;
 	public int players;
 	
-	public List<CharType> setups;
+	public List<CharType> setups = new LinkedList<CharType>();
 	public Behaviour behaviour;
 	public SpawnType type;
 	

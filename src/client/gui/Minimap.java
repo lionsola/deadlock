@@ -22,9 +22,6 @@ public class Minimap extends JComponent {
 	private static final int RADIUS = 2; // character radius
 
 	private static final int charTransparency = 180;
-	private static final int transparency = 255;
-	private static final Color BORDER_COLOR = new Color(0, 0, 0, transparency * 2 / 3);
-	private static final Color UNWALKABLE_TILE_COLOR = GUIFactory.UICOLOR;
 
 	private static final Color PLAYER_COLOR = new Color(255, 255, 255, charTransparency);
 	private static final Color TEAM_COLOR = new Color(0, 255, 0, charTransparency);

@@ -61,7 +61,7 @@ public class Bullet extends Projectile {
 		setSpeed(getSpeed()-speedReduced);
 		if (t!=lastHit){
 			w.addSound(SoundEvent.BULLET_WALL_SOUND_ID,SoundEvent.BULLET_WALL_SOUND_VOLUME*Math.max(0.5,Math.min(2,getSize()/5)),x,y);
-			w.addAnimation(AnimationEvent.BULLETWALL, x, y, 0);
+			//w.addAnimation(AnimationEvent.BULLETWALL, x, y, 0);
 			lastHit = t;
 		}
 	}

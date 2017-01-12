@@ -56,7 +56,7 @@ public class Brain {
 	
 	private Point2D focus;
 	
-	private Arena arena;
+	protected Arena arena;
 	private AIState state = AIState.IDLING;
 	
 	private Path nextPath;

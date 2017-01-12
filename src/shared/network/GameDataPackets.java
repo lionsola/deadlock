@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
+import server.world.Light;
 import shared.network.event.GameEvent;
 
 /**
@@ -47,6 +48,7 @@ public class GameDataPackets {
 		public List<ProjectileData> projectiles = new LinkedList<ProjectileData>();
 		public List<GameEvent> events = new LinkedList<GameEvent>();
 		public List<Vision> visions = new LinkedList<Vision>();
+		public List<Light> dynamicLights = new LinkedList<Light>();
 	}
 	
 }

@@ -1,5 +1,6 @@
 package server.ai;
 
+import java.awt.Color;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -13,8 +14,8 @@ import jbt.execution.core.IBTExecutor;
 import jbt.execution.core.IBTLibrary;
 import jbt.execution.core.IContext;
 import jbt.model.core.ModelTask;
-import server.ai.InterestPoint.Type;
 import server.ai.jbt.library.StandardBTLibrary;
+import server.character.Entity;
 import server.character.InputControlledEntity;
 import server.world.Arena;
 import server.world.Geometry;
@@ -69,11 +70,21 @@ public class NPCBrain extends Brain {
 		for (CharData c : wsp.characters) {
 			if (c.healthPoints>0) {
 				if (c.team != character.team) {
-					if ((c.exposure + alertness)>=1) {
+					// calculate relative exposure
+					double ex = 0;
+					List<Point2D> checkPoints = Entity.getCheckPoints(c.x, c.y, c.radius, c.direction, c.radius);
+					for (Point2D p:checkPoints) {
+						if (character.getLoS().contains(p)) {
+							Color l = new Color(arena.getLightAt(p));
+							float br = Math.max(l.getRed(), Math.max(l.getGreen(), l.getBlue()))/255.0f;
+							ex += br/checkPoints.size();
+						}
+					}
+					if ((ex + alertness)>=1 && ex>0) {
 						enemies.add(c);
-						alertness = Math.min(1, alertness + c.exposure*0.02);
+						alertness = Math.min(1, alertness + ex*0.03);
 					} else {
-						alertness = Math.min(1, alertness + c.exposure*0.02);
+						alertness = Math.min(1, alertness + ex*0.03);
 					}
 					enemyInSight = true;
 				} else if (c.team == character.team) {

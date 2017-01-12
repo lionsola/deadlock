@@ -11,10 +11,14 @@ import java.awt.image.BufferedImage;
 import javax.swing.JList;
 import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputAdapter;
+
+import client.graphics.ParticleSource;
 import client.graphics.Renderer;
 import editor.ArenaPanel;
 import editor.CellRenderable;
 import editor.SpawnPoint;
+import editor.dialogs.MissionDialog;
+import editor.dialogs.ParticleSourceDialog;
 import editor.dialogs.SpawnDialog;
 import server.world.Thing;
 import server.world.Tile;
@@ -24,7 +28,7 @@ import server.world.trigger.TileSwitchPreset;
 import server.world.trigger.Trigger.SwitchOnTouchSide;
 import server.world.trigger.TriggerEffect;
 import server.world.trigger.TriggerEffect.TileSwitch;
-import server.world.Misc;
+import server.network.MissionVar;
 import server.world.SpriteConfig;
 import server.world.Terrain;
 
@@ -125,13 +129,23 @@ public abstract class Tool extends MouseInputAdapter {
 		@Override
 		public void mousePressed(MouseEvent e) {
 			super.mousePressed(e);
+			Point p = getPointedTileCoord(e);
+			Thing t;
 			if (SwingUtilities.isLeftMouseButton(e)) {
-				Point p = getPointedTileCoord(e);
-				arenaPanel.getArena().setThing(p.x, p.y, list.getSelectedValue());
+				t = list.getSelectedValue();
 			} else if (SwingUtilities.isRightMouseButton(e)) {
-				Point p = getPointedTileCoord(e);
-				arenaPanel.getArena().setThing(p.x, p.y, null);
+				t = null;
+			} else {
+				return;
 			}
+			
+			if (isAlternative()) {
+				arenaPanel.getArena().get(p).setMisc(t);
+			} else {
+				arenaPanel.getArena().get(p).setThing(t);
+			}
+			
+			arenaPanel.lightImageChanged = true;
 		}
 		
 		@Override
@@ -141,12 +155,12 @@ public abstract class Tool extends MouseInputAdapter {
 		}
 	}
 	
-	public static class MiscPaint extends Tool {
-		private JList<Misc> list;
+	public static class ParticleSourcePaint extends Tool {
+		private ParticleSourceDialog dialog;
 
-		public MiscPaint(ArenaPanel arenaPanel, JList<Misc> list) {
+		public ParticleSourcePaint(ArenaPanel arenaPanel, ParticleSourceDialog dialog) {
 			super(arenaPanel);
-			this.list = list;
+			this.dialog = dialog;
 		}
 		
 		@Override
@@ -154,10 +168,12 @@ public abstract class Tool extends MouseInputAdapter {
 			super.mousePressed(e);
 			if (SwingUtilities.isLeftMouseButton(e)) {
 				Point p = getPointedTileCoord(e);
-				arenaPanel.getArena().get(p.x, p.y).setMisc(list.getSelectedValue());
+				ParticleSource ps = dialog.getPreset();
+				ps.setLocation(p.x,p.y);
+				arenaPanel.getArena().pss[p.x][p.y] = ps;
 			} else if (SwingUtilities.isRightMouseButton(e)) {
 				Point p = getPointedTileCoord(e);
-				arenaPanel.getArena().get(p.x, p.y).setMisc(null);
+				arenaPanel.getArena().pss[p.x][p.y] = null;
 			}
 		}
 		
@@ -190,8 +206,10 @@ public abstract class Tool extends MouseInputAdapter {
 						s.direction = 0;
 						
 						arenaPanel.getArena().spawns[p.x][p.y] = s;
+						
 					} else {
 						sp = arenaPanel.getArena().spawns[p.x][p.y];
+						dialog.setSpawn(sp);
 					}
 				} else {
 					sp.patrolLocations.add(Utils.tileToMeter(p));
@@ -200,12 +218,14 @@ public abstract class Tool extends MouseInputAdapter {
 				Point p = getPointedTileCoord(e);
 				if (sp==null) {
 					arenaPanel.getArena().spawns[p.x][p.y] = null;
+					dialog.setSpawn(null);
 				} else {
 					if (sp.patrolLocations.size()>0 &&
 							Utils.tileToMeter(p).equals(sp.patrolLocations.get(sp.patrolLocations.size()-1))) {
 						sp.patrolLocations.remove(sp.patrolLocations.size()-1);
 					} else {
 						sp = null;
+						dialog.setSpawn(null);
 					}
 				}
 			} else if (SwingUtilities.isMiddleMouseButton(e)) {
@@ -440,5 +460,35 @@ public abstract class Tool extends MouseInputAdapter {
 		}
 	}
 	
-	
+	public static class MissionVarChooser extends Tool {
+		MissionDialog dialog;
+		
+		public MissionVarChooser(ArenaPanel arenaPanel, MissionDialog dialog) {
+			super(arenaPanel);
+			this.dialog = dialog;
+		}
+		
+		@Override
+		public void mousePressed(MouseEvent e) {
+			Point p = getPointedTileCoord(e);
+			MissionVar v = dialog.getVarList().getSelectedValue();
+			if (v!=null) {
+				switch (v.type) {
+					case Location:
+						v.setValue(p.x,p.y);
+						break;
+					case Character:
+						SpawnPoint sp = arenaPanel.getArena().spawns[p.x][p.y];
+						if (sp!=null) {
+							v.setValue(sp.getId());
+						}
+						break;
+					default:
+						break;
+				}
+			}
+			dialog.getVarList().clearSelection();
+			dialog.invalidate();
+		}
+	}
 }

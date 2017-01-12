@@ -276,6 +276,9 @@ public class LobbyServer implements Runnable {
             		// well, let him
             		if (request.spawnId==-1) {
             			requestingPlayer.spawnPoint = idle;
+            			requestingPlayer.active = false;
+            			request.successful = true;
+            			sendRequest(request);
             		} else {
             			boolean occupied = false;
             			for (ServerPlayer player:playerMap.values()) {
@@ -287,8 +290,7 @@ public class LobbyServer implements Runnable {
             			if (!occupied) {
             				// let him
             				request.successful = true;
-            				requestingPlayer.spawnPoint = spawnMap.get(request.spawnId);
-            				requestingPlayer.type = requestingPlayer.spawnPoint.setups.get(0); 
+            				requestingPlayer.setSpawn(spawnMap.get(request.spawnId));
             				sendRequest(request);
             			}
             			else {
@@ -300,8 +302,8 @@ public class LobbyServer implements Runnable {
 	            					if (request.spawnId==pendingPlayer.spawnPoint.getId()) {
 	            						// switch the two
 	            						SpawnPoint temp = requestingPlayer.spawnPoint; 
-	            						requestingPlayer.spawnPoint = pendingPlayer.spawnPoint;
-	            						pendingPlayer.spawnPoint = temp;
+	            						requestingPlayer.setSpawn(pendingPlayer.spawnPoint);
+	            						pendingPlayer.setSpawn(temp);
 	            						
 	            						// tell the world about it
 	            						request.successful = true;
@@ -314,6 +316,7 @@ public class LobbyServer implements Runnable {
 	            			
 	            			if (!request.successful) {
 	            				pendingRequests.add(request);
+	            				sendRequest(request);
 	            			}
             			}
             		}

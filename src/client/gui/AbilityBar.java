@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
+
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -83,7 +85,10 @@ public class AbilityBar extends JPanel {
 		}
 		
 		public void setAbility(int id) {
-			setIcon(new ImageIcon(Sprite.getAbilityIcon(id).getScaledInstance(SIZE, SIZE, Image.SCALE_SMOOTH)));
+			BufferedImage icon = Sprite.getAbilityIcon(id);
+			if (icon!=null) {
+				setIcon(new ImageIcon(icon.getScaledInstance(SIZE, SIZE, Image.SCALE_SMOOTH)));
+			}
 		}
 		
 		void update(float fill) {

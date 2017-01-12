@@ -22,7 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import client.sound.Sound;
+import client.graphics.ParticleSource;
 import editor.Editor;
 import server.world.Light;
 import server.world.SoundSource;
@@ -56,6 +56,9 @@ public class ThingDialog extends JDialog implements ActionListener {
 	private JComboBox<String> layer;
 	private JCheckBox sound;
 	private SoundSourceDialog soundDialog;
+	
+	private JCheckBox particleSource;
+	private ParticleSourceDialog psDialog;
 	
 	public ThingDialog (Editor editor, Thing tile) {
 		super(editor, "Edit tile", ModalityType.APPLICATION_MODAL);
@@ -112,6 +115,11 @@ public class ThingDialog extends JDialog implements ActionListener {
         topPanel.add(sound,c);
         
         c.gridy += 1;
+        particleSource = new JCheckBox("Particles");
+        particleSource.addActionListener(this);
+        topPanel.add(particleSource,c);
+        
+        c.gridy += 1;
         border = new JCheckBox("Border");
         topPanel.add(border,c);
         
@@ -164,6 +172,9 @@ public class ThingDialog extends JDialog implements ActionListener {
         	}
         	if (tile.getSound()!=null) {
         		sound.setSelected(true);
+        	}
+        	if (tile.getParticleSource()!=null) {
+        		particleSource.setSelected(true);
         	}
         	layer.setSelectedIndex(Math.min(layer.getItemCount()-1,tile.getLayer()));
         } else {
@@ -228,8 +239,19 @@ public class ThingDialog extends JDialog implements ActionListener {
 			} else {
 				tile.setSound(null);
 			}
-
+			
+			if (particleSource.isSelected()) {
+				if (psDialog!=null) {
+					ParticleSource ps = psDialog.getPreset();
+					tile.setParticleSource(ps);
+				}
+			} else {
+				tile.setParticleSource(null);
+			}
+			
 			// Close the dialog
+			editor.tileDataChanged = true;
+			editor.getArenaPanel().lightImageChanged = true;
 			this.setVisible(false);
 			this.dispose();
 		} else if (arg0.getSource()==loadImage) {
@@ -280,6 +302,21 @@ public class ThingDialog extends JDialog implements ActionListener {
 				soundDialog.setVisible(true);
 			} else if (soundDialog!=null) {
 				soundDialog.setVisible(false);				
+			}
+		} else if (arg0.getSource()==particleSource) {
+			if (particleSource.isSelected()) {
+				if (psDialog==null) {
+					if (tile!=null) {
+						ParticleSource ps = tile.getParticleSource();
+						psDialog = new ParticleSourceDialog(this,editor,particleSource,ps);
+					} else {
+						psDialog = new ParticleSourceDialog(this,editor,particleSource,null);
+					}
+					psDialog.setModalityType(ModalityType.MODELESS);
+				}
+				psDialog.setVisible(true);
+			} else if (psDialog!=null) {
+				psDialog.setVisible(false);				
 			}
 		}
 	}

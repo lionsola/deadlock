@@ -26,7 +26,7 @@ import javax.swing.SwingConstants;
 import client.graphics.Sprite;
 import client.gui.GUIFactory;
 import editor.dialogs.ListDialog;
-import editor.dialogs.MiscDialog;
+import editor.dialogs.ParticleSourceDialog;
 import editor.dialogs.SpawnDialog;
 import editor.dialogs.TerrainDialog;
 import editor.dialogs.ThingDialog;
@@ -35,7 +35,6 @@ import editor.tools.Tool;
 import editor.tools.Tool.*;
 import server.world.Thing;
 import server.world.trigger.TileSwitchPreset;
-import server.world.Misc;
 import server.world.Terrain;
 
 public class ToolBar extends JPanel {
@@ -182,7 +181,6 @@ public class ToolBar extends JPanel {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
 								new ThingDialog(editor,list.getList().getSelectedValue()).setVisible(true);
-								editor.tileDataChanged = true;
 								tlm.invalidate();
 							}
 						});
@@ -219,83 +217,6 @@ public class ToolBar extends JPanel {
 		objectPaint.addItemListener(toggleButtonSwitch);
 		this.add(objectPaint);
 		
-		final JToggleButton miscPaint = new JToggleButton();
-		stylizeToolButton(miscPaint);
-		try {
-			miscPaint.setIcon(new ImageIcon(ImageIO.read(new File("resource/editor/misc.png"))));
-		} catch (IOException e1) {
-			miscPaint.setText("Misc");
-		}
-		miscPaint.setToolTipText("Thing Paint - left to paint, right to remove");
-		miscPaint.addItemListener(new ItemListener() {
-			ListDialog<Misc> list = null;
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange()==ItemEvent.SELECTED) {
-					if (list==null) {
-						final CustomListModel<Misc> tlm = new CustomListModel<Misc>(new ArrayList<Misc>(editor.miscTable.values()));
-						JButton add = new JButton("Add");
-						JButton edit = new JButton("Edit");
-						JButton delete = new JButton("Delete");
-						JButton[] buttons = {edit,add,delete};
-						list = new ListDialog<Misc>(editor, miscPaint, "Misc", buttons, tlm);
-						list.getList().setCellRenderer(cellRenderer);
-						add.addActionListener(new ActionListener() {
-							@Override
-							public void actionPerformed(ActionEvent arg0) {
-								MiscDialog dialog = new MiscDialog(editor,null);
-								dialog.setVisible(true);
-								
-								Misc m = dialog.getItem();
-								if (m!=null) {
-									editor.miscTable.put(m.getId(), m);
-									editor.tileDataChanged = true;
-									tlm.getList().add(m);
-									tlm.invalidate();
-								}
-							}
-						});
-						edit.addActionListener(new ActionListener() {
-							@Override
-							public void actionPerformed(ActionEvent arg0) {
-								new MiscDialog(editor,list.getList().getSelectedValue()).setVisible(true);
-								editor.tileDataChanged = true;
-								tlm.invalidate();
-							}
-						});
-						delete.addActionListener(new ActionListener() {
-							@Override
-							public void actionPerformed(ActionEvent e) {
-								int result = JOptionPane.showConfirmDialog(editor,
-										"Deleting an object will affect all maps that use it."
-										+ "\nRemove this object from those maps first."
-										+ "\nProceed?",
-										"WARNING", JOptionPane.OK_CANCEL_OPTION);
-								if (result==JOptionPane.OK_OPTION) {
-									String s = JOptionPane.showInputDialog(editor,
-											"Just to double check, are you sure?");
-									if (s.equals("yup")) {
-										Misc m = list.getList().getSelectedValue();
-										editor.miscTable.remove(m.getId());
-										editor.tileDataChanged = true;
-										tlm.getList().remove(m);
-										tlm.invalidate();
-									}
-								}
-							}
-						});
-					}
-					list.setVisible(true);
-					editor.setTool(new Tool.MiscPaint(editor.getArenaPanel(), list.getList()));
-				} else if (e.getStateChange()==ItemEvent.DESELECTED) {
-					list.setVisible(false);
-					editor.setTool(new Tool.MoveTool(editor.getArenaPanel()));
-				}
-			}
-		});
-		miscPaint.addItemListener(toggleButtonSwitch);
-		this.add(miscPaint);
-		
 		final JToggleButton editSprite = new JToggleButton();
 		stylizeToolButton(editSprite);
 		try {
@@ -316,23 +237,6 @@ public class ToolBar extends JPanel {
 		});
 		editSprite.addItemListener(toggleButtonSwitch);
 		this.add(editSprite);
-		
-		final JButton light = new JButton();
-		stylizeToolButton(light);
-		try {
-			light.setIcon(new ImageIcon(ImageIO.read(new File("resource/editor/light.png"))));
-		} catch (IOException e1) {
-			light.setText("Light");
-		}
-		light.setToolTipText("Update light map");
-		light.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				editor.getArenaPanel().generateLightImage();
-			}
-		});
-		light.addItemListener(toggleButtonSwitch);
-		this.add(light);
 		
 		final JToggleButton trigger = new JToggleButton();
 		stylizeToolButton(trigger);
@@ -415,7 +319,7 @@ public class ToolBar extends JPanel {
 		final JToggleButton spawn = new JToggleButton();
 		stylizeToolButton(spawn);
 		try {
-			spawn.setIcon(new ImageIcon(ImageIO.read(new File("resource/editor/light.png"))));
+			spawn.setIcon(new ImageIcon(ImageIO.read(new File("resource/editor/spawn.png"))));
 		} catch (IOException e1) {
 			spawn.setText("NPC");
 		}
@@ -428,8 +332,8 @@ public class ToolBar extends JPanel {
 				if (arg0.getStateChange()==ItemEvent.SELECTED) {
 					if (dialog==null) {
 						dialog = new SpawnDialog(editor,spawn);
-						dialog.setVisible(true);
 					}
+					dialog.setVisible(true);
 					editor.setTool(new Tool.SpawnPaint(editor.getArenaPanel(), dialog));
 				} else if (arg0.getStateChange()==ItemEvent.DESELECTED) {
 					dialog.setVisible(false);
@@ -439,6 +343,34 @@ public class ToolBar extends JPanel {
 		});
 		spawn.addItemListener(toggleButtonSwitch);
 		this.add(spawn);
+		
+		final JToggleButton particle = new JToggleButton();
+		stylizeToolButton(particle);
+		try {
+			particle.setIcon(new ImageIcon(ImageIO.read(new File("resource/editor/particle.png"))));
+		} catch (IOException e1) {
+			particle.setText("Particle");
+		}
+		particle.setToolTipText("Edit particle sources");
+		particle.addItemListener(new ItemListener() {
+			ParticleSourceDialog dialog = null;
+			
+			@Override
+			public void itemStateChanged(ItemEvent arg0) {
+				if (arg0.getStateChange()==ItemEvent.SELECTED) {
+					if (dialog==null) {
+						dialog = new ParticleSourceDialog(editor,editor, particle, null);
+					}
+					dialog.setVisible(true);
+					editor.setTool(new Tool.ParticleSourcePaint(editor.getArenaPanel(), dialog));
+				} else if (arg0.getStateChange()==ItemEvent.DESELECTED) {
+					dialog.setVisible(false);
+					editor.setTool(new Tool.MoveTool(editor.getArenaPanel()));
+				}
+			}
+		});
+		particle.addItemListener(toggleButtonSwitch);
+		this.add(particle);
 	}
 	
 	private static void stylizeToolButton(AbstractButton button) {

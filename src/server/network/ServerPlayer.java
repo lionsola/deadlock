@@ -31,7 +31,7 @@ public class ServerPlayer {
     public SpawnPoint spawnPoint;
     public Connection connection;
     public InputControlledEntity character;
-	public MatchServer.InputReceiver inputReceiver;
+	public MissionServer.InputReceiver inputReceiver;
     
     /**
      * Constructor.
@@ -82,5 +82,11 @@ public class ServerPlayer {
     
     public void setCharacter(InputControlledEntity c) {
     	this.character = c;
+    }
+    
+    public void setSpawn(SpawnPoint sp) {
+    	this.spawnPoint = sp;
+    	this.type = sp.setups.get(0);
+    	this.team = sp.team;
     }
 }

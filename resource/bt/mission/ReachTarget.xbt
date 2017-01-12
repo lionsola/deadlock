@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Tree>
+  <Node id="Node_0" name="ReachTarget" type="Root">
+    <Children>
+      <Node id="Node_2" name="ReachTarget" type="Condition">
+        <Parameters>
+          <Parameter name="targetLocation" fromcontext="true">targetLocation</Parameter>
+        </Parameters>
+      </Node>
+    </Children>
+  </Node>
+</Tree>
+

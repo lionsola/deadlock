@@ -1,12 +1,13 @@
 package editor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import client.graphics.ParticleSource;
+import server.network.MissionVar;
 import server.world.Arena;
-import server.world.Light;
-import server.world.Misc;
 import server.world.Terrain;
 import server.world.Thing;
 import server.world.Tile;
@@ -14,15 +15,31 @@ import server.world.trigger.TileSwitchPreset;
 
 public class EditorArena extends Arena {
 	public SpawnPoint[][] spawns;
+	public String objectiveType;
+	public List<MissionVar> objectiveData;
+	
+	public ParticleSource[][] pss;
 	
 	public EditorArena(ArenaData ad, HashMap<Integer, Terrain> tileTable, HashMap<Integer, Thing> objectTable,
-			HashMap<Integer,TileSwitchPreset> triggerTable, HashMap<Integer,Misc> miscTable) {
-		super(ad, tileTable, objectTable, triggerTable, miscTable);
+			HashMap<Integer,TileSwitchPreset> triggerTable) {
+		super(ad, tileTable, objectTable, triggerTable);
 		spawns = new SpawnPoint[ad.tMap.length][ad.tMap[0].length];
+		pss = new ParticleSource[ad.tMap.length][ad.tMap[0].length];
+		objectiveType = ad.objectiveType;
+		objectiveData = ad.objectiveData;
+		
 		if (ad.spawns!=null) {
 			for (SpawnPoint sp:ad.spawns) {
 				spawns[sp.x][sp.y] = sp;
 			}
+		}
+		if (ad.pss!=null) {
+			for (ParticleSource ps:ad.pss) {
+				pss[ps.getTx()][ps.getTy()] = ps;
+			}
+		}
+		if (objectiveData==null) {
+			objectiveData = new ArrayList<MissionVar>();
 		}
 	}
 
@@ -65,27 +82,34 @@ public class EditorArena extends Arena {
 		}
 		tMap = newTMap;
 	}
-
-	@Override
-	public void generateLightMap() {
-		List<Light> newLightList = new LinkedList<Light>();
-		for (int x=0;x<getWidth();x++) {
-			for (int y=0;y<getHeight();y++) {
-				if (get(x,y).getThing()!=null && get(x,y).getThing().getLight()!=null) {
-					Light l = get(x,y).getThing().getLight();
-					newLightList.add(new Light(x,y,l.getColor(),l.getRange()));
-				}
-				if (get(x,y).getMisc()!=null && get(x,y).getMisc().getLight()!=null) {
-					Light l = get(x,y).getMisc().getLight();
-					newLightList.add(new Light(x,y,l.getColor(),l.getRange()));
-				}
-			}
-		}
-		lightList = newLightList;
-		super.generateLightMap();
-	}
 	
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	@Override
+	public List<ParticleSource> getParticleSources() {
+		List<ParticleSource> pss = new LinkedList<ParticleSource>();
+		for (int x=0;x<tMap.length;x++) {
+			for (int y=0;y<tMap[0].length;y++) {
+				if (this.pss[x][y]!=null) {
+					pss.add(this.pss[x][y]);
+				}
+				Tile tile = get(x,y);
+				Thing t = tile.getThing();
+				if (t!=null && t.getParticleSource()!=null) {
+					ParticleSource ps = t.getParticleSource().clone();
+					ps.setLocation(x, y);
+					pss.add(ps);
+				}
+				Thing m = tile.getMisc();
+				if (m!=null && m.getParticleSource()!=null) {
+					ParticleSource ps = m.getParticleSource().clone();
+					ps.setLocation(x, y);
+					pss.add(ps);
+				}
+			}
+		}
+		return pss;
 	}
 }

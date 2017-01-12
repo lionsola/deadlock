@@ -32,6 +32,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+import javax.swing.ListCellRenderer;
 import javax.swing.border.EmptyBorder;
 
 import server.network.LobbyServer;
@@ -138,24 +139,37 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(5, 5, 5, 5);
-
-		c.weightx = 1;
-		
+		c.gridwidth = 2;
 		idlePlayersModel = new TeamListModel(idlePlayers);
 		JList<ClientPlayer> idlePlayersList = new JList<ClientPlayer>(idlePlayersModel);
-		idlePlayersList.addMouseListener(new MouseAdapter() {
+		idlePlayersList.setCellRenderer(new ListCellRenderer<ClientPlayer>() {
+			@Override
+			public Component getListCellRendererComponent(JList<? extends ClientPlayer> arg0, ClientPlayer arg1, int arg2, boolean arg3,
+					boolean arg4) {
+				JLabel label = new JLabel(arg1.name);
+				GUIFactory.stylizeMenuComponent(label);
+				label.setBorder(null);
+				return label;
+			}});
+		JPanel idlePlayersPanel = GUIFactory.getTransparentPanel();
+		JLabel up = new JLabel("Unassigned players: ");
+		GUIFactory.stylizeMenuComponent(up);
+		up.setBorder(null);
+		idlePlayersPanel.add(up);
+		idlePlayersPanel.add(idlePlayersList);
+		idlePlayersPanel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				sendRequest(new LobbyRequest.ChangeSpawnRequest(clientPlayer.id, -1, false));
 			}
 		});
-		teamPanel.add(idlePlayersList, c);
+		GUIFactory.stylizeMenuComponent(idlePlayersPanel);
+		teamPanel.add(idlePlayersPanel, c);
+		
 		c.gridy = 1;
 		c.gridx = 0;
-		c.gridwidth = 2;
 		teamPanel.add(GUIFactory.getStyledSeparator(), c);
 		c.gridy++;
-		c.gridwidth = 2;
 		c.weighty = 1;
 
 		JPanel playerList = GUIFactory.getTransparentPanel();
@@ -292,7 +306,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 	 */
 	private void setTypeSelection(CharType type) {
 		//typeIcon.setIcon(new ImageIcon(Sprite.getImage(type, clientPlayer.team)));
-		typeName.setText(type.toString());
+		typeName.setText(String.valueOf((char)type.id));
 		sendRequest(new ChangeCharacterRequest(clientPlayer.id, type));
 	}
 
@@ -329,7 +343,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 			// atm only team game with 2 teams, so
 			int to = clientPlayer.team == 0 ? 1 : 0;
 			sendRequest(new SwitchTeamRequest(clientPlayer.id, to));
-		} else if (arg0.getSource() == readyButton) {
+		} else if (arg0.getSource() == readyButton && clientPlayer.spawnId!=-1) {
 			sendRequest(new ToggleReadyRequest(clientPlayer.id, !clientPlayer.active));
 		} else if (arg0.getSource() == left && clientPlayer.spawnId!=-1) {
 			List<CharType> setups = spawnPanels.get(clientPlayer.spawnId).spawn.setups;
@@ -337,7 +351,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 			if (currentType < 0)
 				currentType = setups.size()-1;
 			setTypeSelection(setups.get(currentType));
-		} else if (arg0.getSource() == right) {
+		} else if (arg0.getSource() == right && clientPlayer.spawnId!=-1) {
 			List<CharType> setups = spawnPanels.get(clientPlayer.spawnId).spawn.setups;
 			currentType++;
 			if (currentType >= setups.size())
@@ -393,7 +407,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 						ClientPlayer p = findPlayer(request.id);
 						players.remove(p);
 					} else if (message instanceof StartGameRequest) {
-						game.setScreen(new GameScreen(game, clientPlayer.id, connection, config.arena, players));
+						game.setScreen(new GameScreen(game, clientPlayer, connection, config.arena, players));
 						break;
 					} else if (message instanceof ChangeSpawnRequest) {
 						ChangeSpawnRequest request = ((ChangeSpawnRequest) message);
@@ -403,6 +417,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 							// update the source
 							if (p.spawnId==-1) {
 								idlePlayers.remove(p);
+								idlePlayersModel.invalidate();
 							} else {
 								SpawnPanel source = spawnPanels.get(p.spawnId);
 								if (source.clientPlayer==p) {
@@ -413,12 +428,20 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 							// update the destination
 							if (request.spawnId==-1) {
 								idlePlayers.add(p);
+								idlePlayersModel.invalidate();
 								p.team = -1;
+								p.active = false;
+								typeName.setText("?");
 							} else {
 								SpawnPanel target = spawnPanels.get(request.spawnId);
 								target.setPlayer(p);
 								p.team = target.spawn.team;
 								p.type = target.spawn.setups.get(0);
+								
+								if (p==clientPlayer) {
+									currentType = 0;
+									setTypeSelection(target.spawn.setups.get(0));
+								}
 							}
 							p.spawnId = request.spawnId;
 							
@@ -430,6 +453,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 						ToggleReadyRequest request = ((ToggleReadyRequest) message);
 						ClientPlayer p = findPlayer(request.id);
 						p.active = request.ready;
+						spawnPanels.get(p.spawnId).update();
 						// INVALIDATE
 					} else if (message instanceof ChangeCharacterRequest) {
 						ChangeCharacterRequest request = ((ChangeCharacterRequest) message);
@@ -463,7 +487,9 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 			spawn = sp;
 			
 			type = new JLabel("?");
-			player = new JLabel();
+			player = new JLabel(" ");
+			GUIFactory.stylizeMenuComponent(type);
+			GUIFactory.stylizeMenuComponent(player);
 			
 			add(type);
 			add(player);
@@ -490,16 +516,17 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 			clientPlayer = p;
 			if (p!=null) {
 				player.setText(p.name);
+				update();
 			} else {
-				player.setText("");
+				player.setText(" ");
 			}
 		}
 		
 		public void update() {
 			if (clientPlayer.active) {
-				player.setForeground(Color.LIGHT_GRAY);
+				player.setForeground(Color.WHITE);
 			} else {
-				player.setForeground(Color.DARK_GRAY);
+				player.setForeground(Color.GRAY);
 			}
 		}
 	}

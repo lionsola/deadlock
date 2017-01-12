@@ -13,7 +13,7 @@ import server.character.InputControlledEntity;
 public class CharData implements Serializable {
 	
 	private static final long serialVersionUID = 951232578889372942L;
-	public short id;
+	public int id;
 	public byte team;
 	public byte weapon;
 	
@@ -29,7 +29,7 @@ public class CharData implements Serializable {
 	public float exposure;
 	
 	public CharData(InputControlledEntity e) {
-		id = (short) e.id;
+		id = e.id;
 		team = (byte) e.team;
 		weapon = (byte) e.getWeapon().getId();
 		
@@ -48,7 +48,7 @@ public class CharData implements Serializable {
 	}
 	
 	public CharData(Entity e) {
-		id = (short) e.id;
+		id = e.id;
 		team = (byte) e.team;
 		
 		x = (float) e.getX();

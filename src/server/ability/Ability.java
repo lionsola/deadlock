@@ -14,6 +14,7 @@ public abstract class Ability {
 	public static final int BINO_ID = 102;
 	public static final int SCOPE_ID = 103;
 	public static final int AMP_ID = 104;	
+	public static final int LIGHT_ID = 105;
 	
 	public final long cooldown;
 	private long cooldownTimer;

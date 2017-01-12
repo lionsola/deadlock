@@ -2,9 +2,9 @@ package client.graphics;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.io.Serializable;
 
-import client.gui.GameWindow;
-import shared.core.Vector2D;
+import shared.core.Vector3D;
 
 /**
  * Creates 2D particles and enables their movement.
@@ -12,20 +12,19 @@ import shared.core.Vector2D;
  * @author Anh Pham
  * @author Shobitha Shivakumar
  */
-public class ParticleAnimation extends BasicAnimation {
-
-	private Vector2D loc; // location of the particle
-	private Vector2D vel; // velocity of the particle
-	private Vector2D acc; // acceleration of the particle
-	private Vector2D size; // size of the particle
-	private Vector2D maxSize; // maximum size allowed for the particle
-	private Vector2D growth; // growth in size of particle
-	private double rotation;
+public class ParticleAnimation extends BasicAnimation implements Cloneable, Serializable {
+	private static final long serialVersionUID = 831617922864676426L;
+	private Vector3D loc; // location of the particle
+	private Vector3D vel; // velocity of the particle
+	private Vector3D acc; // acceleration of the particle
+	
+	private double initSize; // size of the particle
 	private double rotationSpeed;
 	private Color color; // colour of particle
-
-	private boolean ultSize = false;
-	private boolean defaultSize = false;
+	
+	transient private double rotation;
+	transient private double size; 
+	transient private int alpha;
 
 	/**
 	 * Creates a moving particle.
@@ -47,20 +46,22 @@ public class ParticleAnimation extends BasicAnimation {
 	 */
 	public ParticleAnimation(double x, double y, double direction, double speed, double size, long life, Color c) {
 		super((long) life);
-		this.loc = new Vector2D(x, y);
+		this.loc = new Vector3D(x, y, 1);
 		double dx = Math.cos(direction) * speed;
 		double dy = -Math.sin(direction) * speed;
-		this.vel = new Vector2D(dx, dy);
-		this.acc = new Vector2D(0, 0);
+		this.vel = new Vector3D(dx, dy, 0);
+		this.acc = new Vector3D(0, 0, -0.016);
 		this.life = life;
-		this.size = new Vector2D(size, size);
-		this.growth = new Vector2D(0, 0);
-		this.maxSize = new Vector2D(Double.MAX_VALUE, Double.MAX_VALUE);
+		this.initSize = size;
+		this.size = size;
 		this.color = c;
-		acc.mult(GameWindow.MS_PER_UPDATE);
-		vel.mult(GameWindow.MS_PER_UPDATE);
-		growth.mult(GameWindow.MS_PER_UPDATE);
-		rotation *= GameWindow.MS_PER_UPDATE;
+	}
+	
+	public ParticleAnimation(long life) {
+		super(life);
+		loc = new Vector3D(0,0,1);
+		vel = new Vector3D(0,0,0);
+		acc = new Vector3D(0,0,-0.016);
 	}
 
 	/**
@@ -69,53 +70,23 @@ public class ParticleAnimation extends BasicAnimation {
 	 * @return boolean indicates whether a particle has finished updating itself.
 	 */
 	@Override
-	public void update() {
-		super.update();
+	public void update(AnimationSystem as) {
+		super.update(as);
 		vel.add(acc);
 		loc.add(vel);
-		size.add(growth);
-		rotation += rotationSpeed;
-		
-		if (defaultSize) {
-			if (size.x >= maxSize.x) {
-				size.x = maxSize.x;
-			}
-			if (size.y >= maxSize.y)
-				size.y = maxSize.y;
-			if (size.x <= 0) {
-				size.x = 1;
-			}
-			if (size.y <= 0) {
-				size.y = 1;
+		if (loc.z<0) {
+			loc.z = 0;
+			if (vel.z < 0) {
+				vel.z = -vel.z/2;
 			}
 		}
-
-		if (ultSize) {
-			if (size.x > maxSize.x) {
-				size.x = maxSize.x;
-				growth.x *= -1;
-			}
-			if (size.y > maxSize.y) {
-				size.y = maxSize.y;
-				growth.y *= -1;
-			}
-			if (size.x <= 0) {
-				size.x = 1;
-				growth.x *= -1;
-			}
-			if (size.y <= 0) {
-				size.y = 1;
-				growth.y *= -1;
-			}
-		} else { // We stop growing or shrinking.
-			if (size.x > maxSize.x)
-				size.x = maxSize.x;
-			if (size.y > maxSize.y)
-				size.y = maxSize.y;
-			if (size.x <= 0)
-				size.x = 1;
-			if (size.y <= 0)
-				size.y = 1;
+		
+		rotation += rotationSpeed;
+		size = initSize*(0.5+loc.z/2);
+		alpha = (int) Math.max(0, Math.min(color.getAlpha(),color.getAlpha()*2*life/duration));
+		if (life/2>0) {
+			Color c = new Color(color.getRed(),color.getGreen(),color.getBlue(),alpha);
+			as.addCustomAnimation(new LineAnimation(Math.min(500,life/2), loc.x, loc.y, loc.x-vel.x, loc.y-vel.y, size, c));
 		}
 	}
 
@@ -124,16 +95,34 @@ public class ParticleAnimation extends BasicAnimation {
 	 */
 	@Override
 	public void render(Graphics2D g2D) {
-		g2D.setColor(color);
-		if (rotation!=0) {
-			g2D.rotate(-rotation, loc.x, loc.y);
-			Renderer.fillCircle(g2D,loc.x,loc.y,size.x);
-			g2D.rotate(rotation, loc.x, loc.y);
-		} else {
-			Renderer.fillCircle(g2D,loc.x,loc.y,size.x);
+		if (alpha>0) {
+			Color c = new Color(color.getRed(),color.getGreen(),color.getBlue(),alpha);
+			g2D.setColor(c);
+			if (rotation!=0) {
+				double px = Renderer.getPPM()*loc.x;
+				double py = Renderer.getPPM()*loc.y;
+				double rot = rotation;
+				synchronized (g2D) {
+					g2D.rotate(-rot, px, py);
+					Renderer.fillRect(g2D,loc.x-size,loc.y-size,size*2,size*2);
+					g2D.rotate(rot, px, py);
+				}
+			} else {
+				Renderer.fillRect(g2D,loc.x-size,loc.y-size,size*2,size*2);
+			}
 		}
 	}
 
+	public void setDirection(double direction, double speed) {
+		double dx = Math.cos(direction) * speed;
+		double dy = -Math.sin(direction) * speed;
+		setVel(dx, dy, vel.z);
+	}
+	
+	public double getDirection() {
+		return Math.atan2(-vel.y, vel.x);
+	}
+	
 	/**
 	 * Sets a new location for the particle.
 	 * 
@@ -142,11 +131,17 @@ public class ParticleAnimation extends BasicAnimation {
 	 * @param y
 	 *            the y coordinate of the particle.
 	 */
-	public void setLoc(double x, double y) {
+	public void setLoc(double x, double y, double z) {
+		loc.x = x;
+		loc.y = y;
+		loc.z = z;
+	}
+
+	public void set2DLoc(double x, double y) {
 		loc.x = x;
 		loc.y = y;
 	}
-
+	
 	/**
 	 * Sets a new velocity for the particle.
 	 * 
@@ -155,9 +150,10 @@ public class ParticleAnimation extends BasicAnimation {
 	 * @param y
 	 *            change in the y coordinate of the particle.
 	 */
-	public void setVel(double x, double y) {
+	public void setVel(double x, double y, double z) {
 		vel.x = x;
 		vel.y = y;
+		vel.z = z;
 	}
 
 	/**
@@ -168,9 +164,10 @@ public class ParticleAnimation extends BasicAnimation {
 	 * @param y
 	 *            change in the y coordinate of the acceleration of the particle.
 	 */
-	public void setAcc(double x, double y) {
+	public void setAcc(double x, double y, double z) {
 		acc.x = x;
 		acc.y = y;
+		acc.z = z;
 	}
 
 	/**
@@ -181,37 +178,14 @@ public class ParticleAnimation extends BasicAnimation {
 	 * @param y
 	 *            change in the y coordinate of the size of the particle.
 	 */
-	public void setSize(double x, double y) {
-		size.x = x;
-		size.y = y;
+	public void setSize(double size) {
+		this.initSize = size;
 	}
 
-	/**
-	 * Sets the maximum size of a particle.
-	 * 
-	 * @param x
-	 *            change in the x coordinate of the maximum size of the particle.
-	 * @param y
-	 *            change in the y coordinate of the maximum size of the particle.
-	 */
-	public void setMaxSize(double x, double y) {
-		maxSize.x = x;
-		maxSize.y = y;
+	public Vector3D getVelocity() {
+		return vel;
 	}
-
-	/**
-	 * Sets the growth allowed for a particle.
-	 * 
-	 * @param x
-	 *            change in the x coordinate of the growth of the particle.
-	 * @param y
-	 *            change in the y coordinate of the growth of the particle.
-	 */
-	public void setGrowth(double x, double y) {
-		growth.x = x*GameWindow.MS_PER_UPDATE;
-		growth.y = y*GameWindow.MS_PER_UPDATE;
-	}
-
+	
 	/**
 	 * Sets the life for a particle.
 	 * 
@@ -224,17 +198,12 @@ public class ParticleAnimation extends BasicAnimation {
 		life = num;
 	}
 
-	public void setSizeDefault(boolean c) {
-		defaultSize = c;
-	}
-
-	public void setUltSize(boolean c) {
-		defaultSize = false;
-		ultSize = c;
-	}
-
 	public void setRotationSpeed(double rotSpeed) {
 		rotationSpeed = rotSpeed;
+	}
+	
+	public double getSpeed() {
+		return Math.sqrt(vel.x*vel.x + vel.y*vel.y);
 	}
 	
 	/**
@@ -250,15 +219,35 @@ public class ParticleAnimation extends BasicAnimation {
 	/**
 	 * Gets the location of a particle.
 	 */
-	public Vector2D getLoc() {
+	public Vector3D getLoc() {
 		return loc;
 	}
 
 	/**
 	 * Gets the velocity of a particle.
 	 */
-	public Vector2D getVel() {
+	public Vector3D getVel() {
 		return vel;
 	}
+	
+	public Vector3D getAcc() {
+		return acc;
+	}
+	
+	@Override
+	public ParticleAnimation clone() {
+		ParticleAnimation p = new ParticleAnimation(duration);
+		p.acc = acc.clone();
+		p.loc = loc.clone();
+		p.vel = vel.clone();
+		p.color = color;
+		p.rotationSpeed = rotationSpeed;
+		p.initSize = initSize;
+		
+		return p;
+	}
 
+	public Color getColor() {
+		return color;
+	}
 }

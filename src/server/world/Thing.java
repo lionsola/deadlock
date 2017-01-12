@@ -4,12 +4,12 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 
+import client.graphics.ParticleSource;
 import editor.CellRenderable;
 import editor.Identifiable;
 import editor.ImageLoadable;
-import server.world.trigger.TileSwitchPreset.Switchable;
 
-public class Thing implements Switchable, CellRenderable, Identifiable, Serializable, ImageLoadable {
+public class Thing implements CellRenderable, Identifiable, Serializable, ImageLoadable {
 	private static final long serialVersionUID = 5048693025792883019L;
 
 	public Thing(int id) {
@@ -24,12 +24,15 @@ public class Thing implements Switchable, CellRenderable, Identifiable, Serializ
 	protected Color color;
 	protected Light light;
 	protected SoundSource sound;
+	
 	protected String name;
 	protected String imageName;
 	
 	protected boolean border;
 	
 	protected double spriteSize; // in meters
+	
+	protected ParticleSource ps;
 	protected transient BufferedImage objectImage;
 	
 	/**
@@ -178,5 +181,13 @@ public class Thing implements Switchable, CellRenderable, Identifiable, Serializ
 	
 	public void setLayer(int layer) {
 		this.layer = layer;
+	}
+
+	public ParticleSource getParticleSource() {
+		return ps;
+	}
+
+	public void setParticleSource(ParticleSource ps) {
+		this.ps = ps;
 	}
 }

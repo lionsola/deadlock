@@ -18,9 +18,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import editor.Editor;
+import server.world.Thing;
 import server.world.Utils;
 import server.world.trigger.TileSwitchPreset;
-import server.world.trigger.TileSwitchPreset.Switchable;
 
 public class TileSwitchDialog extends JDialog implements ActionListener, ItemListener {
 	private static final long serialVersionUID = 5917436825785813483L;
@@ -39,8 +39,8 @@ public class TileSwitchDialog extends JDialog implements ActionListener, ItemLis
 	
 	TileSwitchPreset triggerPreset;
 	
-	Switchable originalThing;
-	Switchable switchThing;
+	Thing originalThing;
+	Thing switchThing;
 	
 	private JFormattedTextField soundId;
 	private JFormattedTextField soundVolume;
@@ -154,20 +154,12 @@ public class TileSwitchDialog extends JDialog implements ActionListener, ItemLis
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource()==chooseSwitchThing) {
 			// show a list dialog and let the user choose
-			if (itemType.getSelectedIndex()==TileSwitchPreset.THING) {
-				switchThing = ListDialog.selectFromList(editor.getObjectTable().values(), this);
-			} else if (itemType.getSelectedIndex()==TileSwitchPreset.MISC) {
-				switchThing = ListDialog.selectFromList(editor.miscTable.values(), this);
-			}
+			switchThing = ListDialog.selectFromList(editor.getObjectTable().values(), this);
 			switchThingIcon.setIcon(new ImageIcon(switchThing.getImage()));
 			pack();
 		} else if (e.getSource()==chooseOriThing) {
 			// show a list dialog and let the user choose
-			if (itemType.getSelectedIndex()==TileSwitchPreset.THING) {
-				originalThing = ListDialog.selectFromList(editor.getObjectTable().values(), this);
-			} else if (itemType.getSelectedIndex()==TileSwitchPreset.MISC) {
-				originalThing = ListDialog.selectFromList(editor.miscTable.values(), this);
-			}
+			originalThing = ListDialog.selectFromList(editor.getObjectTable().values(), this);
 			originalThingIcon.setIcon(new ImageIcon(originalThing.getImage()));
 			pack();
 		}

@@ -24,6 +24,7 @@ public class NPC extends InputControlledEntity {
 			for (GameEvent e:getPerception().events) {
 				brain.processEvent(e);
 			}
+			getPerception().events.clear();
 			brain.update(getPerception());
 		}
 	}

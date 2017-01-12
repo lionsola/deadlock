@@ -31,6 +31,10 @@ public class Utils {
 		return Utils.randomizer;
 	}
 
+	public static int meterToTile(double m) {
+		return (int)(m/Terrain.tileSize);
+	}
+	
 	public static double getVolumeAtDistance(double volume, double distance, double hearF) {
 		double reducedByDistance = World.DISTANCE_VOLUME_DROP_RATE * distance / hearF;
 		return (volume - reducedByDistance);

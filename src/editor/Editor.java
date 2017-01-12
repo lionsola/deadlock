@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -14,6 +13,8 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.HashMap;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -26,7 +27,6 @@ import editor.tools.Tool;
 import server.world.Thing;
 import server.world.Arena.ArenaData;
 import server.world.trigger.TileSwitchPreset;
-import server.world.Misc;
 import server.world.Terrain;
 
 /**
@@ -63,7 +63,6 @@ public class Editor extends JFrame implements KeyListener {
 	HashMap<Integer,Terrain> tileTable;
 	HashMap<Integer,Thing> objectTable;
 	HashMap<Integer,TileSwitchPreset> triggerTable;
-	public HashMap<Integer,Misc> miscTable;
 	private AudioManager audioManager;
 	
 	public boolean tileDataChanged = false;
@@ -89,12 +88,7 @@ public class Editor extends JFrame implements KeyListener {
         
         objectTable = (HashMap<Integer, Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
         DataManager.loadImage(objectTable.values());
-        
-        miscTable = (HashMap<Integer, Misc>) DataManager.loadObject(DataManager.FILE_MISC);
-        if (miscTable==null) {
-        	miscTable = new HashMap<Integer,Misc>();
-        }
-        DataManager.loadImage(miscTable.values());
+        DataManager.updateParticleSource(objectTable.values());
 
         triggerTable = (HashMap<Integer, TileSwitchPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
         if (triggerTable==null) {
@@ -102,18 +96,14 @@ public class Editor extends JFrame implements KeyListener {
         }
         for (TileSwitchPreset tp:triggerTable.values()) {
         	try {
-	        	if (tp.getItemType()==TileSwitchPreset.THING) {
-		        	tp.setSwitchThing(objectTable.get(tp.getSwitchThingID()));
-		        	tp.setOriginalThing(objectTable.get(tp.getOriginalThingID()));
-	        	} else if (tp.getItemType()==TileSwitchPreset.MISC) {
-	        		tp.setSwitchThing(miscTable.get(tp.getSwitchThingID()));
-	        		tp.setOriginalThing(miscTable.get(tp.getOriginalThingID()));
-	        	}
+	        	tp.setSwitchThing(objectTable.get(tp.getSwitchThingID()));
+	        	tp.setOriginalThing(objectTable.get(tp.getOriginalThingID()));
         	} catch (Exception e) {
         		System.err.println("Error while loading tile switch preset "+tp.getName());
         		e.printStackTrace();
         	}
         }
+        
         audioManager = new AudioManager();
         
         getContentPane().setLayout(new BorderLayout());
@@ -134,7 +124,6 @@ public class Editor extends JFrame implements KeyListener {
 	        		DataManager.saveObject(tileTable, DataManager.FILE_TILES);
 	        		DataManager.saveObject(objectTable, DataManager.FILE_OBJECTS);
 	        		DataManager.saveObject(triggerTable, DataManager.FILE_TRIGGERS);
-	        		DataManager.saveObject(miscTable, DataManager.FILE_MISC);
         		}
         	}
         });
@@ -148,6 +137,7 @@ public class Editor extends JFrame implements KeyListener {
     public void backupTileList() {
     	DataManager.saveObject(tileTable, DataManager.FILE_TILES+"_backup");
     	DataManager.saveObject(objectTable, DataManager.FILE_OBJECTS+"_backup");
+    	DataManager.saveObject(triggerTable, DataManager.FILE_TRIGGERS+"_backup");
     }
     
     @Override
@@ -203,7 +193,7 @@ public class Editor extends JFrame implements KeyListener {
             File file = fc.getSelectedFile();
             Object o = DataManager.loadObject(file);
             if (o instanceof ArenaData) {
-            	a = new EditorArena((ArenaData)o,tileTable,objectTable,triggerTable,miscTable);
+            	a = new EditorArena((ArenaData)o,tileTable,objectTable,triggerTable);
             }
         }
         if (a!=null) {
@@ -284,5 +274,21 @@ public class Editor extends JFrame implements KeyListener {
 
 	public AudioManager getAudioManager() {
 		return audioManager;
+	}
+
+	public static String printAnything(Object object) {
+	    if (object!=null && object.getClass().isArray()) {
+	        if (object instanceof Object[]) // can we cast to Object[]
+	            return Arrays.toString((Object[]) object);
+	        else {  // we can't cast to Object[] - case of primitive arrays
+	            int length = Array.getLength(object);
+	            Object[] objArr = new Object[length];
+	            for (int i=0; i<length; i++)
+	                objArr[i] =  Array.get(object, i);
+	            return Arrays.toString(objArr);
+	        }
+	    } else {
+	    	return String.valueOf(object);
+	    }
 	}
 }

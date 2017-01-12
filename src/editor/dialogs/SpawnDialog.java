@@ -6,8 +6,6 @@ import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.List;
-
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -24,6 +22,7 @@ import editor.SpawnPoint.SpawnType;
 
 public class SpawnDialog extends JDialog {
 	private static final long serialVersionUID = 5917436825785813483L;
+	private JLabel id;
 	private JComboBox<Integer> player;
 	private JComboBox<Behaviour> behaviour;
 	private JComboBox<String> level;
@@ -43,12 +42,14 @@ public class SpawnDialog extends JDialog {
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
         
+        id = new JLabel("?");
         String[] levels = {"0", "1", "2"};
         level = new JComboBox<String>(levels);
         
         characters = new JList<SpawnPoint.CharType>(CharType.values());
         characters.setLayoutOrientation(JList.HORIZONTAL_WRAP);
         characters.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        characters.setSelectedIndex(0);
         characters.setVisibleRowCount(-1);
         
         behaviour = new JComboBox<SpawnPoint.Behaviour>(SpawnPoint.Behaviour.values());
@@ -63,6 +64,8 @@ public class SpawnDialog extends JDialog {
         
         c.gridx = 0;
         c.gridy = 0;
+        panel.add(new JLabel("ID: "));
+        c.gridy++;
         panel.add(new JLabel("Level: "),c);
         c.gridy++;
         panel.add(new JLabel("Team: "),c);
@@ -77,6 +80,8 @@ public class SpawnDialog extends JDialog {
         
         c.gridx = 1;
         c.gridy = 0;
+        panel.add(id);
+        c.gridy++;
         panel.add(level,c);
         c.gridy++;
         panel.add(team,c);
@@ -115,6 +120,7 @@ public class SpawnDialog extends JDialog {
 	
 	public void setSpawn(SpawnPoint s) {
 		if (s!=null) {
+			id.setText(String.valueOf(s.getId()));
 			level.setSelectedIndex(s.level);
 			team.setSelectedIndex(s.team);
 			player.setSelectedItem(s.players);
@@ -124,6 +130,8 @@ public class SpawnDialog extends JDialog {
 			}
 			spawnType.setSelectedItem(s.type);
 			behaviour.setSelectedItem(s.behaviour);
+		} else {
+			id.setText("?");
 		}
 	}
 }

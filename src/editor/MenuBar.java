@@ -4,6 +4,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 
 import javax.swing.BoxLayout;
@@ -17,6 +19,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import editor.dialogs.MissionDialog;
+import editor.tools.Tool;;
 
 public class MenuBar extends JMenuBar {
 	private static final long serialVersionUID = 1984099892818541571L;
@@ -177,6 +182,26 @@ public class MenuBar extends JMenuBar {
 				}
 			}});
 		edit.add(editSize);
+		
+		final JMenuItem editMission = new JMenuItem("Mission");
+		editMission.addActionListener(new ActionListener() {
+			MissionDialog dialog = null;
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (dialog==null) {
+					dialog = new MissionDialog(editor);
+				}
+				if (!dialog.isVisible()) {
+					dialog.setVisible(true);
+				}
+				editor.setTool(new Tool.MissionVarChooser(editor.getArenaPanel(), dialog));
+				dialog.addWindowListener(new WindowAdapter() {
+					public void windowClosing(WindowEvent e) {
+						editor.setTool(new Tool.MoveTool(editor.getArenaPanel()));
+					}
+				});
+			}});
+		edit.add(editMission);
 		
 		JMenu view = new JMenu("View");
 		add(view);

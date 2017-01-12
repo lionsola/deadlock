@@ -1,13 +1,14 @@
 package client.graphics;
 
 import java.awt.Graphics2D;
+import java.io.Serializable;
 
 /**
  * Base class of every animation in the game. All subclasses must implement render and usually also
  * override update.
  */
-public abstract class BasicAnimation {
-
+public abstract class BasicAnimation implements Serializable {
+	private static final long serialVersionUID = 386731074001226329L;
 	protected final long duration;
 	protected long life;
 	protected long lastTick = 0;
@@ -38,7 +39,7 @@ public abstract class BasicAnimation {
 	 * 
 	 * @return
 	 */
-	public void update() {
+	public void update(AnimationSystem as) {
 		long elapsed = System.currentTimeMillis() - lastTick;
 		if (delay > 0) {
 			delay -= elapsed;
