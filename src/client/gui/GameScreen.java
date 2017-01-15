@@ -794,13 +794,15 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			TileChanged e = (TileChanged) event;
 			if (e.itemType==TileSwitchPreset.THING) {
 				arena.get(e.tx, e.ty).setThing(objectTable.get(e.switchThingID));
+				renderer.redrawArenaImage(arena,e.tx,e.ty,arena.get(e.tx,e.ty).getThing().getLayer());
 			} else if (e.itemType==TileSwitchPreset.MISC) {
 				arena.get(e.tx, e.ty).setMisc(objectTable.get(e.switchThingID));
+				renderer.redrawArenaImage(arena,e.tx,e.ty,arena.get(e.tx,e.ty).getMisc().getLayer());
 			}
 			arena.recalculateStaticLights();
 			lightImageChanged = true;
 			
-			renderer.redrawArenaImage(arena,e.tx,e.ty,arena.get(e.tx,e.ty).getThing().getLayer());
+			
 		} else if (event instanceof RoundEnd) {
 			RoundEnd e = (RoundEnd) event;
 			winnerText.setText("Team "+e.winner+" won!");

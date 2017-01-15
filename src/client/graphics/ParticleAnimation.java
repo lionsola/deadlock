@@ -13,6 +13,25 @@ import shared.core.Vector3D;
  * @author Shobitha Shivakumar
  */
 public class ParticleAnimation extends BasicAnimation implements Cloneable, Serializable {
+	public enum GroundInteraction {
+		Bounce {
+			@Override
+			public Vector3D getVelAfterImpact(Vector3D preVel) {
+				return new Vector3D(preVel.x,preVel.y,-preVel.z*2/3);
+			}
+		}, Slide {
+			@Override
+			public Vector3D getVelAfterImpact(Vector3D preVel) {
+				return new Vector3D(preVel.x,preVel.y,0);
+			}
+		}, Stop {
+			@Override
+			public Vector3D getVelAfterImpact(Vector3D preVel) {
+				return new Vector3D(0,0,0);
+			}
+		};
+		abstract public Vector3D getVelAfterImpact(Vector3D preVel);
+	}
 	private static final long serialVersionUID = 831617922864676426L;
 	private Vector3D loc; // location of the particle
 	private Vector3D vel; // velocity of the particle
@@ -21,6 +40,7 @@ public class ParticleAnimation extends BasicAnimation implements Cloneable, Seri
 	private double initSize; // size of the particle
 	private double rotationSpeed;
 	private Color color; // colour of particle
+	private GroundInteraction gi = GroundInteraction.Bounce;
 	
 	transient private double rotation;
 	transient private double size; 
@@ -76,9 +96,7 @@ public class ParticleAnimation extends BasicAnimation implements Cloneable, Seri
 		loc.add(vel);
 		if (loc.z<0) {
 			loc.z = 0;
-			if (vel.z < 0) {
-				vel.z = -vel.z/2;
-			}
+			vel = gi.getVelAfterImpact(vel);
 		}
 		
 		rotation += rotationSpeed;
@@ -243,11 +261,20 @@ public class ParticleAnimation extends BasicAnimation implements Cloneable, Seri
 		p.color = color;
 		p.rotationSpeed = rotationSpeed;
 		p.initSize = initSize;
+		p.gi = gi;
 		
 		return p;
 	}
 
 	public Color getColor() {
 		return color;
+	}
+
+	public GroundInteraction getGroundInteraction() {
+		return gi;
+	}
+
+	public void setGroundInteraction(GroundInteraction gi) {
+		this.gi = gi;
 	}
 }

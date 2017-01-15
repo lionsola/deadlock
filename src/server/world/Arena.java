@@ -317,7 +317,7 @@ public class Arena {
 				int l = Math.max(c.getRed(), Math.max(c.getGreen(), c.getBlue()));
 				int level = (int)Math.ceil(l/INTERVAL);
 				
-				float ratio = l==0?0:(level*INTERVAL/l);
+				float ratio = l==0?0:(level*255.0f/LEVELS/l);
 				
 				int r = clampLight(c.getRed()*ratio);
 				int g = clampLight(c.getGreen()*ratio);

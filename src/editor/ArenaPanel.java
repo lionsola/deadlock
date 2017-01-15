@@ -45,6 +45,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	protected boolean renderLightSource = false;
 	protected boolean renderGrid = false;
 	protected boolean renderConfig = false;
+	protected boolean renderMiscConfig = false;
 	protected boolean renderTileSwitchTrigger = false;
 	protected boolean renderSpawns = true;
 	
@@ -58,6 +59,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	private Thread thread;
 	private Editor editor;
 	private AnimationSystem particles = new AnimationSystem();
+	//private List<ParticleAnimation> particles;
 	public boolean lightImageChanged = true;
 	
 	public ArenaPanel (Editor editor, EditorArena arena) {
@@ -215,7 +217,10 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 			Renderer.renderGrid(g2D, arena, window);
 		}
 		if (renderConfig) {
-			Renderer.renderSpriteConfig(g2D, arena, window);
+			Renderer.renderSpriteConfig(g2D, arena, window, false);
+		}
+		if (renderMiscConfig) {
+			Renderer.renderSpriteConfig(g2D, arena, window, true);
 		}
 		if (renderTileSwitchTrigger) {
 			Renderer.renderTrigger(g2D, arena, window);

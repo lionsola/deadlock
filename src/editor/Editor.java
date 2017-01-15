@@ -255,14 +255,14 @@ public class Editor extends JFrame implements KeyListener {
 	@Override
 	public void keyPressed(KeyEvent arg0) {
 		if (arg0.getKeyCode()==KeyEvent.VK_ALT && currentTool!=null) {
-			currentTool.setAlternative(true);
+			currentTool.setAlternative(!currentTool.isAlternative());
 		}
 	}
 
 	@Override
 	public void keyReleased(KeyEvent arg0) {
 		if (arg0.getKeyCode()==KeyEvent.VK_ALT && currentTool!=null) {
-			currentTool.setAlternative(false);
+			//currentTool.setAlternative(false);
 		}
 	}
 

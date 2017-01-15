@@ -481,50 +481,6 @@ public class Renderer {
 		for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
 				drawTerrain(g2D,a,x,y);
-				/*
-				Terrain t = a.get(x, y).getTerrain();
-				if (t==null || t.getId()==0)
-					continue;
-				
-				if (t.getId()==Terrain.BLEND) {
-					Terrain[] results = new Terrain[4];
-					int i = 0;
-					for (int xi=-1;xi<=1;xi+=2) {
-						for (int yi=-1;yi<=1;yi+=2) {
-							Terrain result = blendVote(a.get(x+xi, y).getTerrain(),
-									a.get(x, y+yi).getTerrain(),a.get(x+xi, y+yi).getTerrain());
-							results[i] = result;
-							
-							if (result==null || result.getId()==0)
-								continue;
-							
-							BufferedImage image = result.getImage();
-							int w = image.getWidth()/32;
-							int h = image.getHeight()/32;
-							double xM = (x%w)*ts;
-							double yM = (y%h)*ts;
-							
-							
-							drawImage(g2D,image, xM+ts*(xi+1.0)/4, yM+ts*(yi+1.0)/4, ts/2, ts/2,
-									x*ts+ts*(xi+1)/4, y*ts+ts*(yi+1)/4, ts/2, ts/2);
-							results[i] = result;
-							i++;
-						}
-					}
-					// double-check if there's any useless blend spot
-					if (results[0]==results[1] && results[1]==results[2] && results[2]==results[3]) {
-						g2D.setColor(Color.WHITE);
-						fillRect(g2D,x*ts,y*ts,ts,ts);
-					}
-				} else {
-					BufferedImage image = t.getImage();
-					int w = image.getWidth()/32;
-					int h = image.getHeight()/32;
-					double xM = (x%w)*ts;
-					double yM = (y%h)*ts;
-					
-					drawImage(g2D,image, xM, yM, ts, ts, x*ts, y*ts, ts, ts);
-				}*/
 			}
 		}
 	}
@@ -596,7 +552,7 @@ public class Renderer {
 		}
 	}
 	
-	public static void renderSpriteConfig(Graphics2D g2D, EditorArena a, Rectangle2D window) {
+	public static void renderSpriteConfig(Graphics2D g2D, EditorArena a, Rectangle2D window, boolean misc) {
 		double ts = Terrain.tileSize;
 		int x1 = Math.max(0, (int) (window.getX() / ts));
 		int y1 = Math.max(0, (int) (window.getY() / ts));
@@ -608,7 +564,12 @@ public class Renderer {
 		g2D.setStroke(new BasicStroke(1));
 		for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
-				SpriteConfig sc = a.get(x, y).getThingConfig();
+				SpriteConfig sc;
+				if (misc) {
+					sc = a.get(x, y).getMiscConfig();
+				} else {
+					sc = a.get(x, y).getThingConfig();
+				}
 				if (sc!=null) {
 					if (sc.flip) {
 						Renderer.drawLine(g2D, (x+0.8)*ts, (y+0.2)*ts, (x+0.8)*ts, (y+0.8)*ts);
@@ -643,7 +604,6 @@ public class Renderer {
 						Point2D c = Utils.tileToMeter(x, y);
 						Renderer.drawLine(g2D, c.getX(), c.getY(), c.getX()+p.getX(),c.getY()+p.getY());
 					}
-					
 					g2D.setColor(GUIFactory.UICOLOR);
 					for (TriggerEffect effect:tr.getEffects()) {
 						if (effect instanceof TriggerEffect.TileSwitch) {

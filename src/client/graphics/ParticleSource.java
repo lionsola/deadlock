@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.io.Serializable;
 import java.util.HashMap;
+
+import client.graphics.ParticleAnimation.GroundInteraction;
 import client.gui.GameWindow;
 import server.world.Terrain;
 import server.world.Utils;
@@ -29,10 +31,11 @@ public class ParticleSource implements Cloneable, Serializable {
 		pf.setColor(new Color(0x608080f0,true));
 		pf.setSize(0.3);
 		pf.setRotationSpeed(0.05);
+		pf.setGroundInteraction(GroundInteraction.Bounce);
 		presets.put(fountain.name,fountain);
 		
 		ParticleSource waterglow = new ParticleSource("Waterglow",1500);
-		waterglow.setInterval(4000);
+		waterglow.setInterval(5000);
 		waterglow.pSpeed = 0.001;
 		waterglow.random = false;
 		waterglow.spreadDistance = 0.5;
@@ -46,15 +49,22 @@ public class ParticleSource implements Cloneable, Serializable {
 		//pf.setRotationSpeed(0.001);
 		presets.put(waterglow.name,waterglow);
 		
-		ParticleSource smoke = new ParticleSource("Smoke",1000);
-		smoke.setInterval(200);
-		smoke.pSpeed = 0.1;
-		ParticleAnimation ps = smoke.getBaseParticle();
-		ps.setVel(0, 0, 0.01);
-		ps.setColor(new Color(0x323232));
+		ParticleSource leaves = new ParticleSource("Leaves",2200);
+		leaves.setInterval(1000);
+		leaves.pSpeed = 0.01;
+		leaves.random = true;
+		leaves.spreadDistance = 4;
+		leaves.spreadAngle = Math.PI/6;
+		ParticleAnimation ps = leaves.getBaseParticle();
+		ps.setLoc(0, 0, 2);
+		ps.setVel(0, 0, -0.03);
+		ps.setAcc(0, 0, 0);
+		ps.setDirection(-Math.PI/5, 0.05);
+		ps.setColor(new Color(0xc0408040,true));
 		ps.setSize(0.2);
-		ps.setRotationSpeed(0.1);
-		presets.put(smoke.name,smoke);
+		ps.setRotationSpeed(0.02);
+		ps.setGroundInteraction(GroundInteraction.Stop);
+		presets.put(leaves.name,leaves);
 		
 		ParticleSource fire = new ParticleSource("Fire",2000);
 		fire.setInterval(150);

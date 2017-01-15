@@ -22,7 +22,7 @@ public class Tile implements Serializable {
 	}
 	
 	public boolean isClear() {
-		return thing==null || thing.isClear();
+		return (thing==null || thing.isClear()) && (misc==null || misc.isClear());
 	}
 	
 	public int coverType() {

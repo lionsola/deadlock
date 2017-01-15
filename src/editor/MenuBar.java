@@ -306,7 +306,7 @@ public class MenuBar extends JMenuBar {
 		});
 		view.add(grid);
 		
-		JCheckBoxMenuItem config = new JCheckBoxMenuItem("Sprite Config.");
+		JCheckBoxMenuItem config = new JCheckBoxMenuItem("Thing Sprite Config.");
 		config.setSelected(false);
 		config.addItemListener(new ItemListener() {
 			@Override
@@ -319,6 +319,20 @@ public class MenuBar extends JMenuBar {
 			}
 		});
 		view.add(config);
+		
+		JCheckBoxMenuItem mconfig = new JCheckBoxMenuItem("Misc Sprite Config.");
+		mconfig.setSelected(false);
+		mconfig.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					editor.getArenaPanel().renderMiscConfig = true;
+				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
+					editor.getArenaPanel().renderMiscConfig = false;
+				}
+			}
+		});
+		view.add(mconfig);
 		
 		view.addSeparator();
 		JCheckBoxMenuItem spawns = new JCheckBoxMenuItem("Spawn locations");

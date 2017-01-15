@@ -14,6 +14,7 @@ import javax.swing.event.MouseInputAdapter;
 
 import client.graphics.ParticleSource;
 import client.graphics.Renderer;
+import client.gui.GUIFactory;
 import editor.ArenaPanel;
 import editor.CellRenderable;
 import editor.SpawnPoint;
@@ -88,7 +89,11 @@ public abstract class Tool extends MouseInputAdapter {
 	}
 	
 	public void render(Graphics2D g2D) {
-		
+		if (isAlternative()) {
+			Point2D p = getPointedCoord();
+			g2D.setFont(GUIFactory.font_s_bold);
+			Renderer.drawString(g2D, "alt.",p.getX(),p.getY()-0.1);
+		}
 	}
 	
 	public static class TilePaint extends Tool {
@@ -152,6 +157,11 @@ public abstract class Tool extends MouseInputAdapter {
 		public void mouseDragged(MouseEvent e) {
 			super.mouseDragged(e);
 			mousePressed(e);
+		}
+		
+		@Override
+		public void render(Graphics2D g2D) {
+			super.render(g2D);
 		}
 	}
 	

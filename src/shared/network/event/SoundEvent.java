@@ -24,10 +24,6 @@ public class SoundEvent extends GameEvent {
 	public static final float BULLET_WALL_SOUND_VOLUME = 25;
 	public static final float PING_SOUND_VOLUME = 30;
 	public static final float FOOTSTEP_SOUND_VOLUME = 15;
-
-	
-	
-	
 	
 	public final float x;
 	public final float y;
