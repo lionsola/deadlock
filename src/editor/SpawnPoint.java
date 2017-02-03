@@ -7,7 +7,7 @@ import java.util.List;
 
 public class SpawnPoint implements Serializable {
 	public enum SpawnType {PlayerOnly,NPCOnly,Both}
-	public enum Behaviour {Patrol,Guard,Dummy}
+	public enum Behaviour {Patrol,Dummy,NPCPatroller,NPCWatcher}
 	public enum CharType {Alpha(0x03b1), Beta(0x03b2), Gamma(0x03b3), Pi(0x03c0), Ju(0x006a), Nu(0x03bd), Officer(0x0061), Agent(0x006f);
 		public final int id;
 		private CharType(int id) {

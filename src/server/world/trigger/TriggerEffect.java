@@ -41,6 +41,7 @@ public interface TriggerEffect extends Serializable {
 				t.setMisc(s);
 			}
 			w.getArena().recalculateStaticLights();
+			w.getArena().updateLightMap(w.getDynamicLights());
 			w.addEvent(new GameEvent.TileChanged(tx,ty,s.getId(),tp.getItemType()));
 			w.addSound(tp.getSoundID(), tp.getSoundVolume(), (tx+0.5)*Terrain.tileSize, (ty+0.5)*Terrain.tileSize);
 		}

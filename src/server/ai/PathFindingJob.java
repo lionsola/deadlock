@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import server.ai.PathFinder.Path;
+import server.ai.Searcher.Path;
 import server.world.Arena;
 import server.world.Geometry;
 import server.world.Terrain;

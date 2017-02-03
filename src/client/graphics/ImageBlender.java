@@ -253,4 +253,14 @@ public class ImageBlender {
 	public static BufferedImage createImage(int width, int height, int transparency) {
 		return ge.createCompatibleImage(width,height,Transparency.TRANSLUCENT);
 	}
+
+	public static BufferedImage applyColor(Color color, BufferedImage source) {
+		BufferedImage copy = deepCopy(source);
+		Graphics2D gunG = (Graphics2D)copy.getGraphics();
+		gunG.setComposite(new OverlayComposite(1.0f));
+		gunG.setColor(color);
+		gunG.fillRect(0, 0, copy.getWidth(), copy.getHeight());
+		gunG.dispose();
+		return copy;
+	}
 }

@@ -279,18 +279,18 @@ public class MenuBar extends JMenuBar {
 		});
 		view.add(light);
 		
-		JCheckBoxMenuItem hardLight = new JCheckBoxMenuItem("Hard light");
-		hardLight.addItemListener(new ItemListener() {
+		JCheckBoxMenuItem lightSource = new JCheckBoxMenuItem("Light source");
+		lightSource.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-					editor.getArenaPanel().renderHardLight = true;
+					editor.getArenaPanel().renderLightSource = true;
 				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
-					editor.getArenaPanel().renderHardLight = false;
+					editor.getArenaPanel().renderLightSource = false;
 				}
 			}
 		});
-		view.add(hardLight);
+		view.add(lightSource);
 		
 		JCheckBoxMenuItem grid = new JCheckBoxMenuItem("Grid");
 		grid.setSelected(true);
@@ -348,5 +348,19 @@ public class MenuBar extends JMenuBar {
 			}
 		});
 		view.add(spawns);
+		
+		JCheckBoxMenuItem particles = new JCheckBoxMenuItem("Particle sources");
+		particles.setSelected(false);
+		particles.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					editor.getArenaPanel().renderParticleSource = true;
+				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
+					editor.getArenaPanel().renderParticleSource = false;
+				}
+			}
+		});
+		view.add(particles);
 	}
 }

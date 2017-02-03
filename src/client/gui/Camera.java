@@ -13,8 +13,9 @@ import shared.network.FullCharacterData;
  */
 public class Camera {
 	private Component parent;
-	private int x;
-	private int y;
+	private double x;
+	private double y;
+	private double z;
 	private Arena arena;
 
 	/**
@@ -23,9 +24,10 @@ public class Camera {
 	 * @param arena
 	 *            The arena in the game
 	 */
-	public Camera(Arena arena, Component parent) {
+	public Camera(Arena arena, Component parent, int height) {
 		this.parent = parent;
 		this.arena = arena;
+		z = height;
 		//x = arenaWidthMeter / 2;
 		//y = arenaHeightMeter / 2;
 	}
@@ -49,22 +51,26 @@ public class Camera {
 	 *            The parent
 	 */
 	public void update(double px, double py) {
-		int arenaWidthPixel = (int) (arena.getWidthMeter()*Renderer.getPPM()+0.5);
-		int arenaHeightPixel = (int) (arena.getHeightMeter()*Renderer.getPPM()+0.5);
+		/*
+		double pw = Renderer.toMeter(parent.getWidth());
+		double ph = Renderer.toMeter(parent.getHeight());
 		
-		if (arenaWidthPixel > parent.getWidth()) {
-			x = Math.min(Renderer.toPixel(px), (int)(arenaWidthPixel - parent.getWidth() / 2.0));
-			x = Math.max(x, (parent.getWidth() / 2));
+		
+		if (arena.getWidthMeter() > pw) {
+			x = Math.min(px, arena.getWidthMeter() - pw / 2.0);
+			x = Math.max(x, (pw / 2));
 		} else {
-			x = arenaWidthPixel / 2;
+			x = arena.getWidthMeter() / 2;
 		}
 
-		if (arenaHeightPixel > parent.getHeight()) {
-			y = Math.min(Renderer.toPixel(py), (int)(arenaHeightPixel - parent.getHeight() / 2.0));
-			y = Math.max(y, parent.getHeight() / 2);
+		if (arena.getHeightMeter() > ph) {
+			y = Math.min(py, arena.getHeightMeter() - ph / 2.0);
+			y = Math.max(y, ph / 2);
 		} else {
-			y = arenaHeightPixel / 2;
-		}
+			y = arena.getHeightMeter() / 2;
+		}*/
+		x = px;
+		y = py;
 	}
 	
 	/**
@@ -72,7 +78,7 @@ public class Camera {
 	 * 
 	 * @return Returns the X coordinate
 	 */
-	public int getX() {
+	public double getX() {
 		return x;
 	}
 
@@ -81,10 +87,18 @@ public class Camera {
 	 * 
 	 * @return Returns the Y coordinate
 	 */
-	public int getY() {
+	public double getY() {
 		return y;
 	}
 
+	public double getZ() {
+		return z;
+	}
+	
+	public void setZ(double z) {
+		this.z = z;
+	}
+	
 	/**
 	 * Get the top left X coordinate of the camera
 	 * 
@@ -93,7 +107,7 @@ public class Camera {
 	 * @return Returns the top left X coordinate of the camera
 	 */
 	public int getTopLeftXPixel() {
-		return x - parent.getWidth() / 2;
+		return Renderer.toPixel(x) - parent.getWidth() / 2;
 	}
 
 	/**
@@ -104,7 +118,7 @@ public class Camera {
 	 * @return Returns the top left X coordinate of the camera
 	 */
 	public int getTopLeftYPixel() {
-		return y - parent.getHeight() / 2;
+		return Renderer.toPixel(y) - parent.getHeight() / 2;
 	}
 
 	/**

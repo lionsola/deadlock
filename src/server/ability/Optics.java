@@ -27,7 +27,7 @@ public class Optics extends ToggleAbility {
 		
 		rangeInc = (RANGE)*GameWindow.MS_PER_UPDATE/TRANS;
 		angleInc = (ANGLE)*GameWindow.MS_PER_UPDATE/TRANS;
-		speedInc = self.cs.getSpeedF()*SPEED*GameWindow.MS_PER_UPDATE/TRANS;
+		speedInc = SPEED*GameWindow.MS_PER_UPDATE/TRANS;
 	}
 
 	@Override

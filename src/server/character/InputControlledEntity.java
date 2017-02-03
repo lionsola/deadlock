@@ -36,8 +36,6 @@ public class InputControlledEntity extends Entity {
 	public static final double MAX_DISPERSION_ANGLE = 0.1;
 	
 	private double instaF = 1;
-	
-	private int typeID; // the type id of the character
 
 	private double targetDirection = 0;
 
@@ -47,24 +45,8 @@ public class InputControlledEntity extends Entity {
 	
 	private InputPacket input = new InputPacket();
 
-	/**
-	 * Creating a new controlled server.character
-	 * 
-	 * @param id
-	 *            the id of the server.character
-	 * @param team
-	 *            the team the server.character is on
-	 */
-	protected InputControlledEntity(int id, int team, ClassStats cs, Weapon weapon, Ability ability, Passive passive) {
-		super(cs,id,team);
-
-		this.primary = weapon;
-		this.ability = ability;
-		this.passive = passive;
-	}
-
-	protected InputControlledEntity(int id, int team, ClassStats cs) {
-		super(cs,id,team);
+	protected InputControlledEntity(int id, int team, int typeId) {
+		super(id,team,typeId);
 	}
 	
 	/**
@@ -146,15 +128,6 @@ public class InputControlledEntity extends Entity {
 	}
 
 	/**
-	 * Returns the characters type ID, i.e. the characters class
-	 * 
-	 * @return the characters type ID
-	 */
-	public int getTypeID() {
-		return typeID;
-	}
-
-	/**
 	 * Process the input
 	 * 
 	 * @param input
@@ -195,8 +168,8 @@ public class InputControlledEntity extends Entity {
 		}
 		
 		if (getInput().sneaking) {
-			dx *= 0.5;
-			dy *= 0.5;
+			dx *= 0.7;
+			dy *= 0.7;
 		}
 		
 		double diffAngle = Math.abs(Geometry.wrapAngle(getMovingDirection()-getDirection()));
@@ -276,37 +249,37 @@ public class InputControlledEntity extends Entity {
 	public static InputControlledEntity newCharacter(int id, int team, CharType type) {
 		switch (type) {
 			case Beta:
-				InputControlledEntity shield =  new InputControlledEntity(id, team, ClassStats.classStats.get(type));
+				InputControlledEntity shield =  new InputControlledEntity(id, team, type.id);
 				shield.setWeapon(WeaponFactory.createGun(3, shield));
 				shield.setAbilty(new ChargedAbility.ThrowFlashGrenade(shield));
 				shield.setPassive(new Shield(shield));
 				return shield;
 			case Pi:
-				InputControlledEntity scout =  new InputControlledEntity(id, team, ClassStats.classStats.get(type));
+				InputControlledEntity scout =  new InputControlledEntity(id, team, type.id);
 				scout.setWeapon(WeaponFactory.createGun(2,scout));
 				scout.setAbilty(new Optics.Binocular(scout));
 				scout.setPassive(new Mark(scout));
 				return scout;
 			case Gamma:
-				InputControlledEntity sniper =  new InputControlledEntity(id, team, ClassStats.classStats.get(type));
+				InputControlledEntity sniper =  new InputControlledEntity(id, team, type.id);
 				sniper.setWeapon(WeaponFactory.createGun(1,sniper));
 				sniper.setAbilty(new Optics.Scope(sniper));
 				sniper.setPassive(new Overwatch(sniper));
 				return sniper;
 			case Ju:
-				InputControlledEntity agent =  new InputControlledEntity(id, team, ClassStats.classStats.get(type));
+				InputControlledEntity agent =  new InputControlledEntity(id, team, type.id);
 				agent.setWeapon(WeaponFactory.createGun(4,agent));
 				agent.setAbilty(new HearingAmplifier(agent));
 				agent.setPassive(new Backstab(agent));
 				return agent;
 			case Alpha:
-				InputControlledEntity gren =  new InputControlledEntity(id, team, ClassStats.classStats.get(type));
+				InputControlledEntity gren =  new InputControlledEntity(id, team, type.id);
 				gren.setWeapon(WeaponFactory.createGun(0,gren));
 				gren.setAbilty(new ChargedAbility.ThrowFragGrenade(gren));
 				gren.setPassive(new Assault(gren));
 				return gren;
 			case Officer:
-				InputControlledEntity officer = new InputControlledEntity(id, team, ClassStats.classStats.get(CharType.Alpha));
+				InputControlledEntity officer = new InputControlledEntity(id, team, type.id);
 				officer.setWeapon(WeaponFactory.createGun(4,officer));
 				officer.setAbilty(new Flashlight(officer));
 				officer.setPassive(new Assault(officer));

@@ -61,6 +61,7 @@ import client.graphics.AnimationSystem;
 import client.graphics.BasicAnimation;
 import client.graphics.ParticleSource;
 import client.graphics.Renderer;
+import client.image.MultiplyComposite;
 import client.image.SoftHardLightComposite;
 import client.sound.AudioManager;
 import client.sound.MusicPlayer;
@@ -100,6 +101,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private Visibility visibility = new Visibility();
 	private Renderer renderer = new Renderer();
 	private HashMap<Integer,Thing> objectTable;
+	
+	private HashMap<Integer,ClientPlayer> pa;
 	
 	private boolean lightImageChanged = false;
 	private boolean playing = true;
@@ -154,7 +157,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		
 		arena = new Arena(arenaName, tileTable, objectTable,triggerTable);
 		renderer.initArenaImages(arena);
-		camera = new Camera(arena, this);
+		camera = new Camera(arena, this, 10);
 		
 		// Initialise fields
 		this.player = player;
@@ -302,7 +305,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			cp.passiveId = pId;
 		}
 		
-		abilityBar = new AbilityBar(this,player.weaponId,player.abilityId,player.passiveId);
+		abilityBar = new AbilityBar(this,player);
 		GUIFactory.stylizeHUDComponent(abilityBar);
 		abilityBar.setSize(abilityBar.getPreferredSize());
 		abilityBar.setLocation(0, getHeight() - abilityBar.getHeight() - 20);
@@ -384,7 +387,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		visualAnimations.update();
 		globalAnimations.update();
 		persistentAnimations.update();
-		persistentAnimations.render(renderer.bloodImage.createGraphics());
+		persistentAnimations.render(renderer.bloodImage.createGraphics(),camera,null);
 		audioManager.update();
 		
 		
@@ -532,36 +535,44 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			Renderer.drawArenaImage(g2D, renderer.getArenaImage(),camera.getDrawArea());
 			*/
 			
-			g2D.setClip(null);
-			nonvisualAnimations.render(g2D);
+			g2D.setClip(camera.getDrawAreaPixel());
+			nonvisualAnimations.render(g2D, camera, camera.getDrawAreaPixel());
 			
 			// create the vision region
-			Area los = new Area();
+			Area losPixel = new Area();
+			Area losMeter = new Area();
 
 			for (Vision v:currentState.visions) {
-				los.add(visibility.generateLoS(v, arena));
+				losPixel.add(visibility.generateLoS(v, arena));
+				losMeter.add(visibility.genLOSAreaMeter(v.x, v.y, v.range, v.angle, v.direction, arena));
+				
 				double r = v.radius*1.5;
-				los.add(new Area(new Ellipse2D.Double(Renderer.toPixel(v.x - r),Renderer.toPixel(v.y - r),
+				losPixel.add(new Area(new Ellipse2D.Double(Renderer.toPixel(v.x - r),Renderer.toPixel(v.y - r),
 						Renderer.toPixel(r*2),Renderer.toPixel(r*2))));
+				losMeter.add(new Area(new Ellipse2D.Double(v.x - r,v.y - r,r*2,r*2)));
 			}
 			
-			g2D.setClip(los);
-			Renderer.drawArenaImage(g2D, renderer.lowImage, camera.getDrawArea());
-			Renderer.drawArenaImage(g2D, renderer.bloodImage, camera.getDrawArea());
+			g2D.setClip(losPixel);
+			//Rectangle2D viewBox = getCharacterVisionBox(c.x,c.y,c.viewRange);
+			Rectangle2D viewBox = losMeter.getBounds2D();
+			Renderer.drawArenaImage(g2D, renderer.lowImage, viewBox);
+			Renderer.drawArenaImage(g2D, renderer.bloodImage, viewBox);
 
 			for (ClientPlayer data : players) {
 				if (data.id != c.id && data.active) {
 					CharData ch = data.character;
-					Renderer.renderOtherCharacter(g2D, ch, data.type);
+					Renderer.renderOtherCharacter(g2D, ch);
 				}
 			}
 			
-			for (NPCData data : currentState.npcs) {
-				Renderer.renderNPC(g2D, data, CharType.Officer);
+			for (CharData data : currentState.characters) {
+				if (data instanceof NPCData) {
+					Renderer.renderNPC(g2D, (NPCData)data);
+				}
 			}
-
+			
 			// render projectiles
-			visualAnimations.render(g2D);
+			visualAnimations.render(g2D, camera, viewBox);
 			for (ProjectileData data : currentState.projectiles) {
 				Renderer.renderProjectile(g2D,data);
 			}
@@ -571,7 +582,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			ClientPlayer currentTarget = Utils.findPlayer(players, c.id);
 			Renderer.renderMainCharacter(g2D, c, currentTarget);
 			
-			Renderer.drawArenaImage(g2D, renderer.highImage, camera.getDrawArea());
+			Renderer.drawArenaImage(g2D, renderer.highImage, viewBox);
 			
 			
 			// Render lighting & shadow
@@ -581,19 +592,19 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			}
 			
 			Composite save = g2D.getComposite();
-			g2D.setComposite(new SoftHardLightComposite(1f));
-			Rectangle2D viewBox = getCharacterVisionBox(c.x,c.y,c.viewRange);
+			g2D.setComposite(new MultiplyComposite(1f));
+			
+			//Renderer.renderHardLight(g2D, arena.getLightmap(), viewBox);
 			Renderer.drawArenaImage(g2D,renderer.getLightMap(),viewBox);
 			g2D.setComposite(save);
-			
 		}
-		g2D.setClip(null);
-		globalAnimations.render(g2D);
+		g2D.setClip(camera.getDrawAreaPixel());
+		globalAnimations.render(g2D, camera, null);
 		int tileX = (int)(input.cx/Terrain.tileSize);
 		int tileY = (int)(input.cy/Terrain.tileSize);
 		if (arena.get(tileX,tileY).coverType()>0)
 			Renderer.renderProtection(g2D,tileX,tileY,arena.get(tileX,tileY).coverType());
-		renderer.renderCharacterUI(g2D,c);
+		//renderer.renderCharacterUI(g2D,c);
 		
 		g2D.setColor(Color.WHITE);
 		Renderer.renderCrosshair(g2D,input.cx,input.cy,c.crosshairSize,1.5f);
@@ -765,14 +776,15 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			
 			if (e.id!=SoundEvent.PING_SOUND_ID && e.volume>0) {
 				nonvisualAnimations.addNoiseAnimation(e.x, e.y, e.volume);
-				visualAnimations.addVisualNoiseAnimation(e.x, e.y);
+				visualAnimations.addVisualNoiseAnimation(e.x, e.y, e.volume);
 			}
 		} else if (event instanceof AnimationEvent) {
 			AnimationEvent e = (AnimationEvent) event;
 			if (e.id==AnimationEvent.BLOOD) {
-				persistentAnimations.addBloodAnimation(e.x, e.y, e.direction, e.team);
+				persistentAnimations.addPersistentBloodAnimation(e.x, e.y, e.direction, e.team);
 			}
-			else if (!e.global) {
+			
+			if (!e.global) {
 				visualAnimations.addAnimation(e);
 			} else {
 				globalAnimations.addAnimation(e);

@@ -1,9 +1,9 @@
 package server.ai;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -14,19 +14,23 @@ import jbt.execution.core.IBTExecutor;
 import jbt.execution.core.IBTLibrary;
 import jbt.execution.core.IContext;
 import jbt.model.core.ModelTask;
+import server.ai.InterestPoint.Type;
+import server.ai.Searcher.Path;
 import server.ai.jbt.library.StandardBTLibrary;
 import server.character.Entity;
 import server.character.InputControlledEntity;
 import server.world.Arena;
 import server.world.Geometry;
+import server.world.Terrain;
 import server.world.Tile;
+import server.world.Utils;
 import shared.core.Vector2D;
 import shared.network.CharData;
 import shared.network.GameDataPackets.WorldStatePacket;
+import shared.network.event.GameEvent;
+import shared.network.event.SoundEvent;
 
-public class NPCBrain extends Brain {
-	float PATROL_THRESHOLD = 0.1f;
-	List<Point2D> patrolLocations = new ArrayList<Point2D>();
+public class NPCBrain {
 	int current = 0;
 	int mode;
 	IContext context;
@@ -35,7 +39,15 @@ public class NPCBrain extends Brain {
 	List<CharData> allies = new LinkedList<CharData>();
 	double alertness;
 	
+	InputControlledEntity character;
+	protected long time;
+	
+	protected Arena arena;
+	private Behaviour behaviour;
+	
+	
 	public NPCBrain(Behaviour behaviour) {
+		this.behaviour = behaviour;
 		if (behaviour!=Behaviour.Dummy) {
 			/* First of all, we create the BT library. */
 			IBTLibrary btLibrary = new StandardBTLibrary();
@@ -43,15 +55,15 @@ public class NPCBrain extends Brain {
 			context = ContextFactory.createContext(btLibrary);
 			
 			/* Now we get the Model BT to run. */
-			ModelTask patrolTree = btLibrary.getBT("NPCPatroller");
+			ModelTask patrolTree = btLibrary.getBT(behaviour.name());
 			/* Then we create the BT Executor to run the tree. */
 			btExecutor = BTExecutorFactory.createBTExecutor(patrolTree, context);
 		}
 	}
 	
-	@Override
-	public void init(Arena arena, InputControlledEntity pc, PathFinder pathFinder) {
-		super.init(arena, pc, pathFinder);
+	public void init(Arena arena, InputControlledEntity pc) {
+		this.arena = arena;
+		this.character = pc;
 		if (context!=null) {
 			context.setVariable("Arena", arena);
 			context.setVariable("Character", pc);
@@ -80,9 +92,16 @@ public class NPCBrain extends Brain {
 							ex += br/checkPoints.size();
 						}
 					}
+					System.out.println(ex);
 					if ((ex + alertness)>=1 && ex>0) {
 						enemies.add(c);
-						alertness = Math.min(1, alertness + ex*0.03);
+						alertness = Math.min(1, alertness + ex*0.05);
+						InterestPoint ip = new InterestPoint();
+						ip.setLocation(new Point2D.Float(c.x,c.y));
+						ip.setTime(time);
+						ip.setType(Type.ENEMY);
+						setNewIp(ip);
+						alertness = 1;
 					} else {
 						alertness = Math.min(1, alertness + ex*0.03);
 					}
@@ -94,7 +113,7 @@ public class NPCBrain extends Brain {
 		}
 		
 		if (!enemyInSight) {
-			alertness = Math.max(0, alertness - 0.01);
+			alertness = Math.max(0, alertness - 0.003);
 		}
 	}
 	
@@ -102,35 +121,94 @@ public class NPCBrain extends Brain {
 		return alertness;
 	}
 	
-	@Override
 	public void update(WorldStatePacket wsp) {
-		identifyCharacters(wsp);
-		if (btExecutor!=null) {
-			btExecutor.tick();
+		if (behaviour!=Behaviour.Dummy) {
+			for (GameEvent e:wsp.events) {
+				processEvent(e);
+			}
+			identifyCharacters(wsp);
+			if (btExecutor!=null) {
+				btExecutor.tick();
+			}
 		}
-	}
-	
-	@Override
-	protected AIState decideAction() {
-		AIState state = super.decideAction();
-		if (state==AIState.EXPLORING && !patrolLocations.isEmpty()) {
-			state = AIState.PATROLING;
-		}
-		return state;
 	}
 
 	public void setPatrolLocations(List<Point2D> patrolLocations) {
-		this.patrolLocations = patrolLocations;
 		if (context!=null) {
 			context.setVariable("patrolLocations", patrolLocations);
 		}
+	}
+	
+	public void processEvent(GameEvent event) {
+		InterestPoint ip = null;
+		if (event instanceof SoundEvent) {
+			SoundEvent e = (SoundEvent) event;
+			//float eventDist = Geometry.diagonalDistance(e.x, e.y, wsp.player.x, wsp.player.y);
+			// if this one is closer than last one
+			if (isGunshotSound(e.id) || e.id==SoundEvent.FOOTSTEP_DEFAULT_ID) {
+				// if it's my own footsteps
+				if (Point2D.distance(e.x, e.y, character.getX(), character.getY())<0.5) {
+					return;
+				}
+				for (CharData c:allies) {
+					// or if it's an ally
+					if (Point2D.distance(c.x,c.y,e.x,e.y)<0.5) {
+						// no sweat
+						return;
+					}
+				}
+				
+				double effect = Math.max(0.01,e.volume/50.0);
+				// else
+				if (e.volume>0 && alertness+effect >= 1) {
+					ip = new InterestPoint();
+					ip.setLocation(new Point2D.Float(e.x,e.y));
+					ip.setTime(time);
+					ip.setType(Type.ENEMY);
+					alertness = 1;
+				} else {
+					// increase alertness
+					alertness += effect;
+					// register the event as an enemy location
+				}
+			} else if (e.id == SoundEvent.PING_SOUND_ID) {
+				ip = new InterestPoint();
+				ip.setLocation(new Point2D.Float(e.x,e.y));
+				ip.setTime(time);
+				ip.setType(Type.PING);
+			}
+		}
+		if (ip!=null) {
+			setNewIp(ip);
+		}
+	}
+	
+	public void setNewIp(InterestPoint ip) {
+		List<Point2D> path = Searcher.searchPath(arena,character.getPosition(),ip.getLocation());
+		if (path!=null) {
+			Object curIp = context.getVariable("interest");
+			// if it's even better than the current interest point
+			if (curIp==null || compare(ip, (InterestPoint)curIp)>1) {
+				// well, investigate it!
+				context.setVariable("interest", ip);
+				System.out.println("Set new interest at " + ip.getLocation() + ", "+ip.getType());
+			}
+		}
+	}
+	
+	public static boolean isGunshotSound(int id) {
+		return id>0 && id<30;
+	}
+	
+	public static double estimateMaxPen(double bulletSpeed) {
+		return bulletSpeed/0.25;
 	}
 	
 	public static Point2D getClearAim(InputControlledEntity character, List<CharData> allies, List<CharData> enemies, Arena arena) {
 		for (CharData enemy:enemies) {
 			boolean blocked = false;
 			Vector2D n = new Vector2D(enemy.y-character.getY(),character.getX()-enemy.x);
-			n.mult((enemy.radius/2)/Math.sqrt(n.magSqr()));
+			n.setMagnitude(enemy.radius/2);
 			
 			Vector2D enemyPos = new Vector2D(enemy.x,enemy.y);
 			//enemyPos.sub(n);
@@ -150,15 +228,16 @@ public class NPCBrain extends Brain {
 				}
 				
 				if (!blocked) {
-					int maxBlock = (int)(character.getWeapon().type.projectileSpeed/0.1);
-					List<Point2D> samples = Geometry.getLineSamples(character.getX(),character.getY(),target.x,target.y, 0.5);
+					double pen = estimateMaxPen(character.getWeapon().type.projectileSpeed);
+					double CAST_DIST = 0.5;
+					List<Point2D> samples = Geometry.getLineSamples(character.getX(),character.getY(),target.x,target.y, CAST_DIST);
 					int blockCount = 0;
 					for (Point2D point:samples) {
 						Tile t = arena.getTileAt(point.getX(),point.getY());
 						if (t.coverType()>0) {
-							blockCount += t.coverType();
+							blockCount += t.coverType()*CAST_DIST/Terrain.tileSize;
 						}
-						if (blockCount>maxBlock) {
+						if (blockCount>pen) {
 							blocked = true;
 							break;
 						}
@@ -171,5 +250,62 @@ public class NPCBrain extends Brain {
 			}
 		}
 		return null;
+	}
+	
+	private Point2D randomIntr(double x, double y, double direction, double distance) {
+		double newX = x + distance * Math.cos(direction);
+		double newY = y - distance * Math.sin(direction);
+		int tileX = (int) (newX / Terrain.tileSize);
+		int tileY = (int) (newY / Terrain.tileSize);
+		if (tileX < 0)
+			tileX = Math.abs(tileX);
+		else if (tileX > arena.getWidth())
+			tileX = arena.getWidth() * 2 - tileX;
+		if (tileY < 0)
+			tileY = Math.abs(tileY);
+		else if (tileY > arena.getHeight())
+			tileY = arena.getHeight() * 2 - tileY;
+
+		int n = 5;
+		int tileX0 = Math.max(0, tileX - n);
+		int tileX1 = Math.min(arena.getWidth(), tileX + n);
+		int tileY0 = Math.max(0, tileY - n);
+		int tileY1 = Math.min(arena.getHeight(), tileY + n);
+
+		List<Point> emptyTiles = new LinkedList<Point>();
+		for (int i = tileX0; i <= tileX1; i++) {
+			for (int j = tileY0; j <= tileY1; j++) {
+				if (arena.get(i, j).isTraversable())
+					emptyTiles.add(new Point(i, j));
+			}
+		}
+		if (emptyTiles.isEmpty()) {
+			System.out.println("Can't find an empty tile from " + new Point(tileX0, tileY0) + " to " + new Point(tileX1, tileY1));
+			return null;
+		} else {
+			return Utils.tileToMeter(emptyTiles.get(Utils.random().nextInt(emptyTiles.size())));
+		}
+	}
+	
+	public int compare(InterestPoint ip0, InterestPoint ip1) {
+		double timeWeight = 0.001;
+		double typeWeight = 10;
+		double distanceWeight = 1;
+		if (ip0.getType()==Type.RANDOM) {
+			if (ip1.getType()==Type.RANDOM) {
+				return 0;
+			} else {
+				return -1;
+			}
+		} else if (ip1.getType()==Type.RANDOM) {
+			return 1;
+		}
+		double dt = ip0.getTime()-ip1.getTime();
+		double distance0 = Searcher.getMoveDistance(arena,character.getPosition(),ip0.getLocation());
+		double distance1 = Searcher.getMoveDistance(arena,character.getPosition(),ip1.getLocation());
+		double dd = distance0 - distance1;
+		double dty = ip0.getType().priority - ip1.getType().priority;
+		
+		return (int)Math.round(timeWeight*dt + distanceWeight*dd + typeWeight*dty);
 	}
 }

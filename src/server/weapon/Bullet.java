@@ -21,8 +21,8 @@ public class Bullet extends Projectile {
 	private final double baseSpeed;
 	Thing lastHit;
 	
-	public Bullet(InputControlledEntity source, double direction, double speed, double size, double damage) {
-		super(source, direction, speed, size);
+	public Bullet(InputControlledEntity source, double x, double y, double direction, double speed, double size, double damage) {
+		super(source, x, y, direction, speed, size);
 		baseDamage = damage;
 		baseSpeed = speed;
 	}

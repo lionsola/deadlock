@@ -363,9 +363,11 @@ public class ToolBar extends JPanel {
 					}
 					dialog.setVisible(true);
 					editor.setTool(new Tool.ParticleSourcePaint(editor.getArenaPanel(), dialog));
+					editor.getArenaPanel().renderParticleSource = true;
 				} else if (arg0.getStateChange()==ItemEvent.DESELECTED) {
 					dialog.setVisible(false);
 					editor.setTool(new Tool.MoveTool(editor.getArenaPanel()));
+					editor.getArenaPanel().renderParticleSource = false;
 				}
 			}
 		});

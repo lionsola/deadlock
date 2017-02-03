@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Tree>
+  <Node id="Node_0" name="CheckInterest" type="Root">
+    <Children>
+      <Node id="Node_2" type="Sequence">
+        <Children>
+          <Node id="Node_3" name="ComputeInterestPoint" type="Action" />
+          <Node id="Node_4" name="Run" type="Action">
+            <Parameters>
+              <Parameter name="runTarget" fromcontext="true">interestStandPoint</Parameter>
+              <Parameter name="controlCursor" fromcontext="false">true</Parameter>
+            </Parameters>
+          </Node>
+          <Node id="Node_5" type="Wait">
+            <Parameters>
+              <Parameter name="duration" fromcontext="false">500</Parameter>
+            </Parameters>
+          </Node>
+          <Node id="Node_6" name="ComputeWatchPoint" type="Action" />
+          <Node id="Node_7" name="PointCursor" type="Action">
+            <Parameters>
+              <Parameter name="cursorTarget" fromcontext="true">watchPoint</Parameter>
+            </Parameters>
+          </Node>
+          <Node id="Node_8" type="Wait">
+            <Parameters>
+              <Parameter name="duration" fromcontext="false">500</Parameter>
+            </Parameters>
+          </Node>
+          <Node id="Node_9" name="ClearVariable" type="Action">
+            <Parameters>
+              <Parameter name="variableName" fromcontext="false">interest</Parameter>
+            </Parameters>
+          </Node>
+        </Children>
+      </Node>
+    </Children>
+  </Node>
+</Tree>
+

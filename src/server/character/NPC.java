@@ -2,30 +2,28 @@ package server.character;
 
 import editor.SpawnPoint.Behaviour;
 import server.ai.NPCBrain;
-import server.ai.PathFinder;
 import server.world.Arena;
 import server.world.World;
 import shared.network.NPCData;
-import shared.network.event.GameEvent;
 
 public class NPC extends InputControlledEntity {
+	public NPC(int id, int team, int typeId) {
+		super(id, team, typeId);
+	}
+
 	public NPCBrain brain;
 	
-	public NPC(int id, int team, ClassStats cs, Arena a, Behaviour behaviour) {
-		super(id, team, cs);
-		brain = new NPCBrain(behaviour);
-		brain.init(a, this, new PathFinder(a));
+	public void init(Arena a, Behaviour b) {
+		brain = new NPCBrain(b);
+		brain.init(a, this); 
 	}
 	
 	@Override
 	public void update(World w) {
 		super.update(w);
 		if (!isDead()) {
-			for (GameEvent e:getPerception().events) {
-				brain.processEvent(e);
-			}
-			getPerception().events.clear();
 			brain.update(getPerception());
+			getPerception().events.clear();
 		}
 	}
 	
@@ -33,9 +31,5 @@ public class NPC extends InputControlledEntity {
 	public NPCData generatePartial() {
 		NPCData data = new NPCData(this);
 		return data;
-	}
-	
-	public static NPC createNPC(int id, int team, int setup, int behaviour, int level) {
-		return null;
 	}
 }

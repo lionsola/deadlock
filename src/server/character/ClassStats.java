@@ -8,7 +8,7 @@ import java.util.Scanner;
 import editor.SpawnPoint.CharType;
 
 public class ClassStats {
-	public static HashMap<CharType,ClassStats> classStats = null;
+	public static HashMap<Integer,ClassStats> classStats = null;
 	
 	private double sizeF, speedF, maxHP, noiseF;
 	
@@ -47,7 +47,7 @@ public class ClassStats {
 	
 	public static void initClassStats() {
 		if (classStats==null){
-			classStats = new HashMap<CharType,ClassStats>();
+			classStats = new HashMap<Integer,ClassStats>();
 			Scanner sc = null;
 			try {
 				sc = new Scanner(new File("resource/character/classStats"));
@@ -59,7 +59,7 @@ public class ClassStats {
 					cs.maxHP = sc.nextDouble();
 					cs.noiseF = sc.nextDouble();
 					
-					classStats.put(cs.classID,cs);
+					classStats.put(cs.classID.id,cs);
 				}
 				sc.close();
 			} catch (IOException e) {

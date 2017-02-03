@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
+import editor.SpawnPoint.CharType;
 import server.ability.Ability;
 import server.passive.Passive;
 import server.weapon.Weapon;
@@ -33,47 +34,21 @@ public class Sprite {
 	*/
 	public static BufferedImage[] COVER;
 	//private static Image[][] images; 
-	private static BufferedImage[] BLOOD;
 	public static HashMap<Integer,BufferedImage> guns = new HashMap<Integer,BufferedImage>();
 	public static HashMap<Integer,String> ability = new HashMap<Integer,String>();
+
+	public static HashMap<Integer,BufferedImage> heads = new HashMap<Integer,BufferedImage>();
 	
 	private static final String ABILITY_ICON_DIR = "resource/weapon/";
 	private static final String WEAPON_SPRITE_DIR = "resource/weapon/";
 
 	public static void initImage() {
 		//images = new Image[5][2];
-		BLOOD = new BufferedImage[4];
 		
 		try {
-			for (int i=0;i<BLOOD.length;i++) {
-				BLOOD[i] = ImageIO.read(new FileInputStream("resource/animation/blood"+i+".png"));
-			}
-			/*
-			COMMANDO_RED = ImageIO.read(new FileInputStream("resource/character/commando_red.png"));
-			SCOUT_RED = ImageIO.read(new FileInputStream("resource/character/scout_red.png"));
-			SNIPER_RED = ImageIO.read(new FileInputStream("resource/character/sniper_red.png"));
-			TANK_RED = ImageIO.read(new FileInputStream("resource/character/tank_red.png"));
-			SPECOPS_RED = ImageIO.read(new FileInputStream("resource/character/specops_red.png"));
-
-			COMMANDO_GREEN = ImageIO.read(new FileInputStream("resource/character/commando_green.png"));
-			SCOUT_GREEN = ImageIO.read(new FileInputStream("resource/character/scout_green.png"));
-			SNIPER_GREEN = ImageIO.read(new FileInputStream("resource/character/sniper_green.png"));
-			TANK_GREEN = ImageIO.read(new FileInputStream("resource/character/tank_green.png"));
-			SPECOPS_GREEN = ImageIO.read(new FileInputStream("resource/character/specops_green.png"));
-			
-			int RED = 1;
-			int GREEN = 0;
-			images[2][RED] = SNIPER_RED;
-			images[2][GREEN] = SNIPER_GREEN;
-			images[1][RED] = SCOUT_RED;
-			images[1][GREEN] = SCOUT_GREEN;
-			images[0][RED] = TANK_RED;
-			images[0][GREEN] = TANK_GREEN;
-			images[4][RED] = COMMANDO_RED;
-			images[4][GREEN] = COMMANDO_GREEN;
-			images[3][RED] = SPECOPS_RED;
-			images[3][GREEN] = SPECOPS_GREEN;
-			*/
+			heads.put(CharType.Alpha.id,ImageIO.read(new FileInputStream("resource/character/alpha_head.png")));
+			heads.put(CharType.Pi.id,ImageIO.read(new FileInputStream("resource/character/pi_head.png")));
+			heads.put(CharType.Officer.id,ImageIO.read(new FileInputStream("resource/character/officer_head.png")));
 			
 			COVER = new BufferedImage[3];
 			
@@ -113,26 +88,6 @@ public class Sprite {
 		}
 	}
 
-	/**
-	 * Get the correct image based on the type and colour (team).
-	 * 
-	 * @param type
-	 *            used to select the appropriate image based on server.character type.
-	 * @param color
-	 *            used to select the appropriate image based on the characters team.
-	 * @return
-	 */
-	//public static Image getImage(int type, int color) {
-	//	return images[type][color];
-	//}
-	
-	/**
-	 * Return a random blood sprite.
-	 */
-	public static BufferedImage getBloodImage() {
-		return BLOOD[Utils.random().nextInt(BLOOD.length)];
-	}
-	
 	public static BufferedImage getAbilityIcon(int id) {
 		try {
 			return ImageIO.read(new FileInputStream(ability.get(id)));

@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import client.graphics.AnimationSystem;
 import client.graphics.ImageBlender;
 import client.graphics.Renderer;
+import client.graphics.Sprite;
 import client.gui.Camera;
 import client.gui.ClientPlayer;
 import client.gui.GameWindow;
@@ -48,6 +49,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	protected boolean renderMiscConfig = false;
 	protected boolean renderTileSwitchTrigger = false;
 	protected boolean renderSpawns = true;
+	protected boolean renderParticleSource = false;
 	
 	private Camera camera;
 	//private double zoomLevel;
@@ -64,9 +66,10 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	
 	public ArenaPanel (Editor editor, EditorArena arena) {
 		super();
+		Sprite.initImage();
 		this.editor = editor;
 		this.arena = arena;
-		camera = new Camera(arena,this);
+		camera = new Camera(arena,this, 10);
 		this.setFocusable(true);
 		this.requestFocusInWindow();
 		this.setIgnoreRepaint(true);
@@ -195,7 +198,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 			}
 		}
 		
-		particles.render(g2D);
+		particles.render(g2D, camera, window);
 		
 		if (renderLight) {
 			Composite save = g2D.getComposite();
@@ -227,6 +230,9 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		}
 		if (renderSpawns) {
 			Renderer.renderSpawnLocations(g2D, arena, window);
+		}
+		if (renderParticleSource) {
+			Renderer.renderEditorParticleSource(g2D, arena, window);
 		}
 		editor.currentTool.render(g2D);
 		//Renderer.renderMainCharacter(g2D, player, playerInfo);

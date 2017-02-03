@@ -64,6 +64,34 @@ public abstract class Projectile {
 	 * 
 	 * @param source
 	 *            the source, ie the player, of which the projectile being fired from
+	 * @param x The x coordinate of the projectile.
+	 * @param y The y coordinate of the projectile.
+	 * @param direction
+	 *            the direction of the projectile
+	 * @param speed
+	 *            the speed of the projectile
+	 * @param size
+	 *            radius of the projectile
+	 */
+	public Projectile(InputControlledEntity source, double x, double y, double direction, double speed, double size) {
+		id = source.id;
+		this.x = x;
+		this.y = y;
+		lastHitId = source.id;
+		
+		this.direction = direction;
+		this.speed = speed;
+		computeDxDy();
+		this.speed += (source.getDx()*dx + source.getDy()*dy)/speed;
+		computeDxDy();
+		this.size = size;
+	}
+	
+	/**
+	 * Create a projectile to be use in the world
+	 * 
+	 * @param source
+	 *            the source, ie the player, of which the projectile being fired from
 	 * @param direction
 	 *            the direction of the projectile
 	 * @param speed

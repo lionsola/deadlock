@@ -139,6 +139,16 @@ public class Vector2D {
         return Math.atan2(y, x);
     }
     
+    public double getMagnitude() {
+    	return Math.sqrt(magSqr());
+    }
+    
+    public void setMagnitude(double magnitude) {
+    	double ratio = magnitude/getMagnitude();
+    	x*= ratio;
+    	y*= ratio;
+    }
+    
     public Vector2D clone() {
     	return new Vector2D(x,y);
     }

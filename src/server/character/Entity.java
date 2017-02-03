@@ -55,9 +55,10 @@ public class Entity {
 	private double speedF;
 	private double noiseF; // the level of volume that the server.character makes, standard = 1
 	private double sizeF;
-	private double hearF; // the 
-	public final ClassStats cs;
+	private double hearF; // the
+	
 	public final int team;
+	public final int typeId;
 	
 	protected double direction; // direction the server.character is facing in radiants
 	
@@ -90,7 +91,9 @@ public class Entity {
 	 * @param viewAngle
 	 *            the angle of the characters line of sight
 	 */
-	public Entity(ClassStats cs, int id, int team) {
+	public Entity(int id, int team, int typeId) {
+		this.typeId = typeId;
+		ClassStats cs = ClassStats.classStats.get(typeId); 
 		this.maxHP = cs.getMaxHP()*BASE_HP;
 		this.healthPoints = maxHP;
 		this.speedF = cs.getSpeedF();
@@ -99,7 +102,6 @@ public class Entity {
 		this.hearF = 1;
 		this.fovRangeF = 1;
 		this.fovAngleF = 1;
-		this.cs = cs;
 		this.id = id;
 		this.team = team;
 	}
@@ -274,10 +276,10 @@ public class Entity {
 			for (int y=newTopY;y<=newBtmY;y++) {
 				Trigger t = w.getArena().get(x,y).getTrigger();
 				if (t!=null) {
-					if ((x<leftX  && dx<0) ||
-							(x>rightX && dx>0) ||
-							(y<topY && dy<0) ||
-							(y>btmY && dy>0)) {
+					if ((x<leftX  /*&& dx<0*/) ||
+							(x>rightX /*&& dx>0*/) ||
+							(y<topY /*&& dy<0*/) ||
+							(y>btmY /*&& dy>0*/)) {
 						t.onCharacterTouch(this, w);
 					}
 				}
@@ -288,10 +290,10 @@ public class Entity {
 			for (int y=topY;y<=btmY;y++) {
 				Trigger t = w.getArena().get(x,y).getTrigger();
 				if (t!=null) {
-					if ((x<newLeftX  && dx>=0) ||
-							(x>newRightX && dx<=0) ||
-							(y<newTopY && dy>=0) ||
-							(y>newBtmY && dy<=0)) {
+					if ((x<newLeftX  /*&& dx>=0*/) ||
+							(x>newRightX /*&& dx<=0*/) ||
+							(y<newTopY /*&& dy>=0*/) ||
+							(y>newBtmY /*&& dy<=0*/)) {
 						t.onCharacterUntouch(this, w);
 					}
 				}
@@ -350,10 +352,10 @@ public class Entity {
 		}
 		
 		// add the characters if they are inside vision
-		for (Entity c : w.getCharacters()) {
+		for (InputControlledEntity c : w.getCharacters()) {
 			if (c.id!=id && (c.team==team || c.intersects(los))) {
 				if (c instanceof NPC) {
-					perception.npcs.add(((NPC)c).generatePartial());
+					perception.characters.add(((NPC)c).generatePartial());
 				}
 				else {
 					perception.characters.add(c.generatePartial());

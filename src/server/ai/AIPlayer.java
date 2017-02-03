@@ -15,21 +15,19 @@ import shared.network.event.GameEvent;
  */
 public class AIPlayer extends ServerPlayer implements GameEvent.Listener {
 	WorldStatePacket wsp;
-	private Brain brain = new Brain();
+	private NPCBrain brain = new NPCBrain(null);
 	public AIPlayer(int id, int team) {
 		super(id, team, "BOT"+id, null);
 	}
 
-	public void init(Arena a, InputControlledEntity pc, PathFinder p) {
-		brain.init(a, pc, p);
+	public void init(Arena a, InputControlledEntity pc) {
+		brain.init(a, pc);
 	}
 	
 	@Override
 	public void sendData(WorldStatePacket wsp) {
 		this.wsp = wsp;
-		for (GameEvent e:wsp.events) {
-			brain.processEvent(e);
-		}
+		brain.update(wsp);
 	}
 	
 	@Override
@@ -39,8 +37,7 @@ public class AIPlayer extends ServerPlayer implements GameEvent.Listener {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		brain.update(wsp);
-		return brain.getInput();
+		return character.getInput();
 	}
 
 	@Override

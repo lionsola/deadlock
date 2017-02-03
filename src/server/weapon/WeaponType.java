@@ -17,9 +17,11 @@ public class WeaponType {
 	public final int bulletsNo;
 	public final int soundId;
 	
+	public final double length;
+	
 	public WeaponType(int weaponId, int weaponType,
 			double dispersion, double instability, double damage, double size, double projectileSpeed,
-			int cooldown, int noise, int reloadTime, int magSize, int bulletsNo, int soundId) {
+			int cooldown, int noise, int reloadTime, int magSize, int bulletsNo, int soundId, double length) {
 		this.weaponId = weaponId;
 		this.weaponType = weaponType;
 		this.gunDispersion = dispersion;
@@ -34,5 +36,6 @@ public class WeaponType {
 		this.magSize = magSize;
 		this.bulletsNo = bulletsNo;
 		this.soundId = soundId;
+		this.length = length;
 	}
 }

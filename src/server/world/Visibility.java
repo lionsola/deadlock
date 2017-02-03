@@ -84,6 +84,10 @@ public class Visibility {
 		return genLOSAreaPixel(v.x, v.y, v.range, v.angle, v.direction, a);
 	}
 	
+	public Area generateLoSMeter(final Vision v, final Arena a) {
+		return genLOSAreaMeter(v.x, v.y, v.range, v.angle, v.direction, a);
+	}
+	
 	public Area genLOSAreaMeter(final double px, final double py,
 			double viewRange, double viewAngle, double dir, final Arena a) {
 		List<Point2D> points = getLOSPoints(px,py,viewRange,viewAngle,dir,a);

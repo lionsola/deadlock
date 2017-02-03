@@ -40,12 +40,12 @@ public class ParticleAnimation extends BasicAnimation implements Cloneable, Seri
 	private double initSize; // size of the particle
 	private double rotationSpeed;
 	private Color color; // colour of particle
-	private GroundInteraction gi = GroundInteraction.Bounce;
+	private GroundInteraction gi = GroundInteraction.Stop;
+	private boolean trail = false;
 	
 	transient private double rotation;
 	transient private double size; 
 	transient private int alpha;
-
 	/**
 	 * Creates a moving particle.
 	 * 
@@ -81,7 +81,7 @@ public class ParticleAnimation extends BasicAnimation implements Cloneable, Seri
 		super(life);
 		loc = new Vector3D(0,0,1);
 		vel = new Vector3D(0,0,0);
-		acc = new Vector3D(0,0,-0.016);
+		acc = new Vector3D(0,0,0);
 	}
 
 	/**
@@ -94,7 +94,7 @@ public class ParticleAnimation extends BasicAnimation implements Cloneable, Seri
 		super.update(as);
 		vel.add(acc);
 		loc.add(vel);
-		if (loc.z<0) {
+		if (loc.z<0 && vel.z<0) {
 			loc.z = 0;
 			vel = gi.getVelAfterImpact(vel);
 		}
@@ -102,7 +102,8 @@ public class ParticleAnimation extends BasicAnimation implements Cloneable, Seri
 		rotation += rotationSpeed;
 		size = initSize*(0.5+loc.z/2);
 		alpha = (int) Math.max(0, Math.min(color.getAlpha(),color.getAlpha()*2*life/duration));
-		if (life/2>0) {
+		
+		if (life/2>0 && trail) {
 			Color c = new Color(color.getRed(),color.getGreen(),color.getBlue(),alpha);
 			as.addCustomAnimation(new LineAnimation(Math.min(500,life/2), loc.x, loc.y, loc.x-vel.x, loc.y-vel.y, size, c));
 		}
@@ -131,6 +132,10 @@ public class ParticleAnimation extends BasicAnimation implements Cloneable, Seri
 		}
 	}
 
+	public void setTrail(boolean trail) {
+		this.trail = trail;
+	}
+	
 	public void setDirection(double direction, double speed) {
 		double dx = Math.cos(direction) * speed;
 		double dy = -Math.sin(direction) * speed;

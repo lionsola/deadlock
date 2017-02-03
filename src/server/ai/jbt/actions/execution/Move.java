@@ -11,8 +11,8 @@ package server.ai.jbt.actions.execution;
 import java.awt.geom.Point2D;
 import java.util.List;
 
-import server.ai.PathFinder;
-import server.ai.PathFinder.Path;
+import server.ai.Searcher;
+import server.ai.Searcher.Path;
 import server.character.InputControlledEntity;
 import server.world.Arena;
 import shared.network.GameDataPackets.InputPacket;
@@ -79,10 +79,9 @@ public class Move extends jbt.execution.task.leaf.action.ExecutionAction {
 		/* TODO: this method's implementation must be completed. */
 		System.out.println(this.getClass().getCanonicalName() + " spawned");
 		InputControlledEntity pc = (InputControlledEntity)getContext().getVariable("Character");
-		PathFinder pf = new PathFinder((Arena)getContext().getVariable("Arena"));
 		float[] target = getMoveTarget();
-		Path p = pf.findPath(pc.getX(), pc.getY(), target[0], target[1]);
-		path = p.path;
+		Arena a = (Arena)getContext().getVariable("Arena");
+		path = Searcher.searchPath(a,pc.getX(), pc.getY(), target[0], target[1]);
 	}
 
 	protected jbt.execution.core.ExecutionTask.Status internalTick() {

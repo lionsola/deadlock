@@ -53,4 +53,12 @@ public class Utils {
 		}
 		return null;
 	}
+
+	public static Point meterToTile(double sx, double sy) {
+		return new Point(meterToTile(sx),meterToTile(sy));
+	}
+
+	public static Point meterToTile(Point2D p) {
+		return meterToTile(p.getX(),p.getY());
+	}
 }

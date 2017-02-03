@@ -186,27 +186,6 @@ public class World {
 	}
 
 	/**
-	 * Generate one snapshot of the world state to send to the clients.
-	 * 
-	 * @return The snapshot containing data about characters and projectiles.
-	 */
-	public WorldStatePacket generateState() {
-		WorldStatePacket wsp = new WorldStatePacket();
-
-		wsp.characters = new LinkedList<CharData>();
-		for (InputControlledEntity character : characters) {
-			wsp.characters.add(character.generatePartial());
-		}
-		
-		wsp.projectiles = new LinkedList<ProjectileData>();
-		for (Projectile projectile : projectiles) {
-			wsp.projectiles.add(projectile.getData());
-		}
-
-		return wsp;
-	}
-
-	/**
 	 * Get the characters visible to one particular characters. Used to give the AIs information
 	 * about what's around them, but only what's visible. Similarly to the filter method actually,
 	 * but this one is more about communicating with the AI while filter deals about packets sent to

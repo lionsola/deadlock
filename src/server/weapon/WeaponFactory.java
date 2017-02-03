@@ -30,7 +30,8 @@ public class WeaponFactory {
 							sc.nextInt(),
 							sc.nextInt(),
 							sc.nextInt(),
-							sc.nextInt());
+							sc.nextInt(),
+							sc.nextDouble());
 					weaponTypes.put(type.weaponId,type);
 				}
 				sc.close();

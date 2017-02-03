@@ -23,6 +23,8 @@ public class CharData implements Serializable {
 	public float armorStart;
 	public float armorAngle;
 	
+	public int typeId;
+	
 	public float radius;
 	public float healthPoints;
 	public float direction;
@@ -45,6 +47,7 @@ public class CharData implements Serializable {
 		healthPoints = (float) e.getHealthPoints();
 		direction = (float) e.getDirection();
 		exposure = (float) e.getExposure();
+		typeId = e.typeId;
 	}
 	
 	public CharData(Entity e) {
@@ -63,6 +66,7 @@ public class CharData implements Serializable {
 		healthPoints = (float) e.getHealthPoints();
 		direction = (float) e.getDirection();
 		exposure = (float) e.getExposure();
+		typeId = e.typeId;
 	}
 	
 	public CharData() {

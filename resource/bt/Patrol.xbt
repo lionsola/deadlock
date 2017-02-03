@@ -11,22 +11,17 @@
                   <Parameter name="patrolLocations" fromcontext="true">patrolLocations</Parameter>
                 </Parameters>
               </Node>
-              <Node id="Node_7" type="Parallel">
+              <Node id="Node_19" name="ComputePatrolPoint" type="Action">
                 <Parameters>
-                  <Parameter name="policy" fromcontext="false">sequence</Parameter>
+                  <Parameter name="patrolLocations" fromcontext="true">patrolLocations</Parameter>
+                  <Parameter name="random" fromcontext="false">false</Parameter>
                 </Parameters>
-                <Children>
-                  <Node id="Node_8" name="PointCursor" type="Action">
-                    <Parameters>
-                      <Parameter name="cursorTarget" fromcontext="true">patrolLocation</Parameter>
-                    </Parameters>
-                  </Node>
-                  <Node id="Node_5" name="Move" type="Action">
-                    <Parameters>
-                      <Parameter name="moveTarget" fromcontext="true">patrolLocation</Parameter>
-                    </Parameters>
-                  </Node>
-                </Children>
+              </Node>
+              <Node id="Node_18" name="Run" type="Action">
+                <Parameters>
+                  <Parameter name="runTarget" fromcontext="true">patrolLocation</Parameter>
+                  <Parameter name="controlCursor" fromcontext="false">true</Parameter>
+                </Parameters>
               </Node>
               <Node id="Node_9" type="Sequence">
                 <Children>

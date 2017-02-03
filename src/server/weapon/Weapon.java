@@ -52,16 +52,17 @@ public abstract class Weapon extends Ability {
 				
 				fire(w,c,direction);
 				final double RECOIL_DISTANCE = 0.2;
-				Point2D p = Geometry.PolarToCartesian(RECOIL_DISTANCE*type.instability,
+				Point2D p = Geometry.PolarToCartesian(RECOIL_DISTANCE*getRecoil(),
 						Math.PI+direction);
 				
 				c.setPosition(w,c.getX()+p.getX(),c.getY()-p.getY());
 				
 				ammoLeft -= 1;
-				w.addAnimation(AnimationEvent.GUNSHOT, c.getX(), c.getY(), direction);
-				w.addSound(type.soundId, type.noise, c.getX(), c.getY());
+				Point2D shotPoint = Geometry.PolarToCartesian(type.length, direction);
+				w.addAnimation(AnimationEvent.GUNSHOT, c.getX()+shotPoint.getX(), c.getY()-shotPoint.getY(), direction);
+				w.addSound(type.soundId, type.noise, c.getX()+shotPoint.getX(), c.getY()-shotPoint.getY());
 				
-				double maxRecoil = InputControlledEntity.MAX_DISPERSION_ANGLE*getInstability();
+				double maxRecoil = InputControlledEntity.MAX_DISPERSION_ANGLE*getRecoil();
 				double recoil = maxRecoil*Math.min(1,Math.abs(Utils.random().nextGaussian())); 
 				recoil = Math.copySign(recoil,(c.getDirection()-c.getTargetDirection())*(Utils.random().nextDouble()<0.8?1:-1));
 				c.setDirection(c.getDirection()+recoil);
@@ -96,7 +97,8 @@ public abstract class Weapon extends Ability {
 	}
 	
 	protected void fireOneBullet (World w, InputControlledEntity c, double direction, double speed) {
-		w.addProjectile(new Bullet(c, direction, speed, type.size, type.damage));
+		Point2D p = Geometry.PolarToCartesian(type.length, direction);
+		w.addProjectile(new Bullet(c,c.getX()+p.getX(),c.getY()-p.getY(),direction, speed, type.size, type.damage));
 	}
 	
 	@Override
@@ -138,7 +140,7 @@ public abstract class Weapon extends Ability {
 		reloadTimer = type.reloadTime;
 	}
 	
-	public double getInstability() {
+	public double getRecoil() {
 		return instability;
 	}
 	

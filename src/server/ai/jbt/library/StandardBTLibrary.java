@@ -2,7 +2,7 @@
 //                   MACHINE GENERATED CODE                
 //                       DO NOT MODIFY                     
 //                                                         
-// Generated on 01/02/2017 08:12:36
+// Generated on 01/31/2017 20:34:16
 // ******************************************************* 
 package server.ai.jbt.library;
 
@@ -11,7 +11,9 @@ package server.ai.jbt.library;
  * <ul>
  * <li>D:/java/Deadlock/\resource/bt/Patrol.xbt</li>
  * <li>D:/java/Deadlock/\resource/bt/Fire.xbt</li>
+ * <li>D:/java/Deadlock/\resource/bt/CheckInterest.xbt</li>
  * <li>D:/java/Deadlock/\resource/bt/NPCPatroller.xbt</li>
+ * <li>D:/java/Deadlock/\resource/bt/NPCWatcher.xbt</li>
  * </ul>
  */
 public class StandardBTLibrary implements jbt.execution.core.IBTLibrary {
@@ -19,8 +21,14 @@ public class StandardBTLibrary implements jbt.execution.core.IBTLibrary {
 	private static jbt.model.core.ModelTask Patrol;
 	/** Tree generated from file D:/java/Deadlock/\resource/bt/Fire.xbt. */
 	private static jbt.model.core.ModelTask Fire;
+	/**
+	 * Tree generated from file D:/java/Deadlock/\resource/bt/CheckInterest.xbt.
+	 */
+	private static jbt.model.core.ModelTask CheckInterest;
 	/** Tree generated from file D:/java/Deadlock/\resource/bt/NPCPatroller.xbt. */
 	private static jbt.model.core.ModelTask NPCPatroller;
+	/** Tree generated from file D:/java/Deadlock/\resource/bt/NPCWatcher.xbt. */
+	private static jbt.model.core.ModelTask NPCWatcher;
 
 	/* Static initialization of all the trees. */
 	static {
@@ -33,10 +41,8 @@ public class StandardBTLibrary implements jbt.execution.core.IBTLibrary {
 						new jbt.model.task.composite.ModelParallel(
 								null,
 								jbt.model.task.composite.ModelParallel.ParallelPolicy.SEQUENCE_POLICY,
-								new server.ai.jbt.actions.PointCursor(null,
-										null, "patrolLocation"),
-								new server.ai.jbt.actions.Move(null, null,
-										"patrolLocation")),
+								new server.ai.jbt.actions.Run(null, null,
+										"patrolLocation", (boolean) true, null)),
 						new jbt.model.task.composite.ModelSequence(null,
 								new server.ai.jbt.actions.ComputeWatchPoint(
 										null),
@@ -55,15 +61,54 @@ public class StandardBTLibrary implements jbt.execution.core.IBTLibrary {
 				new server.ai.jbt.actions.PointCursor(null, null, "Aim"),
 				new server.ai.jbt.actions.FireWeapon(null));
 
+		CheckInterest = new jbt.model.task.composite.ModelSequence(
+				null,
+				new server.ai.jbt.actions.ComputeInterestPoint(null),
+				new server.ai.jbt.actions.Run(null, null, "interestStandPoint",
+						(boolean) true, null),
+				new jbt.model.task.leaf.ModelWait(null, 500),
+				new server.ai.jbt.actions.ComputeWatchPoint(null),
+				new server.ai.jbt.actions.PointCursor(null, null, "watchPoint"),
+				new jbt.model.task.leaf.ModelWait(null, 500),
+				new server.ai.jbt.actions.ClearVariable(null, "interest", null));
+
 		NPCPatroller = new jbt.model.task.decorator.ModelRepeat(
+				null,
+				new jbt.model.task.composite.ModelDynamicPriorityList(
+						null,
+						new jbt.model.task.composite.ModelParallel(
+								new server.ai.jbt.conditions.EnemyInSight(null),
+								jbt.model.task.composite.ModelParallel.ParallelPolicy.SEQUENCE_POLICY,
+								new jbt.model.task.decorator.ModelSucceeder(
+										null,
+										new jbt.model.task.leaf.ModelSubtreeLookup(
+												null, "Fire")),
+								new jbt.model.task.composite.ModelSequence(
+										null,
+										new server.ai.jbt.actions.ComputeChasePosition(
+												null),
+										new server.ai.jbt.actions.Run(null,
+												null, "chaseTarget",
+												(boolean) false, null))),
+						new jbt.model.task.leaf.ModelSubtreeLookup(
+								new server.ai.jbt.conditions.SomethingNeedChecking(
+										null), "CheckInterest"),
+						new jbt.model.task.leaf.ModelSubtreeLookup(null,
+								"Patrol")));
+
+		NPCWatcher = new jbt.model.task.decorator.ModelRepeat(
 				null,
 				new jbt.model.task.composite.ModelDynamicPriorityList(
 						null,
 						new jbt.model.task.leaf.ModelSubtreeLookup(
 								new server.ai.jbt.conditions.EnemyInSight(null),
 								"Fire"),
-						new jbt.model.task.leaf.ModelSubtreeLookup(null,
-								"Patrol")));
+						new jbt.model.task.composite.ModelSequence(null,
+								new server.ai.jbt.actions.ComputeWatchPoint(
+										null),
+								new server.ai.jbt.actions.PointCursor(null,
+										null, "watchPoint"),
+								new jbt.model.task.leaf.ModelWait(null, 2000))));
 
 	}
 
@@ -80,8 +125,14 @@ public class StandardBTLibrary implements jbt.execution.core.IBTLibrary {
 		if (name.equals("Fire")) {
 			return Fire;
 		}
+		if (name.equals("CheckInterest")) {
+			return CheckInterest;
+		}
 		if (name.equals("NPCPatroller")) {
 			return NPCPatroller;
+		}
+		if (name.equals("NPCWatcher")) {
+			return NPCWatcher;
 		}
 		return null;
 	}
@@ -101,7 +152,7 @@ public class StandardBTLibrary implements jbt.execution.core.IBTLibrary {
 	private class BTLibraryIterator
 			implements
 			java.util.Iterator<jbt.util.Pair<java.lang.String, jbt.model.core.ModelTask>> {
-		static final long numTrees = 3;
+		static final long numTrees = 5;
 		long currentTree = 0;
 
 		public boolean hasNext() {
@@ -123,7 +174,17 @@ public class StandardBTLibrary implements jbt.execution.core.IBTLibrary {
 
 			if ((this.currentTree - 1) == 2) {
 				return new jbt.util.Pair<java.lang.String, jbt.model.core.ModelTask>(
+						"CheckInterest", CheckInterest);
+			}
+
+			if ((this.currentTree - 1) == 3) {
+				return new jbt.util.Pair<java.lang.String, jbt.model.core.ModelTask>(
 						"NPCPatroller", NPCPatroller);
+			}
+
+			if ((this.currentTree - 1) == 4) {
+				return new jbt.util.Pair<java.lang.String, jbt.model.core.ModelTask>(
+						"NPCWatcher", NPCWatcher);
 			}
 
 			throw new java.util.NoSuchElementException();

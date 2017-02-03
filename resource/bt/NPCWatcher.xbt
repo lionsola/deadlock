@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Tree>
+  <Node id="Node_0" name="NPCWatcher" type="Root">
+    <Children>
+      <Node id="Node_2" type="Repeat">
+        <Children>
+          <Node id="Node_8" type="DynamicPriorityList">
+            <Children>
+              <Node id="Node_13" type="SubtreeLookup">
+                <Guard>
+                  <Node id="Node_14" name="EnemyInSight" type="Condition" />
+                </Guard>
+                <Parameters>
+                  <Parameter name="subtreeName" fromcontext="false">Fire</Parameter>
+                </Parameters>
+              </Node>
+              <Node id="Node_9" type="Sequence">
+                <Children>
+                  <Node id="Node_10" name="ComputeWatchPoint" type="Action" />
+                  <Node id="Node_11" name="PointCursor" type="Action">
+                    <Parameters>
+                      <Parameter name="cursorTarget" fromcontext="true">watchPoint</Parameter>
+                    </Parameters>
+                  </Node>
+                  <Node id="Node_12" type="Wait">
+                    <Parameters>
+                      <Parameter name="duration" fromcontext="false">2000</Parameter>
+                    </Parameters>
+                  </Node>
+                </Children>
+              </Node>
+            </Children>
+          </Node>
+        </Children>
+      </Node>
+    </Children>
+  </Node>
+</Tree>
+

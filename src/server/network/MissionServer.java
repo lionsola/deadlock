@@ -17,7 +17,7 @@ import jbt.execution.core.IBTLibrary;
 import jbt.execution.core.IContext;
 import jbt.model.core.ModelTask;
 import server.ai.AIPlayer;
-import server.ai.PathFinder;
+import server.ai.Searcher;
 import server.character.ClassStats;
 import server.character.InputControlledEntity;
 import server.character.NPC;
@@ -117,7 +117,6 @@ public class MissionServer implements Runnable, Listener {
 	}
 	
 	protected void setUp(World world, List<ServerPlayer> players) {
-		PathFinder pathFinder = new PathFinder(world.getArena());
 		for (int i=0;i<players.size();i++) {
 			ServerPlayer p = players.get(i);
 			if (p.character==null) {
@@ -130,7 +129,7 @@ public class MissionServer implements Runnable, Listener {
 				p.setCharacter(character);
 			}
 			if (p instanceof AIPlayer) {
-				((AIPlayer) p).init(world.getArena(), p.character, pathFinder);
+				((AIPlayer) p).init(world.getArena(), p.character);
 			}
 			
 			world.addCharacter(p.character,p.spawnPoint);
@@ -139,7 +138,8 @@ public class MissionServer implements Runnable, Listener {
 		
 		for (SpawnPoint p:world.getArena().getSpawns()) {
 			if (p.type==SpawnType.NPCOnly) {
-				NPC npc = new NPC(p.getId(), 1, ClassStats.classStats.get(p.setups.get(0)), world.getArena(), p.behaviour);
+				NPC npc = new NPC(p.getId(),p.team, p.setups.get(0).id);
+				npc.init(world.getArena(), p.behaviour);
 				world.addCharacter(npc,p);
 				npc.setWeapon(WeaponFactory.createGun(Weapon.SILENT_PISTOL_ID, npc));
 				npc.brain.setPatrolLocations(p.patrolLocations);

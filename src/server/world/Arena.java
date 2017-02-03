@@ -358,7 +358,9 @@ public class Arena {
 
 	public int getLightAt(Point2D p) {
 		try {
-			return lightMap[(int)(p.getX()*2/Terrain.tileSize)][(int)(p.getY()*2/Terrain.tileSize)];
+			int lx = (int)(p.getX()*2/Terrain.tileSize);
+			int ly = (int)(p.getY()*2/Terrain.tileSize);
+			return lightMap[lx][ly];
 		} catch (Exception e){
 			return 0;
 		}

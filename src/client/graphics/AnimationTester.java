@@ -72,7 +72,7 @@ public class AnimationTester extends JFrame implements MouseListener, Runnable {
 				Graphics2D g2d = (Graphics2D) bufferstrat.getDrawGraphics();
 				g2d.fillRect(0, 0, render.getWidth(), render.getHeight());
 
-				as.render(g2d);
+				//as.render(g2d);
 
 				g2d.dispose();
 			} while (bufferstrat.contentsRestored());
