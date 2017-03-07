@@ -213,7 +213,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		// place holder for map
 		JLabel map = null;
 		try {
-			BufferedImage mapImage = ImageIO.read(new FileInputStream("resource/map/" + config.arena + ".png"));
+			BufferedImage mapImage = ImageIO.read(new FileInputStream("resource/map/" + HostScreen.MAP_LIST[config.arena] + ".png"));
 			float ratio = 150f/Math.max(mapImage.getWidth(),mapImage.getHeight());
 			map = new JLabel(new ImageIcon(mapImage.getScaledInstance((int)(mapImage.getWidth()*ratio),(int)(mapImage.getHeight()*ratio), Image.SCALE_SMOOTH)),JLabel.CENTER);
 		} catch (IOException e) {
@@ -283,20 +283,6 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 
 	@Override
 	public void update() {}
-
-	// TODO also load image / stuff
-	// not sure if the host should be allowed to change arena in the lobby
-	// or just let him choose it when creating the game (more commonly seen)
-	// -> simplicity -> just let him choose arena & settings at room creation
-	/**
-	 * Loads the arena from a specified name
-	 * 
-	 * @param name
-	 *            The name of the arena
-	 */
-	private void loadArena(String name) {
-		config.arena = name;
-	}
 
 	/**
 	 * Sets the Type selection
@@ -391,9 +377,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 				try {
 					//System.out.println("Message stream available: " + ois.available());
 					Object message = connection.receive();
-					if (message instanceof ChangeArenaRequest) {
-						loadArena(((ChangeArenaRequest) message).arenaName);
-					} else if (message instanceof NewPlayerRequest) {
+					if (message instanceof NewPlayerRequest) {
 						NewPlayerRequest request = ((NewPlayerRequest) message);
 						players.add(request.newPlayer);
 						idlePlayers.add(request.newPlayer);

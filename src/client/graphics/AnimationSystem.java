@@ -140,13 +140,13 @@ public class AnimationSystem {
 		for (int i = 0; i < n; i++) {
 			//double randomDirection = Math.PI*2*Utils.random().nextDouble();
 			double direction = offset + Math.PI*2.0*i/n;
-			ParticleAnimation p = new ParticleAnimation((long)(300+volume*10));
+			ParticleAnimation p = new ParticleAnimation((long)(500+volume*10));
 			p.setTrail(true);
 			p.setVel(0, 0, -0.08);
 			p.setLoc(x, y, 1);
 			p.setDirection(direction, 0.05+volume*0.001);
 			p.setColor(new Color(0x3fffffff,true));
-			p.setSize(0.1);
+			p.setSize(0.12);
 			p.setGroundInteraction(GroundInteraction.Stop);
 			pending.add(p);
 		}
@@ -157,9 +157,9 @@ public class AnimationSystem {
 	 */
 	public void addProjectileTrail(double x, double y, double direction, double speed, double size) {
 		if (size<50)
-			addCustomAnimation(new LineAnimation(50,x,y,direction,speed,Math.min(0.05,size/500)));
+			addCustomAnimation(new LineAnimation(70,x,y,direction,speed,Math.min(0.05,size/500)));
 		else {
-			addCustomAnimation(new LineAnimation(50,x,y,direction,speed,size/3000));
+			addCustomAnimation(new LineAnimation(70,x,y,direction,speed,size/3000));
 		}
 	}
 	

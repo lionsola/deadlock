@@ -47,7 +47,13 @@ public class ComputeInterestPoint extends
 		InputControlledEntity player = (InputControlledEntity)getContext().getVariable("Character");
 		Arena arena = (Arena)getContext().getVariable("Arena");
 		Point2D dest = Searcher.searchCheckStandPoint(arena, player.getPosition(), ip.getLocation(), 3);
-		float[] d = {(float)dest.getX(),(float)dest.getY()};
+		float[] d = new float[2];
+		if (dest!=null) {
+			d[0] = (float)dest.getX();
+			d[1] = (float)dest.getY();
+		} else {
+			d = ipCoord;
+		}
 		getContext().setVariable("interestStandPoint", d);
 	}
 

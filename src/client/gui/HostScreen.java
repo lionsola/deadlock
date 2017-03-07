@@ -36,7 +36,7 @@ public class HostScreen extends AbstractScreen implements ActionListener {
 
 	private static final long serialVersionUID = -8617632006677046360L;
 	// available maps
-	private static final String[] MAP_LIST = {"test","mansion"};
+	public static final String[] MAP_LIST = {"house","house2","test","mansion"};
 	
 	private int currentMode;
 	private JLabel modeLabel;
@@ -170,7 +170,7 @@ public class HostScreen extends AbstractScreen implements ActionListener {
 					port.setBorder(new LineBorder(Color.WHITE));
 					int portnumber = Integer.parseInt(port.getText());
 					
-					LobbyServer lobbyServer = new LobbyServer(portnumber, MAP_LIST[currentMap]);
+					LobbyServer lobbyServer = new LobbyServer(portnumber, currentMap);
 					
 
 					Socket socket = new Socket("localhost", portnumber);

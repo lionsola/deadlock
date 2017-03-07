@@ -1,6 +1,5 @@
 package client.gui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -20,7 +19,6 @@ import javax.swing.JSeparator;
 
 import client.graphics.ImageBlender;
 import client.graphics.Sprite;
-import editor.SpawnPoint.CharType;
 import shared.network.FullCharacterData;
 
 public class AbilityBar extends JPanel {

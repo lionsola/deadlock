@@ -28,6 +28,7 @@ public class CharData implements Serializable {
 	public float radius;
 	public float healthPoints;
 	public float direction;
+	public float faceDir;
 	public float exposure;
 	
 	public CharData(InputControlledEntity e) {
@@ -48,6 +49,7 @@ public class CharData implements Serializable {
 		direction = (float) e.getDirection();
 		exposure = (float) e.getExposure();
 		typeId = e.typeId;
+		faceDir = (float) e.getTargetDirection();
 	}
 	
 	public CharData(Entity e) {

@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import client.graphics.ParticleSource;
+import client.gui.HostScreen;
 import editor.DataManager;
 import editor.EditorArena;
 import editor.SpawnPoint;
@@ -34,25 +35,24 @@ public class Arena {
 
 	private ArenaData ad;
 	protected String name; // the name of the map
-	private transient List<Point2D> t1Spawns; // spawn points of team 1
-	private transient List<Point2D> t2Spawns; // spawn points of team 2
 	
 	protected transient List<Light> staticLights;
 	protected transient int[][] lightMap;
 	
 	protected Tile[][] tMap;
+	protected boolean[] data;
 	
 	/**
 	 * Creating a new Arena
 	 * 
-	 * @param name
+	 * @param mId
 	 *            the name of the file that will be read in to generate the arena.
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public Arena(String name, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable,
+	public Arena(int mId, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable,
 			HashMap<Integer,TileSwitchPreset> triggerTable) {
-		this((ArenaData) DataManager.loadObject("resource/map/"+name+".arena"),tileTable,objectTable,triggerTable);
+		this((ArenaData) DataManager.loadObject("resource/map/"+HostScreen.MAP_LIST[mId]+".arena"),tileTable,objectTable,triggerTable);
 	}
 	
 	public Arena(ArenaData ad, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable,
@@ -80,6 +80,7 @@ public class Arena {
 		int height = ad.tMap[0].length;
 		tMap = ad.tMap;
 		staticLights = new LinkedList<Light>();
+		data = new boolean[ad.noData];
 		for (int x=0;x<width;x++) {
 			for (int y=0;y<height;y++) {
 				tMap[x][y].setTerrain(tileTable.get(ad.idMap[x][y].terrainId));
@@ -101,14 +102,16 @@ public class Arena {
 			}
 		}
 		List<ParticleSource> newPss = new LinkedList<ParticleSource>();
-		for (ParticleSource ps:ad.pss) {
-			ParticleSource preset = ParticleSource.presets.get(ps.name);
-			if (preset!=null) {
-				ParticleSource dup = preset.clone();
-				dup.setLocation(ps.getTx(), ps.getTy());
-				newPss.add(dup);
-			} else {
-				newPss.add(ps);
+		if (ad.pss!=null) {
+			for (ParticleSource ps:ad.pss) {
+				ParticleSource preset = ParticleSource.presets.get(ps.name);
+				if (preset!=null) {
+					ParticleSource dup = preset.clone();
+					dup.setLocation(ps.getTx(), ps.getTy());
+					newPss.add(dup);
+				} else {
+					newPss.add(ps);
+				}
 			}
 		}
 		ad.pss = newPss;
@@ -116,15 +119,6 @@ public class Arena {
 		updateLightMap(null);
 	}
 	
-	/**
-	 * Return the spawn list for a given team.
-	 * @param team The team to get the spawn list for.
-	 */
-	public List<Point2D> getSpawn(int team) {
-		//List<Point2D> teamSpawn = new ArrayList<Point2D>();
-		return (team == 0 ? t1Spawns : t2Spawns);
-	}
-
 	/**
 	 * Used to return a specific Tile.
 	 * 
@@ -309,6 +303,7 @@ public class Arena {
 			}
 		}
 		
+		final int MIN_ILLU = 0x2f;
 		final int LEVELS = 2;
 		final float INTERVAL = 255/LEVELS;
 		for (int x=0;x<lightMap.length;x++) {
@@ -330,7 +325,8 @@ public class Arena {
 	}
 	
 	private int clampLight(double light) {
-		return (int) Math.round(Math.max(0x1f, Math.min(255, light)));
+		final int MIN_ILLU = 0x2f;
+		return (int) Math.round(Math.max(MIN_ILLU, Math.min(255, light)));
 	}
 	
 	public void setTerrain(int x, int y, Terrain t) {
@@ -381,21 +377,23 @@ public class Arena {
 
 	public static class ArenaData implements Serializable {
 		private static final long serialVersionUID = -3052994148693588749L;
-		public String name;
-		public Tile[][] tMap;
-		public TileData[][] idMap;
+		public final String name;
+		public final Tile[][] tMap;
+		public final TileData[][] idMap;
 		
-		public List<SpawnPoint> spawns = new LinkedList<SpawnPoint>();
+		public final List<SpawnPoint> spawns = new LinkedList<SpawnPoint>();
 		public List<ParticleSource> pss = new LinkedList<ParticleSource>();
 		
-		public String objectiveType = "ReachTarget";
-		public List<MissionVar> objectiveData;
+		public final String objectiveType;
+		public final List<MissionVar> objectiveData;
+		public final int noData;
+		public final boolean isReal;
 		
 		public ArenaData(EditorArena a) {
 			name = a.getName();
 			tMap = a.tMap;
 			idMap = new TileData[a.getWidth()][a.getHeight()];
-			
+			noData = a.getNoData();
 			for (int x=0;x<a.getWidth();x++) {
 				for (int y=0;y<a.getHeight();y++) {
 					Tile t = a.get(x, y);
@@ -421,6 +419,7 @@ public class Arena {
 			}
 			objectiveType = a.objectiveType;
 			objectiveData = a.objectiveData;
+			isReal = a.isReal();
 		}
 	}
 	
@@ -454,5 +453,31 @@ public class Arena {
 			}
 		}
 		return pss;
+	}
+
+	public Tile getTileAt(Point2D point) {
+		return getTileAt(point.getX(),point.getY());
+	}
+
+	public void setData(int dataId) {
+		if (dataId>=0 && dataId<data.length) {
+			data[dataId] = true;
+		}
+	}
+	
+	public int getNoData() {
+		return ad.noData;
+	}
+
+	public boolean dataObtained(int dataId) {
+		return data[dataId];
+	}
+	
+	public boolean isReal() {
+		return ad.isReal;
+	}
+	
+	public ArenaData getArenaData() {
+		return ad;
 	}
 }

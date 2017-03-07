@@ -8,6 +8,9 @@
 // ******************************************************* 
 package server.network.btexecution;
 
+import server.character.Entity;
+import server.network.MissionServer;
+
 /** ExecutionCondition class created from MMPM condition EliminateAll. */
 public class EliminateAll extends
 		jbt.execution.task.leaf.condition.ExecutionCondition {
@@ -35,11 +38,12 @@ public class EliminateAll extends
 	}
 
 	protected jbt.execution.core.ExecutionTask.Status internalTick() {
-		/*
-		 * TODO: this method's implementation must be completed. This function
-		 * should only return Status.SUCCESS, Status.FAILURE or Status.RUNNING.
-		 * No other values are allowed.
-		 */
+		MissionServer server = (MissionServer)getContext().getVariable("MissionServer");
+		for (Entity e:server.getWorld().getCharacters()) {
+			if (e.team==1 && !e.isDead()) {
+				return Status.RUNNING;
+			}
+		}
 		return jbt.execution.core.ExecutionTask.Status.SUCCESS;
 	}
 

@@ -145,7 +145,8 @@ public class Camera {
 
 	public Rectangle2D getDrawArea() {
 		return new Rectangle2D.Double(Math.max(0,getTopLeftXMeter()), Math.max(0,getTopLeftYMeter()),
-				Math.min(arena.getWidthMeter(),Renderer.toMeter(parent.getWidth())), Math.min(arena.getHeightMeter(),Renderer.toMeter(parent.getHeight())));
+				Math.min(arena.getWidthMeter()-getTopLeftXMeter(),Renderer.toMeter(parent.getWidth())),
+				Math.min(arena.getHeightMeter()-getTopLeftYMeter(),Renderer.toMeter(parent.getHeight())));
 	}
 
 	public Rectangle getDrawAreaPixel() {

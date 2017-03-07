@@ -64,16 +64,6 @@ public class MainMenuScreen extends AbstractScreen implements ActionListener {
 
 	}
 
-	/**
-	 * Initialise the buttons
-	 * 
-	 * @param button
-	 *            the button to be initialised
-	 */
-	private void initButton(JButton button) {
-		
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == hostButton) {

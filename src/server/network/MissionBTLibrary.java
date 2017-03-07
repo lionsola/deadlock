@@ -2,7 +2,7 @@
 //                   MACHINE GENERATED CODE                
 //                       DO NOT MODIFY                     
 //                                                         
-// Generated on 01/17/2017 21:26:54
+// Generated on 03/04/2017 14:31:51
 // ******************************************************* 
 package server.network;
 
@@ -10,6 +10,7 @@ package server.network;
  * BT library that includes the trees read from the following files:
  * <ul>
  * <li>D:/java/Deadlock/\resource/bt/mission/ReachTarget.xbt</li>
+ * <li>D:/java/Deadlock/\resource/bt/mission/EliminateAll.xbt</li>
  * </ul>
  */
 public class MissionBTLibrary implements jbt.execution.core.IBTLibrary {
@@ -18,11 +19,18 @@ public class MissionBTLibrary implements jbt.execution.core.IBTLibrary {
 	 * D:/java/Deadlock/\resource/bt/mission/ReachTarget.xbt.
 	 */
 	private static jbt.model.core.ModelTask ReachTarget;
+	/**
+	 * Tree generated from file
+	 * D:/java/Deadlock/\resource/bt/mission/EliminateAll.xbt.
+	 */
+	private static jbt.model.core.ModelTask EliminateAll;
 
 	/* Static initialization of all the trees. */
 	static {
 		ReachTarget = new server.network.btmodel.ReachTarget(null, null,
 				"targetLocation");
+
+		EliminateAll = new server.network.btmodel.EliminateAll(null);
 
 	}
 
@@ -35,6 +43,9 @@ public class MissionBTLibrary implements jbt.execution.core.IBTLibrary {
 	public jbt.model.core.ModelTask getBT(java.lang.String name) {
 		if (name.equals("ReachTarget")) {
 			return ReachTarget;
+		}
+		if (name.equals("EliminateAll")) {
+			return EliminateAll;
 		}
 		return null;
 	}
@@ -54,7 +65,7 @@ public class MissionBTLibrary implements jbt.execution.core.IBTLibrary {
 	private class BTLibraryIterator
 			implements
 			java.util.Iterator<jbt.util.Pair<java.lang.String, jbt.model.core.ModelTask>> {
-		static final long numTrees = 1;
+		static final long numTrees = 2;
 		long currentTree = 0;
 
 		public boolean hasNext() {
@@ -67,6 +78,11 @@ public class MissionBTLibrary implements jbt.execution.core.IBTLibrary {
 			if ((this.currentTree - 1) == 0) {
 				return new jbt.util.Pair<java.lang.String, jbt.model.core.ModelTask>(
 						"ReachTarget", ReachTarget);
+			}
+
+			if ((this.currentTree - 1) == 1) {
+				return new jbt.util.Pair<java.lang.String, jbt.model.core.ModelTask>(
+						"EliminateAll", EliminateAll);
 			}
 
 			throw new java.util.NoSuchElementException();

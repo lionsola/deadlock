@@ -39,7 +39,7 @@ public class ComputeChasePosition extends
 		 */
 		this.getExecutor().requestInsertionIntoList(
 				jbt.execution.core.BTExecutor.BTExecutorList.TICKABLE, this);
-		/* TODO: this method's implementation must be completed. */
+		// this method's implementation must be completed.
 		System.out.println(this.getClass().getCanonicalName() + " spawned");
 		List<CharData> enemies = (List<CharData>) getContext().getVariable("Enemies");
 		InputControlledEntity player = (InputControlledEntity)getContext().getVariable("Character");
@@ -48,8 +48,19 @@ public class ComputeChasePosition extends
 		// choose an enemy
 		CharData e = enemies.get(0);
 		double pen = NPCBrain.estimateMaxPen(player.getWeapon().type.projectileSpeed);
-		Point2D dest = Searcher.searchAttackStandPoint(arena, player.getPosition(), new Point2D.Float(e.x,e.y), 5, pen);
-		float[] d = {(float)dest.getX(),(float)dest.getY()};
+		double range = 5;
+		if (player.getWeapon().type.weaponType==3) {
+			range = player.getWeapon().type.length-0.1;
+		}
+		Point2D dest = Searcher.searchAttackStandPoint(arena, player.getPosition(), new Point2D.Float(e.x,e.y), range, pen);
+		float[] d = new float[2];
+		if (dest!=null) {
+			d[0] = (float)dest.getX();
+			d[1] = (float)dest.getY();
+		} else {
+			d[0] = e.x;
+			d[1] = e.y;
+		}
 		getContext().setVariable("chaseTarget", d);		
 	}
 

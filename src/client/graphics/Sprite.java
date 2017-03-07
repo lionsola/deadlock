@@ -11,7 +11,6 @@ import editor.SpawnPoint.CharType;
 import server.ability.Ability;
 import server.passive.Passive;
 import server.weapon.Weapon;
-import server.world.Utils;
 
 /**
  * Load and store the sprites needed in-game.
@@ -35,7 +34,7 @@ public class Sprite {
 	public static BufferedImage[] COVER;
 	//private static Image[][] images; 
 	public static HashMap<Integer,BufferedImage> guns = new HashMap<Integer,BufferedImage>();
-	public static HashMap<Integer,String> ability = new HashMap<Integer,String>();
+	public static HashMap<Integer,String> icons = new HashMap<Integer,String>();
 
 	public static HashMap<Integer,BufferedImage> heads = new HashMap<Integer,BufferedImage>();
 	
@@ -49,6 +48,7 @@ public class Sprite {
 			heads.put(CharType.Alpha.id,ImageIO.read(new FileInputStream("resource/character/alpha_head.png")));
 			heads.put(CharType.Pi.id,ImageIO.read(new FileInputStream("resource/character/pi_head.png")));
 			heads.put(CharType.Officer.id,ImageIO.read(new FileInputStream("resource/character/officer_head.png")));
+			heads.put(CharType.MOfficer.id,ImageIO.read(new FileInputStream("resource/character/officer_head.png")));
 			
 			COVER = new BufferedImage[3];
 			
@@ -61,24 +61,27 @@ public class Sprite {
 			guns.put(Weapon.MARKMAN_RIFLE_ID, ImageIO.read(new FileInputStream(WEAPON_SPRITE_DIR+"sniper.png")));
 			guns.put(Weapon.SILENT_PISTOL_ID, ImageIO.read(new FileInputStream(WEAPON_SPRITE_DIR+"pistol.png")));
 			guns.put(Weapon.ASSAULT_RIFLE_ID, ImageIO.read(new FileInputStream(WEAPON_SPRITE_DIR+"m16.png")));
+			guns.put(7, ImageIO.read(new FileInputStream(WEAPON_SPRITE_DIR+"pistol.png")));
+			guns.put(Weapon.MELEE_ID, ImageIO.read(new FileInputStream(WEAPON_SPRITE_DIR+"melee.png")));
 			
-			ability.put(Weapon.MP7_ID, ABILITY_ICON_DIR+"weapon_mp7.png");
-			ability.put(Weapon.SHOTGUN_ID, ABILITY_ICON_DIR+"weapon_shotgun.png");
-			ability.put(Weapon.MARKMAN_RIFLE_ID, ABILITY_ICON_DIR+"weapon_sniper.png");
-			ability.put(Weapon.SILENT_PISTOL_ID, ABILITY_ICON_DIR+"weapon_pistol.png");
-			ability.put(Weapon.ASSAULT_RIFLE_ID, ABILITY_ICON_DIR+"weapon_assault.png");
+			icons.put(Weapon.MP7_ID, ABILITY_ICON_DIR+"weapon_mp7.png");
+			icons.put(Weapon.SHOTGUN_ID, ABILITY_ICON_DIR+"weapon_shotgun.png");
+			icons.put(Weapon.MARKMAN_RIFLE_ID, ABILITY_ICON_DIR+"weapon_sniper.png");
+			icons.put(Weapon.SILENT_PISTOL_ID, ABILITY_ICON_DIR+"weapon_pistol.png");
+			icons.put(Weapon.ASSAULT_RIFLE_ID, ABILITY_ICON_DIR+"weapon_assault.png");
+			icons.put(Weapon.MELEE_ID, ABILITY_ICON_DIR+"weapon_melee.png");
 			
-			ability.put(Ability.BINO_ID, ABILITY_ICON_DIR+"ability_bino.png");
-			ability.put(Ability.AMP_ID, ABILITY_ICON_DIR+"ability_amp.png");
-			ability.put(Ability.SCOPE_ID, ABILITY_ICON_DIR+"ability_scope.png");
-			ability.put(Ability.FLASH_ID, ABILITY_ICON_DIR+"ability_flash.png");
-			ability.put(Ability.FRAG_ID, ABILITY_ICON_DIR+"ability_frag.png");
+			icons.put(Ability.BINO_ID, ABILITY_ICON_DIR+"ability_bino.png");
+			icons.put(Ability.AMP_ID, ABILITY_ICON_DIR+"ability_amp.png");
+			icons.put(Ability.SCOPE_ID, ABILITY_ICON_DIR+"ability_scope.png");
+			icons.put(Ability.FLASH_ID, ABILITY_ICON_DIR+"ability_flash.png");
+			icons.put(Ability.FRAG_ID, ABILITY_ICON_DIR+"ability_frag.png");
 			
-			ability.put(Passive.ASSAULT_ID, ABILITY_ICON_DIR+"ability_bino.png");
-			ability.put(Passive.BACKSTAB_ID, ABILITY_ICON_DIR+"ability_bino.png");
-			ability.put(Passive.MARK_ID, ABILITY_ICON_DIR+"ability_bino.png");
-			ability.put(Passive.OVERWATCH_ID, ABILITY_ICON_DIR+"ability_bino.png");
-			ability.put(Passive.SHIELD_ID, ABILITY_ICON_DIR+"ability_bino.png");
+			icons.put(Passive.ASSAULT_ID, ABILITY_ICON_DIR+"ability_bino.png");
+			icons.put(Passive.BACKSTAB_ID, ABILITY_ICON_DIR+"ability_bino.png");
+			icons.put(Passive.MARK_ID, ABILITY_ICON_DIR+"ability_bino.png");
+			icons.put(Passive.OVERWATCH_ID, ABILITY_ICON_DIR+"ability_bino.png");
+			icons.put(Passive.SHIELD_ID, ABILITY_ICON_DIR+"ability_bino.png");
 			
 		} catch (Exception e) {
 			System.out.println("Error while loading server.character images");
@@ -90,7 +93,7 @@ public class Sprite {
 
 	public static BufferedImage getAbilityIcon(int id) {
 		try {
-			return ImageIO.read(new FileInputStream(ability.get(id)));
+			return ImageIO.read(new FileInputStream(icons.get(id)));
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;

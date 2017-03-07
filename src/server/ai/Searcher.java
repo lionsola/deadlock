@@ -182,6 +182,7 @@ public class Searcher <T,R> {
     HashMap<T,Float> cm = new HashMap<T,Float>();
     SearchResult<R> result = new SearchResult<R>();
     GoalMapper <T,R> gm;
+    float maxDistance = 30;
     
     public Searcher() {
     	result.status = Status.UNINITIALIZED;
@@ -217,21 +218,22 @@ public class Searcher <T,R> {
             open.remove(current);
             em.put(current, ExploreState.Explored);
             float distCurSrc = cm.get(current)-hf.evaluate(current);
-            
-            // generate nearby empty tiles
-            List<T> nearby = ag.getAdjacentsStates(current);
-            for (T p:nearby) {
-                if (em.get(p)==ExploreState.Explored)
-                    continue;
-                float newTotalDist = distCurSrc + df.getDistance(p,current) + hf.evaluate(p);
-                if (em.get(p)==null || newTotalDist<cm.get(p)) {
-                    fm.put(p, current);
-                    cm.put(p,newTotalDist);
-                    if (em.get(p)==null) {
-                        open.add(p);
-                        em.put(p, ExploreState.Exploring);
-                    }
-                }
+            if (distCurSrc<maxDistance) {
+	            // generate nearby empty tiles
+	            List<T> nearby = ag.getAdjacentsStates(current);
+	            for (T p:nearby) {
+	                if (em.get(p)==ExploreState.Explored)
+	                    continue;
+	                float newTotalDist = distCurSrc + df.getDistance(p,current) + hf.evaluate(p);
+	                if (em.get(p)==null || newTotalDist<cm.get(p)) {
+	                    fm.put(p, current);
+	                    cm.put(p,newTotalDist);
+	                    if (em.get(p)==null) {
+	                        open.add(p);
+	                        em.put(p, ExploreState.Exploring);
+	                    }
+	                }
+	            }
             }
         }
         result.status = Status.FAILURE;

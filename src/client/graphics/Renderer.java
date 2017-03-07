@@ -3,6 +3,8 @@ package client.graphics;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
@@ -81,6 +83,8 @@ public class Renderer {
                         BasicStroke.CAP_BUTT,
                         BasicStroke.JOIN_MITER,
                         10.0f, dash1, 0.0f);
+    
+    
 	
 	/**
 	 * @return the arenaImage
@@ -314,19 +318,46 @@ public class Renderer {
 	public static void renderMainCharacter(Graphics2D g2D, FullCharacterData player, ClientPlayer playerInfo) {
 		// render the character
 		renderGun(g2D,player.x,player.y,player.radius,player.direction,playerInfo.weaponId,playerInfo.team);
-		renderCharacter(g2D, player.x, player.y, player.direction, player.radius, playerInfo.type.id,playerInfo.team);
+		renderCharacter(g2D, player.x, player.y, player.direction, player.faceDir, player.radius, playerInfo.type.id,playerInfo.team);
 		renderArmor(g2D,player.x, player.y, player.radius,player.direction+player.armorStart,player.armorAngle,playerInfo.team);
 		
 	}
 
 	public void renderCharacterUI(Graphics2D g2D, FullCharacterData p) {
 		// render the health bar
+		/*
 		g2D.setStroke(new BasicStroke(toPixel(HEALTHBAR_WIDTH)));
 		g2D.setColor(new Color(255, 50, 50));
 		double length = (0.2*p.healthPoints/Renderer.ppm);
 		double topy = (p.y - p.radius - HEALTHBAR_WIDTH*2);
 		drawLine(g2D, p.x - length / 2, topy, p.x + length / 2, topy);
-
+		*/
+		// render the highlight circle
+	    final BasicStroke dashedHighlight =
+		        new BasicStroke(5f,
+		                        BasicStroke.CAP_BUTT,
+		                        BasicStroke.JOIN_MITER,
+		                        10.0f);
+		    
+	    g2D.setStroke(dashedHighlight);
+	    //double FPHASE = 1500;
+	    //double t = Math.abs(FPHASE-(System.currentTimeMillis()%(FPHASE*2)))/FPHASE;
+		//int alpha = (int)(40 + t*40);
+	    int alpha = getAlpha();
+	    Color c = GUIFactory.UICOLOR;
+		g2D.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha));
+		
+		double phase = Math.PI*2/p.maxAmmo;
+	    for (int a=0;a<p.ammo;a++) {
+			Renderer.drawArc(g2D, p.x, p.y, p.radius*2, phase*a, phase*0.7, Arc2D.OPEN);
+	    }
+	    g2D.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha/4));
+	    for (int a=p.ammo;a<p.maxAmmo;a++) {
+	    	Renderer.drawArc(g2D, p.x, p.y, p.radius*2, phase*a, phase*0.7, Arc2D.OPEN);
+	    }
+		
+		
+		
 		// render direction line
 		/*
 		if (p.viewRange>p.radius*5) {
@@ -342,7 +373,7 @@ public class Renderer {
 	public static void renderOtherCharacter(Graphics2D g2D, CharData c) {
 		if (c.healthPoints>0) {
 			renderGun(g2D,c.x,c.y,c.radius,c.direction,c.weapon,c.team);
-			renderCharacter(g2D,c.x,c.y,c.direction,c.radius,c.typeId,c.team);
+			renderCharacter(g2D,c.x,c.y,c.direction,c.faceDir,c.radius,c.typeId,c.team);
 			renderArmor(g2D,c.x,c.y,c.radius,c.direction+c.armorStart,c.armorAngle,c.team);
 		} else {
 			renderDeadCharacter(g2D,c.x,c.y,c.direction,c.radius,c.team);
@@ -383,7 +414,7 @@ public class Renderer {
 	}
 	
 	
-	private static void renderCharacter(Graphics2D g2D, double x, double y, double direction, double r, int type, int team) {
+	private static void renderCharacter(Graphics2D g2D, double x, double y, double direction, double facingDir, double r, int type, int team) {
 		g2D.setStroke(new BasicStroke(CHARACTER_WIDTH*ppm));
 		//fillCircle(g2D,x, y,r);
 		double openArc = 2;
@@ -393,7 +424,7 @@ public class Renderer {
 		drawArc(g2D,x,y,r, direction+openArc/2, Math.PI*2 - openArc, Arc2D.OPEN);
 		
 		// draw head
-		Point2D h = Geometry.PolarToCartesian(r*0.35, direction);
+		Point2D h = Geometry.PolarToCartesian(r*0.35, facingDir);
 		double hx = x+h.getX();
 		double hy = y-h.getY();
 		//double hr = r*0.55;
@@ -437,7 +468,7 @@ public class Renderer {
 	public static void renderProjectile(Graphics2D g2D, ProjectileData pd) {
 		g2D.setColor(Color.WHITE);
 		if (pd.size < 50) {
-			g2D.setStroke(new BasicStroke((float)(getPPM()*pd.size/1000)));
+			g2D.setStroke(new BasicStroke((float)(getPPM()*pd.size/400)));
 			drawLine(g2D, pd.x, pd.y,pd.prevX,pd.prevY);
 		}
 		else if (pd.size >= 50) {
@@ -473,12 +504,6 @@ public class Renderer {
 		g2D.drawLine(cx, cy-chS-chL,cx, cy-chS+chL);
 		g2D.drawLine(cx+chS-chL, cy,cx+chS+chL, cy);
 		g2D.drawLine(cx-chS-chL, cy,cx-chS+chL, cy);
-	}
-	
-	public static void renderLOS(Graphics2D g2D, Shape los) {
-		g2D.setColor(Color.YELLOW);
-		g2D.setStroke(new BasicStroke(toPixel(0.15)));
-		g2D.draw(los);
 	}
 	
 	public static void renderArenaBGFlat(Graphics2D g2D, Arena a, Rectangle2D window) {
@@ -599,6 +624,8 @@ public class Renderer {
 		}	
 	}
 	
+	
+	
 	public static void renderTrigger(Graphics2D g2D, EditorArena a, Rectangle2D window) {
 		double ts = Terrain.tileSize;
 		int x1 = Math.max(0, (int) (window.getX() / ts));
@@ -632,6 +659,9 @@ public class Renderer {
 							if (tileSwitch.getPreset().getSwitchThing()!=null) {
 								drawImage(g2D,tileSwitch.getPreset().getSwitchThing().getImage(),0,0,ts,ts,p.x*ts,p.y*ts,ts/2,ts/2);
 							}
+						} else if (effect instanceof TriggerEffect.GiveData) {
+							TriggerEffect.GiveData data = (TriggerEffect.GiveData) effect;
+							drawString(g2D, String.valueOf(data.getDataId()), (x+0.5)*ts, (y+0.5)*ts);
 						}
 					}
 				}
@@ -639,6 +669,39 @@ public class Renderer {
 		}
 	}
 
+	public static void renderData(Graphics2D g2D, Arena arena, Rectangle2D window) {
+		double ts = Terrain.tileSize;
+		int x1 = Math.max(0, (int) (window.getX() / ts));
+		int y1 = Math.max(0, (int) (window.getY() / ts));
+		int x2 = Math.min(arena.getWidth() - 1, x1 + (int) (window.getWidth() / ts) + 1);
+		int y2 = Math.min(arena.getHeight() - 1, y1 + (int) (window.getHeight() / ts) + 1);
+		
+		g2D.setStroke(new BasicStroke(2f));
+		Color c = Color.WHITE;
+		int alpha = getAlpha();
+		
+		for (int x = x1; x <= x2; x++) {
+			for (int y = y1; y <= y2; y++) {
+				Trigger tr = arena.get(x, y).getTrigger();
+				if (tr!=null) {
+					for (TriggerEffect effect:tr.getEffects()) {
+						if (effect instanceof TriggerEffect.GiveData) {
+							TriggerEffect.GiveData data = (TriggerEffect.GiveData) effect;
+							if (!arena.dataObtained(data.getDataId())) {
+								g2D.setColor(new Color(c.getRed(),c.getGreen(),c.getBlue(),alpha));
+								drawRect(g2D,x*ts,y*ts,ts,ts);
+								drawCenteredString(g2D, "?", GUIFactory.font_s_bold, (x+0.5)*ts, (y+0.5)*ts);
+							} else {
+								g2D.setColor(new Color(c.getRed(),c.getGreen(),c.getBlue(),alpha/4));
+								drawRect(g2D,x*ts,y*ts,ts,ts);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	public static void renderSpawnLocations(Graphics2D g2D, EditorArena a, Rectangle2D window) {
 		double ts = Terrain.tileSize;
 		int x1 = Math.max(0, (int) (window.getX() / ts));
@@ -651,7 +714,8 @@ public class Renderer {
 				SpawnPoint sp = a.spawns[x][y];
 				if (sp != null) {
 					Point2D p = Utils.tileToMeter(sp.x, sp.y);
-					Renderer.renderCharacter(g2D, p.getX(), p.getY(),sp.direction, 0.5, sp.setups.get(0).id, sp.team);
+					Renderer.renderCharacter(g2D, p.getX(), p.getY(),
+							sp.direction,sp.direction,0.5, sp.setups.get(0).id, sp.team);
 				}
 			}
 		}
@@ -723,6 +787,21 @@ public class Renderer {
 	
 	public static void drawString(Graphics2D g2D, String s, double x, double y) {
 		g2D.drawString(s, toPixel(x), toPixel(y));
+	}
+	
+	public static void drawCenteredString(Graphics2D g2D, String s, Font f, double x, double y) {
+	    // Get the FontMetrics
+	    FontMetrics metrics = g2D.getFontMetrics(f);
+	    // Determine the X coordinate for the text
+	    int px = toPixel(x) - metrics.stringWidth(s) / 2;
+	    // Determine the Y coordinate for the text (note we add the ascent, as in java 2d 0 is top of the screen)
+	    int py = toPixel(y) - metrics.getHeight() / 2 + metrics.getAscent();
+	    
+	    // Set the font
+	    g2D.setFont(f);
+	    
+	    // Draw the String
+	    g2D.drawString(s, px, py);
 	}
 	
 	public static void drawLine(Graphics2D g2D, double x1, double y1, double x2, double y2) {
@@ -896,5 +975,16 @@ public class Renderer {
 				}
 			}
 		}
+	}
+	
+	public static void drawArenaMarks(Graphics2D g2D, Arena a, Rectangle2D window) {
+		
+	}
+	
+	public static int getAlpha() {
+		double FPHASE = 1500;
+	    double t = Math.abs(FPHASE-(System.currentTimeMillis()%(FPHASE*2)))/FPHASE;
+		int alpha = (int)(80 + t*80);
+		return alpha;
 	}
 }

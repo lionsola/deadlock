@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Tree>
+  <Node id="Node_0" name="EliminateAll" type="Root">
+    <Children>
+      <Node id="Node_1" name="EliminateAll" type="Condition" />
+    </Children>
+  </Node>
+</Tree>
+

@@ -9,6 +9,20 @@ import java.io.Serializable;
  */
 public abstract class GameEvent implements Serializable {
 	
+	public static class DataObtained extends GameEvent {
+		private static final long serialVersionUID = 3360696584653021384L;
+		public final int dataId;
+		public final float x;
+		public final float y;
+		public final int charType;
+		public DataObtained(int dataId, double x, double y, int typeId) {
+			this.dataId = dataId;
+			this.x = (float)x;
+			this.y = (float)y;
+			this.charType = typeId;
+		}
+	}
+
 	private static final long serialVersionUID = 5351736924124300703L;
 
 	public static interface Listener {

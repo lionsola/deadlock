@@ -110,23 +110,30 @@ public class ComputePatrolPoint extends
 				jbt.execution.core.BTExecutor.BTExecutorList.TICKABLE, this);
 		
 		System.out.println(this.getClass().getCanonicalName() + " spawned");
-		List<Point2D> patrolLocations = (List<Point2D>)getPatrolLocations();
-		Object i = getContext().getVariable("patrolIndex");
-		int currentIndex = i==null?0:((int)i);
-		Point2D p = patrolLocations.get(currentIndex);
 		InputControlledEntity pc = (InputControlledEntity)getContext().getVariable("Character");
-		if (p.distance(pc.getPosition())<0.2) {
-			if (getRandom()) {
-				int tempIndex = Utils.random().nextInt(patrolLocations.size()-1);
-				currentIndex = tempIndex<currentIndex?tempIndex:tempIndex+1;
-			} else {
-				currentIndex = (currentIndex+1)%patrolLocations.size();
+		if (getPatrolLocations()!=null) {
+			List<Point2D> patrolLocations = (List<Point2D>)getPatrolLocations();
+		
+			Object i = getContext().getVariable("patrolIndex");
+			int currentIndex = i==null?0:((int)i);
+			Point2D p = patrolLocations.get(currentIndex);
+			
+			if (p.distance(pc.getPosition())<0.2) {
+				if (getRandom()) {
+					int tempIndex = Utils.random().nextInt(patrolLocations.size()-1);
+					currentIndex = tempIndex<currentIndex?tempIndex:tempIndex+1;
+				} else {
+					currentIndex = (currentIndex+1)%patrolLocations.size();
+				}
+				p = patrolLocations.get(currentIndex);
 			}
-			p = patrolLocations.get(currentIndex);
+			float[] patrolPoint = {(float)p.getX(),(float)p.getY()};
+			getContext().setVariable("patrolLocation", patrolPoint);
+			getContext().setVariable("patrolIndex", currentIndex);
+		} else {
+			float[] patrolPoint = {(float)pc.getX(),(float)pc.getY()};
+			getContext().setVariable("patrolLocation", patrolPoint);
 		}
-		float[] patrolPoint = {(float)p.getX(),(float)p.getY()};
-		getContext().setVariable("patrolLocation", patrolPoint);
-		getContext().setVariable("patrolIndex", currentIndex);
 	}
 
 	protected jbt.execution.core.ExecutionTask.Status internalTick() {

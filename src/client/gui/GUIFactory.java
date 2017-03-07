@@ -28,8 +28,12 @@ public class GUIFactory {
 	public static final Font font_s_bold = new Font(Font.MONOSPACED, Font.BOLD, 16);
 	public static final Font font_class = new Font(Font.MONOSPACED, Font.BOLD, 20);
 	
-	public static final Color UICOLOR = new Color(50,100,255);
-	public static final Color UICOLOR_BG = new Color(10,20,50);
+	//public static final Color UICOLOR = new Color(50,100,255);
+	//public static final Color UICOLOR_BG = new Color(10,20,50);
+	
+	public static final Color UICOLOR = new Color(150,150,150);
+	public static final Color UICOLOR_BG = new Color(75,75,75);
+	
 	public static final Color TRANSBLACK = new Color(0,0,0,127);
 
 	public static JButton getStyledButton(String text) {

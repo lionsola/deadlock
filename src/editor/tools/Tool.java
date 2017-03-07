@@ -8,7 +8,11 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
+import javax.swing.JComboBox;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputAdapter;
 
@@ -28,6 +32,7 @@ import server.world.trigger.Trigger;
 import server.world.trigger.TileSwitchPreset;
 import server.world.trigger.Trigger.SwitchOnTouchSide;
 import server.world.trigger.TriggerEffect;
+import server.world.trigger.TriggerEffect.GiveData;
 import server.world.trigger.TriggerEffect.TileSwitch;
 import server.network.MissionVar;
 import server.world.SpriteConfig;
@@ -242,7 +247,12 @@ public abstract class Tool extends MouseInputAdapter {
 				Point p = getPointedTileCoord(e);
 				SpawnPoint s = arenaPanel.getArena().spawns[p.x][p.y];
 				if (s!=null) {
-					dialog.setSpawn(s);
+					SpawnPoint ns = dialog.getSpawn();
+					ns.patrolLocations = s.patrolLocations;
+					ns.x = p.x;
+					ns.y = p.y;
+					
+					arenaPanel.getArena().spawns[p.x][p.y] = ns;
 				}
 			}
 		}
@@ -359,6 +369,58 @@ public abstract class Tool extends MouseInputAdapter {
 		}
 	}
 
+	public static class DataPaint extends Tool {
+		public DataPaint(ArenaPanel arenaPanel) {
+			super(arenaPanel);
+		}
+		
+		@Override
+		public void mousePressed(MouseEvent e) {
+			super.mousePressed(e);
+			Point p = getPointedTileCoord(e);
+			Tile t = arenaPanel.getArena().get(p);
+			Trigger tr = t.getTrigger();
+			if (SwingUtilities.isLeftMouseButton(e)) {
+				if (tr==null) {		
+					tr = new Trigger.SwitchOnTouch();
+					tr.setLocation(p);
+					t.setTrigger(tr);
+				}
+				
+				// give new data
+				//SpinnerNumberModel model = new SpinnerNumberModel(0,0,arenaPanel.getArena().getNoData(),1);
+				//JSpinner spinner = new JSpinner(model);
+				String result = JOptionPane.showInputDialog("Data ID:");
+				try {
+					int i = Integer.parseInt(result);
+					
+					// remove old data
+					TriggerEffect oldData = null;
+					for (TriggerEffect effect:tr.getEffects()) {
+						if (effect instanceof GiveData) {
+							oldData = effect;
+						}
+					}
+					tr.removeEffect(oldData);
+					
+					tr.addEffect(new TriggerEffect.GiveData(i));
+				} catch (Exception ex) {
+					
+				}
+			} else if (SwingUtilities.isRightMouseButton(e)) {
+				if (tr!=null) {
+					TriggerEffect oldData = null;
+					for (TriggerEffect effect:tr.getEffects()) {
+						if (effect instanceof GiveData) {
+							oldData = effect;
+						}
+					}
+					tr.removeEffect(oldData);
+				}
+			}
+		}
+	}
+	
 	public static class MoveTool extends Tool {
 		private int prevCx;
 		private int prevCy;

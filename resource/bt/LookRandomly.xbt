@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Tree>
+  <Node id="Node_0" name="LookRandomly" type="Root">
+    <Children>
+      <Node id="Node_20" type="Sequence">
+        <Children>
+          <Node id="Node_16" name="ComputeWatchPoint" type="Action" />
+          <Node id="Node_17" name="PointCursor" type="Action">
+            <Parameters>
+              <Parameter name="cursorTarget" fromcontext="true">watchPoint</Parameter>
+            </Parameters>
+          </Node>
+          <Node id="Node_21" name="ClearVariable" type="Action">
+            <Parameters>
+              <Parameter name="variableName" fromcontext="false">watchPoint</Parameter>
+            </Parameters>
+          </Node>
+          <Node id="Node_12" type="Wait">
+            <Parameters>
+              <Parameter name="duration" fromcontext="false">1000</Parameter>
+            </Parameters>
+          </Node>
+        </Children>
+      </Node>
+    </Children>
+  </Node>
+</Tree>
+

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Tree>
-  <Node id="Node_0" name="NPCPatroller" type="Root">
+  <Node id="Node_0" name="NPCAttacker" type="Root">
     <Children>
       <Node id="Node_2" type="Repeat">
         <Children>
@@ -51,7 +51,7 @@
                       <Node id="Node_44" name="ComputePatrolPoint" type="Action">
                         <Parameters>
                           <Parameter name="patrolLocations" fromcontext="true">patrolLocations</Parameter>
-                          <Parameter name="random" fromcontext="false">false</Parameter>
+                          <Parameter name="random" fromcontext="false">true</Parameter>
                         </Parameters>
                       </Node>
                       <Node id="Node_43" name="Run" type="Action">
@@ -60,26 +60,14 @@
                           <Parameter name="controlCursor" fromcontext="false">true</Parameter>
                         </Parameters>
                       </Node>
-                      <Node id="Node_35" name="ComputeWatchPoint" type="Action" />
-                      <Node id="Node_36" name="PointCursor" type="Action">
+                      <Node id="Node_47" type="Wait">
                         <Parameters>
-                          <Parameter name="cursorTarget" fromcontext="true">watchPoint</Parameter>
+                          <Parameter name="duration" fromcontext="false">500</Parameter>
                         </Parameters>
                       </Node>
-                      <Node id="Node_31" type="Wait">
+                      <Node id="Node_45" type="SubtreeLookup">
                         <Parameters>
-                          <Parameter name="duration" fromcontext="false">1000</Parameter>
-                        </Parameters>
-                      </Node>
-                      <Node id="Node_41" name="ComputeWatchPoint" type="Action" />
-                      <Node id="Node_42" name="PointCursor" type="Action">
-                        <Parameters>
-                          <Parameter name="cursorTarget" fromcontext="true">watchPoint</Parameter>
-                        </Parameters>
-                      </Node>
-                      <Node id="Node_37" type="Wait">
-                        <Parameters>
-                          <Parameter name="duration" fromcontext="false">1000</Parameter>
+                          <Parameter name="subtreeName" fromcontext="false">LookRandomly</Parameter>
                         </Parameters>
                       </Node>
                     </Children>

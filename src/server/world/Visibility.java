@@ -101,7 +101,7 @@ public class Visibility {
 		losBoxy.closePath();
 		
 		Area area = new Area(losBoxy);
-		
+
 		area.intersect(new Area(new Arc2D.Double(px - viewRange,py - viewRange, viewRange * 2, viewRange * 2,
 				Math.toDegrees(dir-viewAngle/2), Math.toDegrees(viewAngle), Arc2D.PIE)));
 		//System.out.println("calculated LoS in " + (System.nanoTime()-startTime) + " ns");

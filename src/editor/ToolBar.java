@@ -373,6 +373,29 @@ public class ToolBar extends JPanel {
 		});
 		particle.addItemListener(toggleButtonSwitch);
 		this.add(particle);
+		
+		final JToggleButton data = new JToggleButton();
+		stylizeToolButton(data);
+		try {
+			data.setIcon(new ImageIcon(ImageIO.read(new File("resource/editor/particle.png"))));
+		} catch (IOException e1) {
+			data.setText("?");
+		}
+		data.setToolTipText("Edit particle sources");
+		data.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent arg0) {
+				if (arg0.getStateChange()==ItemEvent.SELECTED) {
+					editor.setTool(new Tool.DataPaint(editor.getArenaPanel()));
+					editor.getArenaPanel().renderData = true;
+				} else if (arg0.getStateChange()==ItemEvent.DESELECTED) {
+					editor.setTool(new Tool.MoveTool(editor.getArenaPanel()));
+					editor.getArenaPanel().renderData = false;
+				}
+			}
+		});
+		data.addItemListener(toggleButtonSwitch);
+		this.add(data);
 	}
 	
 	private static void stylizeToolButton(AbstractButton button) {

@@ -7,17 +7,14 @@
 		<Action name="UseAbility"/>
 		<Action name="Sneak">
             <Parameter name="sneakTarget" type="COORDINATE"/>
+            <Parameter name="controlCursor" type="BOOLEAN"/>
         </Action>
 		
 		<Action name="Ping"/>
 		<Action name="PointCursor">
 			<Parameter name="cursorTarget" type="COORDINATE"/>
 		</Action>
-		<!-- Orders the current unit to go to a target position -->
-		<Action name="Move">
-			<Parameter name="moveTarget" type="COORDINATE"/>
-		</Action>
-		
+		<!-- Orders the current unit to run to a target position -->
 		<Action name="Run">
 		    <Parameter name="runTarget" type="COORDINATE"/>
 		    <Parameter name="controlCursor" type="BOOLEAN"/>
@@ -43,22 +40,13 @@
 		<Action name="ComputeAttackPoint">
 		</Action>
 		<!-- Randomise a sensible direction to turn to -->
-		<Action name="ComputeWatchPoint">
-		</Action>
+		<Action name="ComputeWatchPoint"/>
 		<Action name="ComputeInterestPoint"/>
 		
 		<!-- Given a target, works out where to point the cursor at when firing -->
         <Action name="ComputePatrolPoint">
               <Parameter name="patrolLocations" type="OBJECT"/>
               <Parameter name="random" type="BOOLEAN"/>
-        </Action>
-		<!-- Given a target, works out where to point the cursor at when firing -->
-		<Action name="ComputeNextPatrolPoint">
-		      <Parameter name="patrolLocations" type="OBJECT"/>
-		</Action>
-		<!-- Given a target, works out where to point the cursor at when firing -->
-        <Action name="ComputeRandomPatrolPoint">
-              <Parameter name="patrolLocations" type="OBJECT"/>
         </Action>
 		
 		<Action name="ClearVariable">
@@ -75,19 +63,16 @@
 		<Sensor name="LowHp" type="BOOLEAN"/>
 		<!-- Checks if the current unit is in enemies' sight -->
         <Sensor name="InEnemySight" type="BOOLEAN"/>
-        <!-- Checks if the current unit is in enemies' sight -->
+        <!-- Checks if there's any enemy in sight -->
         <Sensor name="EnemyInSight" type="BOOLEAN"/>
+        <!-- Checks if the enemy -->
+        <Sensor name="EnemyInWeaponRange" type="BOOLEAN"/>
         <!-- Checks if there are allies nearby -->
         <Sensor name="AllyNearby" type="BOOLEAN"/>
-        <!-- Checks if there are allies nearby -->
+        <!-- Checks if the weapon can be fired -->
         <Sensor name="WeaponReady" type="BOOLEAN"/>
-        
+        <!-- Checks if the enemy -->
         <Sensor name="SomethingNeedChecking" type="BOOLEAN"/>
-        
-        <Sensor name="TargetOutOfRange" type="BOOLEAN">
-            <Parameter name="target" type="COORDINATE"/>
-            <Parameter name="tileDistance" type="INTEGER"/>
-        </Sensor>
 	</SensorSet>
 	
 	<EntitySet>

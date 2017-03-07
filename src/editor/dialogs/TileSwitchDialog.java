@@ -36,7 +36,6 @@ public class TileSwitchDialog extends JDialog implements ActionListener, ItemLis
 	private JComboBox<String> itemType;
 	private JButton save;
 	
-	
 	TileSwitchPreset triggerPreset;
 	
 	Thing originalThing;
@@ -162,8 +161,7 @@ public class TileSwitchDialog extends JDialog implements ActionListener, ItemLis
 			originalThing = ListDialog.selectFromList(editor.getObjectTable().values(), this);
 			originalThingIcon.setIcon(new ImageIcon(originalThing.getImage()));
 			pack();
-		}
-		else if (e.getSource()==save) {
+		} else if (e.getSource()==save) {
 			if (this.triggerPreset==null) {
 				int idNumber = ((Number)id.getValue()).intValue();
 				if (editor.getTriggerTable().containsKey(idNumber)) {

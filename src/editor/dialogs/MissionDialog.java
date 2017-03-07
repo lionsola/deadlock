@@ -14,10 +14,15 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import editor.CustomListModel;
 import editor.Editor;
@@ -26,12 +31,13 @@ import server.network.MissionVar;
 
 public class MissionDialog extends JDialog {
 	private static final long serialVersionUID = 4408113214790963813L;
-	public enum MissionType {ReachTarget,KillAll,KillOne,DefendOne,LocationSequence,LocationSet}
+	public enum MissionType {ReachTarget,EliminateAll,KillOne,DefendOne,LocationSequence,LocationSet}
 	public enum DataType implements Serializable {Location,Character,Time,Locations}
 	EditorArena arena;
 	CustomListModel<MissionVar> clm;
 	JComboBox<MissionType> type;
 	JList<MissionVar> list;
+	JSlider dataNo;
 	public MissionDialog (Editor editor) {
 		super(editor);
 		this.arena = editor.getArenaPanel().getArena();
@@ -48,6 +54,19 @@ public class MissionDialog extends JDialog {
 			}});
 		type.setSelectedItem(arena.objectiveType);
 		panel.add(type);
+		
+		dataNo = new JSlider(SwingConstants.HORIZONTAL,0,9,5);
+		dataNo.setSnapToTicks(true);
+		dataNo.setMajorTickSpacing(1);
+		dataNo.setPaintTicks(true);
+		dataNo.setPaintLabels(true);
+		dataNo.setValue(arena.getNoData());
+		dataNo.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent arg0) {
+				arena.setNoData(dataNo.getValue());
+			}});
+		panel.add(dataNo);
 		
 		clm = new CustomListModel<MissionVar>(arena.objectiveData);
 		list = new JList<MissionVar>(clm);

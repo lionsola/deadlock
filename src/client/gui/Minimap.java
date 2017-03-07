@@ -1,12 +1,18 @@
 package client.gui;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.List;
 
 import javax.swing.JComponent;
 
+import client.graphics.Renderer;
+import editor.SpawnPoint;
+import editor.dialogs.MissionDialog.DataType;
+import server.network.MissionVar;
 import server.world.Arena;
 import server.world.Terrain;
 
@@ -105,6 +111,31 @@ public class Minimap extends JComponent {
 		int characterY = (int) ((p.character.y * TILE_SIZE / Terrain.tileSize) - RADIUS);
 		int characterSize = 2 * RADIUS;
 		g.fillOval(characterX, characterY, characterSize, characterSize);
+		
+		if (arena.getArenaData().objectiveType.equals("ReachTarget")) {
+			g.setColor(Renderer.teamColors[0]);
+			((Graphics2D)g).setStroke(new BasicStroke(1.5f));;
+			for (MissionVar mv :arena.getArenaData().objectiveData) {
+				if (mv.type==DataType.Location) {
+					float[] location = (float[]) mv.getValue();
+					int lX = (int)((location[0] * TILE_SIZE) - RADIUS);
+					int lY = (int) ((location[1] * TILE_SIZE) - RADIUS);
+					g.drawLine(lX-TILE_SIZE, lY-TILE_SIZE, lX+TILE_SIZE, lY+TILE_SIZE);
+					g.drawLine(lX-TILE_SIZE, lY+TILE_SIZE, lX+TILE_SIZE, lY-TILE_SIZE);
+				}
+			}
+		} else if (arena.getArenaData().objectiveType.equals("EliminateAll")) {
+			g.setColor(Renderer.teamColors[1]);
+			((Graphics2D)g).setStroke(new BasicStroke(1.5f));;
+			for (SpawnPoint sp :arena.getArenaData().spawns) {
+				if (sp.team==1) {
+					int lX = (int)((sp.x * TILE_SIZE) - RADIUS);
+					int lY = (int) ((sp.y* TILE_SIZE) - RADIUS);
+					g.drawLine(lX-TILE_SIZE, lY-TILE_SIZE, lX+TILE_SIZE, lY+TILE_SIZE);
+					g.drawLine(lX-TILE_SIZE, lY+TILE_SIZE, lX+TILE_SIZE, lY-TILE_SIZE);
+				}
+			}
+		}
 	}
 
 }

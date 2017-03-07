@@ -58,7 +58,7 @@ public abstract class Trigger implements Serializable {
 				// if this is the first person to enter the door
 				if (characters.size()==1) {
 					for (TriggerEffect te:effects) {
-						te.activate(w);
+						te.activate(w,this,c);
 					}
 				}
 			}
@@ -69,7 +69,7 @@ public abstract class Trigger implements Serializable {
 		
 			if (characters.isEmpty()) {
 				for (TriggerEffect te:effects) {
-					te.activate(w);
+					te.activate(w,this,character);
 				}
 			}
 		}
@@ -81,7 +81,7 @@ public abstract class Trigger implements Serializable {
 		@Override
 		public void onCharacterTouch(Entity c, World w) {
 			for (TriggerEffect te:effects) {
-				te.activate(w);
+				te.activate(w,this,c);
 			}
 		}
 	}
@@ -98,7 +98,7 @@ public abstract class Trigger implements Serializable {
 			if ((p.y==cy && ((side==0 && cx>p.x) || (side==2 && cx<p.x))) ||
 					(p.x==cx && ((side==1 && cy>p.y || (side==3 && cy<p.y))))) {
 				for (TriggerEffect te:effects) {
-					te.activate(w);
+					te.activate(w,this,c);
 				}
 			}
 		}

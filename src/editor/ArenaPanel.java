@@ -50,6 +50,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	protected boolean renderTileSwitchTrigger = false;
 	protected boolean renderSpawns = true;
 	protected boolean renderParticleSource = false;
+	protected boolean renderData = false;
 	
 	private Camera camera;
 	//private double zoomLevel;
@@ -63,6 +64,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	private AnimationSystem particles = new AnimationSystem();
 	//private List<ParticleAnimation> particles;
 	public boolean lightImageChanged = true;
+	
 	
 	public ArenaPanel (Editor editor, EditorArena arena) {
 		super();
@@ -178,7 +180,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 			return;
 		//System.out.println("GameWindow paint");
 		// render background
-		g.setColor(Renderer.BACKGROUND_COLOR);
+		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, getWidth(), getHeight());
 
 		// render HUD
@@ -227,6 +229,9 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		}
 		if (renderTileSwitchTrigger) {
 			Renderer.renderTrigger(g2D, arena, window);
+		}
+		if (renderData) {
+			Renderer.renderData(g2D, arena, window);
 		}
 		if (renderSpawns) {
 			Renderer.renderSpawnLocations(g2D, arena, window);

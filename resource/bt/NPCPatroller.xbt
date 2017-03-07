@@ -6,31 +6,39 @@
         <Children>
           <Node id="Node_3" type="DynamicPriorityList">
             <Children>
-              <Node id="Node_6" type="Parallel">
+              <Node id="Node_51" type="Repeat">
                 <Guard>
-                  <Node id="Node_22" name="EnemyInSight" type="Condition" />
+                  <Node id="Node_52" name="EnemyInSight" type="Condition" />
                 </Guard>
-                <Parameters>
-                  <Parameter name="policy" fromcontext="false">sequence</Parameter>
-                </Parameters>
                 <Children>
-                  <Node id="Node_26" type="Succeeder">
+                  <Node id="Node_6" type="Parallel">
+                    <Parameters>
+                      <Parameter name="policy" fromcontext="false">selector</Parameter>
+                    </Parameters>
                     <Children>
-                      <Node id="Node_4" type="SubtreeLookup">
-                        <Parameters>
-                          <Parameter name="subtreeName" fromcontext="false">Fire</Parameter>
-                        </Parameters>
+                      <Node id="Node_53" type="Repeat">
+                        <Children>
+                          <Node id="Node_4" type="SubtreeLookup">
+                            <Parameters>
+                              <Parameter name="subtreeName" fromcontext="false">Fire</Parameter>
+                            </Parameters>
+                          </Node>
+                        </Children>
                       </Node>
-                    </Children>
-                  </Node>
-                  <Node id="Node_10" type="Sequence">
-                    <Children>
-                      <Node id="Node_11" name="ComputeChasePosition" type="Action" />
-                      <Node id="Node_22" name="Run" type="Action">
-                        <Parameters>
-                          <Parameter name="runTarget" fromcontext="true">chaseTarget</Parameter>
-                          <Parameter name="controlCursor" fromcontext="false">false</Parameter>
-                        </Parameters>
+                      <Node id="Node_54" type="Repeat">
+                        <Children>
+                          <Node id="Node_10" type="Sequence">
+                            <Children>
+                              <Node id="Node_11" name="ComputeChasePosition" type="Action" />
+                              <Node id="Node_22" name="Run" type="Action">
+                                <Parameters>
+                                  <Parameter name="runTarget" fromcontext="true">chaseTarget</Parameter>
+                                  <Parameter name="controlCursor" fromcontext="false">false</Parameter>
+                                </Parameters>
+                              </Node>
+                            </Children>
+                          </Node>
+                        </Children>
                       </Node>
                     </Children>
                   </Node>
@@ -54,32 +62,25 @@
                           <Parameter name="random" fromcontext="false">false</Parameter>
                         </Parameters>
                       </Node>
-                      <Node id="Node_43" name="Run" type="Action">
+                      <Node id="Node_49" name="Sneak" type="Action">
                         <Parameters>
-                          <Parameter name="runTarget" fromcontext="true">patrolLocation</Parameter>
+                          <Parameter name="sneakTarget" fromcontext="true">patrolLocation</Parameter>
                           <Parameter name="controlCursor" fromcontext="false">true</Parameter>
                         </Parameters>
                       </Node>
-                      <Node id="Node_35" name="ComputeWatchPoint" type="Action" />
-                      <Node id="Node_36" name="PointCursor" type="Action">
+                      <Node id="Node_47" type="Wait">
                         <Parameters>
-                          <Parameter name="cursorTarget" fromcontext="true">watchPoint</Parameter>
+                          <Parameter name="duration" fromcontext="false">500</Parameter>
                         </Parameters>
                       </Node>
-                      <Node id="Node_31" type="Wait">
+                      <Node id="Node_45" type="SubtreeLookup">
                         <Parameters>
-                          <Parameter name="duration" fromcontext="false">1000</Parameter>
+                          <Parameter name="subtreeName" fromcontext="false">LookRandomly</Parameter>
                         </Parameters>
                       </Node>
-                      <Node id="Node_41" name="ComputeWatchPoint" type="Action" />
-                      <Node id="Node_42" name="PointCursor" type="Action">
+                      <Node id="Node_46" type="SubtreeLookup">
                         <Parameters>
-                          <Parameter name="cursorTarget" fromcontext="true">watchPoint</Parameter>
-                        </Parameters>
-                      </Node>
-                      <Node id="Node_37" type="Wait">
-                        <Parameters>
-                          <Parameter name="duration" fromcontext="false">1000</Parameter>
+                          <Parameter name="subtreeName" fromcontext="false">LookRandomly</Parameter>
                         </Parameters>
                       </Node>
                     </Children>

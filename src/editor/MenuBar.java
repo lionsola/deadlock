@@ -9,6 +9,7 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 
 import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
@@ -26,6 +27,22 @@ import editor.tools.Tool;;
 public class MenuBar extends JMenuBar {
 	private static final long serialVersionUID = 1984099892818541571L;
 	private final Editor editor;
+	
+	JCheckBoxMenuItem terrain = new JCheckBoxMenuItem("Terrain");
+	JCheckBoxMenuItem things = new JCheckBoxMenuItem("Things");
+	JCheckBoxMenuItem misc = new JCheckBoxMenuItem("Misc");
+	
+	JCheckBoxMenuItem[] layer;
+	
+	JCheckBoxMenuItem light = new JCheckBoxMenuItem("Soft light (ingame)");
+	JCheckBoxMenuItem lightSource = new JCheckBoxMenuItem("Light source");
+	JCheckBoxMenuItem grid = new JCheckBoxMenuItem("Grid");
+	JCheckBoxMenuItem config = new JCheckBoxMenuItem("Thing Sprite Config.");
+	JCheckBoxMenuItem mconfig = new JCheckBoxMenuItem("Misc Sprite Config.");
+	JCheckBoxMenuItem spawns = new JCheckBoxMenuItem("Spawn locations");
+	JCheckBoxMenuItem particles = new JCheckBoxMenuItem("Particle sources");
+	JCheckBoxMenuItem data = new JCheckBoxMenuItem("Data");
+	
 	public MenuBar (final Editor editor) {
 		this.editor = editor;
 		JMenu file = new JMenu("File");
@@ -170,6 +187,10 @@ public class MenuBar extends JMenuBar {
 				vAPanel.add(vAlign);
 				panel.add(vAPanel);
 				
+				JCheckBox real = new JCheckBox("Real");
+				real.setSelected(a.isReal());
+				panel.add(real);
+				
 				int result = JOptionPane.showConfirmDialog(editor,panel,"Edit map",JOptionPane.OK_CANCEL_OPTION,
 						JOptionPane.PLAIN_MESSAGE);
 				if (result==JOptionPane.OK_OPTION) {
@@ -178,6 +199,7 @@ public class MenuBar extends JMenuBar {
 					if (w>0 && h>0 && !name.getText().equals("")) {
 						a.setName(name.getText());
 						a.changeSize(w,h, hAlign.getSelectedIndex(), vAlign.getSelectedIndex());
+						a.setReal(real.isSelected());
 					}
 				}
 			}});
@@ -205,7 +227,7 @@ public class MenuBar extends JMenuBar {
 		
 		JMenu view = new JMenu("View");
 		add(view);
-		JCheckBoxMenuItem terrain = new JCheckBoxMenuItem("Terrain");
+		
 		terrain.setSelected(true);
 		terrain.addItemListener(new ItemListener() {
 			@Override
@@ -219,7 +241,7 @@ public class MenuBar extends JMenuBar {
 		});
 		view.add(terrain);
 		
-		JCheckBoxMenuItem things = new JCheckBoxMenuItem("Things");
+		
 		things.setSelected(true);
 		things.addItemListener(new ItemListener() {
 			@Override
@@ -233,7 +255,7 @@ public class MenuBar extends JMenuBar {
 		});
 		view.add(things);
 		
-		JCheckBoxMenuItem misc = new JCheckBoxMenuItem("Misc");
+		
 		misc.setSelected(true);
 		misc.addItemListener(new ItemListener() {
 			@Override
@@ -248,8 +270,10 @@ public class MenuBar extends JMenuBar {
 		view.add(misc);
 		
 		view.addSeparator();
+		layer = new JCheckBoxMenuItem[editor.layerTypes.length];
 		for (int layer=0;layer<editor.layerTypes.length;layer++) {
 			JCheckBoxMenuItem viewLayer = new JCheckBoxMenuItem(editor.layerTypes[layer]);
+			this.layer[layer] = viewLayer;
 			viewLayer.setSelected(true);
 			final int l = layer;
 			viewLayer.addItemListener(new ItemListener() {
@@ -266,7 +290,7 @@ public class MenuBar extends JMenuBar {
 		}
 		view.addSeparator();
 		
-		JCheckBoxMenuItem light = new JCheckBoxMenuItem("Soft light (ingame)");
+		
 		light.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
@@ -279,7 +303,7 @@ public class MenuBar extends JMenuBar {
 		});
 		view.add(light);
 		
-		JCheckBoxMenuItem lightSource = new JCheckBoxMenuItem("Light source");
+		
 		lightSource.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
@@ -292,7 +316,7 @@ public class MenuBar extends JMenuBar {
 		});
 		view.add(lightSource);
 		
-		JCheckBoxMenuItem grid = new JCheckBoxMenuItem("Grid");
+		
 		grid.setSelected(true);
 		grid.addItemListener(new ItemListener() {
 			@Override
@@ -306,7 +330,7 @@ public class MenuBar extends JMenuBar {
 		});
 		view.add(grid);
 		
-		JCheckBoxMenuItem config = new JCheckBoxMenuItem("Thing Sprite Config.");
+		
 		config.setSelected(false);
 		config.addItemListener(new ItemListener() {
 			@Override
@@ -320,7 +344,7 @@ public class MenuBar extends JMenuBar {
 		});
 		view.add(config);
 		
-		JCheckBoxMenuItem mconfig = new JCheckBoxMenuItem("Misc Sprite Config.");
+		
 		mconfig.setSelected(false);
 		mconfig.addItemListener(new ItemListener() {
 			@Override
@@ -335,7 +359,7 @@ public class MenuBar extends JMenuBar {
 		view.add(mconfig);
 		
 		view.addSeparator();
-		JCheckBoxMenuItem spawns = new JCheckBoxMenuItem("Spawn locations");
+		
 		spawns.setSelected(false);
 		spawns.addItemListener(new ItemListener() {
 			@Override
@@ -349,7 +373,7 @@ public class MenuBar extends JMenuBar {
 		});
 		view.add(spawns);
 		
-		JCheckBoxMenuItem particles = new JCheckBoxMenuItem("Particle sources");
+		
 		particles.setSelected(false);
 		particles.addItemListener(new ItemListener() {
 			@Override
@@ -362,5 +386,48 @@ public class MenuBar extends JMenuBar {
 			}
 		});
 		view.add(particles);
+		
+		data.setSelected(false);
+		data.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					editor.getArenaPanel().renderData = true;
+				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
+					editor.getArenaPanel().renderData = false;
+				}
+			}
+		});
+		view.add(data);
+	}
+	
+	public void resetViewToggleButtons(ArenaPanel ap) {
+		
+		terrain.setSelected(ap.renderTerrain);
+		
+		things.setSelected(ap.renderThing);
+		
+		misc.setSelected(ap.renderMisc);
+		
+		
+		for (int l=0;l<editor.layerTypes.length;l++) {
+			layer[l].setSelected(ap.renderLayer[l]);
+		}
+		
+		light.setSelected(ap.renderLight);
+		
+		lightSource.setSelected(ap.renderLightSource);
+		
+		grid.setSelected(ap.renderGrid);
+		
+		config.setSelected(ap.renderConfig);
+		
+		mconfig.setSelected(ap.renderMiscConfig);
+		
+		
+		spawns.setSelected(ap.renderSpawns);
+		
+		particles.setSelected(ap.renderParticleSource);
+
 	}
 }

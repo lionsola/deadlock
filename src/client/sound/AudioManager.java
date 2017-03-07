@@ -35,8 +35,7 @@ public class AudioManager implements Runnable {
 	private static final String FOOTSTEP_DIR = SOUND_DIR + "footstep/";
 	
 	/**
-	 * Creates a new Audio Manager, where the location of all the sounds used for the game are
-	 * located
+	 * Creates a new Audio Manager, where all the sounds used for the game are loaded
 	 */
 	public AudioManager() {
 		threadPool = Executors.newFixedThreadPool(10);
@@ -50,7 +49,7 @@ public class AudioManager implements Runnable {
 		soundMap.put(1, new SingleSound(SOUND_DIR + "weapon/" + "gunshot_shotgun.wav"));
 		soundMap.put(2, new SingleSound(SOUND_DIR + "weapon/" + "gunshot_pistol.wav"));
 		soundMap.put(3, new SingleSound(SOUND_DIR + "weapon/" + "gunshot_silent_pistol.wav"));
-		soundMap.put(4, new SingleSound(SOUND_DIR + "weapon/" + "gunshot_sniper.wav"));
+		soundMap.put(4, new SingleSound(SOUND_DIR + "weapon/" + "weapon_whoosh.wav"));
 		
 		
 		
@@ -126,6 +125,8 @@ public class AudioManager implements Runnable {
 		tick.addSound(new SingleSound(SOUND_DIR + "environment/" + "tick0.wav"));
 		tick.addSound(new SingleSound(SOUND_DIR + "environment/" + "tick1.wav"));
 		soundMap.put(SoundEvent.TICK_ID,tick);
+		
+		soundMap.put(SoundEvent.MELEE_HIT_ID, new SingleSound(SOUND_DIR + "weapon/" + "melee_hit.wav"));
 		
 		AlternatingSound tv = new AlternatingSound();
 		tv.addSound(footstepHard);

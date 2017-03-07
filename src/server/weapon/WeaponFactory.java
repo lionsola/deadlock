@@ -94,13 +94,22 @@ public class WeaponFactory {
 				}
 			};
 		}
-		else {
+		else if (type.weaponType==0){
 			return new Weapon(self,type) {
 				@Override
 				protected void fire(World w, InputControlledEntity c, double direction) {
 					super.fireOneBullet(w, c, disperseDirection(direction),type.projectileSpeed);
 				}
 			};
+		} else if (type.weaponType==3) {
+			return new Weapon(self,type) {
+				@Override
+				protected void fire(World w, InputControlledEntity c, double direction) {
+					w.addProjectile(new MeleeAttack(c, type.length, direction, type.projectileSpeed, type.size, type.damage));
+				}
+			};
+		} else {
+			return null;
 		}
 	}
 

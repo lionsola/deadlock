@@ -13,6 +13,7 @@ public class SoundEvent extends GameEvent {
 	public static final int BULLET_WALL_SOUND_ID = 31;
 	public static final int GRENADE_EXPLODE_SOUND_ID = 32;
 	public static final int PING_SOUND_ID = 34;
+	public static final int MELEE_HIT_ID = 35;
 	public static final int DOOR_OPEN_ID = 36;
 	
 	public static final int STATIC_NOISE_ID = 50;
@@ -29,8 +30,6 @@ public class SoundEvent extends GameEvent {
 	public final float y;
 	public final float volume;
 	public final byte id;
-
-	
 
 	public SoundEvent(int id, double volume, double x, double y) {
 		this.x = (float)x;

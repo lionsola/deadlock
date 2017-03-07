@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import client.gui.ClientPlayer;
+import client.gui.HostScreen;
 import editor.DataManager;
 import editor.SpawnPoint;
 import editor.SpawnPoint.CharType;
@@ -43,7 +44,7 @@ public class LobbyServer implements Runnable {
 	private HashMap<Integer,ServerPlayer> playerMap = new HashMap<Integer,ServerPlayer>();
 	private int count = 0;
 	// private String arena = "test40";
-	private String arena;
+	private int mId;
 	private List<ChangeSpawnRequest> pendingRequests = new LinkedList<ChangeSpawnRequest>();
 	private List<SpawnPoint> spawns;
 	private HashMap<Integer,SpawnPoint> spawnMap = new HashMap<Integer,SpawnPoint>();
@@ -59,10 +60,10 @@ public class LobbyServer implements Runnable {
 	 * @param port The port to open this server on.
 	 * @param arena The arena of this game.
 	 */
-	public LobbyServer(int port, String arena) throws IOException {
+	public LobbyServer(int port, int mId) throws IOException {
 		serverSocket = new ServerSocket(port);
-		this.arena = arena;
-		ArenaData ad = (ArenaData) DataManager.loadObject("resource/map/"+arena+".arena");
+		this.mId = mId;
+		ArenaData ad = (ArenaData) DataManager.loadObject("resource/map/"+HostScreen.MAP_LIST[mId]+".arena");
 		spawns = ad.spawns;
 		for (SpawnPoint sp:spawns) {
 			spawnMap.put(sp.getId(), sp);
@@ -84,7 +85,7 @@ public class LobbyServer implements Runnable {
 		
 		sendRequest(new StartGameRequest());
 		//new MatchServer(players, arena);
-		new MissionServer(new ArrayList<ServerPlayer>(playerMap.values()), arena);
+		new MissionServer(new ArrayList<ServerPlayer>(playerMap.values()), mId);
 	}
 
 	/**
@@ -351,7 +352,7 @@ public class LobbyServer implements Runnable {
 			players.add(generateClientPlayer(p));
 		}
 		LobbyRequest.GameConfig config = new LobbyRequest.GameConfig();
-		config.arena = arena;
+		config.arena = mId;
 		config.playableSpawns = new LinkedList<SpawnPoint>();
 		for (SpawnPoint sp:spawns) {
 			if (sp.type!=SpawnType.NPCOnly) {

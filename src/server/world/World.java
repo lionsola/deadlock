@@ -11,12 +11,11 @@ import editor.SpawnPoint;
 import server.character.Entity;
 import server.character.InputControlledEntity;
 import server.world.trigger.Trigger;
-import shared.network.CharData;
-import shared.network.ProjectileData;
-import shared.network.GameDataPackets.WorldStatePacket;
 import shared.network.event.AnimationEvent;
 import shared.network.event.GameEvent;
 import shared.network.event.GameEvent.Listener;
+import shared.network.event.SoundEvent;
+import shared.network.event.VoiceEvent;
 
 /**
  * The physical world inside a match, which handles everything including characters, projectiles and
@@ -243,6 +242,12 @@ public class World {
 	public void addActiveTrigger(Trigger t) {
 		if (!activeTriggers.contains(t)) {
 			activeTriggers.add(t);
+		}
+	}
+
+	public void addSound(int id, double volume, double x, double y, String line) {
+		for (Entity ch:characters) {
+			ch.filterVoice(id, volume, x, y, line);
 		}
 	}
 }

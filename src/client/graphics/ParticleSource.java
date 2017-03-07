@@ -50,15 +50,15 @@ public class ParticleSource implements Cloneable, Serializable {
 		//pf.setRotationSpeed(0.001);
 		presets.put(waterglow.name,waterglow);
 		
-		ParticleSource leaves = new ParticleSource("Leaves",2200);
-		leaves.setInterval(1000);
+		ParticleSource leaves = new ParticleSource("Leaves",2500);
+		leaves.setInterval(2200);
 		leaves.pSpeed = 0.01;
 		leaves.random = true;
 		leaves.setSpread(5, 4, 0.5);
 		leaves.spreadAngle = Math.PI/6;
 		ParticleAnimation ps = leaves.getBaseParticle();
 		ps.setLoc(0, 0, 2);
-		ps.setVel(0, 0, -0.025);
+		ps.setVel(0, 0, -0.018);
 		ps.setAcc(0, 0, 0);
 		ps.setDirection(-Math.PI/5, 0.05);
 		ps.setColor(new Color(0xc0408040,true));
@@ -97,7 +97,7 @@ public class ParticleSource implements Cloneable, Serializable {
 		presets.put(light.name,light);
 		
 		ParticleSource outsideDust = new ParticleSource("Outside dust",5000);
-		outsideDust.setInterval(200);
+		outsideDust.setInterval(400);
 		outsideDust.pSpeed = 0.001;
 		outsideDust.setSpread(8,8,2.5);
 		outsideDust.random = true;
@@ -113,7 +113,7 @@ public class ParticleSource implements Cloneable, Serializable {
 		presets.put(outsideDust.name,outsideDust);
 		
 		ParticleSource insideDust = new ParticleSource("Inside dust",5000);
-		insideDust.setInterval(200);
+		insideDust.setInterval(400);
 		insideDust.pSpeed = 0.0005;
 		insideDust.setSpread(8,8,1.25);
 		insideDust.random = true;

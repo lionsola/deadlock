@@ -2,7 +2,7 @@
 //                   MACHINE GENERATED CODE                
 //                       DO NOT MODIFY                     
 //                                                         
-// Generated on 12/24/2016 11:57:23
+// Generated on 02/04/2017 13:31:43
 // ******************************************************* 
 package server.ai.jbt.actions;
 
@@ -18,6 +18,16 @@ public class Sneak extends jbt.model.task.leaf.action.ModelAction {
 	 * value is not specified at construction time. null otherwise.
 	 */
 	private java.lang.String sneakTargetLoc;
+	/**
+	 * Value of the parameter "controlCursor" in case its value is specified at
+	 * construction time. null otherwise.
+	 */
+	private java.lang.Boolean controlCursor;
+	/**
+	 * Location, in the context, of the parameter "controlCursor" in case its
+	 * value is not specified at construction time. null otherwise.
+	 */
+	private java.lang.String controlCursorLoc;
 
 	/**
 	 * Constructor. Constructs an instance of Sneak.
@@ -30,12 +40,23 @@ public class Sneak extends jbt.model.task.leaf.action.ModelAction {
 	 *            in case <code>sneakTarget</code> is null, this variable
 	 *            represents the place in the context where the parameter's
 	 *            value will be retrieved from.
+	 * @param controlCursor
+	 *            value of the parameter "controlCursor", or null in case it
+	 *            should be read from the context. If null,
+	 *            <code>controlCursorLoc</code> cannot be null.
+	 * @param controlCursorLoc
+	 *            in case <code>controlCursor</code> is null, this variable
+	 *            represents the place in the context where the parameter's
+	 *            value will be retrieved from.
 	 */
 	public Sneak(jbt.model.core.ModelTask guard, float[] sneakTarget,
-			java.lang.String sneakTargetLoc) {
+			java.lang.String sneakTargetLoc, java.lang.Boolean controlCursor,
+			java.lang.String controlCursorLoc) {
 		super(guard);
 		this.sneakTarget = sneakTarget;
 		this.sneakTargetLoc = sneakTargetLoc;
+		this.controlCursor = controlCursor;
+		this.controlCursorLoc = controlCursorLoc;
 	}
 
 	/**
@@ -46,6 +67,7 @@ public class Sneak extends jbt.model.task.leaf.action.ModelAction {
 			jbt.execution.core.BTExecutor executor,
 			jbt.execution.core.ExecutionTask parent) {
 		return new server.ai.jbt.actions.execution.Sneak(this, executor,
-				parent, this.sneakTarget, this.sneakTargetLoc);
+				parent, this.sneakTarget, this.sneakTargetLoc,
+				this.controlCursor, this.controlCursorLoc);
 	}
 }

@@ -17,6 +17,8 @@ import server.world.Geometry;
 import server.world.World;
 import shared.network.GameDataPackets.InputPacket;
 import shared.network.event.GameEvent.*;
+import shared.network.event.VoiceEvent;
+
 import java.awt.geom.Point2D;
 
 import client.gui.GameWindow;
@@ -30,8 +32,8 @@ import editor.SpawnPoint.CharType;
  */
 public class InputControlledEntity extends Entity {
 	
-	public static final double MOVEMENT_DISPERSION_FACTOR = 0.007;
-	public static final double ROTATION_DISPERSION_FACTOR = 0.03;
+	public static final double MOVEMENT_SWAY_FACTOR = 0.004;
+	public static final double ROTATION_DISPERSION_FACTOR = 0.04;
 	
 	public static final double MAX_DISPERSION_ANGLE = 0.1;
 	
@@ -66,7 +68,7 @@ public class InputControlledEntity extends Entity {
 			}
 			
 			// translate directional input into movement vector
-			processInput();
+			processInput(world);
 			// apply collision detection to correct the movement vector
 			super.updateCollision(world);
 			
@@ -98,7 +100,7 @@ public class InputControlledEntity extends Entity {
 	private void updateCrosshair() {
 		// add the direction swaying when walking / running
 		//addDispersion(instaF*MOVEMENT_DISPERSION_FACTOR*getCurrentSpeed()*GameWindow.MS_PER_UPDATE);
-		direction += sway*instaF*MOVEMENT_DISPERSION_FACTOR*getCurrentSpeed()*GameWindow.MS_PER_UPDATE/2;
+		direction += sway*instaF*MOVEMENT_SWAY_FACTOR*getCurrentSpeed()*GameWindow.MS_PER_UPDATE;
 		
 		// move character direction toward the target direction slowly 
 		//addDispersion(-DISPERSION_DEC*(0.5+charDispersion));
@@ -133,7 +135,7 @@ public class InputControlledEntity extends Entity {
 	 * @param input
 	 *            the input to be processed
 	 */
-	private void processInput() {
+	private void processInput(World w) {
 		// update direction
 		if (!isDead()) {
 			double newDirection = Math.atan2(getY() - getInput().cy, getInput().cx - getX());
@@ -177,6 +179,10 @@ public class InputControlledEntity extends Entity {
 		double speed = getSpeed()*(1+ratio*0.1);
 		setDx(dx*speed);
 		setDy(dy*speed);
+		
+		// process chat event
+		if (input.chatText!=null)
+			w.addSound(VoiceEvent.CUSTOM_LINE_ID, VoiceEvent.DEFAULT_VOLUME, getX(), getY(), input.chatText);
 	}
 	
 	public void setInput(InputPacket input) {
@@ -228,7 +234,7 @@ public class InputControlledEntity extends Entity {
 			w.getEventListener().onEventReceived(new PlayerDieEvent(sourceId, id));
 		}
 	}
-
+	
 	public Point2D getHead() {
 		Point2D head = Geometry.PolarToCartesian(getRadius()*0.4, getDirection());
 		head.setLocation(head.getX()+getX(),head.getY()+getY());
@@ -280,10 +286,16 @@ public class InputControlledEntity extends Entity {
 				return gren;
 			case Officer:
 				InputControlledEntity officer = new InputControlledEntity(id, team, type.id);
-				officer.setWeapon(WeaponFactory.createGun(4,officer));
+				officer.setWeapon(WeaponFactory.createGun(7,officer));
 				officer.setAbilty(new Flashlight(officer));
 				officer.setPassive(new Assault(officer));
 				return officer;
+			case MOfficer:
+				InputControlledEntity mofficer = new InputControlledEntity(id, team, type.id);
+				mofficer.setWeapon(WeaponFactory.createGun(8,mofficer));
+				mofficer.setAbilty(new Flashlight(mofficer));
+				mofficer.setPassive(new Assault(mofficer));
+				return mofficer;
 			default:
 				System.out.println("Error: Wrong type id");
 				System.exit(-1);

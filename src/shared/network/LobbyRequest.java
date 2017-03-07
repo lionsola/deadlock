@@ -97,7 +97,7 @@ public class LobbyRequest implements Serializable {
 	 */
 	public static class GameConfig implements Serializable {
 		private static final long serialVersionUID = 3557083906903628498L;
-		public String arena;
+		public int arena;
 		public List<SpawnPoint> playableSpawns;
 	}
 

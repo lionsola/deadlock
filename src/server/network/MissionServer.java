@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import client.gui.GameWindow;
+import client.gui.HostScreen;
 import editor.DataManager;
 import editor.SpawnPoint;
 import editor.SpawnPoint.SpawnType;
@@ -17,11 +18,9 @@ import jbt.execution.core.IBTLibrary;
 import jbt.execution.core.IContext;
 import jbt.model.core.ModelTask;
 import server.ai.AIPlayer;
-import server.ai.Searcher;
 import server.character.ClassStats;
 import server.character.InputControlledEntity;
 import server.character.NPC;
-import server.weapon.Weapon;
 import server.weapon.WeaponFactory;
 import server.world.Arena;
 import server.world.Arena.ArenaData;
@@ -62,14 +61,14 @@ public class MissionServer implements Runnable, Listener {
 	 * 
 	 * @param players
 	 *            The list of players in the game
-	 * @param arenaName
+	 * @param mId
 	 *            The name of the arena to be used
 	 * @throws FileNotFoundException
 	 *             File not found exception
 	 * @throws IOException
 	 *             IO exception
 	 */
-	public MissionServer(List<ServerPlayer> players, String arenaName) {
+	public MissionServer(List<ServerPlayer> players, int mId) {
 		this.players = players;
 		WeaponFactory.initWeapons();
 		ClassStats.initClassStats();
@@ -78,12 +77,12 @@ public class MissionServer implements Runnable, Listener {
 			p.inputReceiver = new InputReceiver(this,p);
 			p.inputReceiver.start();
 		}
-		initializeMission(arenaName);
+		initializeMission(mId);
 		setUp(world,players);
 		new Thread(this).start();
 	}
 
-	protected void initializeMission(String arenaName) {
+	protected void initializeMission(int mId) {
 		HashMap<Integer,Terrain> tileTable = (HashMap<Integer, Terrain>) DataManager.loadObject(DataManager.FILE_TILES);
 		
 		HashMap<Integer,Thing> objectTable = (HashMap<Integer, Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
@@ -94,7 +93,7 @@ public class MissionServer implements Runnable, Listener {
         	tp.setSwitchThing(objectTable.get(tp.getSwitchThingID()));
         	tp.setOriginalThing(objectTable.get(tp.getOriginalThingID()));
         }
-		ArenaData ad = (ArenaData) DataManager.loadObject("resource/map/"+arenaName+".arena");
+		ArenaData ad = (ArenaData) DataManager.loadObject("resource/map/"+HostScreen.MAP_LIST[mId]+".arena");
 		/* First of all, we create the BT library. */
 		IBTLibrary btLibrary = new MissionBTLibrary();
 		/* Then we create the initial context that the tree will use. */
@@ -111,7 +110,7 @@ public class MissionServer implements Runnable, Listener {
 			gamemaster = BTExecutorFactory.createBTExecutor(tree, context);
 		}
 		
-		Arena arena = new Arena(arenaName, tileTable, objectTable, triggerTable);
+		Arena arena = new Arena(ad, tileTable, objectTable, triggerTable);
 
 		this.world = new World(arena, this);
 	}
@@ -137,11 +136,10 @@ public class MissionServer implements Runnable, Listener {
 		}
 		
 		for (SpawnPoint p:world.getArena().getSpawns()) {
-			if (p.type==SpawnType.NPCOnly) {
-				NPC npc = new NPC(p.getId(),p.team, p.setups.get(0).id);
+			if (p.type==SpawnType.NPCOnly && p.players<=players.size()) {
+				NPC npc = NPC.newNPC(p.getId(),p.team, p.setups.get(0));
 				npc.init(world.getArena(), p.behaviour);
 				world.addCharacter(npc,p);
-				npc.setWeapon(WeaponFactory.createGun(Weapon.SILENT_PISTOL_ID, npc));
 				npc.brain.setPatrolLocations(p.patrolLocations);
 			}
 		}
@@ -382,5 +380,9 @@ public class MissionServer implements Runnable, Listener {
 			attacker.headshots++;
 		}
 		addEvent(event);
+	}
+
+	public World getWorld() {
+		return world;
 	}
 }

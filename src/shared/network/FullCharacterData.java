@@ -19,6 +19,9 @@ public class FullCharacterData extends CharData {
 	public float viewRange;
 	public float viewAngle;
 	
+	public byte ammo;
+	public byte maxAmmo;
+	
 	public float crosshairSize;
 	
 	public FullCharacterData(InputControlledEntity e) {
@@ -34,6 +37,8 @@ public class FullCharacterData extends CharData {
 		viewAngle = (float) e.getVision().angle;
 		
 		crosshairSize = (float) e.getCrosshairSize();
+		ammo = (byte) e.getWeapon().getAmmo();
+		maxAmmo = (byte) e.getWeapon().type.magSize;
 	}
 	
 	public FullCharacterData() {}

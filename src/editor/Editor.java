@@ -55,6 +55,7 @@ public class Editor extends JFrame implements KeyListener {
 	}
 
 	Tool currentTool;
+	Tool save;
 
 	//List<Terrain> tiles;
 	//List<Thing> objects;
@@ -256,14 +257,19 @@ public class Editor extends JFrame implements KeyListener {
 	public void keyPressed(KeyEvent arg0) {
 		if (arg0.getKeyCode()==KeyEvent.VK_ALT && currentTool!=null) {
 			currentTool.setAlternative(!currentTool.isAlternative());
+		} else if (arg0.getKeyCode()==KeyEvent.VK_CAPS_LOCK) {
+			if (save==null) {
+				save = currentTool;
+				setTool(new Tool.MoveTool(arenaPanel));
+			} else {
+				setTool(save);
+				save = null;
+			}
 		}
 	}
 
 	@Override
 	public void keyReleased(KeyEvent arg0) {
-		if (arg0.getKeyCode()==KeyEvent.VK_ALT && currentTool!=null) {
-			//currentTool.setAlternative(false);
-		}
 	}
 
 	@Override

@@ -30,6 +30,7 @@ public abstract class Weapon extends Ability {
 	public static final int SHOTGUN_ID = 2;
 	public static final int MP7_ID = 3;
 	public static final int SILENT_PISTOL_ID = 4;
+	public static final int MELEE_ID = 8;
 	
 	public final WeaponType type;
 	private double instability;
@@ -64,7 +65,7 @@ public abstract class Weapon extends Ability {
 				
 				double maxRecoil = InputControlledEntity.MAX_DISPERSION_ANGLE*getRecoil();
 				double recoil = maxRecoil*Math.min(1,Math.abs(Utils.random().nextGaussian())); 
-				recoil = Math.copySign(recoil,(c.getDirection()-c.getTargetDirection())*(Utils.random().nextDouble()<0.8?1:-1));
+				recoil = Math.copySign(recoil,(c.getDirection()-c.getTargetDirection())*(Utils.random().nextDouble()<0.75?1:-1));
 				c.setDirection(c.getDirection()+recoil);
 				
 				startCooldown();

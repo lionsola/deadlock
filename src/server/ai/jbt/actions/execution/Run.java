@@ -11,6 +11,7 @@ package server.ai.jbt.actions.execution;
 import java.awt.geom.Point2D;
 import java.util.List;
 
+import server.ai.NPCBrain;
 import server.ai.Searcher;
 import server.character.InputControlledEntity;
 import server.world.Arena;
@@ -120,10 +121,10 @@ public class Run extends jbt.execution.task.leaf.action.ExecutionAction {
 		 * should only return Status.SUCCESS, Status.FAILURE or Status.RUNNING.
 		 * No other values are allowed.
 		 */
-		InputControlledEntity character = (InputControlledEntity)getContext().getVariable("Character");
 		if (path==null) {
 			return Status.FAILURE;
 		}
+		InputControlledEntity character = (InputControlledEntity)getContext().getVariable("Character");
 		double distToCheckPoint = path.get(0).distance(character.getPosition());
 		// if alr close to one checkpoint, move on
 		
@@ -134,33 +135,18 @@ public class Run extends jbt.execution.task.leaf.action.ExecutionAction {
 		}
 		InputPacket input = character.getInput();
 		// follow the next check point on the path
+		Arena a = (Arena)getContext().getVariable("Arena");
 		if (path.isEmpty()) {
 			input.up = false;
 			input.down = false;
 			input.left = false;
 			input.right = false;
 			return Status.SUCCESS;
+		} else if (!a.getTileAt(path.get(0)).isTraversable()) { 
+			return Status.FAILURE;
 		} else {
 			Point2D next = path.get(0);
-			final double COORD_THRESHOLD = 0.05;
-			if (character.getX() + COORD_THRESHOLD < next.getX()) {
-				input.right = true;
-			} else
-				input.right = false;
-			if (character.getX() - COORD_THRESHOLD > next.getX()) {
-				input.left = true;
-	
-			} else
-				input.left = false;
-			if (character.getY() + COORD_THRESHOLD < next.getY()) {
-				input.down = true;
-			} else
-				input.down = false;
-			if (character.getY() - COORD_THRESHOLD > next.getY()) {
-				input.up = true;
-			} else
-				input.up = false;
-			
+			NPCBrain.moveTo(character.getPosition(), next, input);
 			if (getControlCursor()) {
 				Point2D cursorTarget = null;
 				if (path.size()>1) {
@@ -169,20 +155,8 @@ public class Run extends jbt.execution.task.leaf.action.ExecutionAction {
 					cursorTarget = path.get(0);
 				}
 				
-				double d = Point2D.distance(input.cx, input.cy, cursorTarget.getX(), cursorTarget.getY());
-				final double CURSOR_MOVE_RATE = 0.5;
-				double ratio = Math.min(1,CURSOR_MOVE_RATE/d);
-				if (ratio<1) {
-					input.cx = (float) (input.cx + (cursorTarget.getX()-input.cx)*ratio);
-					input.cy = (float) (input.cy + (cursorTarget.getY()-input.cy)*ratio);
-				} else {
-					input.cx = (float) cursorTarget.getX();
-					input.cy = (float) cursorTarget.getY();
-				}
+				NPCBrain.moveCursorTo(cursorTarget, input);
 			}
-			
-			
-			
 			return Status.RUNNING;
 		}
 	}

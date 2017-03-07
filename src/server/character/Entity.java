@@ -25,12 +25,13 @@ import shared.network.GameDataPackets.WorldStatePacket;
 import shared.network.event.AnimationEvent;
 import shared.network.event.GameEvent;
 import shared.network.event.SoundEvent;
+import shared.network.event.VoiceEvent;
 
 /**
  * This class will define the base behaviour of every type of Character.
  */
 public class Entity {
-	public static final double BASE_SPEED	= 0.0033;
+	public static final double BASE_SPEED	= 0.004;
 	public static final double BASE_HP		= 100;
 	public static final double BASE_RADIUS	= 0.5;
 	public static final double BASE_FOVRANGE= 20;
@@ -333,13 +334,13 @@ public class Entity {
 		perception.visions = new LinkedList<Vision>();
 		perception.characters = new LinkedList<CharData>();
 		perception.projectiles = new LinkedList<ProjectileData>();
-		Area los = new Area();
 		try {
+			Area los = fov;
 			los = visibility.genLOSAreaMeter(getX(), getY(), getFovRange(), getFovAngle(), getDirection(), w.getArena());
+			fov = los;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		fov = los;
 		perception.visions.add(getVision());
 		
 		double ts = Terrain.tileSize;
@@ -353,7 +354,7 @@ public class Entity {
 		
 		// add the characters if they are inside vision
 		for (InputControlledEntity c : w.getCharacters()) {
-			if (c.id!=id && (c.team==team || c.intersects(los))) {
+			if (c.id!=id && (c.team==team || c.intersects(fov))) {
 				if (c instanceof NPC) {
 					perception.characters.add(((NPC)c).generatePartial());
 				}
@@ -366,8 +367,8 @@ public class Entity {
 		// copy the projectiles over if they are in line of sight
 		
 		for (Projectile pr : w.getProjectiles()) {
-			if (los.contains(pr.getX(),pr.getY()) ||
-					los.contains(pr.getPrevX(), pr.getPrevY())) {
+			if (fov.contains(pr.getX(),pr.getY()) ||
+					fov.contains(pr.getPrevX(), pr.getPrevY())) {
 				perception.projectiles.add(pr.getData());
 			}
 		}
@@ -668,11 +669,20 @@ public class Entity {
 	}
 	
 	public void filterSound(int id, double volume, double x, double y) {
+		filterVoice(id,volume,x,y,null);
+	}
+	
+	public void filterVoice(int id, double volume, double x, double y, String line) {
 		if (!isDead()) {
 			double distance = Point2D.distance(x, y, getX(), getY());
 			double perceivedVolume = Utils.getVolumeAtDistance(volume, distance, getHearF());
 			if (perceivedVolume >= Entity.BASE_HEARING_THRES) {
-				SoundEvent e = new SoundEvent(id,perceivedVolume,x,y);
+				SoundEvent e = null;
+				if (line==null) {
+					e = new SoundEvent(id,perceivedVolume,x,y);
+				} else {
+					e = new VoiceEvent(id,perceivedVolume,x,y,line);
+				}
 				getPerception().events.add(e);
 			}
 		}

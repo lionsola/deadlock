@@ -19,6 +19,8 @@ public class EditorArena extends Arena {
 	public List<MissionVar> objectiveData;
 	
 	public ParticleSource[][] pss;
+	private int noData;
+	private boolean isReal;
 	
 	public EditorArena(ArenaData ad, HashMap<Integer, Terrain> tileTable, HashMap<Integer, Thing> objectTable,
 			HashMap<Integer,TileSwitchPreset> triggerTable) {
@@ -41,10 +43,16 @@ public class EditorArena extends Arena {
 		if (objectiveData==null) {
 			objectiveData = new ArrayList<MissionVar>();
 		}
+		noData = ad.noData;
+		isReal = ad.isReal;
 	}
 
 	public EditorArena(String n, int w, int h) {
 		super(n,w,h);
+		spawns = new SpawnPoint[w][h];
+		pss = new ParticleSource[w][h];
+		objectiveData = new ArrayList<MissionVar> ();
+		isReal = true;
 	}
 	
 	synchronized public void changeSize(int newWidth, int newHeight, int hDir, int vDir) {
@@ -59,6 +67,8 @@ public class EditorArena extends Arena {
 				newTMap[x][y] = new Tile();
 			}
 		}
+		ParticleSource[][] newPss = new ParticleSource[newWidth][newHeight];
+		SpawnPoint[][] newSpawns = new SpawnPoint[newWidth][newHeight];
 		
 		for (int i=0;i<w0;i++) {
 			for (int j=0;j<h0;j++) {
@@ -78,9 +88,13 @@ public class EditorArena extends Arena {
 					ny = newHeight-1 - j;
 				}
 				newTMap[nx][ny]	= tMap[x][y];
+				newPss[nx][ny] = pss[x][y];
+				newSpawns[nx][ny] = spawns[x][y];
 			}
 		}
 		tMap = newTMap;
+		pss = newPss;
+		spawns = newSpawns;
 	}
 	
 	public void setName(String name) {
@@ -111,5 +125,21 @@ public class EditorArena extends Arena {
 			}
 		}
 		return pss;
+	}
+
+	public int getNoData() {
+		return noData;
+	}
+
+	public void setNoData(int noData) {
+		this.noData = noData;
+	}
+	
+	public void setReal(boolean isReal) {
+		this.isReal = isReal;
+	}
+	
+	public boolean isReal() {
+		return isReal;
 	}
 }

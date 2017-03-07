@@ -114,7 +114,7 @@ public class ImageBlender {
 	 * changing that property.
 	 * 
 	 * @param source
-	 *            The source image to edit.
+	 *            The source gray-scale image to edit.
 	 * @param darkenFactor
 	 *            The factor with which the image will be darken.
 	 * @param contrast
@@ -129,15 +129,21 @@ public class ImageBlender {
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				int sRGB = source.getRGB(x, y);
-				int sR = (sRGB >> 16) & 0xFF;
-				int sG = (sRGB >> 8) & 0xFF;
-				int sB = (sRGB) & 0xFF;
-
-				if ((sR+sG+sB)/3<threshold) {
+				int intensity = sRGB & 0xFF;
+				
+				int dR = (newColor>>16) & 0xFF;
+				int dG = (newColor>>8) & 0xFF;
+				int dB = (newColor>>0) & 0xFF;
+				
+				if (intensity<=threshold) {
 					dest.setRGB(x, y, newColor);
 				}
 				else {
-					dest.setRGB(x, y, sRGB);
+					dR = (int) (dR + (255-dR) * ((intensity-threshold) / (255.0 - threshold)));
+					dG = (int) (dG + (255-dG) * ((intensity-threshold) / (255.0 - threshold)));
+					dB = (int) (dB + (255-dB) * ((intensity-threshold) / (255.0 - threshold)));
+					int dRGB = dR << 16 | dG << 8 | dB;
+					dest.setRGB(x, y, dRGB);
 				}
 			}
 		}
@@ -179,7 +185,7 @@ public class ImageBlender {
 		//return darkenImage(gf.filter(source, d),0.7f,0.5f);
 		d = gf.filter(source, d);
 		//return replaceDarkPixels(d,0x4f,0x1f1f3f);
-		return replaceDarkPixels(d,0x4f,0x1f1f3f);
+		return replaceDarkPixels(d,0x1f,0x1f1f3f);
 	}
 	
 	public static BufferedImage applyMiddlegroundEffect(BufferedImage source) {

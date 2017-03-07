@@ -2,14 +2,19 @@
 <Tree>
   <Node id="Node_0" name="Fire" type="Root">
     <Children>
-      <Node id="Node_18" type="Sequence">
+      <Node id="Node_33" type="Sequence">
         <Children>
           <Node id="Node_19" name="ComputeAttackPoint" type="Action" />
-          <Node id="Node_20" name="PointCursor" type="Action">
-            <Parameters>
-              <Parameter name="cursorTarget" fromcontext="true">Aim</Parameter>
-            </Parameters>
+          <Node id="Node_32" type="Succeeder">
+            <Children>
+              <Node id="Node_20" name="PointCursor" type="Action">
+                <Parameters>
+                  <Parameter name="cursorTarget" fromcontext="true">Aim</Parameter>
+                </Parameters>
+              </Node>
+            </Children>
           </Node>
+          <Node id="Node_29" name="EnemyInWeaponRange" type="Condition" />
           <Node id="Node_21" name="FireWeapon" type="Action" />
         </Children>
       </Node>

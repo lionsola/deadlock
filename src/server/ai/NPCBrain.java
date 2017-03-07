@@ -15,8 +15,7 @@ import jbt.execution.core.IBTLibrary;
 import jbt.execution.core.IContext;
 import jbt.model.core.ModelTask;
 import server.ai.InterestPoint.Type;
-import server.ai.Searcher.Path;
-import server.ai.jbt.library.StandardBTLibrary;
+import server.ai.jbt.library.NPCBTLib;
 import server.character.Entity;
 import server.character.InputControlledEntity;
 import server.world.Arena;
@@ -26,6 +25,7 @@ import server.world.Tile;
 import server.world.Utils;
 import shared.core.Vector2D;
 import shared.network.CharData;
+import shared.network.GameDataPackets.InputPacket;
 import shared.network.GameDataPackets.WorldStatePacket;
 import shared.network.event.GameEvent;
 import shared.network.event.SoundEvent;
@@ -50,14 +50,14 @@ public class NPCBrain {
 		this.behaviour = behaviour;
 		if (behaviour!=Behaviour.Dummy) {
 			/* First of all, we create the BT library. */
-			IBTLibrary btLibrary = new StandardBTLibrary();
+			IBTLibrary btLibrary = new NPCBTLib();
 			/* Then we create the initial context that the tree will use. */
 			context = ContextFactory.createContext(btLibrary);
 			
 			/* Now we get the Model BT to run. */
-			ModelTask patrolTree = btLibrary.getBT(behaviour.name());
+			ModelTask bt = btLibrary.getBT(behaviour.name());
 			/* Then we create the BT Executor to run the tree. */
-			btExecutor = BTExecutorFactory.createBTExecutor(patrolTree, context);
+			btExecutor = BTExecutorFactory.createBTExecutor(bt, context);
 		}
 	}
 	
@@ -204,6 +204,41 @@ public class NPCBrain {
 		return bulletSpeed/0.25;
 	}
 	
+	public static void moveTo(Point2D self, Point2D dest, InputPacket input) {
+		final double COORD_THRESHOLD = 0.05;
+		if (self.getX() + COORD_THRESHOLD < dest.getX()) {
+			input.right = true;
+		} else
+			input.right = false;
+		if (self.getX() - COORD_THRESHOLD > dest.getX()) {
+			input.left = true;
+
+		} else
+			input.left = false;
+		if (self.getY() + COORD_THRESHOLD < dest.getY()) {
+			input.down = true;
+		} else
+			input.down = false;
+		if (self.getY() - COORD_THRESHOLD > dest.getY()) {
+			input.up = true;
+		} else
+			input.up = false;
+		
+	}
+	
+	public static void moveCursorTo(Point2D dest, InputPacket input) {
+		double d = Point2D.distance(input.cx, input.cy, dest.getX(), dest.getY());
+		final double CURSOR_MOVE_RATE = 0.5;
+		double ratio = Math.min(1,CURSOR_MOVE_RATE/d);
+		if (ratio<1) {
+			input.cx = (float) (input.cx + (dest.getX()-input.cx)*ratio);
+			input.cy = (float) (input.cy + (dest.getY()-input.cy)*ratio);
+		} else {
+			input.cx = (float) dest.getX();
+			input.cy = (float) dest.getY();
+		}
+	}	
+	
 	public static Point2D getClearAim(InputControlledEntity character, List<CharData> allies, List<CharData> enemies, Arena arena) {
 		for (CharData enemy:enemies) {
 			boolean blocked = false;
@@ -252,7 +287,7 @@ public class NPCBrain {
 		return null;
 	}
 	
-	private Point2D randomIntr(double x, double y, double direction, double distance) {
+	private static Point2D randomIntr(Arena arena, double x, double y, double direction, double distance) {
 		double newX = x + distance * Math.cos(direction);
 		double newY = y - distance * Math.sin(direction);
 		int tileX = (int) (newX / Terrain.tileSize);

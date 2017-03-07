@@ -1,5 +1,6 @@
 package client.gui;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Composite;
@@ -19,6 +20,8 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -36,6 +39,10 @@ import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import server.ability.Ability;
 import server.passive.Passive;
@@ -57,16 +64,16 @@ import shared.network.event.AnimationEvent;
 import shared.network.event.GameEvent;
 import shared.network.event.GameEvent.*;
 import shared.network.event.SoundEvent;
+import shared.network.event.VoiceEvent;
 import client.graphics.AnimationSystem;
 import client.graphics.BasicAnimation;
 import client.graphics.ParticleSource;
 import client.graphics.Renderer;
+import client.graphics.VoiceAnimation;
 import client.image.MultiplyComposite;
-import client.image.SoftHardLightComposite;
 import client.sound.AudioManager;
 import client.sound.MusicPlayer;
 import editor.DataManager;
-import editor.SpawnPoint.CharType;
 
 /**
  * The GUI where the match takes place, i.e. the arena with players.
@@ -102,8 +109,6 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	private Renderer renderer = new Renderer();
 	private HashMap<Integer,Thing> objectTable;
 	
-	private HashMap<Integer,ClientPlayer> pa;
-	
 	private boolean lightImageChanged = false;
 	private boolean playing = true;
 	private double zoomLevel = 0;
@@ -112,6 +117,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	
 	volatile private int frameCount = 0;
 	volatile private double FPS = 0;
+	
+	private HashMap<Integer,String> dataLines;
 
 	/**
 	 * Creates a new gamescreen where the match will take place
@@ -122,14 +129,14 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	 *            The id of the local player
 	 * @param connection
 	 *            The socket to communicate with the server
-	 * @param arenaName
+	 * @param mId
 	 *            The name of the arena for this game
 	 * @param team1
 	 *            The list of players on team 1
 	 * @throws IOException
 	 *             Exception thrown on gamescreen
 	 */
-	public GameScreen(GameWindow game, ClientPlayer player, Connection connection, String arenaName, List<ClientPlayer> players) throws IOException {
+	public GameScreen(GameWindow game, ClientPlayer player, Connection connection, int mId, List<ClientPlayer> players) throws IOException {
 		super();
 		
 		AudioManager.stopMusic();
@@ -155,7 +162,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		DataManager.loadImage(objectTable.values());
 		DataManager.updateParticleSource(objectTable.values());
 		
-		arena = new Arena(arenaName, tileTable, objectTable,triggerTable);
+		arena = new Arena(mId, tileTable, objectTable,triggerTable);
 		renderer.initArenaImages(arena);
 		camera = new Camera(arena, this, 10);
 		
@@ -170,6 +177,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		}
 
 		initUI();
+		// load data lines
+		initLines(mId);
 		new Thread(this).start();
 	}
 
@@ -535,6 +544,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			Renderer.drawArenaImage(g2D, renderer.getArenaImage(),camera.getDrawArea());
 			*/
 			
+			
 			g2D.setClip(camera.getDrawAreaPixel());
 			nonvisualAnimations.render(g2D, camera, camera.getDrawAreaPixel());
 			
@@ -546,18 +556,25 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 				losPixel.add(visibility.generateLoS(v, arena));
 				losMeter.add(visibility.genLOSAreaMeter(v.x, v.y, v.range, v.angle, v.direction, arena));
 				
-				double r = v.radius*1.5;
+				double r = v.radius*3;
 				losPixel.add(new Area(new Ellipse2D.Double(Renderer.toPixel(v.x - r),Renderer.toPixel(v.y - r),
 						Renderer.toPixel(r*2),Renderer.toPixel(r*2))));
 				losMeter.add(new Area(new Ellipse2D.Double(v.x - r,v.y - r,r*2,r*2)));
 			}
 			
-			g2D.setClip(losPixel);
-			//Rectangle2D viewBox = getCharacterVisionBox(c.x,c.y,c.viewRange);
+			
 			Rectangle2D viewBox = losMeter.getBounds2D();
-			Renderer.drawArenaImage(g2D, renderer.lowImage, viewBox);
-			Renderer.drawArenaImage(g2D, renderer.bloodImage, viewBox);
-
+			if (arena.isReal()) {
+				g2D.setClip(losPixel);
+				//Rectangle2D viewBox = getCharacterVisionBox(c.x,c.y,c.viewRange);
+				Renderer.drawArenaImage(g2D, renderer.lowImage, viewBox);
+				Renderer.drawArenaImage(g2D, renderer.bloodImage, viewBox);
+			} else {
+				g2D.setColor(GUIFactory.UICOLOR);
+				g2D.setStroke(new BasicStroke(2));
+				g2D.draw(losPixel);
+				g2D.setClip(losPixel);
+			}
 			for (ClientPlayer data : players) {
 				if (data.id != c.id && data.active) {
 					CharData ch = data.character;
@@ -582,21 +599,20 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			ClientPlayer currentTarget = Utils.findPlayer(players, c.id);
 			Renderer.renderMainCharacter(g2D, c, currentTarget);
 			
-			Renderer.drawArenaImage(g2D, renderer.highImage, viewBox);
-			
-			
-			// Render lighting & shadow
-			if (lightImageChanged) {
-				renderer.redrawLightImage(arena);
-				lightImageChanged = false;
+			if (arena.isReal()) {
+				Renderer.drawArenaImage(g2D, renderer.highImage, viewBox);
+				// Render lighting & shadow
+				if (lightImageChanged) {
+					renderer.redrawLightImage(arena);
+					lightImageChanged = false;
+				}
+				
+				Composite save = g2D.getComposite();
+				g2D.setComposite(new MultiplyComposite(1f));
+				
+				Renderer.drawArenaImage(g2D,renderer.getLightMap(),viewBox);
+				g2D.setComposite(save);
 			}
-			
-			Composite save = g2D.getComposite();
-			g2D.setComposite(new MultiplyComposite(1f));
-			
-			//Renderer.renderHardLight(g2D, arena.getLightmap(), viewBox);
-			Renderer.drawArenaImage(g2D,renderer.getLightMap(),viewBox);
-			g2D.setComposite(save);
 		}
 		g2D.setClip(camera.getDrawAreaPixel());
 		globalAnimations.render(g2D, camera, null);
@@ -604,15 +620,13 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		int tileY = (int)(input.cy/Terrain.tileSize);
 		if (arena.get(tileX,tileY).coverType()>0)
 			Renderer.renderProtection(g2D,tileX,tileY,arena.get(tileX,tileY).coverType());
-		//renderer.renderCharacterUI(g2D,c);
-		
+		renderer.renderCharacterUI(g2D,c);
+		Renderer.renderData(g2D, arena, camera.getDrawArea());
 		g2D.setColor(Color.WHITE);
 		Renderer.renderCrosshair(g2D,input.cx,input.cy,c.crosshairSize,1.5f);
 		g2D.translate(transX, transY);
 		g2D.drawString("UPS: "+UPS +", FPS: "+FPS+", draw time: "+(System.currentTimeMillis()-tick)+"ms", 10, 10);
 		frameCount += 1;
-		
-		
 	}
 
 	private static Rectangle2D getCharacterVisionBox(double x, double y, double viewRange) {
@@ -754,12 +768,12 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			ClientPlayer attacker = Utils.findPlayer(players,e.attacker);
 			if (attacker!=null)
 				attacker.headshots++;
-			globalAnimations.addCustomAnimation(new BasicAnimation(1500) {
+			globalAnimations.addCustomAnimation(new BasicAnimation(1000) {
 				@Override
 				public void render(Graphics2D g2D) {
 					int alpha = (int)Math.min(255,255*2*life/duration);
-					g2D.setColor(new Color(50,100,255,alpha));
-					Renderer.renderCrosshair(g2D, e.x, e.y, 2, 3);
+					g2D.setColor(new Color(150,150,150,alpha));
+					Renderer.renderCrosshair(g2D, e.x, e.y, 1.5f, 2);
 				}});;
 			audioManager.playSound(SoundEvent.PING_SOUND_ID, SoundEvent.PING_SOUND_VOLUME);
 		} else if (event instanceof ScoreChangedEvent) {
@@ -777,6 +791,9 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			if (e.id!=SoundEvent.PING_SOUND_ID && e.volume>0) {
 				nonvisualAnimations.addNoiseAnimation(e.x, e.y, e.volume);
 				visualAnimations.addVisualNoiseAnimation(e.x, e.y, e.volume);
+			}
+			if (e instanceof VoiceEvent) {
+				globalAnimations.addCustomAnimation(new VoiceAnimation((VoiceEvent)e));
 			}
 		} else if (event instanceof AnimationEvent) {
 			AnimationEvent e = (AnimationEvent) event;
@@ -813,8 +830,12 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			}
 			arena.recalculateStaticLights();
 			lightImageChanged = true;
-			
-			
+		} else if (event instanceof DataObtained) {
+			final DataObtained e = (DataObtained) event;
+			System.out.println("Data "+e.dataId+" obtained!");
+			arena.setData(e.dataId);
+			VoiceEvent ve = new VoiceEvent(e.charType, 15, e.x, e.y, dataLines.containsKey(e.dataId)?dataLines.get(e.dataId):"");
+			globalAnimations.addCustomAnimation(new VoiceAnimation(ve));
 		} else if (event instanceof RoundEnd) {
 			RoundEnd e = (RoundEnd) event;
 			winnerText.setText("Team "+e.winner+" won!");
@@ -831,4 +852,30 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		zoomLevel = Math.max(-0.5,Math.min(0.5,zoomLevel + 0.05*e.getPreciseWheelRotation()));
 		Renderer.setPPM(Renderer.DEFAULT_PPM*(1+zoomLevel));
 	}
+	
+	public void initLines(int missionId) {
+        dataLines = new HashMap<Integer,String>();
+        File file = new File("resource/data.xlsx");
+        Workbook workbook = null;
+        try {
+            workbook = new XSSFWorkbook(new FileInputStream(file));
+            Sheet sheet = workbook.getSheetAt(missionId);
+            for (int i=1;i<arena.getNoData()+1;i++) {
+                int dId = (int)sheet.getRow(i).getCell(0).getNumericCellValue();
+                String s = sheet.getRow(i).getCell(1).getStringCellValue();
+                dataLines.put(dId, s);
+            }
+        } catch (Exception e) {
+            System.err.println("Error while loading mission data.");
+            e.printStackTrace();
+        } finally {
+            if (workbook!=null) {
+                try {
+					workbook.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+            }
+        }
+    }
 }
