@@ -48,6 +48,7 @@ public class JoinScreen extends AbstractScreen implements ActionListener {
 		name.setText("Average Joe");
 		port.setText("7777");
 		ip = GUIFactory.getStyledTextField();
+		ip.setText("192.168.100.9");
 		JPanel menuPanel = new JPanel();
 		menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.PAGE_AXIS));
 		menuPanel.add(GUIFactory.getStyledLabel("Screen name:"));

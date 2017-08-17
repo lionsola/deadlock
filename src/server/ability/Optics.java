@@ -75,7 +75,7 @@ public class Optics extends ToggleAbility {
 	public static class Binocular extends Optics {
 		public static final double BINO_RANGE = 0.25;
 		public static final double BINO_ANGLE = -0.5;
-		public static final double BINO_SPEED = -0.5;
+		public static final double BINO_SPEED = -0.25;
 		
 		public Binocular(InputControlledEntity self) {
 			super(BINO_ID,self, BINO_RANGE, BINO_ANGLE, BINO_SPEED, false);

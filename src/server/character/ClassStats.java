@@ -1,7 +1,7 @@
 package server.character;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -11,6 +11,7 @@ public class ClassStats {
 	public static HashMap<Integer,ClassStats> classStats = null;
 	
 	private double sizeF, speedF, maxHP, noiseF;
+	private int bodyId, weaponId, abilityId, passiveId;
 	
 	private CharType classID;
 	/**
@@ -45,33 +46,62 @@ public class ClassStats {
 		return noiseF;
 	}
 	
+	/**
+	 * @return the weaponId
+	 */
+	public int getWeaponId() {
+		return weaponId;
+	}
+	/**
+	 * @return the abilityId
+	 */
+	public int getAbilityId() {
+		return abilityId;
+	}
+	/**
+	 * @return the passiveId
+	 */
+	public int getPassiveId() {
+		return passiveId;
+	}
+	
+	/**
+	 * @return the bodyId
+	 */
+	public int getBodyId() {
+		return bodyId;
+	}
 	public static void initClassStats() {
 		if (classStats==null){
+			
 			classStats = new HashMap<Integer,ClassStats>();
 			Scanner sc = null;
-			try {
-				sc = new Scanner(new File("resource/character/classStats"));
-				while(sc.hasNext()) {
-					ClassStats cs = new ClassStats();
-					cs.classID = CharType.valueOf(sc.next());
-					cs.sizeF = sc.nextDouble();
-					cs.speedF = sc.nextDouble();
-					cs.maxHP = sc.nextDouble();
-					cs.noiseF = sc.nextDouble();
-					
-					classStats.put(cs.classID.id,cs);
-				}
-				sc.close();
-			} catch (IOException e) {
-				System.err.println("Fail to load class stats");
-				System.exit(-1);
-				e.printStackTrace();
-			} finally {
-				if (sc!=null) {
+			
+			InputStream is = ClassStats.class.getResourceAsStream("/character/classStats");
+			if (is!=null) {
+				try {
+					sc = new Scanner(is);
+					while(sc.hasNext()) {
+						ClassStats cs = new ClassStats();
+						cs.classID = CharType.valueOf(sc.next());
+						cs.sizeF = sc.nextDouble();
+						cs.speedF = sc.nextDouble();
+						cs.maxHP = sc.nextDouble();
+						cs.noiseF = sc.nextDouble();
+						
+						cs.bodyId = sc.nextInt();
+						cs.weaponId = sc.nextInt();
+						cs.abilityId = sc.nextInt();
+						cs.passiveId = sc.nextInt();
+						
+						classStats.put(cs.classID.id,cs);
+					}
 					sc.close();
+					is.close();
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
 			}
-			
 		}
 	}
 }

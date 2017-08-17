@@ -14,8 +14,12 @@
               </Node>
             </Children>
           </Node>
-          <Node id="Node_29" name="EnemyInWeaponRange" type="Condition" />
-          <Node id="Node_21" name="FireWeapon" type="Action" />
+          <Node id="Node_35" name="EnemyInWeaponRange" type="Condition" />
+          <Node id="Node_21" name="FireWeapon" type="Action">
+            <Guard>
+              <Node id="Node_34" name="EnemyInWeaponRange" type="Condition" />
+            </Guard>
+          </Node>
         </Children>
       </Node>
     </Children>

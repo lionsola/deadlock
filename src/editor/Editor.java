@@ -19,6 +19,7 @@ import java.util.HashMap;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuBar;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -67,6 +68,8 @@ public class Editor extends JFrame implements KeyListener {
 	private AudioManager audioManager;
 	
 	public boolean tileDataChanged = false;
+
+	private MenuBar menu;
 	
     public Editor() {
         GraphicsDevice screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
@@ -84,14 +87,14 @@ public class Editor extends JFrame implements KeyListener {
             //setUndecorated(true);
         }
         this.setBackground(Color.BLACK);
-        tileTable = (HashMap<Integer,Terrain>)DataManager.loadObject(DataManager.FILE_TILES);
-		DataManager.loadImage(tileTable.values());
+        tileTable = (HashMap<Integer,Terrain>)DataManager.loadInternalObject(DataManager.FILE_TILES);
+		DataManager.loadImages(tileTable.values());
         
-        objectTable = (HashMap<Integer, Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
-        DataManager.loadImage(objectTable.values());
+        objectTable = (HashMap<Integer, Thing>) DataManager.loadInternalObject(DataManager.FILE_OBJECTS);
+        DataManager.loadImages(objectTable.values());
         DataManager.updateParticleSource(objectTable.values());
 
-        triggerTable = (HashMap<Integer, TileSwitchPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
+        triggerTable = (HashMap<Integer, TileSwitchPreset>) DataManager.loadInternalObject(DataManager.FILE_TRIGGERS);
         if (triggerTable==null) {
         	triggerTable = new HashMap<Integer,TileSwitchPreset>();
         }
@@ -108,8 +111,8 @@ public class Editor extends JFrame implements KeyListener {
         audioManager = new AudioManager();
         
         getContentPane().setLayout(new BorderLayout());
-        
-        this.setJMenuBar(new MenuBar(this));
+        menu = new MenuBar(this);
+        this.setJMenuBar(menu);
         ToolBar tools = new ToolBar(this);
         this.getContentPane().add(tools,BorderLayout.WEST);
         cursorInfo = new JLabel();
@@ -180,6 +183,7 @@ public class Editor extends JFrame implements KeyListener {
     	pack();
     	setTool(new Tool.MoveTool(arenaPanel));
     	arenaPanel.start();
+    	menu.resetViewToggleButtons(arenaPanel);
     }
     
     public void openArena() {

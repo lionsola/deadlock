@@ -9,6 +9,7 @@
 package server.ai.jbt.actions.execution;
 
 import java.awt.geom.Point2D;
+import java.util.LinkedList;
 import java.util.List;
 
 import server.character.InputControlledEntity;
@@ -111,29 +112,25 @@ public class ComputePatrolPoint extends
 		
 		System.out.println(this.getClass().getCanonicalName() + " spawned");
 		InputControlledEntity pc = (InputControlledEntity)getContext().getVariable("Character");
-		if (getPatrolLocations()!=null) {
-			List<Point2D> patrolLocations = (List<Point2D>)getPatrolLocations();
 		
-			Object i = getContext().getVariable("patrolIndex");
-			int currentIndex = i==null?0:((int)i);
-			Point2D p = patrolLocations.get(currentIndex);
-			
-			if (p.distance(pc.getPosition())<0.2) {
-				if (getRandom()) {
-					int tempIndex = Utils.random().nextInt(patrolLocations.size()-1);
-					currentIndex = tempIndex<currentIndex?tempIndex:tempIndex+1;
-				} else {
-					currentIndex = (currentIndex+1)%patrolLocations.size();
-				}
-				p = patrolLocations.get(currentIndex);
+		List<Point2D> patrolLocations = (List<Point2D>)getPatrolLocations();
+	
+		Object i = getContext().getVariable("patrolIndex");
+		int currentIndex = i==null?0:((int)i);
+		Point2D p = patrolLocations.get(currentIndex);
+		
+		if (p.distance(pc.getPosition())<0.2) {
+			if (getRandom()) {
+				int tempIndex = Utils.random().nextInt(patrolLocations.size()-1);
+				currentIndex = tempIndex<currentIndex?tempIndex:tempIndex+1;
+			} else {
+				currentIndex = (currentIndex+1)%patrolLocations.size();
 			}
-			float[] patrolPoint = {(float)p.getX(),(float)p.getY()};
-			getContext().setVariable("patrolLocation", patrolPoint);
-			getContext().setVariable("patrolIndex", currentIndex);
-		} else {
-			float[] patrolPoint = {(float)pc.getX(),(float)pc.getY()};
-			getContext().setVariable("patrolLocation", patrolPoint);
+			p = patrolLocations.get(currentIndex);
 		}
+		float[] patrolPoint = {(float)p.getX(),(float)p.getY()};
+		getContext().setVariable("patrolLocation", patrolPoint);
+		getContext().setVariable("patrolIndex", currentIndex);
 	}
 
 	protected jbt.execution.core.ExecutionTask.Status internalTick() {

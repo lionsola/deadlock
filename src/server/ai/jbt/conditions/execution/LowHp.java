@@ -8,6 +8,8 @@
 // ******************************************************* 
 package server.ai.jbt.conditions.execution;
 
+import server.character.InputControlledEntity;
+
 /** ExecutionCondition class created from MMPM condition LowHp. */
 public class LowHp extends jbt.execution.task.leaf.condition.ExecutionCondition {
 
@@ -34,12 +36,12 @@ public class LowHp extends jbt.execution.task.leaf.condition.ExecutionCondition 
 	}
 
 	protected jbt.execution.core.ExecutionTask.Status internalTick() {
-		/*
-		 * TODO: this method's implementation must be completed. This function
-		 * should only return Status.SUCCESS, Status.FAILURE or Status.RUNNING.
-		 * No other values are allowed.
-		 */
-		return jbt.execution.core.ExecutionTask.Status.SUCCESS;
+		InputControlledEntity character = (InputControlledEntity)getContext().getVariable("Character");
+		if (character.getHealthPoints()<character.getMaxHP()*0.5) {
+			return jbt.execution.core.ExecutionTask.Status.SUCCESS;
+		} else {
+			return jbt.execution.core.ExecutionTask.Status.FAILURE;
+		}
 	}
 
 	protected void internalTerminate() {

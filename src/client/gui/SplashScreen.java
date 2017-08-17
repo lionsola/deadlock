@@ -18,10 +18,6 @@ public class SplashScreen extends AbstractScreen {
 
 	public SplashScreen(final GameWindow game) {
 		super(game);
-		try {
-			setBackground(ImageIO.read(new FileInputStream("resource/background/splash.png")));
-		} catch (Exception e) {
-		}
 		//AudioManager.playMusic("menumusic.wav", MusicPlayer.DEFAULT_VOLUME);
 		addKeyListener(new KeyAdapter() {
 			@Override

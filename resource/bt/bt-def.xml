@@ -36,13 +36,16 @@
         <Action name="ComputeChasePosition">
         </Action>
         
+        <Action name="ComputeEscapePosition">
+        </Action>
+        
 		<!-- Works out where to point the cursor at when firing -->
 		<Action name="ComputeAttackPoint">
 		</Action>
 		<!-- Randomise a sensible direction to turn to -->
 		<Action name="ComputeWatchPoint"/>
 		<Action name="ComputeInterestPoint"/>
-		
+		<Action name="ComputeRandomNearbyPoint"/>
 		<!-- Given a target, works out where to point the cursor at when firing -->
         <Action name="ComputePatrolPoint">
               <Parameter name="patrolLocations" type="OBJECT"/>
@@ -61,8 +64,11 @@
 		<Sensor name="LowAmmo" type="BOOLEAN"/>
 		<!-- Checks if the current unit's hit points is low -->
 		<Sensor name="LowHp" type="BOOLEAN"/>
-		<!-- Checks if the current unit is in enemies' sight -->
-        <Sensor name="InEnemySight" type="BOOLEAN"/>
+		<!-- Checks if the enemy is in a certain range -->
+        <Sensor name="EnemyInRange" type="BOOLEAN">
+            <Parameter name="range" type="FLOAT"/>
+        </Sensor>
+        
         <!-- Checks if there's any enemy in sight -->
         <Sensor name="EnemyInSight" type="BOOLEAN"/>
         <!-- Checks if the enemy -->

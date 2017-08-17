@@ -7,7 +7,7 @@ import server.world.World;
 public class Assault extends Passive {
 	public static final double AS_BODYINSTA = -0.2;
 	public static final double AS_SPEED = 0.2;
-	public static final double AS_RECOIL = -0.5;
+	public static final double AS_RECOIL = -0.4;
 	public static final double AS_MAXANGLE = Math.PI*2/3;
 	public static final double AS_MINANGLE = Math.PI/3;
 	public static final double AS_TRANS = 300;
@@ -29,7 +29,7 @@ public class Assault extends Passive {
 		
 		self().addSpeedMod(targetSpeed-increasedSpeed);
 		self().addInstaMod(targetInsta-increasedInsta);
-		self().getWeapon().addRecoilMod(targetRecoil-increasedRecoil);
+		self().addRecoilMod(targetRecoil-increasedRecoil);
 		increasedSpeed = targetSpeed;
 		increasedInsta = targetInsta;
 		increasedRecoil = targetRecoil;

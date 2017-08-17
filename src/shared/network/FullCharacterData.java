@@ -38,7 +38,7 @@ public class FullCharacterData extends CharData {
 		
 		crosshairSize = (float) e.getCrosshairSize();
 		ammo = (byte) e.getWeapon().getAmmo();
-		maxAmmo = (byte) e.getWeapon().type.magSize;
+		maxAmmo = (byte) e.getWeapon().type.getMagSize();
 	}
 	
 	public FullCharacterData() {}

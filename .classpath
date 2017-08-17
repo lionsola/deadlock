@@ -10,5 +10,7 @@
 	<classpathentry kind="lib" path="lib/xmlbeans-2.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.15.jar"/>
 	<classpathentry kind="lib" path="lib/commons-collections4-4.1.jar"/>
+	<classpathentry kind="lib" path="lib/lwjgl.jar"/>
+	<classpathentry kind="lib" path="lib/lwjgl-glfw.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

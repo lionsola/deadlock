@@ -34,16 +34,15 @@ public class FireWeapon extends jbt.execution.task.leaf.action.ExecutionAction {
 
 	protected jbt.execution.core.ExecutionTask.Status internalTick() {
 		InputControlledEntity pc = (InputControlledEntity)getContext().getVariable("Character");
+		InputPacket input = ((InputPacket)getContext().getVariable("Input"));
 		if (pc.getWeapon().isReady()) {
-			((InputPacket)getContext().getVariable("Input")).fire1 = true;
+			input.fire1 = true;
 			return Status.RUNNING;
+		} else if (input.fire1) {
+			input.fire1 = false;
+			return Status.SUCCESS;
 		} else {
-			((InputPacket)getContext().getVariable("Input")).fire1 = false;
-			if (getStatus()==Status.RUNNING) {
-				return Status.SUCCESS;
-			} else {
-				return Status.FAILURE;
-			}
+			return Status.FAILURE;
 		}
 	}
 

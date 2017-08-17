@@ -29,7 +29,6 @@ public class GameWindow extends JFrame {
 		System.setProperty("sun.java2d.opengl", "true");
 		//setIgnoreRepaint(true);
 		Sprite.initImage();
-		client.data.Class.init();
 		// Should change to load from save file
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		width = (int) screenSize.getWidth();

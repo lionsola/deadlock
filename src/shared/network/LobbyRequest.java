@@ -5,7 +5,6 @@ import java.util.List;
 
 import client.gui.ClientPlayer;
 import editor.SpawnPoint;
-import editor.SpawnPoint.CharType;
 
 /**
  * Models a request from lobby.
@@ -27,14 +26,21 @@ public class LobbyRequest implements Serializable {
 		}
 	}
 
-	public static class ChangeCharacterRequest extends LobbyRequest {
+	public static class ChangeCharSetup extends LobbyRequest {
 		private static final long serialVersionUID = -3235244044264803979L;
+		public static final int CHANGE_CHAR = 0;
+		public static final int CHANGE_WMOD = 1;
+		public static final int CHANGE_HMOD = 2;
+		public static final int CHANGE_AMOD = 3;
+		
 		public final int playerId;
-		public final CharType typeId;
+		public final int changeType;
+		public final int changeValue;
 
-		public ChangeCharacterRequest(int playerId, CharType typeId) {
+		public ChangeCharSetup(int playerId, int changeType, int changeValue) {
 			this.playerId = playerId;
-			this.typeId = typeId;
+			this.changeType = changeType;
+			this.changeValue = changeValue;
 		}
 	}
 

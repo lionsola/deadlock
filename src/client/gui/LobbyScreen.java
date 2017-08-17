@@ -13,7 +13,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.SocketException;
@@ -21,7 +20,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -36,10 +34,11 @@ import javax.swing.ListCellRenderer;
 import javax.swing.border.EmptyBorder;
 
 import server.network.LobbyServer;
+import server.projectile.HitMod;
+import server.weapon.WeaponMod;
 import shared.network.Connection;
 import shared.network.LobbyRequest;
-import shared.network.LobbyRequest.ChangeArenaRequest;
-import shared.network.LobbyRequest.ChangeCharacterRequest;
+import shared.network.LobbyRequest.ChangeCharSetup;
 import shared.network.LobbyRequest.ChangeSpawnRequest;
 import shared.network.LobbyRequest.ChatRequest;
 import shared.network.LobbyRequest.GameConfig;
@@ -49,6 +48,7 @@ import shared.network.LobbyRequest.PlayerLeaveRequest;
 import shared.network.LobbyRequest.StartGameRequest;
 import shared.network.LobbyRequest.SwitchTeamRequest;
 import shared.network.LobbyRequest.ToggleReadyRequest;
+import editor.DataManager;
 import editor.SpawnPoint;
 import editor.SpawnPoint.CharType;
 
@@ -73,12 +73,16 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 	private JButton left;
 	private JButton right;
 	private JButton switchTeam;
+	private JButton wpMod;
+	private JButton hMod;
 
 	// place holder, use each type's icon later
 	private final ClientPlayer clientPlayer;
 	//private String config = "";//"Settings shown here\nSetting1\nSetting2\nSetting3"; 
 
 	private int currentType = 0;
+	private int currentWMod = -1;
+	private int currentHMod = -1;
 
 	private ChatPanel chatPanel;
 	private HashMap<Integer,SpawnPanel> spawnPanels = new HashMap<Integer,SpawnPanel>();
@@ -213,16 +217,17 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		// place holder for map
 		JLabel map = null;
 		try {
-			BufferedImage mapImage = ImageIO.read(new FileInputStream("resource/map/" + HostScreen.MAP_LIST[config.arena] + ".png"));
+			BufferedImage mapImage = DataManager.loadImage("/map/" + HostScreen.MAP_LIST[config.arena] + ".png");
 			float ratio = 150f/Math.max(mapImage.getWidth(),mapImage.getHeight());
 			map = new JLabel(new ImageIcon(mapImage.getScaledInstance((int)(mapImage.getWidth()*ratio),(int)(mapImage.getHeight()*ratio), Image.SCALE_SMOOTH)),JLabel.CENTER);
+			map.setAlignmentX(Component.CENTER_ALIGNMENT);
+			settingPanel.add(map);
 		} catch (IOException e) {
-			System.out.println("Error loading map image");
+			System.err.println("Error while loading map image");
 			e.printStackTrace();
-			map = new JLabel("Error loading map");
+			System.exit(-1);
 		}
-		map.setAlignmentX(Component.CENTER_ALIGNMENT);
-		settingPanel.add(map);
+		
 		GUIFactory.stylizeMenuComponent(settingPanel);
 		//c.gridy++;
 		//teamPanel.add(GUIFactory.getStyledSeparator(), c);
@@ -231,14 +236,31 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		GUIFactory.stylizeMenuComponent(chatPanel);
 		chatPanel.getInputLabel().setText(clientPlayer.name + ": ");
 		
+		JPanel modPanel = GUIFactory.getTransparentPanel();
+		
+		wpMod = new JButton("None");
+		GUIFactory.stylizeMenuComponent(wpMod);
+		wpMod.addActionListener(this);
+		
+		hMod = new JButton("None");
+		GUIFactory.stylizeMenuComponent(hMod);
+		hMod.addActionListener(this);
+		
+		modPanel.add(wpMod);
+		modPanel.add(hMod);
+		
 		JPanel lower = GUIFactory.getTransparentPanel();
 		lower.setLayout(new BoxLayout(lower,BoxLayout.X_AXIS));
-		lower.add(chatPanel);
+		lower.add(modPanel);
 		lower.add(settingPanel);
 		
 		c.fill = GridBagConstraints.BOTH;
 		c.gridy++;
 		teamPanel.add(lower, c);
+		
+		c.fill = GridBagConstraints.BOTH;
+		c.gridy++;
+		teamPanel.add(chatPanel, c);
 		
 		c.gridwidth = 2;
 		c.gridx = 0;
@@ -266,7 +288,6 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "doSomething");
 		this.getActionMap().put("doSomething", new AbstractAction() {
 			private static final long serialVersionUID = 399731857081319049L;
-
 			@Override
 	        public void actionPerformed(ActionEvent arg0) {
 	        	if (chatPanel.isTyping()&&!chatPanel.getInput().equals("")) {
@@ -293,7 +314,7 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 	private void setTypeSelection(CharType type) {
 		//typeIcon.setIcon(new ImageIcon(Sprite.getImage(type, clientPlayer.team)));
 		typeName.setText(String.valueOf((char)type.id));
-		sendRequest(new ChangeCharacterRequest(clientPlayer.id, type));
+		sendRequest(new ChangeCharSetup(clientPlayer.id, ChangeCharSetup.CHANGE_CHAR, type.id));
 	}
 
 	/**
@@ -314,7 +335,13 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		if (arg0.getSource() == playButton) {
+		if (arg0.getSource() == wpMod) {
+			int target = (currentWMod+1)%WeaponMod.values().length;
+			sendRequest(new ChangeCharSetup(clientPlayer.id, ChangeCharSetup.CHANGE_WMOD, target));
+		} else if (arg0.getSource() == hMod) {
+			int target = (currentHMod+1)%HitMod.values().length;
+			sendRequest(new ChangeCharSetup(clientPlayer.id, ChangeCharSetup.CHANGE_HMOD, target));
+		} else if (arg0.getSource() == playButton) {
 			try {
 				// lobbyServer.changeArena("test40");
 				lobbyServer.startGame();
@@ -439,10 +466,30 @@ public class LobbyScreen extends AbstractScreen implements ActionListener {
 						p.active = request.ready;
 						spawnPanels.get(p.spawnId).update();
 						// INVALIDATE
-					} else if (message instanceof ChangeCharacterRequest) {
-						ChangeCharacterRequest request = ((ChangeCharacterRequest) message);
+					} else if (message instanceof ChangeCharSetup) {
+						ChangeCharSetup request = ((ChangeCharSetup) message);
 						ClientPlayer p = findPlayer(request.playerId);
-						p.type = request.typeId;
+						switch (request.changeType) {
+							case ChangeCharSetup.CHANGE_CHAR:
+								p.type = CharType.valueOf(request.changeValue);
+								break;
+							case ChangeCharSetup.CHANGE_WMOD:
+								if (p==clientPlayer) {
+									currentWMod = request.changeValue;
+									wpMod.setText(WeaponMod.get(currentWMod).name());
+								}
+								break;
+							case ChangeCharSetup.CHANGE_HMOD:
+								if (p==clientPlayer) {
+									currentHMod = request.changeValue;
+									hMod.setText(HitMod.get(currentHMod).name());
+								}
+								break;
+							default:
+								System.out.println("Invalid change type");
+								break;
+						}
+						
 						// INVALIDATE
 					} else if (message instanceof ChatRequest) {
 						ChatRequest request = ((ChatRequest) message);

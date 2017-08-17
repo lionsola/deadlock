@@ -1,27 +1,25 @@
 package server.character;
 
-import server.ability.Ability;
-import server.ability.ChargedAbility;
-import server.ability.Flashlight;
-import server.ability.HearingAmplifier;
-import server.ability.Optics;
-import server.passive.Assault;
-import server.passive.Backstab;
-import server.passive.Mark;
-import server.passive.Overwatch;
-import server.passive.Passive;
-import server.passive.Shield;
+import server.ability.*;
+import server.ai.NPCBrain;
+import server.passive.*;
+import server.projectile.HitMod;
 import server.weapon.Weapon;
 import server.weapon.WeaponFactory;
+import server.world.Arena;
 import server.world.Geometry;
+import server.world.Utils;
 import server.world.World;
+import shared.network.CharData;
 import shared.network.GameDataPackets.InputPacket;
+import shared.network.NPCData;
 import shared.network.event.GameEvent.*;
 import shared.network.event.VoiceEvent;
 
 import java.awt.geom.Point2D;
 
 import client.gui.GameWindow;
+import editor.SpawnPoint.Behaviour;
 import editor.SpawnPoint.CharType;
 
 /**
@@ -34,10 +32,10 @@ public class InputControlledEntity extends Entity {
 	
 	public static final double MOVEMENT_SWAY_FACTOR = 0.004;
 	public static final double ROTATION_DISPERSION_FACTOR = 0.04;
+	public static final double MAX_DISPERSION_ANGLE = 0.09;
 	
-	public static final double MAX_DISPERSION_ANGLE = 0.1;
-	
-	private double instaF = 1;
+	private double instabilityMod = 1;
+	private double recoilMod = 1;
 
 	private double targetDirection = 0;
 
@@ -46,9 +44,14 @@ public class InputControlledEntity extends Entity {
 	private Passive passive;
 	
 	private InputPacket input = new InputPacket();
+	public NPCBrain brain;
 
-	protected InputControlledEntity(int id, int team, int typeId) {
+	public InputControlledEntity(int id, int team, int typeId) {
 		super(id,team,typeId);
+	}
+	
+	public void initAI(Arena a, Behaviour b) {
+		brain = new NPCBrain(b,a,this);
 	}
 	
 	/**
@@ -60,15 +63,23 @@ public class InputControlledEntity extends Entity {
 	@Override
 	public void update(World world) {
 		synchronized (input) {
-			if (isDead()) {
+			if (isDead() || !isEnabled()) {
 				input.up = false;
 				input.down = false;
 				input.left = false;
 				input.right = false;
+				
+				input.fire1 = false;
+				input.fire2 = false;
+				input.reload = false;
+				input.sneaking = false;
 			}
 			
-			// translate directional input into movement vector
-			processInput(world);
+			if (isEnabled()) {
+				// translate directional input into movement vector
+				processInput(world);
+			}
+			
 			// apply collision detection to correct the movement vector
 			super.updateCollision(world);
 			
@@ -86,11 +97,16 @@ public class InputControlledEntity extends Entity {
 					primary.update(world, this);
 				
 				
-				super.updateStatusEffects();
+				super.updateStatusEffects(world);
 				
 				super.updatePosition(world);
 				super.updateNoise(world);
 				super.updateExposure(world);
+				
+				if (brain!=null) {
+					brain.update(getPerception());
+					getPerception().events.clear();
+				}
 			}
 			
 			updateCrosshair();
@@ -100,7 +116,7 @@ public class InputControlledEntity extends Entity {
 	private void updateCrosshair() {
 		// add the direction swaying when walking / running
 		//addDispersion(instaF*MOVEMENT_DISPERSION_FACTOR*getCurrentSpeed()*GameWindow.MS_PER_UPDATE);
-		direction += sway*instaF*MOVEMENT_SWAY_FACTOR*getCurrentSpeed()*GameWindow.MS_PER_UPDATE;
+		direction += sway*getInstaMod()*MOVEMENT_SWAY_FACTOR*getCurrentSpeed()*GameWindow.MS_PER_UPDATE;
 		
 		// move character direction toward the target direction slowly 
 		//addDispersion(-DISPERSION_DEC*(0.5+charDispersion));
@@ -116,7 +132,7 @@ public class InputControlledEntity extends Entity {
 
 	public double getCrosshairSize() {
 		//double angle = Math.abs(gunDirection)+getWeapon().type.gunDispersion;
-		double angle = getWeapon().type.gunDispersion;
+		double angle = getWeapon().type.getGunDispersion();
 		return Math.tan(angle)*Point2D.distance(getX(),getY(),getInput().cx,getInput().cy);
 	}
 
@@ -174,11 +190,8 @@ public class InputControlledEntity extends Entity {
 			dy *= 0.7;
 		}
 		
-		double diffAngle = Math.abs(Geometry.wrapAngle(getMovingDirection()-getDirection()));
-		double ratio = (Math.PI/2 - diffAngle)/(Math.PI/2);
-		double speed = getSpeed()*(1+ratio*0.1);
-		setDx(dx*speed);
-		setDy(dy*speed);
+		setDx(dx);
+		setDy(dy);
 		
 		// process chat event
 		if (input.chatText!=null)
@@ -205,19 +218,35 @@ public class InputControlledEntity extends Entity {
 		passive = p;
 	}
 	
-	public double getInstaF() {
-		return instaF;
+	public double getInstaMod() {
+		return instabilityMod;
 	}
 	
 	public void addInstaMod(double instaMod) {
-		this.instaF += instaMod;
+		this.instabilityMod += instaMod;
 	}
 	
 	@Override
-	public void resetStats() {
-		super.resetStats();
-		primary.reset();
-		ability.reset();
+	public CharData generatePartial() {
+		if (brain!=null) {
+			return new NPCData(this);
+		} else {
+			return super.generatePartial();
+		}
+	}
+	
+	@Override
+	public void reset(World w) {
+		super.reset(w);
+		if (primary!=null) {
+			primary.reset();
+		}
+		if (ability!=null) {
+			ability.reset();
+		}
+		if (brain!=null) {
+			initAI(w.getArena(), brain.getBehaviour());
+		}
 	}
 	
 	@Override
@@ -226,10 +255,18 @@ public class InputControlledEntity extends Entity {
 	}
 	
 	@Override
+	public double getSizeF() {
+		return super.getSizeF()*(getInput().sneaking?0.9:1);
+	}
+	
+	@Override
 	public void onHit(World w, double damage, int sourceId) {
 		if (isDead())
 			return;
 		super.onHit(w, damage, sourceId);
+		if (brain!=null) {
+			brain.addAlertness(damage/100);
+		}
 		if (getHealthPoints()<=0) {
 			w.getEventListener().onEventReceived(new PlayerDieEvent(sourceId, id));
 		}
@@ -241,68 +278,74 @@ public class InputControlledEntity extends Entity {
 		return head;
 	}
 
-	/**
-	 * Creates a new server.character.
-	 * 
-	 * @param id
-	 *            the id of the server.character, used to keep track of them
-	 * @param team
-	 *            the team the server.character will be on.
-	 * @param type
-	 *            the type of the server.character, e.g. scout
-	 * @return the new server.character
-	 */
-	public static InputControlledEntity newCharacter(int id, int team, CharType type) {
-		switch (type) {
+	public static void initAbilitySet(InputControlledEntity entity, int weaponMod, int hitMod) {
+		switch (CharType.valueOf(entity.typeId)) {
 			case Beta:
-				InputControlledEntity shield =  new InputControlledEntity(id, team, type.id);
-				shield.setWeapon(WeaponFactory.createGun(3, shield));
-				shield.setAbilty(new ChargedAbility.ThrowFlashGrenade(shield));
-				shield.setPassive(new Shield(shield));
-				return shield;
+				entity.setWeapon(WeaponFactory.createGun(3,weaponMod,hitMod,entity));
+				entity.setAbilty(new ChargedAbility.ThrowFlashGrenade(entity));
+				entity.setPassive(new Shield(entity));
+				break;
 			case Pi:
-				InputControlledEntity scout =  new InputControlledEntity(id, team, type.id);
-				scout.setWeapon(WeaponFactory.createGun(2,scout));
-				scout.setAbilty(new Optics.Binocular(scout));
-				scout.setPassive(new Mark(scout));
-				return scout;
+				entity.setWeapon(WeaponFactory.createGun(2,weaponMod,hitMod,entity));
+				entity.setAbilty(new Optics.Binocular(entity));
+				entity.setPassive(new Mark(entity));
+				break;
 			case Gamma:
-				InputControlledEntity sniper =  new InputControlledEntity(id, team, type.id);
-				sniper.setWeapon(WeaponFactory.createGun(1,sniper));
-				sniper.setAbilty(new Optics.Scope(sniper));
-				sniper.setPassive(new Overwatch(sniper));
-				return sniper;
+				entity.setWeapon(WeaponFactory.createGun(1,weaponMod,hitMod,entity));
+				entity.setAbilty(new Optics.Scope(entity));
+				entity.setPassive(new Overwatch(entity));
+				break;
 			case Ju:
-				InputControlledEntity agent =  new InputControlledEntity(id, team, type.id);
-				agent.setWeapon(WeaponFactory.createGun(4,agent));
-				agent.setAbilty(new HearingAmplifier(agent));
-				agent.setPassive(new Backstab(agent));
-				return agent;
+				entity.setWeapon(WeaponFactory.createGun(4,weaponMod,hitMod,entity));
+				entity.setAbilty(new HearingAmplifier(entity));
+				entity.setPassive(new Backstab(entity));
+				break;
 			case Alpha:
-				InputControlledEntity gren =  new InputControlledEntity(id, team, type.id);
-				gren.setWeapon(WeaponFactory.createGun(0,gren));
-				gren.setAbilty(new ChargedAbility.ThrowFragGrenade(gren));
-				gren.setPassive(new Assault(gren));
-				return gren;
+				entity.setWeapon(WeaponFactory.createGun(0,weaponMod,hitMod,entity));
+				entity.setAbilty(new ChargedAbility.ThrowFragGrenade(entity));
+				entity.setPassive(new Assault(entity));
+				break;
 			case Officer:
-				InputControlledEntity officer = new InputControlledEntity(id, team, type.id);
-				officer.setWeapon(WeaponFactory.createGun(7,officer));
-				officer.setAbilty(new Flashlight(officer));
-				officer.setPassive(new Assault(officer));
-				return officer;
+				entity.setWeapon(WeaponFactory.createGun(7,weaponMod,hitMod,entity));
+				entity.setAbilty(new Flashlight(entity));
+				entity.setPassive(new Assault(entity));
+				break;
 			case MOfficer:
-				InputControlledEntity mofficer = new InputControlledEntity(id, team, type.id);
-				mofficer.setWeapon(WeaponFactory.createGun(8,mofficer));
-				mofficer.setAbilty(new Flashlight(mofficer));
-				mofficer.setPassive(new Assault(mofficer));
-				return mofficer;
+				entity.setWeapon(WeaponFactory.createGun(Weapon.MELEE_ID,weaponMod,hitMod,entity));
+				entity.setAbilty(new Flashlight(entity));
+				entity.setPassive(new Assault(entity));
+				break;
+			case Werewolf:
+				entity.setWeapon(WeaponFactory.createGun(Weapon.BITE_ID,weaponMod,HitMod.Sharp.id,entity));
+				entity.setAbilty(Leap.wolfBig(entity));
+				entity.setPassive(new SummonWolf(entity));
+				break;
+			case Wolf:
+				entity.setWeapon(WeaponFactory.createGun(Weapon.BITE_ID,weaponMod,HitMod.Sharp.id,entity));
+				entity.setAbilty(Leap.wolf(entity));
+				if (Utils.random().nextBoolean()) {
+					entity.setPassive(new Growth(entity));
+				} else {
+					entity.setPassive(new Stealth(entity,1000,1000));
+				}
+				break;
+			case WolfBig:
+				entity.setWeapon(WeaponFactory.createGun(Weapon.BITE_ID,weaponMod,HitMod.Sharp.id,entity));
+				entity.setAbilty(Leap.wolfBig(entity));
+				entity.setPassive(new Assault(entity));
+				break;
+			case Ghoul:
+				entity.setWeapon(WeaponFactory.createGun(Weapon.BITE_ID,weaponMod,HitMod.Zombie.id,entity));
+				//entity.setAbilty(new SimpleAbility.Leap(entity));
+				entity.setPassive(new FastRegen(entity));
+				break;
 			default:
-				System.out.println("Error: Wrong type id");
+				System.out.println("Error: Unsupported char type");
 				System.exit(-1);
-				return null;
+				break;
 		}
 	}
-
+	
 	public double getTargetDirection() {
 		return targetDirection;
 	}
@@ -313,5 +356,13 @@ public class InputControlledEntity extends Entity {
 
 	public Passive getPassive() {
 		return passive;
+	}
+
+	public double getRecoilMod() {
+		return recoilMod;
+	}
+	
+	public void addRecoilMod(double recoilMod) {
+		this.recoilMod += recoilMod;
 	}
 }

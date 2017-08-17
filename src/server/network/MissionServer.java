@@ -1,5 +1,6 @@
 package server.network;
 
+import java.awt.geom.Point2D;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,11 +21,11 @@ import jbt.model.core.ModelTask;
 import server.ai.AIPlayer;
 import server.character.ClassStats;
 import server.character.InputControlledEntity;
-import server.character.NPC;
 import server.weapon.WeaponFactory;
 import server.world.Arena;
 import server.world.Arena.ArenaData;
 import server.world.Thing;
+import server.world.Utils;
 import server.world.Terrain;
 import server.world.World;
 import server.world.trigger.TileSwitchPreset;
@@ -42,7 +43,7 @@ import shared.network.event.SoundEvent;
 public class MissionServer implements Runnable, Listener {
 	public static final int UNDECIDED = -1;
 	public static final int DRAW = -2;
-	enum State {PAUSING, PLAYING, DELAYING}
+	public enum State {PAUSING, PLAYING, DELAYING}
 	private State state = State.DELAYING;
 	
 	protected World world;
@@ -83,17 +84,17 @@ public class MissionServer implements Runnable, Listener {
 	}
 
 	protected void initializeMission(int mId) {
-		HashMap<Integer,Terrain> tileTable = (HashMap<Integer, Terrain>) DataManager.loadObject(DataManager.FILE_TILES);
+		HashMap<Integer,Terrain> tileTable = (HashMap<Integer, Terrain>) DataManager.loadInternalObject(DataManager.FILE_TILES);
 		
-		HashMap<Integer,Thing> objectTable = (HashMap<Integer, Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
+		HashMap<Integer,Thing> objectTable = (HashMap<Integer, Thing>) DataManager.loadInternalObject(DataManager.FILE_OBJECTS);
 		
-		HashMap<Integer,TileSwitchPreset> triggerTable = (HashMap<Integer, TileSwitchPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
+		HashMap<Integer,TileSwitchPreset> triggerTable = (HashMap<Integer, TileSwitchPreset>) DataManager.loadInternalObject(DataManager.FILE_TRIGGERS);
 		
 		for (TileSwitchPreset tp:triggerTable.values()) {
         	tp.setSwitchThing(objectTable.get(tp.getSwitchThingID()));
         	tp.setOriginalThing(objectTable.get(tp.getOriginalThingID()));
         }
-		ArenaData ad = (ArenaData) DataManager.loadObject("resource/map/"+HostScreen.MAP_LIST[mId]+".arena");
+		ArenaData ad = (ArenaData) DataManager.loadInternalObject("/map/"+HostScreen.MAP_LIST[mId]+".arena");
 		/* First of all, we create the BT library. */
 		IBTLibrary btLibrary = new MissionBTLibrary();
 		/* Then we create the initial context that the tree will use. */
@@ -118,29 +119,36 @@ public class MissionServer implements Runnable, Listener {
 	protected void setUp(World world, List<ServerPlayer> players) {
 		for (int i=0;i<players.size();i++) {
 			ServerPlayer p = players.get(i);
-			if (p.character==null) {
-				InputControlledEntity character = InputControlledEntity.newCharacter(p.spawnPoint.getId(), p.spawnPoint.team, p.type);
-				p.setCharacter(character);
-			}  else {
-				//p.character.resetStats();
-				// At the moment, just create everything new
-				InputControlledEntity character = InputControlledEntity.newCharacter(p.spawnPoint.getId(), p.team, p.type);
-				p.setCharacter(character);
-			}
+			InputControlledEntity character = new InputControlledEntity(p.spawnPoint.getId(), p.team, p.type.id);
+			InputControlledEntity.initAbilitySet(character, p.weaponMod, p.hitMod);
+			p.setCharacter(character);
+			
 			if (p instanceof AIPlayer) {
 				((AIPlayer) p).init(world.getArena(), p.character);
 			}
 			
-			world.addCharacter(p.character,p.spawnPoint);
+			world.addCharacterAt(p.character,p.spawnPoint);
 			p.targetIndex = i;
 		}
 		
 		for (SpawnPoint p:world.getArena().getSpawns()) {
 			if (p.type==SpawnType.NPCOnly && p.players<=players.size()) {
-				NPC npc = NPC.newNPC(p.getId(),p.team, p.setups.get(0));
-				npc.init(world.getArena(), p.behaviour);
-				world.addCharacter(npc,p);
-				npc.brain.setPatrolLocations(p.patrolLocations);
+				InputControlledEntity npc = new InputControlledEntity(p.getId(),p.team, p.setups.get(0).id);
+				InputControlledEntity.initAbilitySet(npc, -1, -1);
+				npc.initAI(world.getArena(), p.behaviour);
+				world.addCharacterAt(npc,p);
+				
+				List<Point2D> pls;
+				if (p.patrolLocations!=null) {
+					pls = p.patrolLocations;
+					
+				} else {
+					pls = new LinkedList<Point2D>();
+				}
+				if (pls.size()==0) {
+					pls.add(Utils.tileToMeter(p.x, p.y));	
+				}
+				npc.brain.setPatrolLocations(pls);
 			}
 		}
 	}

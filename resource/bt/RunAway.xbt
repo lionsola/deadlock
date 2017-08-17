@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Tree>
+  <Node id="Node_0" name="RunAway" type="Root">
+    <Children>
+      <Node id="Node_1" type="Selector">
+        <Children>
+          <Node id="Node_4" type="Sequence">
+            <Children>
+              <Node id="Node_5" name="ComputeEscapePosition" type="Action" />
+              <Node id="Node_6" name="Run" type="Action">
+                <Parameters>
+                  <Parameter name="runTarget" fromcontext="true">escapeTarget</Parameter>
+                  <Parameter name="controlCursor" fromcontext="false">true</Parameter>
+                </Parameters>
+              </Node>
+            </Children>
+          </Node>
+          <Node id="Node_7" type="Sequence">
+            <Children>
+              <Node id="Node_8" name="ComputeRandomNearbyPoint" type="Action" />
+              <Node id="Node_9" name="Run" type="Action">
+                <Parameters>
+                  <Parameter name="runTarget" fromcontext="true">randomPoint</Parameter>
+                  <Parameter name="controlCursor" fromcontext="false">true</Parameter>
+                </Parameters>
+              </Node>
+            </Children>
+          </Node>
+        </Children>
+      </Node>
+    </Children>
+  </Node>
+</Tree>
+

@@ -4,19 +4,27 @@
 //                                                         
 //           ABSTRACT METHODS MUST BE IMPLEMENTED          
 //                                                         
-// Generated on 12/23/2016 11:00:28
+// Generated on 04/20/2017 22:15:35
 // ******************************************************* 
-package server.ai.jbt.conditions.execution;
+package server.ai.jbt.actions.execution;
 
-/** ExecutionCondition class created from MMPM condition InEnemySight. */
-public class InEnemySight extends
-		jbt.execution.task.leaf.condition.ExecutionCondition {
+import java.awt.geom.Point2D;
+
+import server.ai.Searcher;
+import server.character.Entity;
+import server.world.Arena;
+import server.world.Utils;
+
+/** ExecutionAction class created from MMPM action ComputeRandomNearbyPoint. */
+public class ComputeRandomNearbyPoint extends
+		jbt.execution.task.leaf.action.ExecutionAction {
 
 	/**
-	 * Constructor. Constructs an instance of InEnemySight that is able to run a
-	 * server.ai.jbt.conditions.InEnemySight.
+	 * Constructor. Constructs an instance of ComputeRandomNearbyPoint that is
+	 * able to run a server.ai.jbt.actions.ComputeRandomNearbyPoint.
 	 */
-	public InEnemySight(server.ai.jbt.conditions.InEnemySight modelTask,
+	public ComputeRandomNearbyPoint(
+			server.ai.jbt.actions.ComputeRandomNearbyPoint modelTask,
 			jbt.execution.core.BTExecutor executor,
 			jbt.execution.core.ExecutionTask parent) {
 		super(modelTask, executor, parent);
@@ -24,40 +32,31 @@ public class InEnemySight extends
 	}
 
 	protected void internalSpawn() {
-		/*
-		 * Do not remove this first line unless you know what it does and you
-		 * need not do it.
-		 */
 		this.getExecutor().requestInsertionIntoList(
 				jbt.execution.core.BTExecutor.BTExecutorList.TICKABLE, this);
-		/* TODO: this method's implementation must be completed. */
 		System.out.println(this.getClass().getCanonicalName() + " spawned");
+		Arena arena = (Arena)getContext().getVariable("Arena");
+		Point2D self = ((Entity)getContext().getVariable("Character")).getPosition();
+		Point2D point = Searcher.searchRandomPoint(arena, self, 5, Utils.random().nextDouble()*Math.PI*2);
+		float[] p = {(float) point.getX(),(float) point.getY()};
+		getContext().setVariable("randomPoint", p);
 	}
 
 	protected jbt.execution.core.ExecutionTask.Status internalTick() {
-		/*
-		 * TODO: this method's implementation must be completed. This function
-		 * should only return Status.SUCCESS, Status.FAILURE or Status.RUNNING.
-		 * No other values are allowed.
-		 */
 		return jbt.execution.core.ExecutionTask.Status.SUCCESS;
 	}
 
 	protected void internalTerminate() {
-		/* TODO: this method's implementation must be completed. */
 	}
 
 	protected void restoreState(jbt.execution.core.ITaskState state) {
-		/* TODO: this method's implementation must be completed. */
 	}
 
 	protected jbt.execution.core.ITaskState storeState() {
-		/* TODO: this method's implementation must be completed. */
 		return null;
 	}
 
 	protected jbt.execution.core.ITaskState storeTerminationState() {
-		/* TODO: this method's implementation must be completed. */
 		return null;
 	}
 }

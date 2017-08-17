@@ -17,20 +17,20 @@ public class Backstab extends Passive {
 	@Override
 	protected void onDeactivate(World w) {
 		self().addNoiseMod(-BS_NOISE);
-		self().getWeapon().addRecoilMod(- self().getWeapon().type.instability*BS_RECOIL);
+		self().addRecoilMod(- BS_RECOIL);
 	}
 
 	@Override
 	protected void onActivate(World w) {
 		self().addNoiseMod(+BS_NOISE);
-		self().getWeapon().addRecoilMod(+ self().getWeapon().type.instability*BS_RECOIL);
+		self().addRecoilMod(+ BS_RECOIL);
 	}
 
 	@Override
 	protected double calculateActivationLevel(World w) {
 		double max = 0;
 		for (CharData c:self().getPerception().characters) {
-			double dir = Math.abs(Geometry.wrapAngle(c.direction - Math.atan2(c.y-self().getY(),c.x-self().getX())));
+			double dir = Math.abs(Geometry.wrapAngle(c.gunDir - Math.atan2(c.y-self().getY(),c.x-self().getX())));
 			double activation = (BS_MIN_ANGLE - dir)/BS_MIN_ANGLE;
 			if (activation > max) {
 				max = activation;

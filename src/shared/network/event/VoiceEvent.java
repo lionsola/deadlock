@@ -1,7 +1,5 @@
 package shared.network.event;
 
-import editor.SpawnPoint.CharType;
-
 public class VoiceEvent extends SoundEvent {
 	private static final long serialVersionUID = -4490555625433873400L;
 	public static final float DEFAULT_VOLUME = 15;

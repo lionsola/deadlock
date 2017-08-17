@@ -62,7 +62,6 @@ public class ComputeAttackPoint extends
 		} else {
 			return Status.FAILURE;
 		}
-		
 	}
 
 	protected void internalTerminate() {

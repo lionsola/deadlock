@@ -27,14 +27,21 @@ public class CharData implements Serializable {
 	
 	public float radius;
 	public float healthPoints;
-	public float direction;
+	
+	public float gunDir;
+	
 	public float faceDir;
-	public float exposure;
+	
+	public float bodyDir;
+	
+	public boolean invi;
 	
 	public CharData(InputControlledEntity e) {
 		id = e.id;
 		team = (byte) e.team;
-		weapon = (byte) e.getWeapon().getId();
+		if (e.getWeapon()!=null) {
+			weapon = (byte) e.getWeapon().getId();
+		}
 		
 		x = (float) e.getX();
 		y = (float) e.getY();
@@ -46,8 +53,9 @@ public class CharData implements Serializable {
 		
 		radius = (float) e.getRadius();
 		healthPoints = (float) e.getHealthPoints();
-		direction = (float) e.getDirection();
-		exposure = (float) e.getExposure();
+		gunDir = (float) e.getDirection();
+		bodyDir = (float) e.getMovingDirection();
+		invi = e.isInvi();
 		typeId = e.typeId;
 		faceDir = (float) e.getTargetDirection();
 	}
@@ -66,8 +74,9 @@ public class CharData implements Serializable {
 		
 		radius = (float) e.getRadius();
 		healthPoints = (float) e.getHealthPoints();
-		direction = (float) e.getDirection();
-		exposure = (float) e.getExposure();
+		gunDir = (float) e.getDirection();
+		bodyDir = (float) e.getMovingDirection();
+		invi = e.isInvi();
 		typeId = e.typeId;
 	}
 	

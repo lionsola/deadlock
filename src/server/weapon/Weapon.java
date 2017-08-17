@@ -5,6 +5,9 @@ import java.awt.geom.Point2D;
 import client.gui.GameWindow;
 import server.ability.Ability;
 import server.character.InputControlledEntity;
+import server.projectile.Bullet;
+import server.projectile.HitMod;
+import server.status.Stunned;
 import server.world.Geometry;
 import server.world.Utils;
 import server.world.World;
@@ -31,16 +34,18 @@ public abstract class Weapon extends Ability {
 	public static final int MP7_ID = 3;
 	public static final int SILENT_PISTOL_ID = 4;
 	public static final int MELEE_ID = 8;
+	public static final int BITE_ID = 9;
 	
 	public final WeaponType type;
-	private double instability;
 	private int ammoLeft;
 	private long reloadTimer;
+	private HitMod hMod;
 
-	public Weapon(InputControlledEntity self, WeaponType type) {
-		super(type.weaponId,self,type.cooldown);
+	public Weapon(InputControlledEntity self, WeaponType type, HitMod hMod) {
+		super(type.getWeaponId(),self,type.getCooldown());
 		this.type = type;
 		reset();
+		this.hMod = hMod;
 	}
 
 	public void update(World w, InputControlledEntity c) {
@@ -52,21 +57,29 @@ public abstract class Weapon extends Ability {
 				double direction = c.getDirection();
 				
 				fire(w,c,direction);
-				final double RECOIL_DISTANCE = 0.2;
+				final double RECOIL_DISTANCE = 0.3;
 				Point2D p = Geometry.PolarToCartesian(RECOIL_DISTANCE*getRecoil(),
 						Math.PI+direction);
 				
 				c.setPosition(w,c.getX()+p.getX(),c.getY()-p.getY());
+				long stunDur = (long) (getRecoil()*200);
+				if (stunDur>0) {
+					c.setDx(0);
+					c.setDy(0);
+					c.addStatusEffect(new Stunned(c,stunDur));
+					System.out.println("Stunned by recoil in " + stunDur + "ms");
+				}
+				
 				
 				ammoLeft -= 1;
 				Point2D shotPoint = Geometry.PolarToCartesian(type.length, direction);
 				w.addAnimation(AnimationEvent.GUNSHOT, c.getX()+shotPoint.getX(), c.getY()-shotPoint.getY(), direction);
-				w.addSound(type.soundId, type.noise, c.getX()+shotPoint.getX(), c.getY()-shotPoint.getY());
+				w.addSound(type.getSoundId(), type.getNoise(), c.getX()+shotPoint.getX(), c.getY()-shotPoint.getY());
 				
-				double maxRecoil = InputControlledEntity.MAX_DISPERSION_ANGLE*getRecoil();
-				double recoil = maxRecoil*Math.min(1,Math.abs(Utils.random().nextGaussian())); 
-				recoil = Math.copySign(recoil,(c.getDirection()-c.getTargetDirection())*(Utils.random().nextDouble()<0.75?1:-1));
-				c.setDirection(c.getDirection()+recoil);
+				double maxRecoilAngle = InputControlledEntity.MAX_DISPERSION_ANGLE*getRecoil();
+				double recoilAngle = maxRecoilAngle*Math.min(1,Math.abs(Utils.random().nextGaussian())); 
+				recoilAngle = Math.copySign(recoilAngle,(c.getDirection()-c.getTargetDirection())*(Utils.random().nextDouble()<0.75?1:-1));
+				c.setDirection(c.getDirection()+recoilAngle);
 				
 				startCooldown();
 				if (ammoLeft<=0) {
@@ -77,8 +90,8 @@ public abstract class Weapon extends Ability {
 				reloadTimer = 0;
 			}
 			if (ammoLeft==0) {
-				if (reloadTimer>type.reloadTime) {
-					ammoLeft = type.magSize;
+				if (reloadTimer>type.getReloadTime()) {
+					ammoLeft = type.getMagSize();
 				}
 				else {
 					reloadTimer += GameWindow.MS_PER_UPDATE;
@@ -90,7 +103,7 @@ public abstract class Weapon extends Ability {
 	protected abstract void fire(World w, InputControlledEntity c, double direction);
 	
 	protected double disperseDirection(double gunDirection) {
-		return gunDirection + type.gunDispersion*Utils.random().nextGaussian()/2;
+		return gunDirection + type.getGunDispersion()*Utils.random().nextGaussian()/2;
 	}
 	
 	public static double randomizeStat(double stat, double limit) {
@@ -98,8 +111,10 @@ public abstract class Weapon extends Ability {
 	}
 	
 	protected void fireOneBullet (World w, InputControlledEntity c, double direction, double speed) {
-		Point2D p = Geometry.PolarToCartesian(type.length, direction);
-		w.addProjectile(new Bullet(c,c.getX()+p.getX(),c.getY()-p.getY(),direction, speed, type.size, type.damage));
+		Point2D p = Geometry.PolarToCartesian(type.getLength(), direction);
+		Bullet b = new Bullet(c,c.getX()+p.getX(),c.getY()-p.getY(),direction, speed, type.getSize(), type.getDamage());
+		b.setHMod(hMod);
+		w.addProjectile(b);
 	}
 	
 	@Override
@@ -109,7 +124,7 @@ public abstract class Weapon extends Ability {
 	
 	@Override
 	public double getCooldownPercent() {
-		return Math.min(super.getCooldownPercent(), Math.min(1,1.0*reloadTimer/type.reloadTime));
+		return Math.min(super.getCooldownPercent(), Math.min(1,1.0*reloadTimer/type.getReloadTime()));
 	}
 	
 	@Override
@@ -117,7 +132,7 @@ public abstract class Weapon extends Ability {
 		if (ammoLeft>0) {
 			return super.timeLeft();
 		} else {
-			return (int) (type.reloadTime-reloadTimer);
+			return (int) (type.getReloadTime()-reloadTimer);
 		}
 	}
 	
@@ -136,16 +151,11 @@ public abstract class Weapon extends Ability {
 	@Override
 	public void reset() {
 		super.reset();
-		instability = type.instability;
-		ammoLeft = type.magSize;
-		reloadTimer = type.reloadTime;
+		ammoLeft = type.getMagSize();
+		reloadTimer = type.getReloadTime();
 	}
 	
 	public double getRecoil() {
-		return instability;
-	}
-	
-	public void addRecoilMod(double recoilMod) {
-		this.instability += recoilMod;
+		return self().getRecoilMod()*type.getInstability();
 	}
 }

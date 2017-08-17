@@ -59,7 +59,7 @@ public class ComputeClosestSafePosition extends
 					// cast a line from this position to the enemy
 					List<Point2D> points = Geometry.getLineSamples(e.x,e.y,meter.getX(),meter.getY(),1);
 					for (Point2D castPoint:points) {
-						coverCount += a.getTileAt(castPoint.getX(), castPoint.getY()).coverType();
+						coverCount += a.getTileAt(castPoint.getX(), castPoint.getY()).getCoverType();
 					}
 				}
 				

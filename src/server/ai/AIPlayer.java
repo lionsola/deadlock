@@ -15,13 +15,13 @@ import shared.network.event.GameEvent;
  */
 public class AIPlayer extends ServerPlayer implements GameEvent.Listener {
 	WorldStatePacket wsp;
-	private NPCBrain brain = new NPCBrain(null);
+	private NPCBrain brain;
 	public AIPlayer(int id, int team) {
 		super(id, team, "BOT"+id, null);
 	}
 
 	public void init(Arena a, InputControlledEntity pc) {
-		brain.init(a, pc);
+		//brain.init(a, pc);
 	}
 	
 	@Override

@@ -52,7 +52,7 @@ public class Arena {
 	 */
 	public Arena(int mId, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable,
 			HashMap<Integer,TileSwitchPreset> triggerTable) {
-		this((ArenaData) DataManager.loadObject("resource/map/"+HostScreen.MAP_LIST[mId]+".arena"),tileTable,objectTable,triggerTable);
+		this((ArenaData) DataManager.loadInternalObject("/map/"+HostScreen.MAP_LIST[mId]+".arena"),tileTable,objectTable,triggerTable);
 	}
 	
 	public Arena(ArenaData ad, HashMap<Integer,Terrain> tileTable, HashMap<Integer,Thing> objectTable,
@@ -303,16 +303,22 @@ public class Arena {
 			}
 		}
 		
-		final int MIN_ILLU = 0x2f;
+		//final int MIN_ILLU = 0x2f;
 		final int LEVELS = 2;
 		final float INTERVAL = 255/LEVELS;
 		for (int x=0;x<lightMap.length;x++) {
 			for (int y=0;y<lightMap[0].length;y++) {
 				Color c = new Color(lightMap[x][y]);
 				int l = Math.max(c.getRed(), Math.max(c.getGreen(), c.getBlue()));
-				int level = (int)Math.ceil(l/INTERVAL);
+				if (l==255) {
+					int q = 1;
+					q++;
+					if (q>0)
+						;
+				}
+				int level = (int)Math.min(LEVELS, Math.ceil(l/INTERVAL));
 				
-				float ratio = l==0?0:(level*255.0f/LEVELS/l);
+				float ratio = l==0?0:((level*255.0f/LEVELS)/l);
 				
 				int r = clampLight(c.getRed()*ratio);
 				int g = clampLight(c.getGreen()*ratio);
@@ -394,6 +400,7 @@ public class Arena {
 			tMap = a.tMap;
 			idMap = new TileData[a.getWidth()][a.getHeight()];
 			noData = a.getNoData();
+			int spCount = 0;
 			for (int x=0;x<a.getWidth();x++) {
 				for (int y=0;y<a.getHeight();y++) {
 					Tile t = a.get(x, y);
@@ -410,6 +417,7 @@ public class Arena {
 					
 					if (a.spawns[x][y]!=null) {
 						spawns.add(a.spawns[x][y]);
+						a.spawns[x][y].setId(spCount++);
 					}
 					
 					if (a.pss[x][y]!=null) {

@@ -18,10 +18,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -151,15 +148,16 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		addMouseListener(this);
 		addMouseWheelListener(this);
 		
+		
 		// Loading the arena
-		HashMap<Integer,Terrain> tileTable = (HashMap<Integer, Terrain>) DataManager.loadObject(DataManager.FILE_TILES);
+		HashMap<Integer,Terrain> tileTable = (HashMap<Integer, Terrain>) DataManager.loadInternalObject(DataManager.FILE_TILES);
 		
-		objectTable = (HashMap<Integer, Thing>) DataManager.loadObject(DataManager.FILE_OBJECTS);
+		objectTable = (HashMap<Integer, Thing>) DataManager.loadInternalObject(DataManager.FILE_OBJECTS);
 		
-		HashMap<Integer,TileSwitchPreset> triggerTable = (HashMap<Integer, TileSwitchPreset>) DataManager.loadObject(DataManager.FILE_TRIGGERS);
+		HashMap<Integer,TileSwitchPreset> triggerTable = (HashMap<Integer, TileSwitchPreset>) DataManager.loadInternalObject(DataManager.FILE_TRIGGERS);
 		
-		DataManager.loadImage(tileTable.values());
-		DataManager.loadImage(objectTable.values());
+		DataManager.loadImages(tileTable.values());
+		DataManager.loadImages(objectTable.values());
 		DataManager.updateParticleSource(objectTable.values());
 		
 		arena = new Arena(mId, tileTable, objectTable,triggerTable);
@@ -228,7 +226,6 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 
 		winnerText = new JLabel(" ");
 		GUIFactory.stylizeHUDComponent(winnerText);
-		
 		winnerText.setVisible(false);
 		winnerText.setFont(GUIFactory.font_m);
 		winnerText.setSize(200, 50);
@@ -306,6 +303,14 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 					aId = Ability.AMP_ID;
 					pId = Passive.BACKSTAB_ID;
 					break;
+					
+				// werewolf
+				case Werewolf:
+					wId = Weapon.BITE_ID;
+					aId = Ability.GROWL_ID;
+					pId = Passive.ASSAULT_ID;
+					break;
+					
 				default:
 					break;
 			}
@@ -396,9 +401,8 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		visualAnimations.update();
 		globalAnimations.update();
 		persistentAnimations.update();
-		persistentAnimations.render(renderer.bloodImage.createGraphics(),camera,null);
+		//persistentAnimations.render(renderer.bloodImage.createGraphics(),camera,null);
 		audioManager.update();
-		
 		
 		if (wsp != null) {
 			this.currentState = wsp;
@@ -545,8 +549,6 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			*/
 			
 			
-			g2D.setClip(camera.getDrawAreaPixel());
-			nonvisualAnimations.render(g2D, camera, camera.getDrawAreaPixel());
 			
 			// create the vision region
 			Area losPixel = new Area();
@@ -555,36 +557,34 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			for (Vision v:currentState.visions) {
 				losPixel.add(visibility.generateLoS(v, arena));
 				losMeter.add(visibility.genLOSAreaMeter(v.x, v.y, v.range, v.angle, v.direction, arena));
-				
-				double r = v.radius*3;
-				losPixel.add(new Area(new Ellipse2D.Double(Renderer.toPixel(v.x - r),Renderer.toPixel(v.y - r),
-						Renderer.toPixel(r*2),Renderer.toPixel(r*2))));
-				losMeter.add(new Area(new Ellipse2D.Double(v.x - r,v.y - r,r*2,r*2)));
 			}
+			Area nonvisual = new Area(camera.getDrawAreaPixel());
+			nonvisual.subtract(losPixel);
 			
+			g2D.setClip(nonvisual);
+			
+			nonvisualAnimations.render(g2D, camera, camera.getDrawAreaPixel());
+			g2D.setClip(camera.getDrawAreaPixel());
 			
 			Rectangle2D viewBox = losMeter.getBounds2D();
 			if (arena.isReal()) {
 				g2D.setClip(losPixel);
 				//Rectangle2D viewBox = getCharacterVisionBox(c.x,c.y,c.viewRange);
 				Renderer.drawArenaImage(g2D, renderer.lowImage, viewBox);
-				Renderer.drawArenaImage(g2D, renderer.bloodImage, viewBox);
+				//Renderer.drawArenaImage(g2D, renderer.bloodImage, viewBox);
 			} else {
 				g2D.setColor(GUIFactory.UICOLOR);
 				g2D.setStroke(new BasicStroke(2));
 				g2D.draw(losPixel);
 				g2D.setClip(losPixel);
 			}
-			for (ClientPlayer data : players) {
-				if (data.id != c.id && data.active) {
-					CharData ch = data.character;
-					Renderer.renderOtherCharacter(g2D, ch);
-				}
+			for (CharData ch : currentState.characters) {
+				renderer.renderOtherCharacter(g2D, ch);
 			}
 			
 			for (CharData data : currentState.characters) {
 				if (data instanceof NPCData) {
-					Renderer.renderNPC(g2D, (NPCData)data);
+					renderer.renderNPC(g2D, (NPCData)data);
 				}
 			}
 			
@@ -597,35 +597,40 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 			// render the main character
 			//Renderer.renderLOS(g2D, los);
 			ClientPlayer currentTarget = Utils.findPlayer(players, c.id);
-			Renderer.renderMainCharacter(g2D, c, currentTarget);
+			renderer.renderMainCharacter(g2D, c, currentTarget);
 			
 			if (arena.isReal()) {
 				Renderer.drawArenaImage(g2D, renderer.highImage, viewBox);
 				// Render lighting & shadow
 				if (lightImageChanged) {
-					renderer.redrawLightImage(arena);
+					//renderer.redrawLightImage(arena);
 					lightImageChanged = false;
 				}
 				
 				Composite save = g2D.getComposite();
 				g2D.setComposite(new MultiplyComposite(1f));
 				
-				Renderer.drawArenaImage(g2D,renderer.getLightMap(),viewBox);
+				//Renderer.drawArenaImage(g2D,renderer.getLightMap(),viewBox);
 				g2D.setComposite(save);
+			} else {
+				//Renderer.drawArenaImage(g2D,renderer.getLightMap(),viewBox);
 			}
+			
+			renderer.saveCharData(mainCharacter, currentState.characters);
 		}
 		g2D.setClip(camera.getDrawAreaPixel());
 		globalAnimations.render(g2D, camera, null);
 		int tileX = (int)(input.cx/Terrain.tileSize);
 		int tileY = (int)(input.cy/Terrain.tileSize);
-		if (arena.get(tileX,tileY).coverType()>0)
-			Renderer.renderProtection(g2D,tileX,tileY,arena.get(tileX,tileY).coverType());
+		if (arena.get(tileX,tileY).getCoverType()>0)
+			Renderer.renderProtection(g2D,tileX,tileY,arena.get(tileX,tileY).getCoverType());
 		renderer.renderCharacterUI(g2D,c);
 		Renderer.renderData(g2D, arena, camera.getDrawArea());
 		g2D.setColor(Color.WHITE);
 		Renderer.renderCrosshair(g2D,input.cx,input.cy,c.crosshairSize,1.5f);
 		g2D.translate(transX, transY);
 		g2D.drawString("UPS: "+UPS +", FPS: "+FPS+", draw time: "+(System.currentTimeMillis()-tick)+"ms", 10, 10);
+		
 		frameCount += 1;
 	}
 
@@ -798,7 +803,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 		} else if (event instanceof AnimationEvent) {
 			AnimationEvent e = (AnimationEvent) event;
 			if (e.id==AnimationEvent.BLOOD) {
-				persistentAnimations.addPersistentBloodAnimation(e.x, e.y, e.direction, e.team);
+				//persistentAnimations.addPersistentBloodAnimation(e.x, e.y, e.direction, e.team);
 			}
 			
 			if (!e.global) {
@@ -855,16 +860,19 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
 	
 	public void initLines(int missionId) {
         dataLines = new HashMap<Integer,String>();
-        File file = new File("resource/data.xlsx");
+        InputStream is = GameScreen.class.getResourceAsStream("/data.xlsx");
         Workbook workbook = null;
         try {
-            workbook = new XSSFWorkbook(new FileInputStream(file));
-            Sheet sheet = workbook.getSheetAt(missionId);
-            for (int i=1;i<arena.getNoData()+1;i++) {
-                int dId = (int)sheet.getRow(i).getCell(0).getNumericCellValue();
-                String s = sheet.getRow(i).getCell(1).getStringCellValue();
-                dataLines.put(dId, s);
-            }
+        	if (is!=null) {
+        		workbook = new XSSFWorkbook(is);
+                Sheet sheet = workbook.getSheetAt(missionId);
+                for (int i=1;i<arena.getNoData()+1;i++) {
+                    int dId = (int)sheet.getRow(i).getCell(0).getNumericCellValue();
+                    String s = sheet.getRow(i).getCell(1).getStringCellValue();
+                    dataLines.put(dId, s);
+                }
+        	}
+            
         } catch (Exception e) {
             System.err.println("Error while loading mission data.");
             e.printStackTrace();
@@ -872,6 +880,7 @@ public class GameScreen extends JLayeredPane implements KeyListener, MouseListen
             if (workbook!=null) {
                 try {
 					workbook.close();
+					is.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

@@ -24,6 +24,7 @@ public class Connection {
 			oos.writeObject(o);
 			oos.reset();
 		} catch (IOException e) {
+			System.err.println("Error while sending data packet");
 			e.printStackTrace();
 		}
 	}

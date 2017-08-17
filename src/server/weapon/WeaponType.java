@@ -1,21 +1,22 @@
 package server.weapon;
 
-public class WeaponType {
+public class WeaponType implements Cloneable {
+
 	public final int weaponId;
 	public final int weaponType;
 	
-	public final double gunDispersion;
-	public final double instability;
-	public final double damage;
-	public final double size; // how far can the server.weapon fire projectiles before they drop
-	public final double projectileSpeed; // how fast the projectiles are, that the server.weapon fires
+	private final double gunDispersion;
+	private final double instability;
+	private final double damage;
+	private final double size; // how far can the server.weapon fire projectiles before they drop
+	private final double projectileSpeed; // how fast the projectiles are, that the server.weapon fires
 	
-	public final int cooldown; // the time between each shot in ms
-	public final int noise; // the volume released by firing this server.weapon
-	public final int reloadTime; // how long it takes for the gun to reload
-	public final int magSize; // the amount of projectiles in each magazine
-	public final int bulletsNo;
-	public final int soundId;
+	private final int cooldown; // the time between each shot in ms
+	private final int noise; // the volume released by firing this weapon
+	private final int reloadTime; // how long it takes for the gun to reload
+	private final int magSize; // the amount of projectiles in each magazine
+	private final int bulletsNo;
+	private final int soundId;
 	
 	public final double length;
 	
@@ -38,4 +39,103 @@ public class WeaponType {
 		this.soundId = soundId;
 		this.length = length;
 	}
+	
+	/**
+	 * @return the weaponId
+	 */
+	public int getWeaponId() {
+		return weaponId;
+	}
+
+	/**
+	 * @return the weaponType
+	 */
+	public int getWeaponType() {
+		return weaponType;
+	}
+
+	/**
+	 * @return the gunDispersion
+	 */
+	public double getGunDispersion() {
+		return gunDispersion;
+	}
+
+	/**
+	 * @return the instability
+	 */
+	public double getInstability() {
+		return instability;
+	}
+
+	/**
+	 * @return the damage
+	 */
+	public double getDamage() {
+		return damage;
+	}
+
+	/**
+	 * @return the size
+	 */
+	public double getSize() {
+		return size;
+	}
+
+	/**
+	 * @return the projectileSpeed
+	 */
+	public double getProjectileSpeed() {
+		return projectileSpeed;
+	}
+
+	/**
+	 * @return the cooldown
+	 */
+	public int getCooldown() {
+		return cooldown;
+	}
+
+	/**
+	 * @return the noise
+	 */
+	public int getNoise() {
+		return noise;
+	}
+
+	/**
+	 * @return the reloadTime
+	 */
+	public int getReloadTime() {
+		return reloadTime;
+	}
+
+	/**
+	 * @return the magSize
+	 */
+	public int getMagSize() {
+		return magSize;
+	}
+
+	/**
+	 * @return the bulletsNo
+	 */
+	public int getBulletsNo() {
+		return bulletsNo;
+	}
+
+	/**
+	 * @return the soundId
+	 */
+	public int getSoundId() {
+		return soundId;
+	}
+
+	/**
+	 * @return the length
+	 */
+	public double getLength() {
+		return length;
+	}
+
 }

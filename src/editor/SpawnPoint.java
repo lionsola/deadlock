@@ -8,8 +8,9 @@ import java.util.List;
 
 public class SpawnPoint implements Serializable {
 	public enum SpawnType {PlayerOnly,NPCOnly,Both}
-	public enum Behaviour {Patrol,Dummy,NPCPatroller,NPCWatcher,NPCAttacker}
-	public enum CharType {Alpha(0x03b1), Beta(0x03b2), Gamma(0x03b3), Pi(0x03c0), Ju(0x006a), Nu(0x03bd), Officer(0x0061), Agent(0x006f), MOfficer(0x0062);
+	public enum Behaviour {Dummy,NPCPatroller,NPCWatcher,NPCAttacker,NPCRandom,Patrol,NPCWerewolf,NPCWolf,Custom}
+	public enum CharType {Alpha(0x03b1), Beta(0x03b2), Gamma(0x03b3), Pi(0x03c0), Ju(0x006a), Nu(0x03bd), Officer(0x0061), Agent(0x006f),
+		MOfficer(0x0062),Bat(0x0063),Vampire(0x0064),Werewolf(0x0065),Wolf(0x0066),WolfBig(0x0067),Ghoul(0x0068);
 		public final int id;
 		private CharType(int id) {
 			this.id = id;
@@ -41,6 +42,7 @@ public class SpawnPoint implements Serializable {
 	public SpawnType type;
 	
 	public List<Point2D> patrolLocations = new LinkedList<Point2D>();
+	private int id;
 	
 	@Override
 	public String toString() {
@@ -49,6 +51,10 @@ public class SpawnPoint implements Serializable {
 	}
 	
 	public int getId() {
-		return team*1000000 + x*1000 + y;
+		return id;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
 	}
 }

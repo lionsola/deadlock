@@ -87,21 +87,23 @@ public class AnimationSystem {
 		for (int i = 0; i < 5; i++) {
 			double randomDirection = direction + (Math.PI/2) * Utils.random().nextGaussian()/2;
 			double d = 1-0.5*Math.abs(Geometry.wrapAngle(randomDirection - direction))/(Math.PI/2);
-			BloodAnimation p = new BloodAnimation(x, y, randomDirection, 0.15*d, Renderer.teamColors[team],500, 0);
+			BloodAnimation p = new BloodAnimation(x, y, randomDirection, 0.05*d, Renderer.teamColors2[team],500, 0);
 			pending.add(p);
 		}
 	}
 
-	public void addVisualBloodAnimation(double x, double y, double direction, int team) {
-		for (int i = 0; i < 10; i++) {
+	public void addVisualBloodAnimation(double x, double y, double direction, int team, float value) {
+		double size = 0.2 + 0.005*value;
+		long dur = (long) (700 + 2*value);
+		for (int i = 0; i < 7; i++) {
 			double randomDirection = direction + (Math.PI) * Utils.random().nextGaussian()/2;
 			double speed = 0.12*Math.pow((1-0.9*Math.abs(Geometry.wrapAngle(randomDirection - direction))/(Math.PI*0.9)),2);
-			ParticleAnimation p = new ParticleAnimation(700);
+			ParticleAnimation p = new ParticleAnimation(dur);
 			p.setTrail(true);
 			p.setLoc(x, y, 0.5);
 			p.setAcc(0, 0, -0.004);
 			p.setGroundInteraction(GroundInteraction.Stop);
-			p.setSize(0.25);
+			p.setSize(size);
 			Color c = Renderer.teamColors2[team].brighter();
 			p.setColor(new Color(c.getRed(),c.getGreen(),c.getBlue(),0xa0));
 			p.setRotationSpeed(0.02);
@@ -157,9 +159,9 @@ public class AnimationSystem {
 	 */
 	public void addProjectileTrail(double x, double y, double direction, double speed, double size) {
 		if (size<50)
-			addCustomAnimation(new LineAnimation(70,x,y,direction,speed,Math.min(0.05,size/500)));
+			addCustomAnimation(new LineAnimation(200,x,y,direction,speed,Math.min(0.1,size/300)));
 		else {
-			addCustomAnimation(new LineAnimation(70,x,y,direction,speed,size/3000));
+			addCustomAnimation(new LineAnimation(150,x,y,direction,speed,size/3000));
 		}
 	}
 	
@@ -178,7 +180,7 @@ public class AnimationSystem {
 				addCustomAnimation(new CircleAnimation(e.x,e.y,1.5,1000, 0,Color.RED));
 				break;
 			case AnimationEvent.BLOOD:
-				addVisualBloodAnimation(e.x,e.y,e.direction,e.team);
+				addVisualBloodAnimation(e.x,e.y,e.direction,e.team,e.value);
 				break;
 			default:
 				System.err.println("UNKNOWN ANIMATION RECEIVED");

@@ -28,6 +28,7 @@ public interface TriggerEffect extends Serializable {
 				w.getArena().setData(dataId);
 				Point2D p = e.getPosition();
 				w.addEvent(new GameEvent.DataObtained(dataId,p.getX(),p.getY(),e.typeId));
+				e.heal(10);
 			}
 		}
 		
@@ -59,15 +60,18 @@ public interface TriggerEffect extends Serializable {
 					tp.getItemType()==TileSwitchPreset.MISC && t.getMisc()==tp.getSwitchThing()) {
 				s = tp.getOriginalThing();
 			}
-			if (tp.getItemType()==TileSwitchPreset.THING) {
-				t.setThing(s);
-			} else if (tp.getItemType()==TileSwitchPreset.MISC) {
-				t.setMisc(s);
+			if (s!=null) {
+				if (tp.getItemType()==TileSwitchPreset.THING) {
+					t.setThing(s);
+				} else if (tp.getItemType()==TileSwitchPreset.MISC) {
+					t.setMisc(s);
+				}
+				
+				w.getArena().recalculateStaticLights();
+				w.getArena().updateLightMap(w.getDynamicLights());
+				w.addEvent(new GameEvent.TileChanged(tx,ty,s.getId(),tp.getItemType()));
+				w.addSound(tp.getSoundID(), tp.getSoundVolume(), (tx+0.5)*Terrain.tileSize, (ty+0.5)*Terrain.tileSize);
 			}
-			w.getArena().recalculateStaticLights();
-			w.getArena().updateLightMap(w.getDynamicLights());
-			w.addEvent(new GameEvent.TileChanged(tx,ty,s.getId(),tp.getItemType()));
-			w.addSound(tp.getSoundID(), tp.getSoundVolume(), (tx+0.5)*Terrain.tileSize, (ty+0.5)*Terrain.tileSize);
 		}
 		
 		public Point getTargetTile() {

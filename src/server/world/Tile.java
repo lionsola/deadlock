@@ -25,7 +25,7 @@ public class Tile implements Serializable {
 		return (thing==null || thing.isClear()) && (misc==null || misc.isClear());
 	}
 	
-	public int coverType() {
+	public int getCoverType() {
 		return thing==null?0:thing.getCoverType();
 	}
 	
@@ -81,5 +81,9 @@ public class Tile implements Serializable {
 
 	public void setMiscConfig(SpriteConfig miscConfig) {
 		this.miscConfig = miscConfig;
+	}
+	
+	public boolean isBounceTile(int minLayer) {
+		return thing!=null && (getCoverType()>0 && thing.getLayer()>=minLayer);
 	}
 }

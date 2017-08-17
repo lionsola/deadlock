@@ -225,11 +225,20 @@ public class ImageBlender {
 	}
 	
 	public static BufferedImage drawLightImage(Arena a) {
-		BufferedImage source = ge.createCompatibleImage(Renderer.toPixelDefault(a.getWidthMeter()),Renderer.toPixelDefault(a.getHeightMeter()));
-		Graphics2D g2D = (Graphics2D)source.getGraphics();
-		Renderer.renderHardLight(g2D, a.getLightmap(), new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
-		g2D.dispose();
-		return source;//blurImage(source,null,32f);
+		BufferedImage source;
+		if (a.isReal()) {
+			source = ge.createCompatibleImage(Renderer.toPixelDefault(a.getWidthMeter()),Renderer.toPixelDefault(a.getHeightMeter()));
+			Graphics2D g2D = (Graphics2D)source.getGraphics();
+			Renderer.renderHardLight(g2D, a.getLightmap(), new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
+			g2D.dispose();
+		} else {
+			source = ge.createCompatibleImage(Renderer.toPixelDefault(a.getWidthMeter()),Renderer.toPixelDefault(a.getHeightMeter()),Transparency.TRANSLUCENT);
+			Graphics2D g2D = (Graphics2D)source.getGraphics();
+			Renderer.renderMatrixHardLight(g2D, a.getLightmap(), new Rectangle2D.Double(0,0,a.getWidthMeter(),a.getHeightMeter()));
+			g2D.dispose();
+		}
+		
+		return source;
 	}
 	
 	public static BufferedImage drawLightImage(Arena a, FullCharacterData player) {

@@ -3,8 +3,8 @@ package server.character;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Point2D;
 
+import server.projectile.Projectile;
 import server.world.Geometry;
-import server.world.Projectile;
 import server.world.Utils;
 
 /**
@@ -15,7 +15,6 @@ import server.world.Utils;
 public class Armor {
 	private double startAngle;
 	private double extend;
-	//private double width;
 	private Entity self;
 	
 	public Armor (Entity c, double start, double angle) {

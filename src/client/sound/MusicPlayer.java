@@ -2,6 +2,7 @@ package client.sound;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -68,8 +69,8 @@ public class MusicPlayer extends Thread {
      */
     public void run() {
         // Get the target file
-        File soundFile = new File(filename);
-        if (!soundFile.exists()) {
+    	InputStream soundFile = MusicPlayer.class.getResourceAsStream(filename);
+        if (soundFile==null) {
             // Show error message if file not found
             System.err.println("Wave file not found: " + filename);
             return;
@@ -126,6 +127,12 @@ public class MusicPlayer extends Thread {
                 // Close io
                 auline.drain();
                 auline.close();
+                try {
+					audioInputStream.close();
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
             }
         }
     }

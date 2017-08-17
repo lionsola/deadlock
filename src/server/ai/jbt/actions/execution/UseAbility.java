@@ -8,6 +8,9 @@
 // ******************************************************* 
 package server.ai.jbt.actions.execution;
 
+import server.character.InputControlledEntity;
+import shared.network.GameDataPackets.InputPacket;
+
 /** ExecutionAction class created from MMPM action UseAbility. */
 public class UseAbility extends jbt.execution.task.leaf.action.ExecutionAction {
 
@@ -34,16 +37,24 @@ public class UseAbility extends jbt.execution.task.leaf.action.ExecutionAction {
 	}
 
 	protected jbt.execution.core.ExecutionTask.Status internalTick() {
-		/*
-		 * TODO: this method's implementation must be completed. This function
-		 * should only return Status.SUCCESS, Status.FAILURE or Status.RUNNING.
-		 * No other values are allowed.
-		 */
-		return jbt.execution.core.ExecutionTask.Status.SUCCESS;
+		InputControlledEntity pc = (InputControlledEntity)getContext().getVariable("Character");
+		InputPacket input = ((InputPacket)getContext().getVariable("Input"));
+		if (pc.getAbility().isReady()) {
+			input.fire2 = true;
+			//System.out.println("UseAbility running");
+			return Status.RUNNING;
+		} else if (input.fire2) {
+			//System.out.println("UseAbility success");
+			input.fire2 = false;
+			return Status.SUCCESS;
+		} else {
+			//System.out.println("Fail to use ability");
+			return Status.FAILURE;
+		}
 	}
 
 	protected void internalTerminate() {
-		/* TODO: this method's implementation must be completed. */
+		((InputPacket)getContext().getVariable("Input")).fire2 = false;
 	}
 
 	protected void restoreState(jbt.execution.core.ITaskState state) {

@@ -2,8 +2,8 @@ package server.passive;
 
 import server.character.Armor;
 import server.character.InputControlledEntity;
+import server.projectile.Projectile;
 import server.world.Geometry;
-import server.world.Projectile;
 import server.world.World;
 
 public class Shield extends Passive {

@@ -1,20 +1,24 @@
-package server.world;
+package server.projectile;
 
 import java.awt.geom.Point2D;
 
 import client.gui.GameWindow;
+import server.character.Entity;
 import server.character.InputControlledEntity;
+import server.world.Terrain;
+import server.world.Tile;
+import server.world.World;
 import shared.network.ProjectileData;
 
 /**
  * Used to represent a projectile.
- * 
- * @author Anh Pham
- * @author Connor Cartwright
  */
 public abstract class Projectile {
 	transient final public int id;
 
+	protected final double initX;
+	protected final double initY;
+	
 	private double x;
 	private double y;
 	
@@ -31,6 +35,10 @@ public abstract class Projectile {
 	
 	private double speed;
 	
+	private final double range;
+	private double travelled = 0;
+	private HitMod hMod = null;
+	
 	public static final double RAYCAST_DISTANCE = 0.2;
 
 	/**
@@ -45,20 +53,18 @@ public abstract class Projectile {
 	 * @param size
 	 *            radius of the projectile
 	 */
-	public Projectile(InputControlledEntity source, double direction, double speed, double size) {
-		id = source.id;
-		x = source.getX();
-		y = source.getY();
-		lastHitId = source.id;
-		
-		this.direction = direction;
-		this.speed = speed;
-		computeDxDy();
-		this.speed += (source.getDx()*dx + source.getDy()*dy)/speed;
-		computeDxDy();
-		this.size = size;
+	public Projectile(Entity source, double direction, double speed, double size, double range) {
+		this(source,source.getX(),source.getY(),direction,speed,size,Double.MAX_VALUE);
 	}
 
+	public Projectile(Entity source, double direction, double speed, double size) {
+		this(source,direction,speed,size,Double.MAX_VALUE);
+	}
+	
+	public Projectile(Entity source, double x, double y, double direction, double speed, double size) {
+		this(source,x,y,direction,speed,size,Double.MAX_VALUE);
+	}
+	
 	/**
 	 * Create a projectile to be use in the world
 	 * 
@@ -73,8 +79,10 @@ public abstract class Projectile {
 	 * @param size
 	 *            radius of the projectile
 	 */
-	public Projectile(InputControlledEntity source, double x, double y, double direction, double speed, double size) {
+	public Projectile(Entity source, double x, double y, double direction, double speed, double size, double range) {
 		id = source.id;
+		initX = x;
+		initY = y;
 		this.x = x;
 		this.y = y;
 		lastHitId = source.id;
@@ -82,9 +90,10 @@ public abstract class Projectile {
 		this.direction = direction;
 		this.speed = speed;
 		computeDxDy();
-		this.speed += (source.getDx()*dx + source.getDy()*dy)/speed;
+		this.speed += source.getSpeed();
 		computeDxDy();
 		this.size = size;
+		this.range = range;
 	}
 	
 	/**
@@ -101,6 +110,8 @@ public abstract class Projectile {
 	 */
 	public Projectile(Projectile source, double direction, double speed, double size) {
 		id = source.id;
+		initX = x;
+		initY = y;
 		x = source.getX();
 		y = source.getY();
 
@@ -112,6 +123,7 @@ public abstract class Projectile {
 		dy += source.getDy();
 		computeSpeedDir();
 		this.size = size;
+		this.range = Double.MAX_VALUE;
 	}
 	
 	/**
@@ -125,6 +137,8 @@ public abstract class Projectile {
 		prevX = x;
 		prevY = y;
 		int checks = (int)Math.ceil(speed*GameWindow.MS_PER_UPDATE/RAYCAST_DISTANCE);
+		
+		double curDir = getDirection();
 		
 		for (int i=0;i<checks && !isConsumed();i++) {
 			double oldX = x;
@@ -141,19 +155,26 @@ public abstract class Projectile {
 					if (isConsumed())
 						break;
 					else {
-						onHitCharacter(w,ch,x,y);
+						if (hMod!=null) {
+							hMod.onHitEntity(w, ch, this);
+						}
+						onHitCharacter(w,ch);
 					}
 				}
 			}
-
+			
 			// check projectile vs wall collision
 			int tileX = (int) (x / Terrain.tileSize);
 			int tileY = (int) (y / Terrain.tileSize);
 			Tile t = w.getArena().get(tileX, tileY);
-			if (!t.isTraversable() || t.coverType()>0) {
-				onHitWall(w,x,y,t.getThing());
+			if (!t.isTraversable() || t.getCoverType()>0) {
+				onHitWall(w,t);
+			}
+			if (Math.abs(getDirection()-curDir)>0.02) {
+				break;
 			}
 		}
+		travelled += Point2D.distance(x, y, prevX, prevY);
 	}
 	
 	public ProjectileData getData() {
@@ -166,17 +187,27 @@ public abstract class Projectile {
 		return data;
 	}
 	
-	protected abstract void onHitWall(World w, double x, double y, Thing t);
+	protected abstract void onHitWall(World w, Tile t);
 
-	protected abstract void onHitCharacter(World w, InputControlledEntity ch, double x, double y);
+	protected abstract void onHitCharacter(World w, InputControlledEntity ch);
 	
-	public abstract boolean isConsumed();
+	public boolean isConsumed() {
+		return travelled >= range;
+	}
 
-	protected void setX(double x) {
+	public HitMod getHMod() {
+		return hMod;
+	}
+	
+	public void setHMod(HitMod hMod) {
+		this.hMod = hMod;
+	}
+	
+	public void setX(double x) {
 		this.x = x;
 	}
 	
-	protected void setY(double y) {
+	public void setY(double y) {
 		this.y = y;
 	}
 	
@@ -216,7 +247,7 @@ public abstract class Projectile {
 		return size;
 	}
 	
-	protected void setDirection(double d) {
+	public void setDirection(double d) {
 		this.direction = d;
 		computeDxDy();
 	}
@@ -234,5 +265,22 @@ public abstract class Projectile {
 	private void computeSpeedDir() {
 		speed = Math.sqrt(dx*dx + dy*dy);
 		direction = Math.atan2(-dy, dx);
+	}
+	
+	public void bounce(World w, final int LAYER) {
+		int checks = (int)Math.ceil(speed*GameWindow.MS_PER_UPDATE/RAYCAST_DISTANCE);
+		double bounceX = getX() - getDx()*GameWindow.MS_PER_UPDATE/checks;
+		double bounceY = getY() - getDy()*GameWindow.MS_PER_UPDATE/checks;
+		if (!w.getArena().getTileAt(bounceX, getY()).isBounceTile(LAYER)) {
+			setDirection(Math.PI - getDirection());
+			setX(bounceX);
+		} else if (!w.getArena().getTileAt(getX(), bounceY).isBounceTile(LAYER)) {
+			setDirection(- getDirection());
+			setY(bounceY);
+		} else {
+			setX(bounceX);
+			setY(bounceY);
+			setDirection(getDirection()+Math.PI);
+		}
 	}
 }

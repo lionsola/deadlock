@@ -10,7 +10,6 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
-import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.Transparency;
@@ -21,16 +20,19 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
 import java.io.IOException;
-
-import javax.imageio.ImageIO;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 import client.gui.ClientPlayer;
 import client.gui.GUIFactory;
 import client.image.OverlayComposite;
+import editor.DataManager;
 import editor.EditorArena;
 import editor.SpawnPoint;
+import server.character.ClassStats;
+import server.character.Entity;
 import server.world.Arena;
 import server.world.Geometry;
 import server.world.Light;
@@ -55,14 +57,14 @@ import shared.network.ProjectileData;
 public class Renderer {
 	public static final int CURSOR_BMP_SIZE = 33;
 	public static final int CURSOR_SIZE = 5;
-	public static final float CHARACTER_WIDTH = 0.1f;
+	public static final float CHARACTER_WIDTH = 0.08f;
 	public static final float HEALTHBAR_WIDTH = 0.25f;
 	
 	public static final Color DEFAULT_COLOR = new Color(0xb6b6b6);
 	public static final Color BACKGROUND_COLOR = new Color(0x1a1a1a);
 	//public static final Color[] teamColors = {new Color(0x32ff32),new Color(0xff3232)};
 	//public static final Color[] teamColors2 = {new Color(0x0f4f0f),new Color(0x4f0f0f)};
-	public static final Color[] teamColors = {new Color(0xffffff),new Color(0xff4040)};
+	public static final Color[] teamColors = {new Color(0x999999),new Color(0xff4040)};
 	public static final Color[] teamColors2 = {new Color(0x4d4d4d),new Color(0x4d1313)};
 	
 	private BufferedImage arenaImage;
@@ -74,6 +76,9 @@ public class Renderer {
 	public BufferedImage highImage;
 	public BufferedImage bloodImage;
 	
+	//private HashMap<Integer,CharData> oldData = new HashMap<Integer,CharData>();
+	private HashMap<Integer,Float> oldBodyDir = new HashMap<Integer,Float>();
+	
 	public static final float DEFAULT_PPM = 20f;
 	private static float ppm = Renderer.DEFAULT_PPM;
 	
@@ -84,8 +89,38 @@ public class Renderer {
                         BasicStroke.JOIN_MITER,
                         10.0f, dash1, 0.0f);
     
-    
+    public Renderer() {
+    	
+    }
 	
+    public void saveCharData(FullCharacterData main, List<CharData> others) {
+    	HashMap<Integer,Float> newData = new HashMap<Integer,Float>();
+    	List<CharData> chars = new LinkedList<CharData>(others);
+    	chars.add(main);
+    	for (CharData data:chars) {
+    		float targetBodyDir = data.bodyDir;
+    		float faceBodyDelta = Geometry.wrapAngle(data.faceDir-targetBodyDir);
+    		if (Math.abs(faceBodyDelta)>Math.PI*0.75) {
+    			targetBodyDir += Math.PI - Math.copySign(0.001,faceBodyDelta);
+			}
+    		
+    		if (oldBodyDir.containsKey(data.id)) {
+    			float oldDir = oldBodyDir.get(data.id);
+				
+    			final float RATE = 0.12f;
+    			final float delta = Geometry.wrapAngle(targetBodyDir-oldDir);
+    			if (Math.abs(delta)>Math.PI*0.6) {
+    				targetBodyDir = (float) (oldDir + Math.copySign(Math.abs(delta)-Math.PI*0.4,delta));
+    			}
+    			else if (Math.abs(delta)>RATE) {
+    				targetBodyDir = oldDir + Math.copySign(RATE,delta);
+    			}
+    		}
+    		newData.put(data.id, targetBodyDir);
+    	}
+    	oldBodyDir = newData;
+    }
+    
 	/**
 	 * @return the arenaImage
 	 */
@@ -142,8 +177,7 @@ public class Renderer {
 		g2D.rotate(-rot,toPixel((x+0.5)*ts),toPixel((y+0.5)*ts));
 		if (!flip) {
 			drawImage(g2D,image, xS, yS, ts, ts, xD, yD, wD, wD);
-		}
-		else {
+		} else {
 			drawImage(g2D,image, xS, yS, ts, ts, xD+wD, yD, -wD-1.0/ppm, wD);
 		}
 		g2D.rotate(rot,toPixel((x+0.5)*ts),toPixel((y+0.5)*ts));
@@ -257,7 +291,7 @@ public class Renderer {
 	public void initArenaImages(Arena arena) {
 		BufferedImage lightArenaImage;
 		try {
-			lightArenaImage = ImageIO.read(new FileInputStream("resource/map/"+arena.getName()+"_plain.png"));
+			lightArenaImage = DataManager.loadImage("/map/"+arena.getName()+"_plain.png");
 		} catch (IOException e) {
 			System.err.println("Error while reading pre-rendered map image");
 			e.printStackTrace();
@@ -265,7 +299,7 @@ public class Renderer {
 		}
 		
 		try {
-			arenaImage = ImageIO.read(new FileInputStream("resource/map/"+arena.getName()+"_mid.png"));
+			arenaImage = DataManager.loadImage("/map/"+arena.getName()+"_mid.png");
 		} catch (IOException e) {
 			System.err.println("Error while reading pre-rendered map image");
 			e.printStackTrace();
@@ -273,17 +307,15 @@ public class Renderer {
 		}
 		
 		try {
-			darkArenaImage = ImageIO.read(new FileInputStream("resource/map/"+arena.getName()+"_dark.png"));
+			darkArenaImage = DataManager.loadImage("/map/"+arena.getName()+"_dark.png");
 		} catch (IOException e) {
 			System.err.println("Error while reading pre-rendered dark image");
 			e.printStackTrace();
 			darkArenaImage = ImageBlender.applyBackgroundEffect(lightArenaImage);
 		}
 		
-		
-		
 		try {
-			lightMap = ImageIO.read(new FileInputStream("resource/map/"+arena.getName()+"_lightmap.png"));
+			lightMap = DataManager.loadImage("/map/"+arena.getName()+"_lightmap.png");
 		} catch (IOException e) {
 			System.err.println("Error while reading pre-rendered light map");
 			e.printStackTrace();
@@ -293,8 +325,7 @@ public class Renderer {
 		BufferedImage[] layerImages = new BufferedImage[4];
 		for (int layer=0;layer<4;layer++) {
 			try {
-				layerImages[layer] = ImageIO.read(
-						new FileInputStream("resource/map/"+arena.getName()+"_layer"+layer+".png"));
+				layerImages[layer] = DataManager.loadImage("/map/"+arena.getName()+"_layer"+layer+".png");
 			} catch (IOException e) {
 				System.err.println("Error while reading pre-rendered light map");
 				e.printStackTrace();
@@ -315,11 +346,11 @@ public class Renderer {
 		lightArenaImage = null;
 	}
 	
-	public static void renderMainCharacter(Graphics2D g2D, FullCharacterData player, ClientPlayer playerInfo) {
+	public void renderMainCharacter(Graphics2D g2D, FullCharacterData player, ClientPlayer playerInfo) {
 		// render the character
-		renderGun(g2D,player.x,player.y,player.radius,player.direction,playerInfo.weaponId,playerInfo.team);
-		renderCharacter(g2D, player.x, player.y, player.direction, player.faceDir, player.radius, playerInfo.type.id,playerInfo.team);
-		renderArmor(g2D,player.x, player.y, player.radius,player.direction+player.armorStart,player.armorAngle,playerInfo.team);
+		renderGun(g2D,player.x,player.y,player.radius,player.gunDir,playerInfo.weaponId,playerInfo.team);
+		renderCharacter(g2D, player);
+		renderArmor(g2D,player.x, player.y, player.radius,player.gunDir+player.armorStart,player.armorAngle,playerInfo.team);
 		
 	}
 
@@ -370,17 +401,17 @@ public class Renderer {
 		*/
 	}
 	
-	public static void renderOtherCharacter(Graphics2D g2D, CharData c) {
+	public void renderOtherCharacter(Graphics2D g2D, CharData c) {
 		if (c.healthPoints>0) {
-			renderGun(g2D,c.x,c.y,c.radius,c.direction,c.weapon,c.team);
-			renderCharacter(g2D,c.x,c.y,c.direction,c.faceDir,c.radius,c.typeId,c.team);
-			renderArmor(g2D,c.x,c.y,c.radius,c.direction+c.armorStart,c.armorAngle,c.team);
+			renderGun(g2D,c.x,c.y,c.radius,c.gunDir,c.weapon,c.team);
+			renderCharacter(g2D,c);
+			renderArmor(g2D,c.x,c.y,c.radius,c.gunDir+c.armorStart,c.armorAngle,c.team);
 		} else {
-			renderDeadCharacter(g2D,c.x,c.y,c.direction,c.radius,c.team);
+			renderDeadCharacter(g2D,c.x,c.y,c.gunDir,c.radius,c.team);
 		}
 	}
 	
-	public static void renderNPC(Graphics2D g2D, NPCData npc) {
+	public void renderNPC(Graphics2D g2D, NPCData npc) {
 		renderOtherCharacter(g2D,npc);
 		g2D.setStroke(new BasicStroke(toPixel(HEALTHBAR_WIDTH)));
 		g2D.setColor(new Color(255, 50, 50));
@@ -397,58 +428,101 @@ public class Renderer {
 	}
 	
 	private static void renderGun(Graphics2D g2D, double x, double y, double r, double gunDirection, int typeId, int team) {
-		BufferedImage gunImage = ImageBlender.deepCopy(Sprite.guns.get(typeId));
-		Graphics2D gunG = (Graphics2D)gunImage.getGraphics();
-		gunG.setComposite(new OverlayComposite(1.0f));
-		gunG.setColor(teamColors[team].darker());
-		gunG.fillRect(0, 0, gunImage.getWidth(), gunImage.getHeight());
-		gunG.dispose();
-		
-		double gunW = gunImage.getHeight()/DEFAULT_PPM;
-		double gunL = gunImage.getWidth()/DEFAULT_PPM;
-		g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		
-		g2D.rotate(-gunDirection,x*ppm,y*ppm);
-		Renderer.drawImage(g2D,gunImage, x+r-0.2, y-gunW/2,gunL,gunW);
-		g2D.rotate(gunDirection,x*ppm,y*ppm);
+		BufferedImage gun = Sprite.guns.get(typeId);
+		if (gun!=null) {
+	 		BufferedImage gunImage = ImageBlender.deepCopy(gun);
+			Graphics2D gunG = (Graphics2D)gunImage.getGraphics();
+			gunG.setComposite(new OverlayComposite(1.0f));
+			gunG.setColor(teamColors[team].darker());
+			gunG.fillRect(0, 0, gunImage.getWidth(), gunImage.getHeight());
+			gunG.dispose();
+			
+			double gunW = gunImage.getHeight()/DEFAULT_PPM;
+			double gunL = gunImage.getWidth()/DEFAULT_PPM;
+			g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			
+			g2D.rotate(-gunDirection,x*ppm,y*ppm);
+			Renderer.drawImage(g2D,gunImage, x+r*0.6, y-gunW/2,gunL,gunW);
+			g2D.rotate(gunDirection,x*ppm,y*ppm);
+		}
 	}
 	
-	
-	private static void renderCharacter(Graphics2D g2D, double x, double y, double direction, double facingDir, double r, int type, int team) {
-		g2D.setStroke(new BasicStroke(CHARACTER_WIDTH*ppm));
-		//fillCircle(g2D,x, y,r);
-		double openArc = 2;
-		g2D.setColor(teamColors2[team].darker());
-		fillArc(g2D,x,y,r, direction+openArc/2, Math.PI*2 - openArc, Arc2D.CHORD);
-		g2D.setColor(teamColors[team].darker());
-		drawArc(g2D,x,y,r, direction+openArc/2, Math.PI*2 - openArc, Arc2D.OPEN);
+	private void renderCharacter(Graphics2D g2D, CharData d) {
+		double x = d.x;
+		double y = d.y;
+		double faceDir = d.faceDir;
+		double r = d.radius;
+		int type = d.typeId;
+		int team = d.team;
+		boolean invi = d.invi;
+		
+		int body = ClassStats.classStats.get(type).getBodyId();
+		double sizeF = r/Entity.BASE_RADIUS;
+		if (invi) {
+			float dash1[] = {10.0f};
+		    BasicStroke dashed = new BasicStroke(CHARACTER_WIDTH*ppm,
+		    		BasicStroke.CAP_BUTT,BasicStroke.JOIN_MITER,10.0f, dash1, 0.0f);
+			g2D.setStroke(dashed);
+			g2D.setColor(teamColors[team]);
+			drawCircle(g2D,x,y,r);
+			return;
+		} else {
+			g2D.setStroke(new BasicStroke(CHARACTER_WIDTH*ppm));
+		}
+		
+		double bodyDir = oldBodyDir.containsKey(d.id)?oldBodyDir.get(d.id):d.bodyDir;
+		
+		g2D.rotate(-bodyDir,x*ppm,y*ppm);
+		g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		switch (body) {
+			case 0:
+				g2D.setColor(teamColors[team].darker());
+				fillPolygon(g2D,x,y,r*1.2,5);
+				g2D.setColor(teamColors2[team]);
+				drawPolygon(g2D,x,y,r*1.2,5);
+				break;
+			case 1:
+				g2D.setColor(teamColors[team].darker());
+				fillPolygon(g2D,x,y,r*1.4,3);
+				g2D.setColor(teamColors2[team]);
+				drawPolygon(g2D,x,y,r*1.4,3);
+				break;
+			case 2:
+				g2D.setColor(teamColors[team].darker());
+				fillPolygon(g2D,x,y,r*1.1,7);
+				break;
+			default:
+				break;
+		}
+		g2D.rotate(bodyDir,x*ppm,y*ppm);
 		
 		// draw head
-		Point2D h = Geometry.PolarToCartesian(r*0.35, facingDir);
+		Point2D h = Geometry.PolarToCartesian(r*0.3, faceDir);
 		double hx = x+h.getX();
 		double hy = y-h.getY();
-		//double hr = r*0.55;
 		//g2D.setColor(teamColors[team].brighter());
 		//fillCircle(g2D,x+h.getX(),y-h.getY(),hr);
+		
 		
 		BufferedImage headImage = ImageBlender.deepCopy(Sprite.heads.get(type));
 		Graphics2D gunG = (Graphics2D)headImage.getGraphics();
 		gunG.setComposite(new OverlayComposite(1.0f));
-		gunG.setColor(teamColors[team]);
+		gunG.setColor(teamColors[team].darker());
 		gunG.fillRect(0, 0, headImage.getWidth(), headImage.getHeight());
 		gunG.dispose();
 		
-		
-		double hW = headImage.getWidth()/DEFAULT_PPM;
-		double hH = headImage.getHeight()/DEFAULT_PPM;
+		double hW = sizeF*headImage.getWidth()/DEFAULT_PPM;
+		double hH = sizeF*headImage.getHeight()/DEFAULT_PPM;
 		g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		
-		g2D.rotate(-direction,hx*ppm,hy*ppm);
+		g2D.rotate(-faceDir,hx*ppm,hy*ppm);
 		Renderer.drawImage(g2D,headImage, hx-hW/2, hy-hH/2,hW,hH);
-		g2D.rotate(direction,hx*ppm,hy*ppm);
+		g2D.rotate(faceDir,hx*ppm,hy*ppm);
 		
 		g2D.setStroke(new BasicStroke(1));
 	}
+
+
 
 	private static void renderDeadCharacter(Graphics2D g2D, double x, double y, double direction, double r, int team) {
 		g2D.setStroke(new BasicStroke(CHARACTER_WIDTH*ppm));
@@ -468,7 +542,7 @@ public class Renderer {
 	public static void renderProjectile(Graphics2D g2D, ProjectileData pd) {
 		g2D.setColor(Color.WHITE);
 		if (pd.size < 50) {
-			g2D.setStroke(new BasicStroke((float)(getPPM()*pd.size/400)));
+			g2D.setStroke(new BasicStroke((float)(getPPM()*pd.size/300)));
 			drawLine(g2D, pd.x, pd.y,pd.prevX,pd.prevY);
 		}
 		else if (pd.size >= 50) {
@@ -690,7 +764,8 @@ public class Renderer {
 							if (!arena.dataObtained(data.getDataId())) {
 								g2D.setColor(new Color(c.getRed(),c.getGreen(),c.getBlue(),alpha));
 								drawRect(g2D,x*ts,y*ts,ts,ts);
-								drawCenteredString(g2D, "?", GUIFactory.font_s_bold, (x+0.5)*ts, (y+0.5)*ts);
+								//drawCenteredString(g2D, "?", GUIFactory.font_s_bold, (x+0.5)*ts, (y+0.5)*ts);
+								drawCenteredString(g2D, ""+data.getDataId(), GUIFactory.font_s_bold, (x+0.5)*ts, (y+0.5)*ts);
 							} else {
 								g2D.setColor(new Color(c.getRed(),c.getGreen(),c.getBlue(),alpha/4));
 								drawRect(g2D,x*ts,y*ts,ts,ts);
@@ -702,7 +777,7 @@ public class Renderer {
 		}
 	}
 	
-	public static void renderSpawnLocations(Graphics2D g2D, EditorArena a, Rectangle2D window) {
+	public void renderSpawnLocations(Graphics2D g2D, EditorArena a, Rectangle2D window, final int players) {
 		double ts = Terrain.tileSize;
 		int x1 = Math.max(0, (int) (window.getX() / ts));
 		int y1 = Math.max(0, (int) (window.getY() / ts));
@@ -712,13 +787,95 @@ public class Renderer {
 		for (int x = x1; x <= x2; x++) {
 			for (int y = y1; y <= y2; y++) {
 				SpawnPoint sp = a.spawns[x][y];
-				if (sp != null) {
-					Point2D p = Utils.tileToMeter(sp.x, sp.y);
-					Renderer.renderCharacter(g2D, p.getX(), p.getY(),
-							sp.direction,sp.direction,0.5, sp.setups.get(0).id, sp.team);
+				if (sp != null && sp.players<=players) {
+					Renderer.renderSpawnPoint(g2D,sp);
 				}
 			}
 		}
+	}
+	
+	private static void renderSpawnPoint(Graphics2D g2D, SpawnPoint sp) {
+		Point2D p = Utils.tileToMeter(sp.x, sp.y);
+		int typeId = sp.setups.get(0).id;
+		double x = p.getX();
+		double y = p.getY();
+		double direction = 0;
+		double r = Entity.BASE_RADIUS*ClassStats.classStats.get(typeId).getSize();
+		int type = sp.setups.get(0).id;
+		int team = sp.team;
+		boolean invi = false;
+		
+		int body = ClassStats.classStats.get(type).getBodyId();
+		double sizeF = r/Entity.BASE_RADIUS;
+		if (invi) {
+			float dash1[] = {10.0f};
+		    BasicStroke dashed = new BasicStroke(CHARACTER_WIDTH*ppm,
+		    		BasicStroke.CAP_BUTT,BasicStroke.JOIN_MITER,10.0f, dash1, 0.0f);
+			g2D.setStroke(dashed);
+			g2D.setColor(teamColors[team]);
+			drawCircle(g2D,x,y,r);
+			return;
+		} else {
+			g2D.setStroke(new BasicStroke(CHARACTER_WIDTH*ppm));
+		}
+		//fillCircle(g2D,x, y,r);
+		g2D.rotate(-direction,x*ppm,y*ppm);
+		g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		double openArc;
+		switch (body) {
+			case 0:
+				openArc = 2;
+				g2D.setColor(teamColors2[team].darker());
+				//fillArc(g2D,x,y,r, openArc/2, Math.PI*2 - openArc, Arc2D.CHORD);
+				g2D.setColor(teamColors[team].darker());
+				//fillArc(g2D,x,y,r, openArc/2, Math.PI*2 - openArc, Arc2D.CHORD);
+				//fillRect(g2D,x-r*0.8,y-r*0.8,r*1.6,r*1.6);
+				fillPolygon(g2D,x,y,r*1.2,5);
+				//drawArc(g2D,x,y,r, openArc/2, Math.PI*2 - openArc, Arc2D.OPEN);
+				break;
+			case 1:
+				openArc = 2;
+				g2D.setColor(teamColors2[team].darker());
+				fillArc(g2D,x,y,r,r*0.9, openArc/2, Math.PI*2 - openArc, Arc2D.CHORD);
+				g2D.setColor(teamColors[team].darker());
+				drawArc(g2D,x,y,r,r*0.9, openArc/2, Math.PI*2 - openArc, Arc2D.OPEN);
+				break;
+			case 2:
+				openArc = 2;
+				g2D.setColor(teamColors2[team].darker());
+				fillArc(g2D,x,y,r,r*1.1, openArc/2, Math.PI*2 - openArc, Arc2D.CHORD);
+				g2D.setColor(teamColors[team].darker());
+				drawArc(g2D,x,y,r,r*1.1, openArc/2, Math.PI*2 - openArc, Arc2D.OPEN);
+				break;
+			default:
+				break;
+		}
+		g2D.rotate(direction,x*ppm,y*ppm);
+		
+		// draw head
+		Point2D h = Geometry.PolarToCartesian(r*0.35, direction);
+		double hx = x+h.getX();
+		double hy = y-h.getY();
+		//g2D.setColor(teamColors[team].brighter());
+		//fillCircle(g2D,x+h.getX(),y-h.getY(),hr);
+		
+		
+		BufferedImage headImage = ImageBlender.deepCopy(Sprite.heads.get(type));
+		Graphics2D gunG = (Graphics2D)headImage.getGraphics();
+		gunG.setComposite(new OverlayComposite(1.0f));
+		gunG.setColor(teamColors[team].darker());
+		gunG.fillRect(0, 0, headImage.getWidth(), headImage.getHeight());
+		gunG.dispose();
+		
+		double hW = sizeF*headImage.getWidth()/DEFAULT_PPM;
+		double hH = sizeF*headImage.getHeight()/DEFAULT_PPM;
+		g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		
+		g2D.rotate(-direction,hx*ppm,hy*ppm);
+		Renderer.drawImage(g2D,headImage, hx-hW/2, hy-hH/2,hW,hH);
+		g2D.rotate(direction,hx*ppm,hy*ppm);
+		
+		g2D.setStroke(new BasicStroke(1));
 	}
 	
 	public static void renderEditorLightSource(Graphics2D g2D, EditorArena a, Rectangle2D window) {
@@ -785,6 +942,49 @@ public class Renderer {
 		}
 	}
 	
+	public static void renderMatrixHardLight(Graphics2D g2D, int[][] lightMap, Rectangle2D window) {
+		double ts = Terrain.tileSize;
+		double ts2 = ts/2;
+		int x1 = Math.max(0, (int) (window.getX() / ts));
+		int y1 = Math.max(0, (int) (window.getY() / ts));
+		int x2 = Math.min(lightMap.length/2 - 1, x1 + (int) (window.getWidth() / ts) + 1);
+		int y2 = Math.min(lightMap[0].length/2 - 1, y1 + (int) (window.getHeight() / ts) + 1);
+		
+		BufferedImage softShadow = ImageBlender.createImage(toPixel(ts2), toPixel(ts2), Transparency.TRANSLUCENT);
+		Graphics2D s1G = softShadow.createGraphics();
+		s1G.setColor(GUIFactory.UICOLOR);
+		s1G.setStroke(new BasicStroke(1.1f,BasicStroke.CAP_SQUARE,BasicStroke.JOIN_BEVEL));
+		drawLine(s1G,0,0,ts2,ts2);
+		s1G.dispose();
+		
+		BufferedImage hardShadow = ImageBlender.createImage(toPixel(ts2), toPixel(ts2), Transparency.TRANSLUCENT);
+		Graphics2D s2G = hardShadow.createGraphics();
+		s2G.setColor(GUIFactory.UICOLOR);
+		s2G.setStroke(new BasicStroke(1f,BasicStroke.CAP_SQUARE,BasicStroke.JOIN_BEVEL));
+		drawLine(s2G,0,ts2,ts2,0);
+		drawLine(s2G,0,0,ts2,ts2);
+		s2G.dispose();
+		
+		// draw 
+		for (int x = x1*2; x <= x2*2; x++) {
+			for (int y = y1*2; y <= y2*2; y++) {
+				int max = getMaxComponent(lightMap[x][y]);
+				if (max<255) {
+					if (max<255/2) {
+						Renderer.drawImage(g2D, hardShadow, x*ts2, y*ts2, ts2, ts2);
+					} else {
+						Renderer.drawImage(g2D, softShadow, x*ts2, y*ts2, ts2, ts2);
+					}
+				}
+			}
+		}
+	}
+	
+	public static int getMaxComponent(int colorCode) {
+		Color c = new Color(colorCode);
+		return Math.max(c.getRed(), Math.max(c.getGreen(), c.getBlue()));
+	}
+	
 	public static void drawString(Graphics2D g2D, String s, double x, double y) {
 		g2D.drawString(s, toPixel(x), toPixel(y));
 	}
@@ -818,6 +1018,14 @@ public class Renderer {
 	
 	private static void fillArc(Graphics2D g2D, double cx, double cy, double cr, double start, double extent, int type) {
 		g2D.fill(new Arc2D.Double((cx-cr)*ppm,(cy-cr)*ppm,(cr*2)*ppm,(cr*2)*ppm,Math.toDegrees(start),Math.toDegrees(extent),type));
+	}
+	
+	private static void drawArc(Graphics2D g2D, double cx, double cy, double cw, double ch, double start, double extent, int type) {
+		g2D.draw(new Arc2D.Double((cx-cw)*ppm,(cy-ch)*ppm,(cw*2)*ppm,(ch*2)*ppm,Math.toDegrees(start),Math.toDegrees(extent),type));
+	}
+	
+	private static void fillArc(Graphics2D g2D, double cx, double cy, double cw, double ch, double start, double extent, int type) {
+		g2D.fill(new Arc2D.Double((cx-cw)*ppm,(cy-ch)*ppm,(cw*2)*ppm,(ch*2)*ppm,Math.toDegrees(start),Math.toDegrees(extent),type));
 	}
 	
 	static void drawCircle(Graphics2D g2D, double x, double y, double radius) {
@@ -877,6 +1085,26 @@ public class Renderer {
 			polygon.addPoint(toPixel(point.getX()),toPixel(point.getY()));
 		}
 		g2D.fillPolygon(polygon);
+	}
+	
+	static void fillPolygon(Graphics2D g2D, double x, double y, double r, int sides) {
+		Polygon polygon = new Polygon();
+		for (int s=0;s<sides;s++) {
+			double angle = s*Math.PI*2/sides;
+			Point2D p = Geometry.PolarToCartesian(r, angle);
+			polygon.addPoint(toPixel(x+p.getX()),toPixel(y+p.getY()));
+		}
+		g2D.fillPolygon(polygon);
+	}
+	
+	static void drawPolygon(Graphics2D g2D, double x, double y, double r, int sides) {
+		Polygon polygon = new Polygon();
+		for (int s=0;s<sides;s++) {
+			double angle = s*Math.PI*2/sides;
+			Point2D p = Geometry.PolarToCartesian(r, angle);
+			polygon.addPoint(toPixel(x+p.getX()),toPixel(y+p.getY()));
+		}
+		g2D.drawPolygon(polygon);
 	}
 	
 	static void drawRect(Graphics2D g2D, double x, double y, double w, double h) {

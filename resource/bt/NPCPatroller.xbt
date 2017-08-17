@@ -16,7 +16,7 @@
                       <Parameter name="policy" fromcontext="false">selector</Parameter>
                     </Parameters>
                     <Children>
-                      <Node id="Node_53" type="Repeat">
+                      <Node id="Node_58" type="Repeat">
                         <Children>
                           <Node id="Node_4" type="SubtreeLookup">
                             <Parameters>
@@ -25,18 +25,14 @@
                           </Node>
                         </Children>
                       </Node>
-                      <Node id="Node_54" type="Repeat">
+                      <Node id="Node_10" type="Sequence">
                         <Children>
-                          <Node id="Node_10" type="Sequence">
-                            <Children>
-                              <Node id="Node_11" name="ComputeChasePosition" type="Action" />
-                              <Node id="Node_22" name="Run" type="Action">
-                                <Parameters>
-                                  <Parameter name="runTarget" fromcontext="true">chaseTarget</Parameter>
-                                  <Parameter name="controlCursor" fromcontext="false">false</Parameter>
-                                </Parameters>
-                              </Node>
-                            </Children>
+                          <Node id="Node_11" name="ComputeChasePosition" type="Action" />
+                          <Node id="Node_22" name="Run" type="Action">
+                            <Parameters>
+                              <Parameter name="runTarget" fromcontext="true">chaseTarget</Parameter>
+                              <Parameter name="controlCursor" fromcontext="false">false</Parameter>
+                            </Parameters>
                           </Node>
                         </Children>
                       </Node>

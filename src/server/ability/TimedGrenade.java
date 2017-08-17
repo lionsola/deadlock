@@ -4,12 +4,13 @@ import java.awt.geom.Area;
 
 import client.gui.GameWindow;
 import server.character.InputControlledEntity;
+import server.projectile.Bullet;
+import server.projectile.HitMod;
+import server.projectile.Projectile;
 import server.status.Blinded;
-import server.weapon.Bullet;
 import server.world.Geometry;
 import server.world.LineOfSight;
-import server.world.Projectile;
-import server.world.Thing;
+import server.world.Tile;
 import server.world.Utils;
 import server.world.World;
 import shared.network.event.SoundEvent;
@@ -23,31 +24,16 @@ public abstract class TimedGrenade extends Projectile {
 	}
 
 	@Override
-	protected void onHitWall(World w, double x, double y, Thing t) {
-		// TODO Auto-generated method stub
-		if (t.getCoverType()>=2) {
-			double bounceX = x - getDx()*GameWindow.MS_PER_UPDATE;
-			double bounceY = y - getDy()*GameWindow.MS_PER_UPDATE;
-			if (w.getArena().getTileAt(bounceX, y).coverType()<2) {
-				setDirection(Math.PI - getDirection());
-				setX(bounceX);
-				//System.out.println("Bounce X");
-			} else if (w.getArena().getTileAt(x, bounceY).coverType()<2) {
-				setDirection(- getDirection());
-				setY(bounceY);
-				//System.out.println("Bounce Y");
-			} else {
-				setX(bounceX);
-				setY(bounceY);
-				setDirection(getDirection()+Math.PI);
-				//System.out.println("Bounce XY");
-			}
-			setSpeed(getSpeed() - Math.min(500*RESIST_CONSTANT*getSize(),getSpeed()*0.5));
+	protected void onHitWall(World w, Tile t) {
+		final int LAYER = 2;
+		if (t.isBounceTile(LAYER)) {
+			bounce(w,LAYER);
+			setSpeed(getSpeed() - Math.max(0.001,getSpeed()*(0.8-t.getCoverType()*0.2)));
 		}
 	}
-
+	
 	@Override
-	protected void onHitCharacter(World w, InputControlledEntity ch, double x, double y) {
+	protected void onHitCharacter(World w, InputControlledEntity ch) {
 	}
 
 	@Override
@@ -92,7 +78,9 @@ public abstract class TimedGrenade extends Projectile {
 			for (int i=0;i<FRAGS*0.1;i++) {
 				double direction = Utils.random().nextDouble()*Math.PI*2;
 				double sizeF = Math.max(1,1 + 0.8*Utils.random().nextGaussian()/2);
-				w.addProjectile(new Bullet(this, direction, BASE_SPEED/Math.sqrt(sizeF), BASE_SIZE*sizeF, DAMAGE));
+				Bullet b = new Bullet(this, direction, BASE_SPEED/Math.sqrt(sizeF), BASE_SIZE*sizeF, DAMAGE);
+				b.setHMod(HitMod.Sharp);
+				w.addProjectile(b);
 			}
 		}
 	}

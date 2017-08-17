@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Collection;
@@ -21,10 +22,10 @@ import server.world.trigger.TileSwitchPreset;
 import server.world.Terrain;
 
 public class DataManager {
-	public static final String FILE_TILES = "resource/tile/tiles";
-	public static final String FILE_OBJECTS = "resource/tile/objects";
+	public static final String FILE_TILES = "/tile/tiles";
+	public static final String FILE_OBJECTS = "/tile/objects";
 	public static final String DIR_MAP = "resource/map/";
-	public static final String FILE_TRIGGERS = "resource/tile/triggers";	
+	public static final String FILE_TRIGGERS = "/tile/triggers";	
 	
 	public static void exportImages(Arena a) throws IOException {
 		
@@ -98,14 +99,35 @@ public class DataManager {
 		return loadObject(new File(path));
 	}
 	
-	
-	public static void loadImage(Collection<? extends ImageLoadable> items) {
+	public static Object loadInternalObject(String path) {
+		ObjectInputStream in = null;
 		try {
-			for (ImageLoadable i:items) {
-				i.setImage(ImageIO.read(new FileInputStream("resource/tile/" + i.getImageName())));
-			}
+			in = new ObjectInputStream(DataManager.class.getResourceAsStream(path));
+			Object object = in.readObject();
+			return object;
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			if (in!=null) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return null;
+	}
+	
+	public static void loadImages(Collection<? extends ImageLoadable> items) {
+		try {
+			for (ImageLoadable i:items) {
+				i.setImage(DataManager.loadImage("/tile/" + i.getImageName()));
+			}
+		} catch (IOException e) {
+			System.err.println("Error while loading tile images");
+			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 	
@@ -133,6 +155,7 @@ public class DataManager {
 		return objectMap;
 	}
 	
+	/*
 	public static <T> void loadFromTable(int[][] idArray, HashMap<Integer, T> table, T[][] array) {
 		int width = idArray.length;
 		int height = idArray[0].length;
@@ -165,6 +188,7 @@ public class DataManager {
 			e.printStackTrace();
 		}
 	}
+	*/
 	
 	public static void exportArenaData(EditorArena a) {
 		saveObject(new Arena.ArenaData(a),"resource/map/"+a.getName()+"_copy.arena");
@@ -181,5 +205,12 @@ public class DataManager {
 				}
 			}
 		}
+	}
+
+	public static BufferedImage loadImage(String name) throws IOException {
+		InputStream is = DataManager.class.getResourceAsStream(name);
+		BufferedImage image = ImageIO.read(DataManager.class.getResourceAsStream(name));
+		is.close();
+		return image;
 	}
 }

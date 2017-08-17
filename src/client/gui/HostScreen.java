@@ -6,11 +6,9 @@ import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -20,6 +18,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
+import editor.DataManager;
 import server.network.LobbyServer;
 import shared.network.Connection;
 import shared.network.GameModeData;
@@ -36,7 +35,7 @@ public class HostScreen extends AbstractScreen implements ActionListener {
 
 	private static final long serialVersionUID = -8617632006677046360L;
 	// available maps
-	public static final String[] MAP_LIST = {"house","house2","test","mansion"};
+	public static final String[] MAP_LIST = {"alpha","house","house2","highstreet","highstreet2","test","mansion"};
 	
 	private int currentMode;
 	private JLabel modeLabel;
@@ -135,15 +134,15 @@ public class HostScreen extends AbstractScreen implements ActionListener {
 	private void initialiseMaps() {
 		currentMap = 0;
 		scaledMap = new Image[MAP_LIST.length];
-
-		for (int i = 0; i < MAP_LIST.length; i++) {
-			try {
-				Image mapImage = ImageIO.read(new FileInputStream("resource/map/" + MAP_LIST[i] + ".png"));
+		try {
+			for (int i = 0; i < MAP_LIST.length; i++) {
+				Image mapImage = DataManager.loadImage("/map/" + MAP_LIST[i] + ".png");
 				scaledMap[i] = mapImage.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
-			} catch (IOException e) {
-				System.out.println("Error loading map image");
-				e.printStackTrace();
 			}
+		} catch (IOException e) {
+			System.err.println("Error while loading map images");
+			e.printStackTrace();
+			System.exit(-1);
 		}
 		GameModeData.initialize();
 	}

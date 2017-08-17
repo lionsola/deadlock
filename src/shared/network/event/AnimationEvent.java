@@ -5,6 +5,7 @@ public class AnimationEvent extends GameEvent {
 	public final float x;
 	public final float y;
 	public final float direction;
+	public float value;
 	public final byte id;
 	public final byte team;
 	public final boolean global;

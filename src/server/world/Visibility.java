@@ -2,6 +2,7 @@ package server.world;
 
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -77,7 +78,7 @@ public class Visibility {
 	}
 
 	public Area generateLoS(final FullCharacterData p, final Arena a) {
-		return genLOSAreaPixel(p.x, p.y, p.viewRange, p.viewAngle, p.direction, a);
+		return genLOSAreaPixel(p.x, p.y, p.viewRange, p.viewAngle, p.gunDir, a);
 	}
 	
 	public Area generateLoS(final Vision v, final Arena a) {
@@ -101,9 +102,12 @@ public class Visibility {
 		losBoxy.closePath();
 		
 		Area area = new Area(losBoxy);
-
-		area.intersect(new Area(new Arc2D.Double(px - viewRange,py - viewRange, viewRange * 2, viewRange * 2,
-				Math.toDegrees(dir-viewAngle/2), Math.toDegrees(viewAngle), Arc2D.PIE)));
+		Area fanShape = new Area(new Arc2D.Double(px - viewRange,py - viewRange, viewRange * 2, viewRange * 2,
+				Math.toDegrees(dir-viewAngle/2), Math.toDegrees(viewAngle), Arc2D.PIE));
+		double range = viewRange * viewAngle / (Math.PI*4);
+		fanShape.add(new Area(new Ellipse2D.Double(px - range,py - range, range*2, range*2)));
+		
+		area.intersect(fanShape);
 		//System.out.println("calculated LoS in " + (System.nanoTime()-startTime) + " ns");
 		
 		return area;
@@ -122,9 +126,14 @@ public class Visibility {
 		
 		Area area = new Area(losBoxy);
 		
-		area.intersect(new Area(new Arc2D.Double(Renderer.toPixel(px - viewRange),Renderer.toPixel(py - viewRange),
+		Area fanShape = new Area(new Arc2D.Double(Renderer.toPixel(px - viewRange),Renderer.toPixel(py - viewRange),
 				Renderer.toPixel(viewRange * 2),Renderer.toPixel(viewRange * 2),
-				Math.toDegrees(dir-viewAngle/2), Math.toDegrees(viewAngle), Arc2D.PIE)));
+				Math.toDegrees(dir-viewAngle/2), Math.toDegrees(viewAngle), Arc2D.PIE));
+		double range = viewRange * viewAngle / (Math.PI*4);
+		fanShape.add(new Area(new Ellipse2D.Double(Renderer.toPixel(px - range),Renderer.toPixel(py - range),
+				Renderer.toPixel(range*2),Renderer.toPixel(range*2))));
+		
+		area.intersect(fanShape);
 		//System.out.println("calculated LoS in " + (System.nanoTime()-startTime) + " ns");
 		
 		return area;
@@ -402,7 +411,7 @@ public class Visibility {
 	                beginAngle = p.angle;
 	                if (pass == 1 && p.angle > maxAngle) {
 		                // Early exit for the visualization to show the sweep process
-		                break;
+		                //break;
 		            }
 	            }
 	        }

@@ -3,6 +3,8 @@ package server.ai;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,10 +22,10 @@ import server.world.Utils;
  */
 public class Searcher <T,R> {
 	
-	public static Point2D searchAttackStandPoint(final Arena arena, Point2D self, final Point2D target, final double range, final double pen) {
-		Searcher<Point,Point2D> searcher = new Searcher<Point,Point2D>();
+	public static Point2D searchRandomPoint(final Arena arena, final Point2D self, final double limit, final double direction) {
+		final Searcher<Point,Point2D> searcher = new Searcher<Point,Point2D>();
     	final Point ts = Utils.meterToTile(self.getX(),self.getY());
-    	final Point td = Utils.meterToTile(target.getX(),target.getY());
+    	final List<Point> locs = new ArrayList<Point>();
     	searcher.source = ts;
     	searcher.df = new ArenaDistanceFunction();
     	searcher.ag = new ArenaAdjacentWalkableGenerator(arena);
@@ -31,12 +33,51 @@ public class Searcher <T,R> {
 			@Override
 			public boolean isGoal(Point state) {
 				Point2D ms = Utils.tileToMeter(state);
-				if (ms.distance(target)<range) {
+				if (ms.distance(self)<limit) {
+					locs.add(state);
+					return false;
+				}
+				else {
+					return true;
+				}
+			}};
+    	searcher.hf = new HeuristicFunction<Point> (){
+			@Override
+			public float evaluate(Point state) {
+				return 8-searcher.ag.getAdjacentsStates(state).size();
+			}};
+		searcher.gm = new GoalMapper<Point,Point2D>() {
+			@Override
+			public Point2D map(List<Point> state) {
+				if (locs.isEmpty()) {
+					return null;
+				} else {
+					return Utils.tileToMeter(locs.get(Utils.random().nextInt(locs.size())));
+				}
+			}};
+    	searcher.run();
+    	
+    	return searcher.result.path;
+	}
+	
+	public static Point2D searchAttackStandPoint(final Arena arena, Point2D self, final Point2D target,
+			final double range, final double pen) {
+		Searcher<Point,Point2D> searcher = new Searcher<Point,Point2D>();
+    	final Point ts = Utils.meterToTile(self.getX(),self.getY());
+    	final Point td = Utils.meterToTile(target.getX(),target.getY());
+    	searcher.source = td;
+    	searcher.df = new ArenaDistanceFunction();
+    	searcher.ag = new ArenaAdjacentWalkableGenerator(arena);
+    	searcher.gv = new GoalVerifier<Point>() {
+			@Override
+			public boolean isGoal(Point state) {
+				Point2D ms = Utils.tileToMeter(state);
+				if (ms.distance(target)>range) {
 					double block = 0;
 					double CAST_DIST = 0.5; 
 					List<Point2D> points = Geometry.getLineSamples(ms, target, CAST_DIST);
 					for (Point2D p:points) {
-						block += arena.getTileAt(p.getX(),p.getY()).coverType() * CAST_DIST/Terrain.tileSize;
+						block += arena.getTileAt(p.getX(),p.getY()).getCoverType() * CAST_DIST/Terrain.tileSize;
 						if (block>pen) {
 							return false;
 						}
@@ -50,18 +91,68 @@ public class Searcher <T,R> {
     	searcher.hf = new HeuristicFunction<Point> (){
 			@Override
 			public float evaluate(Point state) {
-				return Geometry.diagonalDistance(state, td);
+				return Geometry.diagonalDistance(state, ts);
 			}};
 		searcher.gm = new GoalMapper<Point,Point2D>() {
 			@Override
 			public Point2D map(List<Point> state) {
 				return Utils.tileToMeter(state.get(state.size()-1));
 			}};
+		searcher.maxDistance = 20;
     	searcher.run();
     	
     	return searcher.result.path;
 	}
 
+	public static Point2D searchEscapePoint(final Arena arena, final Point2D self, final Point2D target) {
+		double curBlock = 0;
+		double CAST_DIST = 0.5;
+		List<Point2D> points = Geometry.getLineSamples(self, target, CAST_DIST);
+		for (Point2D p:points) {
+			curBlock += arena.getTileAt(p.getX(),p.getY()).getCoverType() * CAST_DIST/Terrain.tileSize;
+		}
+		
+		Searcher<Point,Point2D> searcher = new Searcher<Point,Point2D>();
+    	final Point ts = Utils.meterToTile(self.getX(),self.getY());
+    	final Point td = Utils.meterToTile(target.getX(),target.getY());
+    	searcher.source = ts;
+    	searcher.df = new ArenaDistanceFunction();
+    	searcher.ag = new ArenaAdjacentWalkableGenerator(arena);
+    	final double CUR_BLOCK = curBlock;
+    	searcher.gv = new GoalVerifier<Point>() {
+			@Override
+			public boolean isGoal(Point state) {
+				Point2D ms = Utils.tileToMeter(state);
+				if (ms.distance(target)>self.distance(target) && ms.distance(self)>0.3) {
+					double block = 0;
+					
+					double CAST_DIST = 0.5; 
+					List<Point2D> points = Geometry.getLineSamples(ms, target, CAST_DIST);
+					for (Point2D p:points) {
+						block += arena.getTileAt(p.getX(),p.getY()).getCoverType() * CAST_DIST/Terrain.tileSize;
+					}
+					if (block>=CUR_BLOCK) {
+						return true;
+					}
+				}
+				return false;
+			}};
+    	searcher.hf = new HeuristicFunction<Point> (){
+			@Override
+			public float evaluate(Point state) {
+				return -Geometry.diagonalDistance(state, td);
+			}};
+		searcher.gm = new GoalMapper<Point,Point2D>() {
+			@Override
+			public Point2D map(List<Point> state) {
+				return Utils.tileToMeter(state.get(state.size()-1));
+			}};
+		searcher.maxDistance = 15;
+    	searcher.run();
+    	
+    	return searcher.result.path;
+	}
+	
 	public static Point2D searchCheckStandPoint(final Arena arena, Point2D self, final Point2D target, final double range) {
 		Searcher<Point,Point2D> searcher = new Searcher<Point,Point2D>();
     	final Point ts = Utils.meterToTile(self.getX(),self.getY());
@@ -177,6 +268,7 @@ public class Searcher <T,R> {
     DistanceFunction<T> df;
     AdjacentGenerator<T> ag;
     GoalVerifier<T> gv;
+    StateVerifier<T> st;
     HashMap<T,ExploreState> em = new HashMap<T,ExploreState>();
     HashMap<T,T> fm = new HashMap<T,T>();
     HashMap<T,Float> cm = new HashMap<T,Float>();
@@ -285,6 +377,10 @@ public class Searcher <T,R> {
     	public R map(List<T> state);
     }
     
+    public interface StateVerifier <T> {
+    	public boolean isValid(T state);
+    }
+    
     public static class ExactGoalVerifier<T> implements GoalVerifier<T> {
     	private T goal;
     	public ExactGoalVerifier(T goal) {
@@ -337,6 +433,7 @@ public class Searcher <T,R> {
 	            adjPositions.add(btmright);
 	        if (arena.get(btm).isTraversable() && arena.get(left).isTraversable() && arena.get(btmleft).isTraversable())
 	            adjPositions.add(btmleft);
+	        Collections.shuffle(adjPositions);
 	        return adjPositions;
 		}
     }

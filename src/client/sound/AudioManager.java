@@ -29,8 +29,8 @@ public class AudioManager implements Runnable {
 	
 	private HashMap<Integer, Sound> soundMap;
 	
-	private static final String SOUND_DIR = "resource/audio/sounds/";
-	private static final String MUSIC_DIR = "resource/audio/music/";
+	private static final String SOUND_DIR = "/audio/sounds/";
+	private static final String MUSIC_DIR = "/audio/music/";
 	
 	private static final String FOOTSTEP_DIR = SOUND_DIR + "footstep/";
 	
@@ -50,8 +50,6 @@ public class AudioManager implements Runnable {
 		soundMap.put(2, new SingleSound(SOUND_DIR + "weapon/" + "gunshot_pistol.wav"));
 		soundMap.put(3, new SingleSound(SOUND_DIR + "weapon/" + "gunshot_silent_pistol.wav"));
 		soundMap.put(4, new SingleSound(SOUND_DIR + "weapon/" + "weapon_whoosh.wav"));
-		
-		
 		
 		AlternatingSound footstepDirt = new AlternatingSound();
 		footstepDirt.addSound(new SingleSound(FOOTSTEP_DIR + "footstep_dirt0.wav"));

@@ -8,6 +8,8 @@
 // ******************************************************* 
 package server.ai.jbt.actions.execution;
 
+import shared.network.GameDataPackets.InputPacket;
+
 /** ExecutionAction class created from MMPM action Ping. */
 public class Ping extends jbt.execution.task.leaf.action.ExecutionAction {
 
@@ -29,7 +31,13 @@ public class Ping extends jbt.execution.task.leaf.action.ExecutionAction {
 	}
 
 	protected jbt.execution.core.ExecutionTask.Status internalTick() {
-		return jbt.execution.core.ExecutionTask.Status.SUCCESS;
+		if (getStatus()!=Status.RUNNING) {
+			((InputPacket)getContext().getVariable("Input")).ping = true;
+			return Status.RUNNING;
+		} else {
+			((InputPacket)getContext().getVariable("Input")).ping = false;
+			return Status.SUCCESS;
+		}
 	}
 
 	protected void internalTerminate() {

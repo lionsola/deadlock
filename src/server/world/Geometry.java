@@ -62,6 +62,19 @@ public class Geometry {
 		return angle;
 	}
 	
+	public static float wrapAngle(float angle) {
+		float pi2 = (float) (Math.PI*2);
+		angle = angle % pi2; 
+
+		// force it to be the positive remainder, so that 0 <= angle < 360  
+		angle = (angle + pi2) % pi2;  
+
+		// force into the minimum absolute value residue class, so that -180 < angle <= 180  
+		if (angle > Math.PI)  
+		    angle -= pi2;  
+		return angle;
+	}
+	
 	// Returns the list of points from (x0, y0) to (x1, y1), with default distance threshold
 	public static List<Point2D> getLineSamples(double x0, double y0, double x1, double y1) {
 		return getLineSamples(x0,y0,x1,y1,LINE_SAMPLE_THRESHOLD);

@@ -22,6 +22,7 @@ import client.gui.Camera;
 import client.gui.ClientPlayer;
 import client.gui.GameWindow;
 import client.image.MultiplyComposite;
+import server.character.ClassStats;
 import shared.network.FullCharacterData;
 import shared.network.GameDataPackets.InputPacket;
 
@@ -49,6 +50,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	protected boolean renderMiscConfig = false;
 	protected boolean renderTileSwitchTrigger = false;
 	protected boolean renderSpawns = true;
+	protected int players = 0;
 	protected boolean renderParticleSource = false;
 	protected boolean renderData = false;
 	
@@ -64,10 +66,12 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 	private AnimationSystem particles = new AnimationSystem();
 	//private List<ParticleAnimation> particles;
 	public boolean lightImageChanged = true;
+	private Renderer renderer = new Renderer();
 	
 	
 	public ArenaPanel (Editor editor, EditorArena arena) {
 		super();
+		ClassStats.initClassStats();
 		Sprite.initImage();
 		this.editor = editor;
 		this.arena = arena;
@@ -159,7 +163,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 		Point gameOnScreen = getLocationOnScreen();
 		input.cx = (float)Renderer.toMeter(cursorOnScreen.x - gameOnScreen.x + camera.getTopLeftXPixel());
 		input.cy = (float)Renderer.toMeter(cursorOnScreen.y - gameOnScreen.y + camera.getTopLeftYPixel());
-		player.direction = (float) Math.atan2(player.y-input.cy,input.cx-player.x);
+		player.gunDir = (float) Math.atan2(player.y-input.cy,input.cx-player.x);
 	}
 	
 	public EditorArena getArena() {
@@ -234,7 +238,7 @@ public class ArenaPanel extends JPanel implements Runnable, KeyListener, MouseWh
 			Renderer.renderData(g2D, arena, window);
 		}
 		if (renderSpawns) {
-			Renderer.renderSpawnLocations(g2D, arena, window);
+			renderer .renderSpawnLocations(g2D, arena, window, players);
 		}
 		if (renderParticleSource) {
 			Renderer.renderEditorParticleSource(g2D, arena, window);

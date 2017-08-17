@@ -41,7 +41,7 @@ public class LineOfSight {
 	 * @return Area an area representing the Line of Sight.
 	 */
 	public Area generateLoS(final FullCharacterData p, final Arena a) {
-		return genLOSAreaPixel(p.x, p.y, p.viewRange, p.viewAngle, p.direction, a);
+		return genLOSAreaPixel(p.x, p.y, p.viewRange, p.viewAngle, p.gunDir, a);
 	}
 
 	/**

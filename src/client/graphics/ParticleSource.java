@@ -50,8 +50,8 @@ public class ParticleSource implements Cloneable, Serializable {
 		//pf.setRotationSpeed(0.001);
 		presets.put(waterglow.name,waterglow);
 		
-		ParticleSource leaves = new ParticleSource("Leaves",2500);
-		leaves.setInterval(2200);
+		ParticleSource leaves = new ParticleSource("Leaves",2700);
+		leaves.setInterval(3000);
 		leaves.pSpeed = 0.01;
 		leaves.random = true;
 		leaves.setSpread(5, 4, 0.5);
@@ -83,7 +83,7 @@ public class ParticleSource implements Cloneable, Serializable {
 		presets.put(fire.name,fire);
 		
 		ParticleSource light = new ParticleSource("Light",1200);
-		light.setInterval(1500);
+		light.setInterval(2000);
 		light.pSpeed = 0.005;
 		light.setSpread(0.2,0.2,0);
 		light.random = true;
@@ -97,7 +97,7 @@ public class ParticleSource implements Cloneable, Serializable {
 		presets.put(light.name,light);
 		
 		ParticleSource outsideDust = new ParticleSource("Outside dust",5000);
-		outsideDust.setInterval(400);
+		outsideDust.setInterval(500);
 		outsideDust.pSpeed = 0.001;
 		outsideDust.setSpread(8,8,2.5);
 		outsideDust.random = true;
@@ -113,7 +113,7 @@ public class ParticleSource implements Cloneable, Serializable {
 		presets.put(outsideDust.name,outsideDust);
 		
 		ParticleSource insideDust = new ParticleSource("Inside dust",5000);
-		insideDust.setInterval(400);
+		insideDust.setInterval(500);
 		insideDust.pSpeed = 0.0005;
 		insideDust.setSpread(8,8,1.25);
 		insideDust.random = true;
@@ -139,12 +139,12 @@ public class ParticleSource implements Cloneable, Serializable {
 	boolean random = false;
 	long counter;
 	Color altColor = null;
-	
+
 	private ParticleSource(String name, long life) {
 		this.name = name;
 		baseParticle = new ParticleAnimation(life);
 	}
-	
+
 	public void update(AnimationSystem as) {
 		boolean add = false;
 		if (random) {

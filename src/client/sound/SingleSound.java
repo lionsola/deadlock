@@ -27,7 +27,7 @@ public class SingleSound implements Sound {
 	public SingleSound(String fileName) {
 		file = fileName;
 		try {
-			AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(fileName));
+			AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(SingleSound.class.getResourceAsStream(fileName));
 			this.format = audioInputStream.getFormat();
 			this.samples = getSamples(audioInputStream, format);
 

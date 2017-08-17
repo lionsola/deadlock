@@ -19,7 +19,7 @@ import server.ai.DummyPlayer;
 import server.world.Arena.ArenaData;
 import shared.network.Connection;
 import shared.network.LobbyRequest;
-import shared.network.LobbyRequest.ChangeCharacterRequest;
+import shared.network.LobbyRequest.ChangeCharSetup;
 import shared.network.LobbyRequest.ChangeSpawnRequest;
 import shared.network.LobbyRequest.ChatRequest;
 import shared.network.LobbyRequest.LobbyInformationPacket;
@@ -63,7 +63,7 @@ public class LobbyServer implements Runnable {
 	public LobbyServer(int port, int mId) throws IOException {
 		serverSocket = new ServerSocket(port);
 		this.mId = mId;
-		ArenaData ad = (ArenaData) DataManager.loadObject("resource/map/"+HostScreen.MAP_LIST[mId]+".arena");
+		ArenaData ad = (ArenaData) DataManager.loadInternalObject("/map/"+HostScreen.MAP_LIST[mId]+".arena");
 		spawns = ad.spawns;
 		for (SpawnPoint sp:spawns) {
 			spawnMap.put(sp.getId(), sp);
@@ -251,9 +251,22 @@ public class LobbyServer implements Runnable {
                     ToggleReadyRequest request = ((ToggleReadyRequest)message);
                     player.active = true;
                     server.sendRequest(request);
-                } else if (message instanceof ChangeCharacterRequest) {
-                    ChangeCharacterRequest request = ((ChangeCharacterRequest)message);
-                    player.type = request.typeId;
+                } else if (message instanceof ChangeCharSetup) {
+                    ChangeCharSetup request = ((ChangeCharSetup)message);
+                    switch (request.changeType) {
+                    	case ChangeCharSetup.CHANGE_CHAR:
+                    		player.type = CharType.valueOf(request.changeValue);
+                    		break;
+                    	case ChangeCharSetup.CHANGE_WMOD:
+                    		player.weaponMod = request.changeValue;
+                    		break;
+                    	case ChangeCharSetup.CHANGE_HMOD:
+                    		player.hitMod = request.changeValue;
+                    		break;
+                		default:
+                			break;
+                    }
+                    
                     server.sendRequest(request);
                 } else if (message instanceof ChatRequest) {
                 	ChatRequest request = ((ChatRequest)message);

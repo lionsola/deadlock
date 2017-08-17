@@ -9,6 +9,7 @@ public abstract class Passive {
 	public static final int MARK_ID = 202;
 	public static final int OVERWATCH_ID = 203;
 	public static final int SHIELD_ID = 204;
+	public static final int FASTREGEN_ID = 205;
 	
 	private InputControlledEntity self;
 	private double level;

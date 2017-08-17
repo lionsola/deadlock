@@ -9,10 +9,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import client.gui.GameWindow;
+import server.projectile.Projectile;
 import server.status.StatusEffect;
 import server.world.Arena;
+import server.world.Geometry;
 import server.world.Light;
-import server.world.Projectile;
 import server.world.Terrain;
 import server.world.Utils;
 import server.world.Visibility;
@@ -34,7 +35,7 @@ public class Entity {
 	public static final double BASE_SPEED	= 0.004;
 	public static final double BASE_HP		= 100;
 	public static final double BASE_RADIUS	= 0.5;
-	public static final double BASE_FOVRANGE= 20;
+	public static final double BASE_FOVRANGE= 17;
 	public static final double BASE_FOVANGLE= Math.toRadians(120);
 	
 	public static final double BASE_HEARING_THRES = -10;
@@ -69,13 +70,14 @@ public class Entity {
 	private final double maxHP;
 	private double healthPoints; // the number of health points the server.character class has
 	
-	private double exposure = 0;
-	
 	private Visibility visibility = new Visibility();
 	private Armor armor;
 	private List<StatusEffect> statusEffects = new LinkedList<StatusEffect>();
 	private WorldStatePacket perception = new WorldStatePacket();
 	private Area fov = new Area();
+	
+	private boolean enabled = true;
+	private boolean invi = false;
 	/**
 	 * Creates a new abstract server.character.
 	 * 
@@ -113,18 +115,20 @@ public class Entity {
 	 */
 	public void update(World world) {
 		updateCollision(world);
-		updateStatusEffects();
+		updateStatusEffects(world);
 		updateNoise(world);
-		updatePosition(world);
+		
 		updateExposure(world);
 		updatePerception(world);
+		
+		updatePosition(world);
 	}
 
-	protected void updateStatusEffects() {
+	protected void updateStatusEffects(World world) {
 		List<StatusEffect> remove = new LinkedList<StatusEffect>();
 		for (StatusEffect se:statusEffects) {
 			if (!se.isFinished()) {
-				se.update();
+				se.update(world);
 			} else {
 				remove.add(se);
 			}
@@ -139,6 +143,12 @@ public class Entity {
 	 *            the world to update the coordinates in.
 	 */
 	protected void updateCollision(World world) {
+		double diffAngle = Math.abs(Geometry.wrapAngle(getMovingDirection()-getDirection()));
+		double ratio = (Math.PI/2 - diffAngle)/(Math.PI/2);
+		double speed = getSpeed()*(1+ratio*0.1);
+		double dx = this.dx*speed;
+		double dy = this.dy*speed;
+		
 		Arena arena = world.getArena();
 		int curTileY = (int)(y/Terrain.tileSize);
 		int curTileX = (int)(x/Terrain.tileSize);
@@ -314,7 +324,7 @@ public class Entity {
 			inc = getNoiseF()*1;
 
 		noise = Math.max(0, noise + inc);
-		double noiseThres = 30;
+		double noiseThres = 25;
 		if (noise > noiseThres) {
 			Terrain te = world.getArena().getTileAt(x, y).getTerrain();
 			if (te!=null) {
@@ -335,8 +345,7 @@ public class Entity {
 		perception.characters = new LinkedList<CharData>();
 		perception.projectiles = new LinkedList<ProjectileData>();
 		try {
-			Area los = fov;
-			los = visibility.genLOSAreaMeter(getX(), getY(), getFovRange(), getFovAngle(), getDirection(), w.getArena());
+			Area los = visibility.genLOSAreaMeter(getX(), getY(), getFovRange(), getFovAngle(), getDirection(), w.getArena());
 			fov = los;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -353,13 +362,10 @@ public class Entity {
 		}
 		
 		// add the characters if they are inside vision
-		for (InputControlledEntity c : w.getCharacters()) {
-			if (c.id!=id && (c.team==team || c.intersects(fov))) {
-				if (c instanceof NPC) {
-					perception.characters.add(((NPC)c).generatePartial());
-				}
-				else {
-					perception.characters.add(c.generatePartial());
+		for (Entity c : w.getCharacters()) {
+			if (c.id!=id) {
+				if (c.team==team || (!c.invi && c.intersects(fov))) {
+					perception.characters.add(c.generatePartial());	
 				}
 			}
 		}
@@ -388,6 +394,7 @@ public class Entity {
 	public Area getLoS() {
 		return fov;
 	}
+	
 	
 	/**
 	 * Returns the direction of the server.character.
@@ -492,7 +499,7 @@ public class Entity {
 	 * @return the radius of the server.character
 	 */
 	public double getRadius() {
-		return BASE_RADIUS*sizeF;
+		return BASE_RADIUS*getSizeF();
 	}
 
 	public double getSizeF() {
@@ -558,7 +565,7 @@ public class Entity {
 	 * @param dx
 	 *            the delta x of the server.character
 	 */
-	protected void setDx(double dx) {
+	public void setDx(double dx) {
 		this.dx = dx;
 	}
 
@@ -568,7 +575,7 @@ public class Entity {
 	 * @param dy
 	 *            the delta y of the server.character
 	 */
-	protected void setDy(double dy) {
+	public void setDy(double dy) {
 		this.dy = dy;
 	}
 
@@ -584,9 +591,13 @@ public class Entity {
 	public double getHealthPoints() {
 		return healthPoints;
 	}
+	
+	public double getMaxHP() {
+		return maxHP;
+	}
 
 	public void onHit(World w, double damage, int sourceId) {
-		healthPoints = Math.max(0, healthPoints-damage);
+		setHealthPoints(healthPoints-damage);
 	}
 	
 	/**
@@ -595,16 +606,12 @@ public class Entity {
 	 * @param healthPoints
 	 *            the health points of the server.character
 	 */
-	protected void setHealthPoints(double healthPoints) {
-		this.healthPoints = healthPoints;
+	public void setHealthPoints(double healthPoints) {
+		this.healthPoints = Math.max(0,Math.min(getMaxHP(), healthPoints));
 	}
 	
-	public double getExposure() {
-		return exposure;
-	}
-	
-	public void setExposure(double exposure) {
-		this.exposure = exposure;
+	public void heal(double extraHp) {
+		this.healthPoints = Math.min(healthPoints + extraHp, maxHP);
 	}
 	
 	public Armor getArmor() {
@@ -623,14 +630,22 @@ public class Entity {
 	/**
 	 * Reset the HP of the server.character
 	 */
-	public void resetStats() {
+	public void reset(World w) {
 		healthPoints = maxHP;
 		for (StatusEffect se:statusEffects) {
-			se.onFinish();
+			se.onFinish(w);
 		}
 		statusEffects.clear();
 	}
 
+	public boolean isInvi() {
+		return invi;
+	}
+	
+	public void setInvi(boolean invi) {
+		this.invi = invi;
+	}
+	
 	public double getHearF() {
 		return hearF;
 	}
@@ -645,6 +660,11 @@ public class Entity {
 	
 	public void addStatusEffect(StatusEffect effect) {
 		statusEffects.add(effect);
+		effect.start();
+	}
+	
+	public List<StatusEffect> getStatusEffects() {
+		return statusEffects;
 	}
 	
 	public boolean isMoving() {
@@ -652,7 +672,7 @@ public class Entity {
 	}
 	
 	public double getMovingDirection() {
-		return Math.atan2(-dy, dx);
+		return isMoving()?Math.atan2(-dy, dx):getDirection();
 	}
 	
 	public void clearEvents() {
@@ -718,9 +738,9 @@ public class Entity {
 		return false;
 	}
 	
-	protected void updateExposure(World w) {
+	protected double updateExposure(World w) {
 		double targetExposure = 0;
-		final double EXPOSURE_CHANGE = 0.01;
+		//final double EXPOSURE_CHANGE = 0.01;
 		List<Point2D> checkPoints = getCheckPoints();
 		for (Point2D p:checkPoints) {
 			Color l = new Color(w.getArena().getLightAt(p));
@@ -730,11 +750,14 @@ public class Entity {
 		if (isMoving()) {
 			targetExposure *= (1+getNoiseF());
 		}
+		/*
 		if (Math.abs(targetExposure-exposure)<EXPOSURE_CHANGE) {
 			exposure = targetExposure;
 		} else {
 			exposure += Math.copySign(EXPOSURE_CHANGE, targetExposure-exposure);
 		}
+		*/
+		return targetExposure;
 	}
 	
 	private List<Point2D> getCheckPoints() {
@@ -765,7 +788,17 @@ public class Entity {
 		checkPoints.add(new Point2D.Double(x-radius, y));
 		checkPoints.add(new Point2D.Double(x, y+radius));
 		checkPoints.add(new Point2D.Double(x+radius, y));
+		checkPoints.add(new Point2D.Double(x+radius, y));
+		Geometry.PolarToCartesian(l, dir);
 		// TODO gun
 		return checkPoints;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 }

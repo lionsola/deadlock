@@ -12,7 +12,6 @@ import java.awt.geom.Point2D;
 import java.util.List;
 
 import server.ai.Searcher;
-import server.ai.Searcher.Path;
 import server.character.InputControlledEntity;
 import server.world.Arena;
 import shared.network.GameDataPackets.InputPacket;

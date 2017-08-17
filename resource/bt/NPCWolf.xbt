@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Tree>
+  <Node id="Node_0" name="NPCWolf" type="Root">
+    <Children>
+      <Node id="Node_2" type="Repeat">
+        <Children>
+          <Node id="Node_3" type="DynamicPriorityList">
+            <Children>
+              <Node id="Node_51" type="Repeat">
+                <Guard>
+                  <Node id="Node_52" name="EnemyInSight" type="Condition" />
+                </Guard>
+                <Children>
+                  <Node id="Node_6" type="Parallel">
+                    <Parameters>
+                      <Parameter name="policy" fromcontext="false">selector</Parameter>
+                    </Parameters>
+                    <Children>
+                      <Node id="Node_59" type="Repeat">
+                        <Children>
+                          <Node id="Node_82" type="Sequence">
+                            <Children>
+                              <Node id="Node_68" name="ComputeAttackPoint" type="Action" />
+                              <Node id="Node_81" type="Succeeder">
+                                <Children>
+                                  <Node id="Node_69" name="PointCursor" type="Action">
+                                    <Parameters>
+                                      <Parameter name="cursorTarget" fromcontext="true">Aim</Parameter>
+                                    </Parameters>
+                                  </Node>
+                                </Children>
+                              </Node>
+                              <Node id="Node_85" type="Selector">
+                                <Children>
+                                  <Node id="Node_87" type="Sequence">
+                                    <Children>
+                                      <Node id="Node_88" name="EnemyInRange" type="Condition">
+                                        <Parameters>
+                                          <Parameter name="range" fromcontext="false">5</Parameter>
+                                        </Parameters>
+                                      </Node>
+                                      <Node id="Node_89" name="UseAbility" type="Action" />
+                                    </Children>
+                                  </Node>
+                                  <Node id="Node_86" type="Sequence">
+                                    <Children>
+                                      <Node id="Node_84" name="EnemyInWeaponRange" type="Condition" />
+                                      <Node id="Node_70" name="FireWeapon" type="Action" />
+                                    </Children>
+                                  </Node>
+                                </Children>
+                              </Node>
+                            </Children>
+                          </Node>
+                        </Children>
+                      </Node>
+                      <Node id="Node_60" type="Repeat">
+                        <Children>
+                          <Node id="Node_61" type="Selector">
+                            <Children>
+                              <Node id="Node_120" type="Sequence">
+                                <Children>
+                                  <Node id="Node_123" type="Inverter">
+                                    <Children>
+                                      <Node id="Node_121" name="WeaponReady" type="Condition" />
+                                    </Children>
+                                  </Node>
+                                  <Node id="Node_96" name="ComputeRandomNearbyPoint" type="Action" />
+                                  <Node id="Node_125" name="Run" type="Action">
+                                    <Parameters>
+                                      <Parameter name="runTarget" fromcontext="true">randomPoint</Parameter>
+                                      <Parameter name="controlCursor" fromcontext="false">false</Parameter>
+                                    </Parameters>
+                                  </Node>
+                                </Children>
+                              </Node>
+                              <Node id="Node_10" type="Sequence">
+                                <Children>
+                                  <Node id="Node_11" name="ComputeChasePosition" type="Action" />
+                                  <Node id="Node_22" name="Run" type="Action">
+                                    <Parameters>
+                                      <Parameter name="runTarget" fromcontext="true">chaseTarget</Parameter>
+                                      <Parameter name="controlCursor" fromcontext="false">false</Parameter>
+                                    </Parameters>
+                                  </Node>
+                                </Children>
+                              </Node>
+                              <Node id="Node_62" type="Sequence">
+                                <Children>
+                                  <Node id="Node_63" name="ComputeEscapePosition" type="Action" />
+                                  <Node id="Node_64" name="Run" type="Action">
+                                    <Parameters>
+                                      <Parameter name="runTarget" fromcontext="true">escapeTarget</Parameter>
+                                      <Parameter name="controlCursor" fromcontext="false">true</Parameter>
+                                    </Parameters>
+                                  </Node>
+                                </Children>
+                              </Node>
+                              <Node id="Node_65" type="Sequence">
+                                <Children>
+                                  <Node id="Node_94" name="ComputeRandomNearbyPoint" type="Action" />
+                                  <Node id="Node_67" name="Run" type="Action">
+                                    <Parameters>
+                                      <Parameter name="runTarget" fromcontext="true">randomPoint</Parameter>
+                                      <Parameter name="controlCursor" fromcontext="false">false</Parameter>
+                                    </Parameters>
+                                  </Node>
+                                </Children>
+                              </Node>
+                            </Children>
+                          </Node>
+                        </Children>
+                      </Node>
+                    </Children>
+                  </Node>
+                </Children>
+              </Node>
+              <Node id="Node_24" type="SubtreeLookup">
+                <Guard>
+                  <Node id="Node_25" name="SomethingNeedChecking" type="Condition" />
+                </Guard>
+                <Parameters>
+                  <Parameter name="subtreeName" fromcontext="false">CheckInterest</Parameter>
+                </Parameters>
+              </Node>
+              <Node id="Node_27" type="Repeat">
+                <Children>
+                  <Node id="Node_28" type="Sequence">
+                    <Children>
+                      <Node id="Node_58" name="ComputeRandomNearbyPoint" type="Action" />
+                      <Node id="Node_49" name="Sneak" type="Action">
+                        <Parameters>
+                          <Parameter name="sneakTarget" fromcontext="true">randomPoint</Parameter>
+                          <Parameter name="controlCursor" fromcontext="false">true</Parameter>
+                        </Parameters>
+                      </Node>
+                      <Node id="Node_47" type="Wait">
+                        <Parameters>
+                          <Parameter name="duration" fromcontext="false">500</Parameter>
+                        </Parameters>
+                      </Node>
+                      <Node id="Node_45" type="SubtreeLookup">
+                        <Parameters>
+                          <Parameter name="subtreeName" fromcontext="false">LookRandomly</Parameter>
+                        </Parameters>
+                      </Node>
+                    </Children>
+                  </Node>
+                </Children>
+              </Node>
+            </Children>
+          </Node>
+        </Children>
+      </Node>
+    </Children>
+  </Node>
+</Tree>
+

@@ -10,6 +10,8 @@ import java.io.FileInputStream;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
+import editor.DataManager;
+
 /**
  * Abstract class. AbstractScreen objects are used within a GameWindow to switch between, well, screens.
  * i.e MenuScreen, GameScreen, OptionScreen ...
@@ -54,7 +56,7 @@ public abstract class AbstractScreen extends JPanel {
 	 */
 	protected void useDefaultBackground() {
 		try {
-			background = ImageIO.read(new FileInputStream("resource/background/mansion.png"));
+			background = DataManager.loadImage("/background/mansion.png");
 		} catch (Exception e) {
 			System.out.println("Error load background image!");
 			background = null;

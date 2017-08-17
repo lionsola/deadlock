@@ -55,7 +55,6 @@ public class AbilityBar extends JPanel {
 			avt.setBorder(BorderFactory.createLineBorder(GUIFactory.UICOLOR,2,true));
 			add(avt);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		this.add(new JSeparator());
@@ -120,6 +119,8 @@ public class AbilityBar extends JPanel {
 			BufferedImage icon = Sprite.getAbilityIcon(id);
 			if (icon!=null) {
 				setIcon(new ImageIcon(icon.getScaledInstance(SIZE, SIZE, Image.SCALE_SMOOTH)));
+			} else {
+				setText("AB"+id);
 			}
 		}
 		

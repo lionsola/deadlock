@@ -19,6 +19,11 @@ import shared.network.GameDataPackets.WorldStatePacket;
 public class ServerPlayer {
     public final int id;
     public int team;
+    
+    public int weaponMod = -1;
+    public int hitMod = -1;
+    public int armorMod = -1;
+    
     public String name;
     public boolean active = false;
     public CharType type;

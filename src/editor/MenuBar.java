@@ -9,6 +9,7 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
@@ -19,6 +20,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTextField;
 
 import editor.dialogs.MissionDialog;
@@ -42,6 +44,7 @@ public class MenuBar extends JMenuBar {
 	JCheckBoxMenuItem spawns = new JCheckBoxMenuItem("Spawn locations");
 	JCheckBoxMenuItem particles = new JCheckBoxMenuItem("Particle sources");
 	JCheckBoxMenuItem data = new JCheckBoxMenuItem("Data");
+	JRadioButtonMenuItem[] buttons;
 	
 	public MenuBar (final Editor editor) {
 		this.editor = editor;
@@ -399,6 +402,25 @@ public class MenuBar extends JMenuBar {
 			}
 		});
 		view.add(data);
+		
+		JMenu players = new JMenu("Players: ");
+		
+		ButtonGroup bg = new ButtonGroup();
+		
+		buttons = new JRadioButtonMenuItem[4];
+		for (int i=0;i<=3;i++) {
+			buttons[i] = new JRadioButtonMenuItem(""+(i+1));
+			bg.add(buttons[i]);
+			final int index = i+1;
+			buttons[i].addActionListener(new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					editor.getArenaPanel().players = index;
+				}});
+			players.add(buttons[i]);
+		}
+		buttons[0].setSelected(true);
+		view.add(players);
 	}
 	
 	public void resetViewToggleButtons(ArenaPanel ap) {
@@ -429,5 +451,6 @@ public class MenuBar extends JMenuBar {
 		
 		particles.setSelected(ap.renderParticleSource);
 
+		buttons[ap.players].doClick();
 	}
 }

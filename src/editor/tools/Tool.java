@@ -211,7 +211,18 @@ public abstract class Tool extends MouseInputAdapter {
 		@Override
 		public void mousePressed(MouseEvent e) {
 			super.mousePressed(e);
-			if (SwingUtilities.isLeftMouseButton(e)) {
+			if (isAlternative() && SwingUtilities.isLeftMouseButton(e)) {
+				Point p = getPointedTileCoord(e);
+				SpawnPoint s = arenaPanel.getArena().spawns[p.x][p.y];
+				if (s!=null) {
+					SpawnPoint ns = dialog.getSpawn();
+					ns.patrolLocations = s.patrolLocations;
+					ns.x = p.x;
+					ns.y = p.y;
+					
+					arenaPanel.getArena().spawns[p.x][p.y] = ns;
+				}
+			} else if (SwingUtilities.isLeftMouseButton(e)) {
 				Point p = getPointedTileCoord(e);
 				if (sp==null) {
 					if (arenaPanel.getArena().spawns[p.x][p.y]==null) {
@@ -243,22 +254,12 @@ public abstract class Tool extends MouseInputAdapter {
 						dialog.setSpawn(null);
 					}
 				}
-			} else if (SwingUtilities.isMiddleMouseButton(e)) {
-				Point p = getPointedTileCoord(e);
-				SpawnPoint s = arenaPanel.getArena().spawns[p.x][p.y];
-				if (s!=null) {
-					SpawnPoint ns = dialog.getSpawn();
-					ns.patrolLocations = s.patrolLocations;
-					ns.x = p.x;
-					ns.y = p.y;
-					
-					arenaPanel.getArena().spawns[p.x][p.y] = ns;
-				}
-			}
+			} 
 		}
 		
 		@Override
 		public void render(Graphics2D g2D) {
+			super.render(g2D);
 			if (sp!=null && sp.patrolLocations!=null) {
 				Point2D prev = Utils.tileToMeter(sp.x, sp.y);
 				for (Point2D p:sp.patrolLocations) {

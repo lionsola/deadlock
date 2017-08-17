@@ -35,17 +35,16 @@ public class Overwatch extends Passive {
 
 	@Override
 	protected void onDeactivate(World w) {
-		self().getWeapon().addRecoilMod(-self().getWeapon().type.instability*OW_RECOIL);
+		self().addRecoilMod(-OW_RECOIL);
 	}
 
 	@Override
 	protected void onActivate(World w) {
-		self().getWeapon().addRecoilMod(self().getWeapon().type.instability*OW_RECOIL);
+		self().addRecoilMod(OW_RECOIL);
 	}
 
 	@Override
 	protected double calculateActivationLevel(World w) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 }

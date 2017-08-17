@@ -5,6 +5,11 @@
       <Node id="Node_2" type="Sequence">
         <Children>
           <Node id="Node_3" name="ComputeInterestPoint" type="Action" />
+          <Node id="Node_9" name="ClearVariable" type="Action">
+            <Parameters>
+              <Parameter name="variableName" fromcontext="false">interest</Parameter>
+            </Parameters>
+          </Node>
           <Node id="Node_4" name="Run" type="Action">
             <Parameters>
               <Parameter name="runTarget" fromcontext="true">interestStandPoint</Parameter>
@@ -25,11 +30,6 @@
           <Node id="Node_8" type="Wait">
             <Parameters>
               <Parameter name="duration" fromcontext="false">500</Parameter>
-            </Parameters>
-          </Node>
-          <Node id="Node_9" name="ClearVariable" type="Action">
-            <Parameters>
-              <Parameter name="variableName" fromcontext="false">interest</Parameter>
             </Parameters>
           </Node>
         </Children>

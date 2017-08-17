@@ -10,12 +10,11 @@ import client.gui.GameWindow;
 import editor.SpawnPoint;
 import server.character.Entity;
 import server.character.InputControlledEntity;
+import server.projectile.Projectile;
 import server.world.trigger.Trigger;
 import shared.network.event.AnimationEvent;
 import shared.network.event.GameEvent;
 import shared.network.event.GameEvent.Listener;
-import shared.network.event.SoundEvent;
-import shared.network.event.VoiceEvent;
 
 /**
  * The physical world inside a match, which handles everything including characters, projectiles and
@@ -25,6 +24,8 @@ public class World {
 	public static final double DISTANCE_VOLUME_DROP_RATE = 2.5;
 	
 	private final List<InputControlledEntity> characters = new ArrayList<InputControlledEntity>();
+	private final List<InputControlledEntity> newCharacters = new ArrayList<InputControlledEntity>();
+	private final List<InputControlledEntity> removedCharacters = new ArrayList<InputControlledEntity>();
 	
 	private final List<Projectile> projectiles = new LinkedList<Projectile>();
 	private final List<Projectile> newProjectiles = new LinkedList<Projectile>();
@@ -34,6 +35,7 @@ public class World {
 	private final List<Trigger> activeTriggers = new LinkedList<Trigger>();
 	
 	private long timeCounter = 0;
+	private int idCounter;
 	
 	private Arena arena;
 	private Listener listener;
@@ -52,6 +54,7 @@ public class World {
 	 */
 	public World(Arena arena, Listener listener) {
 		this.arena = arena;
+		idCounter = arena.getArenaData().spawns.size()+1;
 		this.listener = listener;
 	}
 
@@ -62,12 +65,21 @@ public class World {
 	 *            the player to be added
 	 * @param spawnPoint 
 	 */
-	public void addCharacter(InputControlledEntity p, SpawnPoint spawnPoint) {
+	public void addCharacterAt(InputControlledEntity p, SpawnPoint spawnPoint) {
 		Point2D spawn = Utils.tileToMeter(spawnPoint.x,spawnPoint.y);
 		p.setPosition(this,spawn.getX(),spawn.getY());
 		characters.add(p);
 	}
 
+	public void addCharacter(InputControlledEntity p) {
+		newCharacters.add(p);
+	}
+	
+	public int generateUniqueID() {
+		// TODO add edge case
+		return idCounter++;
+	}
+	
 	/**
 	 * Add a projectile to the world
 	 * 
@@ -114,6 +126,12 @@ public class World {
 	 */
 	public void update() {
 		// update characters
+		characters.addAll(newCharacters);
+		newCharacters.clear();
+		
+		characters.removeAll(removedCharacters);
+		removedCharacters.clear();
+		
 		for (InputControlledEntity p : characters) {
 			p.update(this);
 		}
@@ -249,5 +267,9 @@ public class World {
 		for (Entity ch:characters) {
 			ch.filterVoice(id, volume, x, y, line);
 		}
+	}
+
+	public void removeCharacter(InputControlledEntity e) {
+		removedCharacters.add(e);
 	}
 }
